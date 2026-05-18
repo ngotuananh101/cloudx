@@ -2,6 +2,7 @@ import { useState, FormEventHandler } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Cloud, Eye, EyeOff } from 'lucide-react';
 import { store } from '@/actions/App/Http/Controllers/Auth/LoginController';
+import GuestLayout from '@/layouts/GuestLayout';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -21,11 +22,10 @@ export default function Login() {
     };
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
+        <GuestLayout>
             <Head title="Login" />
 
-            <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
-                {/* Logo */}
+            {/* Logo */}
                 <div className="mb-6 flex items-center justify-center gap-2">
                     <Cloud className="h-6 w-6 fill-brand text-brand" />
                     <span className="text-xl font-bold tracking-tight text-brand">
@@ -77,7 +77,7 @@ export default function Login() {
                                 Password
                             </Label>
                             <Link
-                                href="#"
+                                href="/forgot-password"
                                 className="text-xs font-bold text-brand hover:underline"
                             >
                                 Forgot Password?
@@ -186,7 +186,6 @@ export default function Login() {
                         Create account
                     </Link>
                 </div>
-            </div>
-        </div>
+        </GuestLayout>
     );
 }
