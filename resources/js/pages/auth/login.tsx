@@ -1,10 +1,25 @@
-import { Head, Link } from '@inertiajs/react';
-import { Cloud } from 'lucide-react';
+import { useState, FormEventHandler } from 'react';
+import { Head, Link, useForm } from '@inertiajs/react';
+import { Cloud, Eye, EyeOff } from 'lucide-react';
+import { store } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export default function Login() {
+    const [showPassword, setShowPassword] = useState(false);
+
+    const { data, setData, post, processing, errors } = useForm({
+        email: '',
+        password: '',
+        remember: false,
+    });
+
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
+        post(store.url());
+    };
+
     return (
         <div className="flex min-h-screen items-center justify-center bg-[#f8f9fa]">
             <Head title="Login" />
@@ -29,10 +44,7 @@ export default function Login() {
                 </div>
 
                 {/* Form */}
-                <form
-                    className="space-y-6"
-                    onSubmit={(e) => e.preventDefault()}
-                >
+                <form className="space-y-6" onSubmit={submit}>
                     <div className="space-y-2">
                         <Label
                             htmlFor="email"
@@ -44,8 +56,16 @@ export default function Login() {
                             id="email"
                             type="email"
                             placeholder="name@company.com"
-                            className="h-11 border-0 bg-[#f4f5f7] px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300"
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            autoComplete="username"
                         />
+                        {errors.email && (
+                            <p className="mt-1 text-xs font-medium text-red-500">
+                                {errors.email}
+                            </p>
+                        )}
                     </div>
 
                     <div className="space-y-2">
@@ -63,15 +83,41 @@ export default function Login() {
                                 Forgot Password?
                             </Link>
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            placeholder="********"
-                            className="h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300"
-                        />
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                placeholder="********"
+                                className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                                value={data.password}
+                                onChange={(e) =>
+                                    setData('password', e.target.value)
+                                }
+                                autoComplete="current-password"
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                            >
+                                {showPassword ? (
+                                    <EyeOff className="h-5 w-5" />
+                                ) : (
+                                    <Eye className="h-5 w-5" />
+                                )}
+                            </button>
+                        </div>
+                        {errors.password && (
+                            <p className="mt-1 text-xs font-medium text-red-500">
+                                {errors.password}
+                            </p>
+                        )}
                     </div>
 
-                    <Button className="h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]">
+                    <Button
+                        className="h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
+                        disabled={processing}
+                    >
                         Sign In
                     </Button>
                 </form>
