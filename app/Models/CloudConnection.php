@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class CloudConnection extends Model
 {
@@ -49,5 +51,20 @@ class CloudConnection extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the dynamically built Flysystem disk for this connection.
+     */
+    public function getDisk(): Filesystem
+    {
+        return Storage::build([
+            'driver' => 'google_drive',
+            'client_id' => config('services.google.client_id'),
+            'client_secret' => config('services.google.client_secret'),
+            'credentials' => $this->credentials,
+            'connection_id' => $this->id,
+            'folder_id' => 'root',
+        ]);
     }
 }

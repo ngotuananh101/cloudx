@@ -60,6 +60,13 @@ return [
             'report' => false,
         ],
 
+        'google_drive' => [
+            'driver' => 'google_drive',
+            'client_id' => env('GOOGLE_CLIENT_ID'),
+            'client_secret' => env('GOOGLE_CLIENT_SECRET'),
+            'folder_id' => env('GOOGLE_DRIVE_FOLDER_ID', 'root'),
+        ],
+
     ],
 
     /*
