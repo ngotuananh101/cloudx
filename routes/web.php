@@ -1,13 +1,14 @@
 <?php
 
 use App\Http\Controllers\CloudConnectionController;
+use App\Http\Controllers\HomeController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::inertia('/', 'dashboard')->name('home');
-    Route::inertia('/dashboard', 'dashboard')->name('dashboard');
+    Route::get('/', HomeController::class)->name('home');
+    Route::get('/dashboard', HomeController::class)->name('dashboard');
 
     // Cloud Connections OAuth Flow
     Route::get('/oauth/google/redirect', [CloudConnectionController::class, 'redirectToGoogle'])->name('oauth.google.redirect');

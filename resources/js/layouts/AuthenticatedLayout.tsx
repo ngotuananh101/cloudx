@@ -27,14 +27,7 @@ interface AuthenticatedLayoutProps {
 export default function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
     const { auth } = usePage().props as any;
     const user = auth?.user;
-
-    const storageConnections = [
-        { name: 'GOOGLE DRIVE', icon: Cloud, active: false },
-        { name: 'ONEDRIVE', icon: Cloud, active: false },
-        { name: 'DROPBOX', icon: Folder, active: false },
-        { name: 'AWS S3', icon: Folder, active: false },
-        { name: 'FTP SERVER', icon: Folder, active: false },
-    ];
+    const connections = user?.connections || [];
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans antialiased text-gray-900">
@@ -76,24 +69,28 @@ export default function AuthenticatedLayout({ children }: AuthenticatedLayoutPro
                         <div className="px-3 mb-2 text-[10px] font-bold tracking-wider text-gray-400">
                             CONNECTED STORAGE
                         </div>
-                        <ul className="space-y-1">
-                            {storageConnections.map((storage) => (
-                                <li key={storage.name}>
-                                    <a
-                                        href="#"
-                                        className="group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <storage.icon className="h-4.5 w-4.5 text-gray-400 group-hover:text-gray-600" />
-                                            {storage.name}
+                        {connections && connections.length > 0 ? (
+                            <ul className="space-y-1">
+                                {connections.map((connection: any) => (
+                                    <li key={connection.id}>
+                                        <div
+                                            className="group flex items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-colors cursor-pointer"
+                                        >
+                                            <div className="flex items-center gap-3 truncate">
+                                                <Cloud className="h-4.5 w-4.5 text-gray-400 group-hover:text-gray-600 shrink-0" />
+                                                <span className="truncate text-gray-700 font-bold" title={connection.name}>
+                                                    {connection.name}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <button className="rounded p-0.5 opacity-0 group-hover:opacity-100 hover:bg-gray-200 transition-all">
-                                            <MoreVertical className="h-3.5 w-3.5 text-gray-500" />
-                                        </button>
-                                    </a>
-                                </li>
-                            ))}
-                        </ul>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <div className="px-3 py-1.5 text-[11px] text-gray-400 font-medium italic">
+                                No storage connected
+                            </div>
+                        )}
                     </div>
 
                     {/* System Section */}
