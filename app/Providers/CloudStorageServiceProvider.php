@@ -19,7 +19,12 @@ class CloudStorageServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(Client::class, function () {
-            return new Client;
+            $client = new Client;
+            if (config('app.env') === 'local') {
+                $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
+            }
+
+            return $client;
         });
 
         $this->app->bind(Drive::class, function ($app) {
@@ -34,6 +39,9 @@ class CloudStorageServiceProvider extends ServiceProvider
     {
         Storage::extend('google_drive', function ($app, $config) {
             $client = new Client;
+            if (config('app.env') === 'local') {
+                $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
+            }
             $client->setClientId($config['client_id'] ?? config('services.google.client_id'));
             $client->setClientSecret($config['client_secret'] ?? config('services.google.client_secret'));
 
