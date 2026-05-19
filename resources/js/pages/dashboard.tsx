@@ -18,6 +18,8 @@ import {
     X,
     Lock
 } from 'lucide-react';
+import { redirect as googleRedirect } from '@/routes/oauth/google';
+import { destroy as destroyConnection } from '@/routes/cloud-connections';
 
 interface Connection {
     id: number;
@@ -42,13 +44,13 @@ export default function Dashboard({ connections = [] }: DashboardProps) {
 
     const handleDisconnect = (id: number, name: string) => {
         if (confirm(`Are you sure you want to disconnect ${name}?`)) {
-            router.delete(`/cloud-connections/${id}`);
+            router.delete(destroyConnection.url(id));
         }
     };
 
     const handleConnectGoogle = () => {
         setIsConnectModalOpen(false);
-        window.location.href = route('oauth.google.redirect');
+        window.location.href = googleRedirect.url();
     };
 
     // Calculate total statistics
