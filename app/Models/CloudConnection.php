@@ -20,6 +20,7 @@ class CloudConnection extends Model
         'user_id',
         'name',
         'provider',
+        'provider_id',
         'credentials',
         'status',
         'total_space',

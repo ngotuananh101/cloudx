@@ -72,22 +72,24 @@ class CloudConnectionController extends Controller
             $totalSpace = $quota->getLimit();
             $usedSpace = $quota->getUsage();
 
-            // Create or update the connection for the authenticated user
-            $request->user()->cloudConnections()->updateOrCreate(
-                [
-                    'provider' => CloudProvider::GOOGLE_DRIVE(),
-                    // Track by provider to keep one connection or allow multiple by mapping name
-                ],
-                [
-                    'name' => 'Google Drive ('.$emailAddress.')',
-                    'credentials' => $token,
-                    'status' => ConnectionStatus::CONNECTED(),
-                    'total_space' => $totalSpace,
-                    'used_space' => $usedSpace,
-                    'error_message' => null,
-                    'last_synced_at' => now(),
-                ]
-            );
+            // Create or update the connection for the authenticated user uniquely by provider_id
+            $connection = $request->user()->cloudConnections()->firstOrNew([
+                'provider' => CloudProvider::GOOGLE_DRIVE(),
+                'provider_id' => $emailAddress,
+            ]);
+
+            if (! $connection->exists) {
+                $connection->name = 'Google Drive ('.$emailAddress.')';
+            }
+
+            $connection->fill([
+                'credentials' => $token,
+                'status' => ConnectionStatus::CONNECTED(),
+                'total_space' => $totalSpace,
+                'used_space' => $usedSpace,
+                'error_message' => null,
+                'last_synced_at' => now(),
+            ])->save();
 
             return redirect()->route('dashboard')->with('success', 'Successfully connected to Google Drive!');
         } catch (\Exception $e) {
