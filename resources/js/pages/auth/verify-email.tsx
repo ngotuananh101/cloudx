@@ -39,26 +39,26 @@ export default function VerifyEmail({ status }: { status?: string }) {
                 </div>
             )}
 
-            <form onSubmit={submit}>
-                <div className="mt-4 flex items-center justify-between">
-                    <Button
-                        className="h-11 rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
-                        disabled={processing}
-                    >
-                        Resend Verification Email <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-
-                    <Link
-                        href={destroy.url()}
-                        method="post"
-                        as="button"
-                        className="inline-flex items-center rounded-md text-sm font-medium text-gray-600 underline hover:text-gray-900 focus:ring-2 focus:ring-brand focus:ring-offset-2 focus:outline-none"
-                    >
-                        <LogOut className="mr-2 h-4 w-4" />
-                        Log Out
-                    </Link>
-                </div>
+            <form onSubmit={submit} className="space-y-6">
+                <Button
+                    className="h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
+                    disabled={processing}
+                >
+                    Resend Verification Email <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
             </form>
+
+            <div className="mt-8 text-center">
+                <Link
+                    href={destroy.url()}
+                    method="post"
+                    as="button"
+                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-700"
+                >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Log Out
+                </Link>
+            </div>
         </GuestLayout>
     );
 }
