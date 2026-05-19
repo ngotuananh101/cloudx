@@ -1,0 +1,140 @@
+import { useState, FormEventHandler } from 'react';
+import { Head, useForm } from '@inertiajs/react';
+import { KeyRound, Mail, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import GuestLayout from '@/layouts/GuestLayout';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { store } from '@/actions/App/Http/Controllers/Auth/ResetPasswordController';
+
+export default function ResetPassword({ token, email }: { token: string, email: string }) {
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+    const { data, setData, post, processing, errors } = useForm({
+        token: token,
+        email: email,
+        password: '',
+        password_confirmation: '',
+    });
+
+    const submit: FormEventHandler = (e) => {
+        e.preventDefault();
+        post(store.url());
+    };
+
+    return (
+        <GuestLayout>
+            <Head title="Reset Password" />
+
+            <div className="mb-8 text-center">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
+                    <div className="flex items-center justify-center">
+                        <KeyRound className="h-8 w-8 text-brand" strokeWidth={2.5} />
+                    </div>
+                </div>
+
+                <h1 className="mb-3 text-2xl font-semibold text-gray-900">
+                    Set new password
+                </h1>
+                <p className="mx-auto max-w-xs text-sm text-gray-500">
+                    Your new password must be different from previously used passwords.
+                </p>
+            </div>
+
+            <form onSubmit={submit} className="space-y-6">
+                <div className="space-y-2">
+                    <Label
+                        htmlFor="email"
+                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                    >
+                        Email Address
+                    </Label>
+                    <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                            <Mail className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <Input
+                            id="email"
+                            type="email"
+                            className={`h-11 border-0 bg-[#f4f5f7] pl-11 pr-4 text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            readOnly
+                        />
+                    </div>
+                    {errors.email && (
+                        <p className="mt-1 text-xs font-medium text-red-500">{errors.email}</p>
+                    )}
+                </div>
+
+                <div className="space-y-2">
+                    <Label
+                        htmlFor="password"
+                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                    >
+                        New Password
+                    </Label>
+                    <div className="relative">
+                        <Input
+                            id="password"
+                            type={showPassword ? 'text' : 'password'}
+                            placeholder="********"
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            autoComplete="new-password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    {errors.password && (
+                        <p className="mt-1 text-xs font-medium text-red-500">{errors.password}</p>
+                    )}
+                </div>
+
+                <div className="space-y-2">
+                    <Label
+                        htmlFor="password_confirmation"
+                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                    >
+                        Confirm Password
+                    </Label>
+                    <div className="relative">
+                        <Input
+                            id="password_confirmation"
+                            type={showConfirmPassword ? 'text' : 'password'}
+                            placeholder="********"
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
+                            value={data.password_confirmation}
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            autoComplete="new-password"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
+                        >
+                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                        </button>
+                    </div>
+                    {errors.password_confirmation && (
+                        <p className="mt-1 text-xs font-medium text-red-500">{errors.password_confirmation}</p>
+                    )}
+                </div>
+
+                <Button
+                    className="mt-2 h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
+                    disabled={processing}
+                >
+                    Reset Password <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+            </form>
+        </GuestLayout>
+    );
+}

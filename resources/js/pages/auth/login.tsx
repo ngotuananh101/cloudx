@@ -1,5 +1,5 @@
 import { useState, FormEventHandler } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Cloud, Eye, EyeOff } from 'lucide-react';
 import { store } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import GuestLayout from '@/layouts/GuestLayout';
@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
 export default function Login() {
+    const { status } = usePage().props as { status?: string };
     const [showPassword, setShowPassword] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
@@ -42,6 +43,12 @@ export default function Login() {
                         Enter your credentials to access your vault
                     </p>
                 </div>
+
+                {status && (
+                    <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-600">
+                        {status}
+                    </div>
+                )}
 
                 {/* Form */}
                 <form className="space-y-6" onSubmit={submit}>
