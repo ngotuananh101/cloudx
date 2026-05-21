@@ -198,7 +198,7 @@ export default function AuthenticatedLayout({
 
                 {/* Content scroll wrapper */}
                 <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
-                    <div className="mx-auto max-w-[1280px]">{children}</div>
+                    <div className="mx-auto max-w-7xl">{children}</div>
                 </main>
             </div>
         </div>
