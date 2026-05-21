@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\CloudProvider;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -52,6 +53,7 @@ class HandleInertiaRequests extends Middleware
                                 'name' => $connection->name,
                                 'provider' => $connection->provider->description,
                                 'provider_value' => $connection->provider->value,
+                                'provider_icon' => CloudProvider::getIcon($connection->provider->value),
                                 'status' => $connection->status->description,
                                 'status_value' => $connection->status->value,
                             ];

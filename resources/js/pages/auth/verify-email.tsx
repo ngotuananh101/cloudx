@@ -21,7 +21,10 @@ export default function VerifyEmail({ status }: { status?: string }) {
             <div className="mb-8 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
                     <div className="flex items-center justify-center">
-                        <MailCheck className="h-8 w-8 text-brand" strokeWidth={2.5} />
+                        <MailCheck
+                            className="h-8 w-8 text-brand"
+                            strokeWidth={2.5}
+                        />
                     </div>
                 </div>
 
@@ -29,13 +32,17 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     Verify your email
                 </h1>
                 <p className="mx-auto text-sm text-gray-500">
-                    Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn't receive the email, we will gladly send you another.
+                    Thanks for signing up! Before getting started, could you
+                    verify your email address by clicking on the link we just
+                    emailed to you? If you didn't receive the email, we will
+                    gladly send you another.
                 </p>
             </div>
 
             {status === 'verification-link-sent' && (
                 <div className="mb-6 rounded-md bg-green-50 p-4 text-sm font-medium text-green-600">
-                    A new verification link has been sent to the email address you provided during registration.
+                    A new verification link has been sent to the email address
+                    you provided during registration.
                 </div>
             )}
 
@@ -44,7 +51,8 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     className="h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
                     disabled={processing}
                 >
-                    Resend Verification Email <ArrowRight className="ml-2 h-4 w-4" />
+                    Resend Verification Email{' '}
+                    <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
             </form>
 

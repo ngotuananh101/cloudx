@@ -27,9 +27,15 @@ export default function ForgotPassword() {
             <div className="mb-8 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
                     <div className="relative flex items-center justify-center">
-                        <RotateCcw className="h-8 w-8 text-brand" strokeWidth={2.5} />
+                        <RotateCcw
+                            className="h-8 w-8 text-brand"
+                            strokeWidth={2.5}
+                        />
                         <div className="absolute inset-0 flex items-center justify-center pt-[2px]">
-                            <Lock className="h-3 w-3 fill-brand text-brand" strokeWidth={3} />
+                            <Lock
+                                className="h-3 w-3 fill-brand text-brand"
+                                strokeWidth={3}
+                            />
                         </div>
                     </div>
                 </div>
@@ -38,7 +44,8 @@ export default function ForgotPassword() {
                     Reset your password
                 </h1>
                 <p className="mx-auto max-w-xs text-sm text-gray-500">
-                    Enter your email address and we'll send you a link to reset your password.
+                    Enter your email address and we'll send you a link to reset
+                    your password.
                 </p>
             </div>
 
@@ -64,13 +71,15 @@ export default function ForgotPassword() {
                             id="email"
                             type="email"
                             placeholder="name@company.com"
-                            className={`h-11 border-0 bg-[#f4f5f7] pl-11 pr-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                         />
                     </div>
                     {errors.email && (
-                        <p className="mt-1 text-xs font-medium text-red-500">{errors.email}</p>
+                        <p className="mt-1 text-xs font-medium text-red-500">
+                            {errors.email}
+                        </p>
                     )}
                 </div>
 

@@ -8,7 +8,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import GuestLayout from '@/layouts/GuestLayout';
 
-export default function ResetPassword({ token, email }: { token: string, email: string }) {
+export default function ResetPassword({
+    token,
+    email,
+}: {
+    token: string;
+    email: string;
+}) {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -31,7 +37,10 @@ export default function ResetPassword({ token, email }: { token: string, email: 
             <div className="mb-8 text-center">
                 <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
                     <div className="flex items-center justify-center">
-                        <KeyRound className="h-8 w-8 text-brand" strokeWidth={2.5} />
+                        <KeyRound
+                            className="h-8 w-8 text-brand"
+                            strokeWidth={2.5}
+                        />
                     </div>
                 </div>
 
@@ -39,7 +48,8 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                     Set new password
                 </h1>
                 <p className="mx-auto max-w-xs text-sm text-gray-500">
-                    Your new password must be different from previously used passwords.
+                    Your new password must be different from previously used
+                    passwords.
                 </p>
             </div>
 
@@ -58,14 +68,16 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                         <Input
                             id="email"
                             type="email"
-                            className={`h-11 border-0 bg-[#f4f5f7] pl-11 pr-4 text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             readOnly
                         />
                     </div>
                     {errors.email && (
-                        <p className="mt-1 text-xs font-medium text-red-500">{errors.email}</p>
+                        <p className="mt-1 text-xs font-medium text-red-500">
+                            {errors.email}
+                        </p>
                     )}
                 </div>
 
@@ -83,7 +95,9 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                             placeholder="********"
                             className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
                             value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
+                            onChange={(e) =>
+                                setData('password', e.target.value)
+                            }
                             autoComplete="new-password"
                         />
                         <button
@@ -91,11 +105,17 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                         >
-                            {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            {showPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                            ) : (
+                                <Eye className="h-5 w-5" />
+                            )}
                         </button>
                     </div>
                     {errors.password && (
-                        <p className="mt-1 text-xs font-medium text-red-500">{errors.password}</p>
+                        <p className="mt-1 text-xs font-medium text-red-500">
+                            {errors.password}
+                        </p>
                     )}
                 </div>
 
@@ -113,19 +133,29 @@ export default function ResetPassword({ token, email }: { token: string, email: 
                             placeholder="********"
                             className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
                             value={data.password_confirmation}
-                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            onChange={(e) =>
+                                setData('password_confirmation', e.target.value)
+                            }
                             autoComplete="new-password"
                         />
                         <button
                             type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            onClick={() =>
+                                setShowConfirmPassword(!showConfirmPassword)
+                            }
                             className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                         >
-                            {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                            {showConfirmPassword ? (
+                                <EyeOff className="h-5 w-5" />
+                            ) : (
+                                <Eye className="h-5 w-5" />
+                            )}
                         </button>
                     </div>
                     {errors.password_confirmation && (
-                        <p className="mt-1 text-xs font-medium text-red-500">{errors.password_confirmation}</p>
+                        <p className="mt-1 text-xs font-medium text-red-500">
+                            {errors.password_confirmation}
+                        </p>
                     )}
                 </div>
 
