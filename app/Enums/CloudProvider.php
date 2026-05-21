@@ -36,4 +36,16 @@ final class CloudProvider extends Enum
             default => parent::getDescription($value),
         };
     }
+
+    public static function getIcon(int $value): string
+    {
+        return match ($value) {
+            self::GOOGLE_DRIVE => '/assets/svg/GoogleDrive.svg',
+            self::ONEDRIVE => '/assets/svg/OneDrive.svg',
+            self::DROPBOX => '/assets/svg/Dropbox.svg',
+            self::AWS_S3 => '/assets/svg/S3.svg',
+            self::FTP => '/assets/svg/Ftp.svg',
+            default => 'cloud',
+        };
+    }
 }

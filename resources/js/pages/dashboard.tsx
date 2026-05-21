@@ -1,9 +1,4 @@
-import { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
-import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { Button } from '@/components/ui/button';
 import {
     Cloud,
     FolderArchive,
@@ -18,14 +13,20 @@ import {
     X,
     Lock
 } from 'lucide-react';
-import { redirect as googleRedirect } from '@/routes/oauth/google';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { destroy as destroyConnection } from '@/routes/cloud-connections';
+import { redirect as googleRedirect } from '@/routes/oauth/google';
 
 interface Connection {
     id: number;
     name: string;
     provider: string;
     provider_value: number;
+    provider_icon: string;
     status: string;
     status_value: number;
     used_space: number;
@@ -38,6 +39,8 @@ interface Connection {
 interface DashboardProps {
     connections: Connection[];
 }
+
+
 
 export default function Dashboard({ connections = [] }: DashboardProps) {
     const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
@@ -57,10 +60,14 @@ export default function Dashboard({ connections = [] }: DashboardProps) {
     const totalUsedBytes = connections.reduce((acc, c) => acc + (c.used_space || 0), 0);
 
     const formatBytes = (bytes: number, precision = 1) => {
-        if (bytes <= 0) return '0 B';
+        if (bytes <= 0) {
+return '0 B';
+}
+
         const units = ['B', 'KB', 'MB', 'GB', 'TB', 'PB'];
         const pow = Math.floor(Math.log(bytes) / Math.log(1024));
         const unitLimit = Math.min(pow, units.length - 1);
+
         return (bytes / Math.pow(1024, unitLimit)).toFixed(precision) + ' ' + units[unitLimit];
     };
 
@@ -134,11 +141,16 @@ export default function Dashboard({ connections = [] }: DashboardProps) {
             ) : (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {connections.map((connection) => {
-                        let providerIcon = HardDrive;
                         let colorClass = 'bg-amber-500/10 text-amber-600';
+
                         if (connection.provider_value === 1) { // Google Drive
-                            providerIcon = Cloud;
                             colorClass = 'bg-blue-500/10 text-blue-600';
+                        } else if (connection.provider_value === 2) { // OneDrive
+                            colorClass = 'bg-indigo-500/10 text-indigo-600';
+                        } else if (connection.provider_value === 3) { // Dropbox
+                            colorClass = 'bg-blue-500/10 text-blue-600';
+                        } else if (connection.provider_value === 4) { // AWS S3
+                            colorClass = 'bg-orange-500/10 text-orange-600';
                         }
 
                         return (
@@ -149,7 +161,11 @@ export default function Dashboard({ connections = [] }: DashboardProps) {
                                 <CardContent className="p-0">
                                     <div className="flex items-center justify-between mb-4">
                                         <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${colorClass}`}>
-                                            <providerIcon className="h-6 w-6" strokeWidth={2} />
+                                            {connection.provider_icon?.endsWith('.svg') ? (
+                                                <img src={connection.provider_icon} className="h-6 w-6" alt={connection.provider} />
+                                            ) : (
+                                                <HardDrive className="h-6 w-6" strokeWidth={2} />
+                                            )}
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-[10px] font-black tracking-widest text-gray-400">
@@ -249,12 +265,22 @@ export default function Dashboard({ connections = [] }: DashboardProps) {
 
                             {/* Mini provider icons */}
                             <div className="my-6 grid grid-cols-3 gap-3">
-                                {['GOOGLE', 'ONEDRIVE', 'AWS S3'].map((item) => (
-                                    <div key={item} className="flex flex-col items-center justify-center rounded-xl bg-gray-50 py-3 text-center border border-gray-100/50 hover:bg-gray-100/80 transition-colors">
-                                        <Cloud className="h-5 w-5 text-gray-400" />
-                                        <span className="mt-1 text-[8px] font-black tracking-wider text-gray-500">{item}</span>
-                                    </div>
-                                ))}
+                                {['GOOGLE', 'ONEDRIVE', 'AWS S3'].map((item) => {
+                                    let miniIcon = <Cloud className="h-5 w-5 text-gray-400" />;
+
+                                    if (item === 'GOOGLE') {
+                                        miniIcon = <img src="/assets/svg/GoogleDrive.svg" className="h-5 w-5" alt="Google Drive" />;
+                                    } else if (item === 'AWS S3') {
+                                        miniIcon = <Database className="h-5 w-5 text-gray-400" />;
+                                    }
+
+                                    return (
+                                        <div key={item} className="flex flex-col items-center justify-center rounded-xl bg-gray-50 py-3 text-center border border-gray-100/50 hover:bg-gray-100/80 transition-colors">
+                                            {miniIcon}
+                                            <span className="mt-1 text-[8px] font-black tracking-wider text-gray-500">{item}</span>
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             {/* Action Button */}
@@ -323,8 +349,8 @@ export default function Dashboard({ connections = [] }: DashboardProps) {
                                 className="flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 shadow-sm hover:bg-blue-50/20 hover:border-blue-200 transition-all duration-300 text-left group"
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10 text-blue-600">
-                                        <Cloud className="h-6 w-6" />
+                                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-500/10">
+                                        <img src="/assets/svg/GoogleDrive.svg" className="h-6 w-6" alt="Google Drive" />
                                     </div>
                                     <div>
                                         <h5 className="text-sm font-bold text-gray-900">Google Drive</h5>

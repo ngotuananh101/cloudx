@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use Illuminate\Http\Request;
 
@@ -21,6 +22,7 @@ class HomeController extends Controller
                     'name' => $connection->name,
                     'provider' => $connection->provider->description,
                     'provider_value' => $connection->provider->value,
+                    'provider_icon' => CloudProvider::getIcon($connection->provider->value),
                     'status' => $connection->status->description,
                     'status_value' => $connection->status->value,
                     'used_space' => $connection->used_space,

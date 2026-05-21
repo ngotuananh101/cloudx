@@ -1,10 +1,10 @@
-import { FormEventHandler } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { MailCheck, ArrowRight, LogOut } from 'lucide-react';
-import GuestLayout from '@/layouts/GuestLayout';
-import { Button } from '@/components/ui/button';
-import { resend } from '@/actions/App/Http/Controllers/Auth/VerifyEmailController';
+import type { FormEventHandler } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
+import { resend } from '@/actions/App/Http/Controllers/Auth/VerifyEmailController';
+import { Button } from '@/components/ui/button';
+import GuestLayout from '@/layouts/GuestLayout';
 
 export default function VerifyEmail({ status }: { status?: string }) {
     const { post, processing } = useForm({});

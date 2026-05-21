@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import {
     LayoutDashboard,
@@ -14,10 +13,11 @@ import {
     MoreVertical,
     FileText
 } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
 
 interface AuthenticatedLayoutProps {
     children: ReactNode;

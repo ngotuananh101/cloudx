@@ -1,11 +1,11 @@
-import { FormEventHandler } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { RotateCcw, Lock, Mail, ArrowRight, ArrowLeft } from 'lucide-react';
-import GuestLayout from '@/layouts/GuestLayout';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import type { FormEventHandler } from 'react';
 import { store } from '@/actions/App/Http/Controllers/Auth/ForgotPasswordController';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import GuestLayout from '@/layouts/GuestLayout';
 
 export default function ForgotPassword() {
     const { status } = usePage().props as { status?: string };

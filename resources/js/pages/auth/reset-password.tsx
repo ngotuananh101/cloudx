@@ -1,11 +1,12 @@
-import { useState, FormEventHandler } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import { KeyRound, Mail, Eye, EyeOff, ArrowRight } from 'lucide-react';
-import GuestLayout from '@/layouts/GuestLayout';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import type { FormEventHandler } from 'react';
+import { useState } from 'react';
 import { store } from '@/actions/App/Http/Controllers/Auth/ResetPasswordController';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import GuestLayout from '@/layouts/GuestLayout';
 
 export default function ResetPassword({ token, email }: { token: string, email: string }) {
     const [showPassword, setShowPassword] = useState(false);

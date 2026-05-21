@@ -1,11 +1,12 @@
-import { useState, FormEventHandler } from 'react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Cloud, Eye, EyeOff } from 'lucide-react';
+import type { FormEventHandler } from 'react';
+import { useState } from 'react';
 import { store } from '@/actions/App/Http/Controllers/Auth/LoginController';
-import GuestLayout from '@/layouts/GuestLayout';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import GuestLayout from '@/layouts/GuestLayout';
 
 export default function Login() {
     const { status } = usePage().props as { status?: string };
