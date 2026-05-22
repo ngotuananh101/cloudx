@@ -8,6 +8,7 @@ import {
     Bell,
     Settings2,
     Plus,
+    Folder,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
@@ -22,7 +23,8 @@ interface AuthenticatedLayoutProps {
 export default function AuthenticatedLayout({
     children,
 }: AuthenticatedLayoutProps) {
-    const { auth } = usePage().props as any;
+    const { url, props } = usePage() as any;
+    const auth = props.auth;
     const user = auth?.user;
     const connections = user?.connections || [];
 
@@ -54,12 +56,22 @@ export default function AuthenticatedLayout({
                         <ul className="space-y-1">
                             <li>
                                 <Link
-                                    href="/"
-                                    className="relative flex items-center gap-3 rounded-lg bg-red-50/50 px-3 py-2.5 text-sm font-semibold text-brand transition-colors"
+                                    href="/dashboard"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                 >
-                                    <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />
-                                    <LayoutDashboard className="h-5 w-5 text-brand" />
+                                    {(url === '/dashboard' || url === '/') && <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
+                                    <LayoutDashboard className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-brand' : 'text-gray-400'}`} />
                                     DASHBOARD
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/files"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url.startsWith('/files') ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                >
+                                    {url.startsWith('/files') && <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
+                                    <Folder className={`h-5 w-5 ${url.startsWith('/files') ? 'text-brand' : 'text-gray-400'}`} />
+                                    FILES
                                 </Link>
                             </li>
                         </ul>
