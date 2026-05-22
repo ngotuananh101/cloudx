@@ -40,7 +40,7 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
             <Head title="Files & Folders" />
 
             {/* Header & Controls */}
-            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <div className="flex items-center text-[10px] font-extrabold tracking-widest text-gray-400">
                         <span className="uppercase">{connection?.name || 'WORKSPACE'}</span>
@@ -51,35 +51,25 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
                         {decodedPath ? (
                             <>
                                 <button onClick={handleNavigateHome} className="text-2xl font-extrabold tracking-tight text-gray-400 hover:text-gray-900 transition-colors">
-                                    <Home className="h-6 w-6" />
+                                    <Home className="h-5 w-5" />
                                 </button>
-                                <span className="text-2xl font-extrabold text-gray-300">/</span>
-                                <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 truncate max-w-md">
+                                <span className="text-lg font-medium text-gray-300">/</span>
+                                <h2 className="text-lg font-medium tracking-tight text-gray-900 truncate max-w-md">
                                     {decodedPath.split('/').pop() || decodedPath}
                                 </h2>
                             </>
                         ) : (
-                            <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">
+                            <h2 className="text-xl font-extrabold tracking-tight text-gray-900">
                                 My Files
                             </h2>
                         )}
                     </div>
                 </div>
-                <div className="flex items-center gap-3 self-start sm:self-center">
-                    <Button variant="outline" className="h-10 rounded-xl border-gray-200 font-bold tracking-wide text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900">
-                        <FolderPlus className="mr-2 h-4 w-4" />
-                        New Folder
-                    </Button>
-                    <Button className="h-10 rounded-xl bg-[#0f172a] font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-[#1e293b]">
-                        <Upload className="mr-2 h-4 w-4" />
-                        Upload
-                    </Button>
-                </div>
             </div>
 
-            {/* Filters / Search Bar */}
-            <div className="mb-6 flex items-center gap-4 rounded-2xl border border-gray-100/50 bg-white p-2.5 shadow-sm">
-                <div className="relative flex-1">
+            {/* Filters / Search Bar & Actions */}
+            <div className="mb-3 flex flex-col sm:flex-row items-center gap-3 rounded-2xl border border-gray-100/50 bg-white p-2.5 shadow-sm">
+                <div className="relative flex-1 w-full">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
                         <Search className="h-4 w-4 text-gray-400" />
                     </div>
@@ -91,9 +81,20 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
                         className="h-11 w-full rounded-xl border-none bg-gray-50/50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
                     />
                 </div>
-                <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-xl border-gray-100 text-gray-500 hover:bg-gray-50 hover:text-gray-900">
-                    <Filter className="h-5 w-5" />
-                </Button>
+                <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0 justify-end">
+                    <Button variant="outline" className="h-11 rounded-xl border-gray-200 font-bold tracking-wide text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900">
+                        <FolderPlus className="mr-2 h-4 w-4" />
+                        New Folder
+                    </Button>
+                    <Button className="h-11 rounded-xl bg-[#0f172a] font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-[#1e293b]">
+                        <Upload className="mr-2 h-4 w-4" />
+                        Upload
+                    </Button>
+                    <div className="h-8 w-[1px] bg-gray-200 mx-1 hidden sm:block"></div>
+                    <Button variant="outline" size="icon" className="h-11 w-11 shrink-0 rounded-xl border-gray-100 text-gray-500 hover:bg-gray-50 hover:text-gray-900">
+                        <Filter className="h-5 w-5" />
+                    </Button>
+                </div>
             </div>
 
             {/* Table Container */}
@@ -106,7 +107,7 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
                     <div className="w-32 shrink-0 pr-4">TYPE</div>
                     <div className="w-32 shrink-0 pr-4">MODIFIED</div>
                     <div className="w-24 shrink-0 text-right">ACTIONS</div>
-                    <div className="w-[14px] shrink-0" /> {/* Scrollbar spacer */}
+                    <div className="w-3.5 shrink-0" /> {/* Scrollbar spacer */}
                 </div>
 
                 {/* Virtualized List Body */}
