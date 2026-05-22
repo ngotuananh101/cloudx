@@ -93,7 +93,7 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
                         <FolderPlus className="mr-2 h-4 w-4" />
                         New Folder
                     </Button>
-                    <Button className="h-11 rounded-xl bg-[#0f172a] font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-[#1e293b]">
+                    <Button className="h-11 rounded-xl bg-[#bd1e24] font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-[#a0181e]">
                         <Upload className="mr-2 h-4 w-4" />
                         Upload
                     </Button>

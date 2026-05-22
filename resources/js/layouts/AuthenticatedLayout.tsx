@@ -177,11 +177,6 @@ export default function AuthenticatedLayout({
                             <Settings className="h-5 w-5 text-gray-600" />
                         </button>
 
-                        {/* Upload Button */}
-                        <Button className="h-10 rounded-xl bg-[#bd1e24] px-6 text-xs font-bold tracking-wider text-white shadow-sm hover:bg-[#a0181e]">
-                            Upload
-                        </Button>
-
                         {/* User Avatar */}
                         <Avatar className="h-10 w-10 cursor-pointer border border-gray-200 shadow-sm">
                             <AvatarImage src="" />
