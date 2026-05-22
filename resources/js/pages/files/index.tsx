@@ -26,7 +26,14 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
 
     const handleNavigate = (item: FileItemProps) => {
         if (item.type === 'folder') {
-            const encodedPath = btoa(item.id.toString()).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            const str = item.id.toString();
+            // Encode unicode string to base64 safely
+            const base64 = btoa(
+                encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (match, p1) => 
+                    String.fromCharCode(parseInt(p1, 16))
+                )
+            );
+            const encodedPath = base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
             router.visit(`/s/${connection.id}/${encodedPath}`);
         }
     };
