@@ -1,64 +1,19 @@
-import { Head } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState, useMemo } from 'react';
 import { FileTableRow, FileItemProps } from '@/components/FileTableRow';
 import { Button } from '@/components/ui/button';
-import { Upload, FolderPlus, Search, Filter } from 'lucide-react';
+import { Upload, FolderPlus, Search, Filter, ChevronRight, Home } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
-// Generate mock data for demonstration
-const generateMockData = (count: number): FileItemProps[] => {
-    const types: FileItemProps['type'][] = ['folder', 'document', 'image', 'code', 'archive', 'video', 'audio'];
-    const extensions: Record<string, string[]> = {
-        document: ['.pdf', '.docx', '.txt', '.md'],
-        image: ['.png', '.jpg', '.svg', '.gif'],
-        code: ['.js', '.tsx', '.py', '.php', '.css', '.html'],
-        archive: ['.zip', '.tar.gz', '.rar'],
-        video: ['.mp4', '.mov', '.avi'],
-        audio: ['.mp3', '.wav']
-    };
-    
-    const folderNames = ['Projects', 'Design Assets', 'Invoices 2024', 'Marketing', 'Development', 'Personal', 'A very long folder name that should definitely be truncated because it is too long to fit in the table column properly and needs an ellipsis'];
-
-    return Array.from({ length: count }, (_, i) => {
-        const type = Math.random() > 0.8 ? 'folder' : types[Math.floor(Math.random() * (types.length - 1)) + 1];
-        
-        let name = '';
-        if (type === 'folder') {
-            name = folderNames[Math.floor(Math.random() * folderNames.length)] + (i > 10 ? ` ${i}` : '');
-        } else {
-            const exts = extensions[type] || ['.file'];
-            // Occasionally generate a very long file name
-            if (i % 15 === 0) {
-                name = `This_is_an_extremely_long_file_name_that_simulates_a_user_uploading_a_file_with_a_crazy_long_name_like_a_zoom_recording_or_something_similar_from_2024_Q1_FINAL_v2_copy_123456789${exts[Math.floor(Math.random() * exts.length)]}`;
-            } else {
-                name = `File_${i.toString().padStart(4, '0')}${exts[Math.floor(Math.random() * exts.length)]}`;
-            }
-        }
-
-        return {
-            id: i,
-            name,
-            type,
-            size: type === 'folder' ? 0 : Math.floor(Math.random() * 1024 * 1024 * 50) + 1024,
-            updatedAt: new Date(Date.now() - Math.random() * 10000000000).toLocaleDateString('en-US', {
-                month: 'short',
-                day: 'numeric',
-                year: 'numeric'
-            })
-        };
-    });
-};
-
-export default function FileBrowser() {
+export default function FileBrowser({ connection, currentPath, decodedPath, files }: any) {
     const [searchQuery, setSearchQuery] = useState('');
-    const allFiles = useMemo(() => generateMockData(10000), []);
 
     const filteredFiles = useMemo(() => {
-        if (!searchQuery) return allFiles;
-        return allFiles.filter(f => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    }, [allFiles, searchQuery]);
+        if (!searchQuery) return files || [];
+        return (files || []).filter((f: any) => f.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    }, [files, searchQuery]);
 
     const parentRef = useRef<HTMLDivElement>(null);
 
@@ -69,6 +24,17 @@ export default function FileBrowser() {
         overscan: 15,
     });
 
+    const handleNavigate = (item: FileItemProps) => {
+        if (item.type === 'folder') {
+            const encodedPath = btoa(item.id.toString()).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+            router.visit(`/s/${connection.id}/${encodedPath}`);
+        }
+    };
+
+    const handleNavigateHome = () => {
+        router.visit(`/s/${connection.id}`);
+    };
+
     return (
         <AuthenticatedLayout title="Files">
             <Head title="Files & Folders" />
@@ -76,12 +42,28 @@ export default function FileBrowser() {
             {/* Header & Controls */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <span className="text-[10px] font-extrabold tracking-widest text-gray-400">
-                        WORKSPACE
-                    </span>
-                    <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-gray-900">
-                        Files & Folders
-                    </h2>
+                    <div className="flex items-center text-[10px] font-extrabold tracking-widest text-gray-400">
+                        <span className="uppercase">{connection?.name || 'WORKSPACE'}</span>
+                        <ChevronRight className="mx-1 h-3 w-3" />
+                        <span className="uppercase">FILES</span>
+                    </div>
+                    <div className="mt-1 flex items-center gap-2">
+                        {decodedPath ? (
+                            <>
+                                <button onClick={handleNavigateHome} className="text-2xl font-extrabold tracking-tight text-gray-400 hover:text-gray-900 transition-colors">
+                                    <Home className="h-6 w-6" />
+                                </button>
+                                <span className="text-2xl font-extrabold text-gray-300">/</span>
+                                <h2 className="text-2xl font-extrabold tracking-tight text-gray-900 truncate max-w-md">
+                                    {decodedPath.split('/').pop() || decodedPath}
+                                </h2>
+                            </>
+                        ) : (
+                            <h2 className="text-2xl font-extrabold tracking-tight text-gray-900">
+                                My Files
+                            </h2>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center gap-3 self-start sm:self-center">
                     <Button variant="outline" className="h-10 rounded-xl border-gray-200 font-bold tracking-wide text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900">
@@ -103,7 +85,7 @@ export default function FileBrowser() {
                     </div>
                     <Input
                         type="text"
-                        placeholder="Search across 10,000+ files..."
+                        placeholder={`Search in ${decodedPath ? decodedPath.split('/').pop() : 'My Files'}...`}
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         className="h-11 w-full rounded-xl border-none bg-gray-50/50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
@@ -115,15 +97,16 @@ export default function FileBrowser() {
             </div>
 
             {/* Table Container */}
-            <div className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm overflow-hidden h-[calc(100vh-280px)] min-h-[400px]">
+            <div className="flex flex-col rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden h-[calc(100vh-280px)] min-h-[400px]">
                 
                 {/* Table Header */}
-                <div className="flex items-center border-b border-gray-100 bg-gray-50/50 pl-6 pr-[38px] py-3 text-[11px] font-extrabold tracking-wider text-gray-400">
+                <div className="flex items-center border-b border-gray-100 bg-gray-50/50 pl-6 pr-6 py-3 text-[11px] font-extrabold tracking-wider text-gray-400">
                     <div className="flex-1 pr-4">NAME</div>
                     <div className="w-32 shrink-0 pr-4">SIZE</div>
                     <div className="w-32 shrink-0 pr-4">TYPE</div>
                     <div className="w-32 shrink-0 pr-4">MODIFIED</div>
                     <div className="w-24 shrink-0 text-right">ACTIONS</div>
+                    <div className="w-[14px] shrink-0" /> {/* Scrollbar spacer */}
                 </div>
 
                 {/* Virtualized List Body */}
@@ -136,8 +119,12 @@ export default function FileBrowser() {
                             <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm">
                                 <Search className="h-7 w-7 text-gray-300" />
                             </div>
-                            <h3 className="text-lg font-extrabold tracking-tight text-gray-900">No files found</h3>
-                            <p className="mt-1 text-sm font-medium text-gray-500">We couldn't find anything matching your search.</p>
+                            <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
+                                {searchQuery ? 'No matching files found' : 'This folder is empty'}
+                            </h3>
+                            <p className="mt-1 text-sm font-medium text-gray-500">
+                                {searchQuery ? 'Try adjusting your search query.' : 'Upload some files or create a new folder to get started.'}
+                            </p>
                         </div>
                     ) : (
                         <div
@@ -153,6 +140,7 @@ export default function FileBrowser() {
                                     <FileTableRow 
                                         key={file.id} 
                                         item={file} 
+                                        onNavigate={handleNavigate}
                                         style={{
                                             position: 'absolute',
                                             top: 0,

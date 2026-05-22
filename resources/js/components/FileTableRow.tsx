@@ -22,7 +22,7 @@ export interface FileItemProps {
     updatedAt: string;
 }
 
-export function FileTableRow({ item, style }: { item: FileItemProps; style: React.CSSProperties }) {
+export function FileTableRow({ item, style, onNavigate }: { item: FileItemProps; style: React.CSSProperties, onNavigate?: (item: FileItemProps) => void }) {
     const getIcon = () => {
         switch (item.type) {
             case 'folder': return <Folder className="h-4.5 w-4.5 text-blue-500 fill-blue-500/20" />;
@@ -47,14 +47,17 @@ export function FileTableRow({ item, style }: { item: FileItemProps; style: Reac
     return (
         <div 
             style={style} 
-            className="group absolute top-0 left-0 flex h-14 w-full items-center border-b border-gray-100/50 bg-white px-6 transition-colors hover:bg-gray-50/80"
+            className="group absolute top-0 left-0 flex h-14 w-full items-center border-b border-gray-50 bg-white px-6 transition-colors hover:bg-gray-50/80"
         >
             {/* Name Column */}
-            <div className="flex flex-1 min-w-0 items-center gap-3 pr-4">
+            <div 
+                className={`flex flex-1 min-w-0 items-center gap-3 pr-4 ${item.type === 'folder' ? 'cursor-pointer' : ''}`}
+                onClick={() => item.type === 'folder' && onNavigate?.(item)}
+            >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     {getIcon()}
                 </div>
-                <span className="truncate text-sm font-semibold text-gray-900 transition-colors group-hover:text-blue-600 cursor-pointer">
+                <span className="truncate text-sm font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
                     {item.name}
                 </span>
             </div>

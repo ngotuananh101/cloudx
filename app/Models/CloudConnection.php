@@ -65,7 +65,6 @@ class CloudConnection extends Model
             'client_secret' => config('services.google.client_secret'),
             'credentials' => $this->credentials,
             'connection_id' => $this->id,
-            'folder_id' => 'root',
         ]);
     }
 }

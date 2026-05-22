@@ -64,16 +64,6 @@ export default function AuthenticatedLayout({
                                     DASHBOARD
                                 </Link>
                             </li>
-                            <li>
-                                <Link
-                                    href="/files"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url.startsWith('/files') ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
-                                >
-                                    {url.startsWith('/files') && <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
-                                    <Folder className={`h-5 w-5 ${url.startsWith('/files') ? 'text-brand' : 'text-gray-400'}`} />
-                                    FILES
-                                </Link>
-                            </li>
                         </ul>
                     </div>
 
@@ -84,33 +74,33 @@ export default function AuthenticatedLayout({
                         </div>
                         {connections && connections.length > 0 ? (
                             <ul className="space-y-1">
-                                {connections.map((connection: any) => (
-                                    <li key={connection.id}>
-                                        <div className="group flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900">
-                                            <div className="flex items-center gap-3 truncate">
-                                                {connection.provider_icon?.endsWith(
-                                                    '.svg',
-                                                ) ? (
-                                                    <img
-                                                        src={
-                                                            connection.provider_icon
-                                                        }
-                                                        className="h-4.5 w-4.5 shrink-0"
-                                                        alt={connection.name}
-                                                    />
-                                                ) : (
-                                                    <Cloud className="h-4.5 w-4.5 shrink-0 text-gray-400 group-hover:text-gray-600" />
-                                                )}
-                                                <span
-                                                    className="truncate font-bold text-gray-700"
-                                                    title={connection.name}
-                                                >
-                                                    {connection.name}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                ))}
+                                {connections.map((connection: any) => {
+                                    const isActive = url.startsWith(`/s/${connection.id}`);
+                                    return (
+                                        <li key={connection.id}>
+                                            <Link href={`/s/${connection.id}`} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+                                                {isActive && <div className="absolute top-1/2 left-0 h-6 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
+                                                <div className="flex items-center gap-3 truncate">
+                                                    {connection.provider_icon?.endsWith('.svg') ? (
+                                                        <img
+                                                            src={connection.provider_icon}
+                                                            className="h-4.5 w-4.5 shrink-0"
+                                                            alt={connection.name}
+                                                        />
+                                                    ) : (
+                                                        <Cloud className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-brand' : 'text-gray-400 group-hover:text-gray-600'}`} />
+                                                    )}
+                                                    <span
+                                                        className={`truncate font-bold ${isActive ? 'text-brand' : 'text-gray-700'}`}
+                                                        title={connection.name}
+                                                    >
+                                                        {connection.name}
+                                                    </span>
+                                                </div>
+                                            </Link>
+                                        </li>
+                                    );
+                                })}
                             </ul>
                         ) : (
                             <div className="px-3 py-1.5 text-[11px] font-medium text-gray-400 italic">
