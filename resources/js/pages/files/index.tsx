@@ -90,11 +90,11 @@ export default function FileBrowser({ connection, currentPath, decodedPath, file
                 </div>
                 <div className="flex w-full items-center gap-2 sm:w-auto sm:shrink-0 justify-end">
                     <Button variant="outline" className="h-11 rounded-xl border-gray-200 font-bold tracking-wide text-gray-700 shadow-sm transition-all hover:bg-gray-50 hover:text-gray-900">
-                        <FolderPlus className="mr-2 h-4 w-4" />
+                        <FolderPlus className="h-4 w-4" />
                         New Folder
                     </Button>
                     <Button className="h-11 rounded-xl bg-[#bd1e24] font-bold tracking-wide text-white shadow-sm transition-all duration-300 hover:bg-[#a0181e]">
-                        <Upload className="mr-2 h-4 w-4" />
+                        <Upload className="h-4 w-4" />
                         Upload
                     </Button>
                     <div className="h-8 w-[1px] bg-gray-200 mx-1 hidden sm:block"></div>
