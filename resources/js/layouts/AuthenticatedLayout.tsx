@@ -8,7 +8,6 @@ import {
     Bell,
     Settings2,
     Plus,
-    Folder,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
@@ -76,6 +75,7 @@ export default function AuthenticatedLayout({
                             <ul className="space-y-1">
                                 {connections.map((connection: any) => {
                                     const isActive = url.startsWith(`/s/${connection.id}`);
+
                                     return (
                                         <li key={connection.id}>
                                             <Link href={`/s/${connection.id}`} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>

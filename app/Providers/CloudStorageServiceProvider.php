@@ -3,6 +3,10 @@
 namespace App\Providers;
 
 use App\Models\CloudConnection;
+use App\Services\CloudStorage\CloudProviderRegistry;
+use App\Services\CloudStorage\CloudStorageManager;
+use App\Services\CloudStorage\Connectors\GoogleDriveConnector;
+use App\Services\CloudStorage\Connectors\OneDriveConnector;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -18,9 +22,9 @@ class CloudStorageServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton(Client::class, function () {
+        $this->app->bind(Client::class, function () {
             $client = new Client;
-            if (config('app.env') === 'local') {
+            if (app()->environment('local')) {
                 $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
             }
 
@@ -30,6 +34,17 @@ class CloudStorageServiceProvider extends ServiceProvider
         $this->app->bind(Drive::class, function ($app) {
             return new Drive($app->make(Client::class));
         });
+
+        $this->app->singleton(CloudProviderRegistry::class, function ($app) {
+            return new CloudProviderRegistry([
+                $app->make(GoogleDriveConnector::class),
+                $app->make(OneDriveConnector::class),
+            ]);
+        });
+
+        $this->app->singleton(CloudStorageManager::class, function ($app) {
+            return new CloudStorageManager($app->make(CloudProviderRegistry::class));
+        });
     }
 
     /**
@@ -38,10 +53,7 @@ class CloudStorageServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Storage::extend('google_drive', function ($app, $config) {
-            $client = new Client;
-            if (config('app.env') === 'local') {
-                $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
-            }
+            $client = $app->make(Client::class);
             $client->setClientId($config['client_id'] ?? config('services.google.client_id'));
             $client->setClientSecret($config['client_secret'] ?? config('services.google.client_secret'));
 
@@ -49,13 +61,18 @@ class CloudStorageServiceProvider extends ServiceProvider
                 $client->setAccessToken($config['credentials']);
 
                 if ($client->isAccessTokenExpired() && $client->getRefreshToken()) {
-                    $newAccessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                    $refreshToken = $client->getRefreshToken();
+                    $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
 
-                    if (isset($config['connection_id'])) {
+                    if (! isset($newAccessToken['error']) && isset($newAccessToken['access_token'], $config['connection_id'])) {
                         $connection = CloudConnection::find($config['connection_id']);
                         if ($connection) {
                             $connection->update([
-                                'credentials' => array_merge($connection->credentials, $newAccessToken),
+                                'credentials' => array_merge(
+                                    $connection->credentials,
+                                    ['refresh_token' => $connection->credentials['refresh_token'] ?? $refreshToken],
+                                    $newAccessToken,
+                                ),
                                 'last_synced_at' => now(),
                             ]);
                         }

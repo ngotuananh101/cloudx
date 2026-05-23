@@ -25,6 +25,29 @@ final class CloudProvider extends Enum
 
     const FTP = 5;
 
+    public function slug(): string
+    {
+        return match ($this->value) {
+            self::GOOGLE_DRIVE => 'google-drive',
+            self::ONEDRIVE => 'onedrive',
+            self::DROPBOX => 'dropbox',
+            self::AWS_S3 => 'aws-s3',
+            self::FTP => 'ftp',
+        };
+    }
+
+    public static function fromSlug(string $slug): ?self
+    {
+        return match ($slug) {
+            'google-drive' => self::GOOGLE_DRIVE(),
+            'onedrive' => self::ONEDRIVE(),
+            'dropbox' => self::DROPBOX(),
+            'aws-s3' => self::AWS_S3(),
+            'ftp' => self::FTP(),
+            default => null,
+        };
+    }
+
     public static function getDescription(mixed $value): string
     {
         return match ($value) {

@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
+use App\Services\CloudStorage\CloudStorageManager;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    public function __construct(private CloudStorageManager $cloudStorageManager) {}
+
     /**
      * Handle the incoming request.
      */
@@ -37,7 +40,31 @@ class HomeController extends Controller
 
         return inertia('dashboard', [
             'connections' => $connections,
+            'availableProviders' => $this->availableProviders(),
         ]);
+    }
+
+    /**
+     * @return array<int, array{key: string, label: string, value: int, icon: string, status: string, redirectUrl: string, capabilities: array{browse: bool, upload: bool, download: bool, delete: bool, createFolder: bool, share: bool}}>
+     */
+    public function availableProviders(): array
+    {
+        return collect($this->cloudStorageManager->connectors())
+            ->map(function ($connector): array {
+                $provider = $connector->provider();
+
+                return [
+                    'key' => $provider->slug(),
+                    'label' => $provider->description,
+                    'value' => $provider->value,
+                    'icon' => CloudProvider::getIcon($provider->value),
+                    'status' => 'active',
+                    'redirectUrl' => route('oauth.redirect', ['provider' => $provider->slug()]),
+                    'capabilities' => $connector->capabilities()->toArray(),
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**

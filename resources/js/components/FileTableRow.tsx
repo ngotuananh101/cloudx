@@ -7,22 +7,23 @@ import {
     FileVideo,
     FileAudio,
     File,
-    MoreHorizontal,
     Download,
     Trash2,
-    Share2
+    Share2,
 } from 'lucide-react';
+import type { CSSProperties, KeyboardEvent } from 'react';
+import { formatBytes } from '@/lib/format-bytes';
+import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { Button } from './ui/button';
 
-export interface FileItemProps {
-    id: string | number;
-    name: string;
-    type: 'folder' | 'document' | 'image' | 'code' | 'archive' | 'video' | 'audio' | 'other';
-    size: number;
-    updatedAt: string;
+interface FileTableRowProps {
+    item: CloudFile;
+    style: CSSProperties;
+    capabilities?: ProviderCapabilities;
+    onNavigate?: (item: CloudFile) => void;
 }
 
-export function FileTableRow({ item, style, onNavigate }: { item: FileItemProps; style: React.CSSProperties, onNavigate?: (item: FileItemProps) => void }) {
+export function FileTableRow({ item, style, capabilities, onNavigate }: FileTableRowProps) {
     const getIcon = () => {
         switch (item.type) {
             case 'folder': return <Folder className="h-4.5 w-4.5 text-blue-500 fill-blue-500/20" />;
@@ -36,12 +37,15 @@ export function FileTableRow({ item, style, onNavigate }: { item: FileItemProps;
         }
     };
 
-    const formatSize = (bytes: number) => {
-        if (bytes === 0) return '--';
-        const k = 1024;
-        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    const hasActions = Boolean(capabilities?.share || capabilities?.download || capabilities?.delete);
+
+    const handleFolderKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+        if (!item.isDirectory || (event.key !== 'Enter' && event.key !== ' ')) {
+            return;
+        }
+
+        event.preventDefault();
+        onNavigate?.(item);
     };
 
     return (
@@ -50,9 +54,12 @@ export function FileTableRow({ item, style, onNavigate }: { item: FileItemProps;
             className="group absolute top-0 left-0 flex h-14 w-full items-center border-b border-gray-50 bg-white px-6 transition-colors hover:bg-gray-50/80"
         >
             {/* Name Column */}
-            <div 
-                className={`flex flex-1 min-w-0 items-center gap-3 pr-4 ${item.type === 'folder' ? 'cursor-pointer' : ''}`}
-                onClick={() => item.type === 'folder' && onNavigate?.(item)}
+            <div
+                className={`flex min-w-0 flex-1 items-center gap-3 pr-4 ${item.isDirectory ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200' : ''}`}
+                onClick={() => item.isDirectory && onNavigate?.(item)}
+                onKeyDown={handleFolderKeyDown}
+                role={item.isDirectory ? 'button' : undefined}
+                tabIndex={item.isDirectory ? 0 : undefined}
             >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     {getIcon()}
@@ -64,7 +71,7 @@ export function FileTableRow({ item, style, onNavigate }: { item: FileItemProps;
 
             {/* Size Column */}
             <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500">
-                {item.type === 'folder' ? '--' : formatSize(item.size)}
+                {item.isDirectory ? '--' : formatBytes(item.size)}
             </div>
 
             {/* Type Column */}
@@ -79,20 +86,27 @@ export function FileTableRow({ item, style, onNavigate }: { item: FileItemProps;
 
             {/* Actions Column */}
             <div className="flex w-24 shrink-0 justify-end gap-1">
-                <div className="flex opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900">
-                        <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900">
-                        <Download className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-600">
-                        <Trash2 className="h-4 w-4" />
-                    </Button>
-                </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 opacity-100 group-hover:opacity-0 absolute right-6">
-                    <MoreHorizontal className="h-4 w-4" />
-                </Button>
+                {hasActions && (
+                    <>
+                        <div className="flex opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+                            {capabilities?.share && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900" aria-label={`Share ${item.name}`}>
+                                    <Share2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {capabilities?.download && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900" aria-label={`Download ${item.name}`}>
+                                    <Download className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {capabilities?.delete && (
+                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-600" aria-label={`Delete ${item.name}`}>
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );
