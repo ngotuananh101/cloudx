@@ -196,3 +196,54 @@ Use Wayfinder to generate TypeScript functions for Laravel routes. Import from `
 - IMPORTANT: Activate `inertia-react-development` when working with Inertia React client-side patterns.
 
 </laravel-boost-guidelines>
+
+## Project structure notes
+
+### Cloud storage backend
+
+- `app/Data/` contains small immutable DTOs shared by cloud storage features:
+  - `ConnectedAccountData` stores OAuth account details for persistence. Do not expose credentials via generic serialization.
+  - `CloudFileData` normalizes file/folder rows for Inertia props.
+  - `ProviderCapabilities` describes feature support per provider (`browse`, `upload`, `download`, `delete`, `createFolder`, `share`).
+- `app/Services/CloudStorage/` contains shared provider infrastructure:
+  - `CloudStorageManager` is the main service used by models/controllers to resolve connectors and disks.
+  - `CloudProviderRegistry` maps `CloudProvider` enum values to connector implementations.
+  - `CloudFileBrowser` centralizes path decoding, provider listing, Flysystem listing, file type detection, hidden-file filtering, and directory-first sorting.
+  - `PathEncoder` provides URL-safe base64 path encoding/decoding for storage browser routes.
+  - `CloudFileTypeDetector` maps folder/extensions to UI file types.
+- `app/Services/CloudStorage/Contracts/` defines provider extension points:
+  - `CloudProviderConnector` is required for every provider.
+  - `BrowsesCloudFiles` is optional for providers that list files directly without a Flysystem adapter.
+- `app/Services/CloudStorage/Connectors/` contains provider implementations:
+  - `GoogleDriveConnector` handles Google OAuth and Flysystem disk creation.
+  - `OneDriveConnector` handles Microsoft OAuth and Microsoft Graph listing/refresh directly.
+- Add future cloud providers by implementing `CloudProviderConnector`, registering it in `CloudStorageServiceProvider`, adding provider metadata in the dashboard controller flow, and adding tests for OAuth/capabilities/listing.
+
+### Cloud storage frontend
+
+- `resources/js/types/cloud.ts` contains shared TypeScript types for cloud providers, connections, capabilities, and files.
+- `resources/js/lib/cloud-path.ts` mirrors backend path encoding for browser navigation.
+- `resources/js/lib/format-bytes.ts` formats byte values for dashboards and file rows.
+- `resources/js/components/files/` contains reusable file browser UI:
+  - `FileBrowserHeader`
+  - `FileToolbar`
+  - `VirtualizedFileTable`
+  - `EmptyFileState`
+- `resources/js/components/FileTableRow.tsx` renders one virtualized cloud file/folder row with capability-gated actions.
+- `resources/js/components/cloud/` contains dashboard storage UI:
+  - `StorageOverviewCards`
+  - `ConnectStorageModal`
+  - `ProviderOption`
+  - `UsageSummary`
+  - `RecentActivityList`
+- `resources/js/pages/files/index.tsx` should stay thin: search state, navigation, and component composition only.
+- `resources/js/pages/dashboard.tsx` should stay thin: modal state, disconnect action, and component composition only.
+
+### Cloud storage tests
+
+- `tests/Feature/CloudStorageFoundationTest.php` covers DTOs/path/type helpers.
+- `tests/Feature/CloudProviderRegistryTest.php` covers registry and manager resolution.
+- `tests/Feature/CloudConnectionTest.php` covers generic OAuth routes/controller behavior and Google regressions.
+- `tests/Feature/OneDriveConnectorTest.php` covers Microsoft OAuth, token refresh, Graph listing, state validation, and HTTP safety.
+- `tests/Feature/StorageBrowserTest.php` covers storage browser ownership, Flysystem listing, direct provider listing, and Inertia props.
+- `tests/Feature/DashboardProviderMetadataTest.php` covers dashboard provider metadata and capabilities.
