@@ -124,6 +124,36 @@ it('lists files via a direct browsing connector with normalized metadata and sor
         ->and($files[1]['size'])->toBe(10);
 });
 
+it('lists one drive files through the flysystem disk path', function () {
+    Storage::fake('onedrive-test');
+    Storage::disk('onedrive-test')->put('Docs/readme.txt', 'contents');
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => 'OneDrive',
+        'provider' => CloudProvider::ONEDRIVE,
+        'credentials' => ['access_token' => 'token'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    $connector = Mockery::mock(CloudProviderConnector::class);
+
+    $manager = Mockery::mock(CloudStorageManager::class);
+    $manager->shouldReceive('connector')->once()->with(Mockery::on(
+        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::ONEDRIVE())
+    ))->andReturn($connector);
+    $manager->shouldReceive('disk')->once()->with($connection)->andReturn(Storage::disk('onedrive-test'));
+
+    $browser = new CloudFileBrowser($manager);
+
+    $files = $browser->list($connection, PathEncoder::encode('Docs'));
+
+    expect($files)->toHaveCount(1)
+        ->and($files[0]['path'])->toBe('Docs/readme.txt')
+        ->and($files[0]['name'])->toBe('readme.txt');
+});
+
 it('forbids non-owners from browsing a storage connection', function () {
     $owner = User::factory()->create();
     $user = User::factory()->create();

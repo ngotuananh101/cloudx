@@ -7,6 +7,8 @@ use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Connectors\GoogleDriveConnector;
 use App\Services\CloudStorage\Connectors\OneDriveConnector;
+use App\Services\OneDrive\OneDriveAdapter;
+use App\Services\OneDrive\OneDriveClient;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -52,6 +54,23 @@ class CloudStorageServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Storage::extend('onedrive', function ($app, array $config): FilesystemAdapter {
+            $connection = $config['connection'] ?? null;
+
+            if (! $connection instanceof CloudConnection) {
+                $connectionId = $config['connection_id'] ?? null;
+                $connection = CloudConnection::query()->findOrFail($connectionId);
+            }
+
+            $adapter = new OneDriveAdapter(new OneDriveClient($connection));
+
+            return new FilesystemAdapter(
+                new Filesystem($adapter),
+                $adapter,
+                $config
+            );
+        });
+
         Storage::extend('google_drive', function ($app, $config) {
             $client = $app->make(Client::class);
             $client->setClientId($config['client_id'] ?? config('services.google.client_id'));
