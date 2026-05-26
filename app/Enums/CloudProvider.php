@@ -39,7 +39,7 @@ final class CloudProvider extends Enum
     public static function fromSlug(string $slug): ?self
     {
         return match ($slug) {
-            'google-drive' => self::GOOGLE_DRIVE(),
+            'google', 'google-drive' => self::GOOGLE_DRIVE(),
             'onedrive' => self::ONEDRIVE(),
             'dropbox' => self::DROPBOX(),
             'aws-s3' => self::AWS_S3(),
