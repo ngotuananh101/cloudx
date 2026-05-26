@@ -6,13 +6,16 @@ import {
     HelpCircle,
     LogOut,
     Bell,
+    FolderPlus,
+    Search,
     Settings2,
-    Plus,
+    Upload,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { formatBytes } from '@/lib/format-bytes';
 import { index as storageIndex } from '@/routes/storage';
@@ -20,10 +23,21 @@ import { index as storageIndex } from '@/routes/storage';
 interface AuthenticatedLayoutProps {
     children: ReactNode;
     title?: string;
+    cloudSearch?: {
+        value: string;
+        onChange: (value: string) => void;
+        placeholder: string;
+    };
+    cloudActions?: {
+        canCreateFolder?: boolean;
+        canUpload?: boolean;
+    };
 }
 
 export default function AuthenticatedLayout({
     children,
+    cloudSearch,
+    cloudActions,
 }: AuthenticatedLayoutProps) {
     const { url, props } = usePage() as any;
     const auth = props.auth;
@@ -117,6 +131,28 @@ export default function AuthenticatedLayout({
                         )}
                     </div>
 
+                    {activeConnection && (cloudActions?.canCreateFolder || cloudActions?.canUpload) && (
+                        <div>
+                            <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
+                                CLOUD ACTIONS
+                            </div>
+                            <div className="space-y-2 px-3">
+                                {cloudActions?.canCreateFolder && (
+                                    <Button variant="outline" className="h-10 w-full justify-start rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700">
+                                        <FolderPlus className="h-4 w-4" />
+                                        New Folder
+                                    </Button>
+                                )}
+                                {cloudActions?.canUpload && (
+                                    <Button className="h-10 w-full justify-start rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]">
+                                        <Upload className="h-4 w-4" />
+                                        Upload
+                                    </Button>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
                     {/* System Section */}
                     <div>
                         <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
@@ -180,8 +216,22 @@ export default function AuthenticatedLayout({
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Navbar */}
                 <header className="flex h-[72px] w-full flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8">
-                    {/* Left: Page Title */}
-                    <div className="flex items-center gap-6"></div>
+                    <div className="flex min-w-0 flex-1 items-center gap-6">
+                        {cloudSearch && activeConnection && (
+                            <div className="relative w-full max-w-md">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                    <Search className="h-4 w-4 text-gray-400" />
+                                </div>
+                                <Input
+                                    type="text"
+                                    placeholder={cloudSearch.placeholder}
+                                    value={cloudSearch.value}
+                                    onChange={(event) => cloudSearch.onChange(event.target.value)}
+                                    className="h-11 w-full rounded-xl border-none bg-gray-50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
+                                />
+                            </div>
+                        )}
+                    </div>
 
                     {/* Right: Actions and User */}
                     <div className="flex items-center gap-4">

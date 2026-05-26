@@ -1,7 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
-import { FileToolbar } from '@/components/files/FileToolbar';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
@@ -39,20 +38,24 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
     };
 
     return (
-        <AuthenticatedLayout title="Files">
+        <AuthenticatedLayout
+            title="Files"
+            cloudSearch={{
+                value: searchQuery,
+                onChange: setSearchQuery,
+                placeholder: `Search in ${decodedPath ? decodedPath.split('/').pop() : 'My Files'}...`,
+            }}
+            cloudActions={{
+                canCreateFolder: connection.capabilities?.createFolder,
+                canUpload: connection.capabilities?.upload,
+            }}
+        >
             <Head title="Files & Folders" />
 
             <FileBrowserHeader connection={connection} decodedPath={decodedPath} onNavigateHome={handleNavigateHome} />
 
             <div className="grid grid-cols-1 gap-6">
                 <div className="min-w-0 space-y-4">
-                    <FileToolbar
-                        decodedPath={decodedPath}
-                        searchQuery={searchQuery}
-                        setSearchQuery={setSearchQuery}
-                        capabilities={connection.capabilities}
-                    />
-
                     <VirtualizedFileTable
                         files={filteredFiles}
                         searchQuery={searchQuery}
