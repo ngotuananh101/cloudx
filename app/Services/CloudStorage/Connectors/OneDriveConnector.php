@@ -12,6 +12,7 @@ use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
 use App\Services\OneDrive\OneDriveClient;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -59,9 +60,7 @@ class OneDriveConnector implements CloudProviderConnector, ReportsStorageQuota
             throw new RuntimeException('Microsoft authentication failed or was cancelled.');
         }
 
-        $token = Http::asForm()
-            ->connectTimeout(5)
-            ->timeout(10)
+        $token = $this->http()->asForm()
             ->retry([100, 250])
             ->post(self::TOKEN_URL, [
                 'client_id' => config('services.microsoft.client_id'),
@@ -79,17 +78,13 @@ class OneDriveConnector implements CloudProviderConnector, ReportsStorageQuota
 
         $token['expires_at'] = now()->addSeconds((int) ($token['expires_in'] ?? 3600))->timestamp;
 
-        $user = Http::withToken($token['access_token'])
-            ->connectTimeout(5)
-            ->timeout(10)
+        $user = $this->http()->withToken($token['access_token'])
             ->retry([100, 250])
             ->get('https://graph.microsoft.com/v1.0/me')
             ->throw()
             ->json();
 
-        $drive = Http::withToken($token['access_token'])
-            ->connectTimeout(5)
-            ->timeout(10)
+        $drive = $this->http()->withToken($token['access_token'])
             ->retry([100, 250])
             ->get('https://graph.microsoft.com/v1.0/me/drive')
             ->throw()
@@ -110,6 +105,13 @@ class OneDriveConnector implements CloudProviderConnector, ReportsStorageQuota
     private function stateSessionKey(): string
     {
         return 'oauth_state_onedrive';
+    }
+
+    private function http(): PendingRequest
+    {
+        $request = Http::connectTimeout(5)->timeout(10);
+
+        return app()->isLocal() ? $request->withoutVerifying() : $request;
     }
 
     public function disk(CloudConnection $connection): Filesystem

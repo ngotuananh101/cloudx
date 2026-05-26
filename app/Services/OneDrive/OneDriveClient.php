@@ -36,9 +36,7 @@ class OneDriveClient
             throw new RuntimeException('OneDrive refresh token is missing.');
         }
 
-        $token = Http::asForm()
-            ->connectTimeout(5)
-            ->timeout(10)
+        $token = $this->http()->asForm()
             ->retry([100, 250])
             ->post(self::TOKEN_URL, [
                 'client_id' => config('services.microsoft.client_id'),
@@ -195,7 +193,7 @@ class OneDriveClient
 
             $chunkLength = strlen($chunk);
             $end = $offset + $chunkLength - 1;
-            $response = Http::withHeaders([
+            $response = $this->http()->withHeaders([
                 'Content-Length' => (string) $chunkLength,
                 'Content-Range' => "bytes {$offset}-{$end}/{$size}",
             ])->withBody($chunk)->put($uploadUrl)->throw();
@@ -263,7 +261,7 @@ class OneDriveClient
         }
 
         for ($attempt = 0, $delay = 10000; $attempt < 5; $attempt++, $delay = min($delay * 2, 50000)) {
-            $monitor = Http::connectTimeout(5)->timeout(10)->get($monitorUrl)->throw()->json();
+            $monitor = $this->http()->get($monitorUrl)->throw()->json();
             $status = is_array($monitor) ? ($monitor['status'] ?? null) : null;
 
             if ($status === 'completed') {
@@ -354,10 +352,15 @@ class OneDriveClient
     {
         $credentials = $this->credentials();
 
-        return Http::withToken((string) ($credentials['access_token'] ?? ''))
-            ->connectTimeout(5)
-            ->timeout(10)
+        return $this->http()->withToken((string) ($credentials['access_token'] ?? ''))
             ->retry([100, 250], throw: false);
+    }
+
+    private function http(): PendingRequest
+    {
+        $request = Http::connectTimeout(5)->timeout(10);
+
+        return app()->isLocal() ? $request->withoutVerifying() : $request;
     }
 
     private function encodePath(string $path): string
