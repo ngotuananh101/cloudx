@@ -7,6 +7,7 @@ use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudFileBrowser;
+use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\BrowsesCloudFiles;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
@@ -41,7 +42,10 @@ it('lists Google Drive files via Flysystem with normalized metadata and sorting'
     $manager->shouldReceive('connector')->once()->with(Mockery::type(CloudProvider::class))->andReturn($connector);
     $manager->shouldReceive('disk')->once()->with($connection)->andReturn(Storage::disk('google-test'));
 
-    $browser = new CloudFileBrowser($manager);
+    $cache = Mockery::mock(CloudStorageCache::class);
+    $cache->shouldReceive('rememberFolderListing')->once()->andReturnUsing(fn (CloudConnection $connection, string $path, Closure $callback): array => $callback());
+
+    $browser = new CloudFileBrowser($manager, $cache);
 
     $files = $browser->list($connection, '');
 
@@ -111,7 +115,10 @@ it('lists files via a direct browsing connector with normalized metadata and sor
     ))->andReturn($connector);
     $manager->shouldNotReceive('disk');
 
-    $browser = new CloudFileBrowser($manager);
+    $cache = Mockery::mock(CloudStorageCache::class);
+    $cache->shouldReceive('rememberFolderListing')->once()->andReturnUsing(fn (CloudConnection $connection, string $path, Closure $callback): array => $callback());
+
+    $browser = new CloudFileBrowser($manager, $cache);
 
     $files = $browser->list($connection, PathEncoder::encode('Projects'));
 
@@ -145,7 +152,10 @@ it('lists one drive files through the flysystem disk path', function () {
     ))->andReturn($connector);
     $manager->shouldReceive('disk')->once()->with($connection)->andReturn(Storage::disk('onedrive-test'));
 
-    $browser = new CloudFileBrowser($manager);
+    $cache = Mockery::mock(CloudStorageCache::class);
+    $cache->shouldReceive('rememberFolderListing')->once()->andReturnUsing(fn (CloudConnection $connection, string $path, Closure $callback): array => $callback());
+
+    $browser = new CloudFileBrowser($manager, $cache);
 
     $files = $browser->list($connection, PathEncoder::encode('Docs'));
 
@@ -190,7 +200,7 @@ it('renders owner storage browser with capabilities and files', function () {
     $connector->shouldReceive('capabilities')->once()->andReturn(new ProviderCapabilities(true, true, false, false, true, false));
 
     $manager = Mockery::mock(CloudStorageManager::class);
-    $manager->shouldReceive('connector')->once()->with(Mockery::type(CloudProvider::class))->andReturn($connector);
+    $manager->shouldReceive('connector')->twice()->with(Mockery::type(CloudProvider::class))->andReturn($connector);
 
     $this->app->instance(CloudFileBrowser::class, $browser);
     $this->app->instance(CloudStorageManager::class, $manager);

@@ -31,6 +31,8 @@ interface AuthenticatedLayoutProps {
     cloudActions?: {
         canCreateFolder?: boolean;
         canUpload?: boolean;
+        onCreateFolder?: () => void;
+        onUpload?: () => void;
     };
 }
 
@@ -138,13 +140,22 @@ export default function AuthenticatedLayout({
                             </div>
                             <div className="space-y-2 px-3">
                                 {cloudActions?.canCreateFolder && (
-                                    <Button variant="outline" className="h-10 w-full justify-start rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={cloudActions.onCreateFolder}
+                                        className="h-10 w-full justify-start rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700"
+                                    >
                                         <FolderPlus className="h-4 w-4" />
                                         New Folder
                                     </Button>
                                 )}
                                 {cloudActions?.canUpload && (
-                                    <Button className="h-10 w-full justify-start rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]">
+                                    <Button
+                                        type="button"
+                                        onClick={cloudActions.onUpload}
+                                        className="h-10 w-full justify-start rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]"
+                                    >
                                         <Upload className="h-4 w-4" />
                                         Upload
                                     </Button>
