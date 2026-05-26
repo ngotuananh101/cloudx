@@ -9,7 +9,10 @@ use League\Flysystem\StorageAttributes;
 
 class CloudFileBrowser
 {
-    public function __construct(private CloudStorageManager $cloudStorage) {}
+    public function __construct(
+        private CloudStorageManager $cloudStorage,
+        private CloudStorageCache $cache,
+    ) {}
 
     /**
      * @return array<int, array{id: string, path: string, name: string, type: string, size: int|null, updatedAt: string|null, isDirectory: bool}>
@@ -17,10 +20,13 @@ class CloudFileBrowser
     public function list(CloudConnection $connection, string $encodedPath): array
     {
         $decodedPath = $this->decodedPath($encodedPath);
-        $connector = $this->cloudStorage->connector($connection->provider);
-        $files = $connector instanceof BrowsesCloudFiles
-            ? $this->listDirectProvider($connection, $decodedPath, $connector)
-            : $this->listFlysystem($connection, $decodedPath);
+        $files = $this->cache->rememberFolderListing($connection, $decodedPath, function () use ($connection, $decodedPath): array {
+            $connector = $this->cloudStorage->connector($connection->provider);
+
+            return $connector instanceof BrowsesCloudFiles
+                ? $this->listDirectProvider($connection, $decodedPath, $connector)
+                : $this->listFlysystem($connection, $decodedPath);
+        });
 
         usort($files, function (array $first, array $second): int {
             if ($first['isDirectory'] && ! $second['isDirectory']) {

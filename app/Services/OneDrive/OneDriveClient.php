@@ -116,6 +116,16 @@ class OneDriveClient
         return is_array($item) ? $item : null;
     }
 
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function drive(): ?array
+    {
+        $drive = $this->graph()->get(self::GRAPH_URL.'/me/drive')->throw()->json();
+
+        return is_array($drive) ? $drive : null;
+    }
+
     public function download(string $path): string
     {
         return $this->graph()->get($this->contentUrl($path))->throw()->body();

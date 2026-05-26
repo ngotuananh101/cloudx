@@ -2,11 +2,14 @@
 
 namespace App\Services\CloudStorage\Connectors;
 
+use App\Data\CloudStorageQuotaData;
 use App\Data\ConnectedAccountData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
+use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
+use App\Services\OneDrive\OneDriveClient;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -14,7 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 
-class OneDriveConnector implements CloudProviderConnector
+class OneDriveConnector implements CloudProviderConnector, ReportsStorageQuota
 {
     public const AUTHORIZE_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
 
@@ -126,6 +129,27 @@ class OneDriveConnector implements CloudProviderConnector
             delete: true,
             createFolder: true,
             share: false,
+        );
+    }
+
+    public function storageQuota(CloudConnection $connection): CloudStorageQuotaData
+    {
+        $drive = (new OneDriveClient($connection))->drive();
+        $quota = is_array($drive) ? ($drive['quota'] ?? null) : null;
+
+        if (! is_array($quota)) {
+            return CloudStorageQuotaData::unsupported();
+        }
+
+        $totalBytes = isset($quota['total']) ? (int) $quota['total'] : null;
+        $usedBytes = isset($quota['used']) ? (int) $quota['used'] : null;
+        $remainingBytes = isset($quota['remaining']) ? (int) $quota['remaining'] : null;
+
+        return new CloudStorageQuotaData(
+            totalBytes: $totalBytes,
+            usedBytes: $usedBytes,
+            remainingBytes: $remainingBytes,
+            usedPercent: $totalBytes > 0 && $usedBytes !== null ? round(($usedBytes / $totalBytes) * 100, 1) : null,
         );
     }
 }

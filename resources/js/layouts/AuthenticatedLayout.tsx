@@ -13,6 +13,8 @@ import type { ReactNode } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { formatBytes } from '@/lib/format-bytes';
 
 interface AuthenticatedLayoutProps {
     children: ReactNode;
@@ -26,6 +28,10 @@ export default function AuthenticatedLayout({
     const auth = props.auth;
     const user = auth?.user;
     const connections = user?.connections || [];
+    const pageConnection = props.connection as any;
+    const activeConnection = pageConnection?.storageQuota
+        ? pageConnection
+        : connections.find((connection: any) => url.startsWith(`/s/${connection.id}`));
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans text-gray-900 antialiased">
@@ -108,6 +114,29 @@ export default function AuthenticatedLayout({
                             </div>
                         )}
                     </div>
+
+                    {activeConnection?.storageQuota?.supported && (
+                        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-black tracking-widest text-gray-400">
+                                    STORAGE
+                                </span>
+                                <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-extrabold text-brand">
+                                    {activeConnection.storageQuota.usedPercent ?? 0}%
+                                </span>
+                            </div>
+                            <div className="truncate text-xs font-extrabold text-gray-900" title={activeConnection.name}>
+                                {activeConnection.name}
+                            </div>
+                            <div className="mt-3">
+                                <Progress value={activeConnection.storageQuota.usedPercent ?? 0} className="h-2 bg-gray-200 [&>div]:bg-brand" />
+                            </div>
+                            <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500">
+                                <span>{formatBytes(activeConnection.storageQuota.usedBytes || 0)} used</span>
+                                <span>{formatBytes(activeConnection.storageQuota.totalBytes || 0)}</span>
+                            </div>
+                        </div>
+                    )}
 
                     {/* System Section */}
                     <div>

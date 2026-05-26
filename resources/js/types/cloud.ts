@@ -17,10 +17,19 @@ export interface AvailableProvider {
     capabilities: ProviderCapabilities;
 }
 
+export interface CloudStorageQuota {
+    totalBytes: number | null;
+    usedBytes: number | null;
+    remainingBytes: number | null;
+    usedPercent: number | null;
+    supported: boolean;
+}
+
 export interface CloudConnection {
     id: number;
     name: string;
     provider: string;
+    provider_label?: string;
     provider_value?: number;
     provider_icon?: string;
     status?: string;
@@ -30,6 +39,7 @@ export interface CloudConnection {
     used_formatted?: string;
     total_formatted?: string;
     percent?: number;
+    storageQuota?: CloudStorageQuota;
     capabilities?: ProviderCapabilities;
 }
 

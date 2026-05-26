@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudFileBrowser;
 use App\Services\CloudStorage\CloudStorageManager;
+use App\Services\CloudStorage\CloudStorageQuota;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,6 +17,7 @@ class StorageBrowserController extends Controller
     public function __construct(
         private CloudFileBrowser $fileBrowser,
         private CloudStorageManager $cloudStorage,
+        private CloudStorageQuota $storageQuota,
     ) {}
 
     public function index(CloudConnection $connection, string $path = ''): Response
@@ -43,7 +46,10 @@ class StorageBrowserController extends Controller
                 'id' => $connection->id,
                 'name' => $connection->name,
                 'provider' => $connection->provider->value,
+                'provider_label' => $connection->provider->description,
+                'provider_icon' => CloudProvider::getIcon($connection->provider->value),
                 'capabilities' => $connector->capabilities()->toArray(),
+                'storageQuota' => $this->storageQuota->get($connection),
             ],
             'currentPath' => $path,
             'decodedPath' => $decodedPath,

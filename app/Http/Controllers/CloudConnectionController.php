@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
+use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\CloudStorageManager;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,7 +13,10 @@ use Throwable;
 
 class CloudConnectionController extends Controller
 {
-    public function __construct(private CloudStorageManager $cloudStorage) {}
+    public function __construct(
+        private CloudStorageManager $cloudStorage,
+        private CloudStorageCache $cache,
+    ) {}
 
     public function redirect(string $provider): RedirectResponse
     {
@@ -69,6 +73,7 @@ class CloudConnectionController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
+        $this->cache->flushConnection($connection);
         $connection->delete();
 
         return redirect()->route('dashboard')->with('success', 'Successfully disconnected '.$connection->name);
