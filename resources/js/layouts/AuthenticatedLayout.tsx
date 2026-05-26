@@ -15,6 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { formatBytes } from '@/lib/format-bytes';
+import { index as storageIndex } from '@/routes/storage';
 
 interface AuthenticatedLayoutProps {
     children: ReactNode;
@@ -31,7 +32,7 @@ export default function AuthenticatedLayout({
     const pageConnection = props.connection as any;
     const activeConnection = pageConnection?.storageQuota
         ? pageConnection
-        : connections.find((connection: any) => url.startsWith(`/s/${connection.id}`));
+        : connections.find((connection: any) => url.startsWith(storageIndex.url({ connection: connection.id })));
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans text-gray-900 antialiased">
@@ -80,11 +81,12 @@ export default function AuthenticatedLayout({
                         {connections && connections.length > 0 ? (
                             <ul className="space-y-1">
                                 {connections.map((connection: any) => {
-                                    const isActive = url.startsWith(`/s/${connection.id}`);
+                                    const storageUrl = storageIndex.url({ connection: connection.id });
+                                    const isActive = url.startsWith(storageUrl);
 
                                     return (
                                         <li key={connection.id}>
-                                            <Link href={`/s/${connection.id}`} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+                                            <Link href={storageUrl} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
                                                 {isActive && <div className="absolute top-1/2 left-0 h-6 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
                                                 <div className="flex items-center gap-3 truncate">
                                                     {connection.provider_icon?.endsWith('.svg') ? (

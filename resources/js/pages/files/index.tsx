@@ -6,6 +6,7 @@ import { StorageQuotaPanel } from '@/components/files/StorageQuotaPanel';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
+import { index as storageIndex } from '@/routes/storage';
 import type { CloudConnection, CloudFile } from '@/types/cloud';
 
 interface FileBrowserProps {
@@ -31,11 +32,11 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         }
 
         const encodedPath = encodeCloudPath(file.path);
-        router.visit(`/s/${connection.id}/${encodedPath}`);
+        router.visit(storageIndex.url({ connection: connection.id, path: encodedPath }));
     };
 
     const handleNavigateHome = () => {
-        router.visit(`/s/${connection.id}`);
+        router.visit(storageIndex.url({ connection: connection.id }));
     };
 
     return (
