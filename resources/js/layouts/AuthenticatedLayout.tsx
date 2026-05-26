@@ -117,29 +117,6 @@ export default function AuthenticatedLayout({
                         )}
                     </div>
 
-                    {activeConnection?.storageQuota?.supported && (
-                        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
-                            <div className="mb-2 flex items-center justify-between gap-2">
-                                <span className="text-[10px] font-black tracking-widest text-gray-400">
-                                    STORAGE
-                                </span>
-                                <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-extrabold text-brand">
-                                    {activeConnection.storageQuota.usedPercent ?? 0}%
-                                </span>
-                            </div>
-                            <div className="truncate text-xs font-extrabold text-gray-900" title={activeConnection.name}>
-                                {activeConnection.name}
-                            </div>
-                            <div className="mt-3">
-                                <Progress value={activeConnection.storageQuota.usedPercent ?? 0} className="h-2 bg-gray-200 [&>div]:bg-brand" />
-                            </div>
-                            <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500">
-                                <span>{formatBytes(activeConnection.storageQuota.usedBytes || 0)} used</span>
-                                <span>{formatBytes(activeConnection.storageQuota.totalBytes || 0)}</span>
-                            </div>
-                        </div>
-                    )}
-
                     {/* System Section */}
                     <div>
                         <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
@@ -157,18 +134,29 @@ export default function AuthenticatedLayout({
                             </li>
                         </ul>
                     </div>
-
-                    {/* Add New Cloud Button */}
-                    <div className="pt-2">
-                        <Button className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#bd1e24] text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]">
-                            <Plus className="h-4 w-4" strokeWidth={2.5} />
-                            ADD NEW CLOUD
-                        </Button>
-                    </div>
                 </div>
 
                 {/* Sidebar Footer */}
                 <div className="space-y-1 border-t border-gray-100 p-4">
+                    {activeConnection?.storageQuota?.supported && (
+                        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                            <div className="mb-2 flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-black tracking-widest text-gray-400">
+                                    STORAGE
+                                </span>
+                                <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-extrabold text-brand">
+                                    {activeConnection.storageQuota.usedPercent ?? 0}%
+                                </span>
+                            </div>
+                            <div className="mt-3">
+                                <Progress value={activeConnection.storageQuota.usedPercent ?? 0} className="h-2 bg-gray-200 [&>div]:bg-brand" />
+                            </div>
+                            <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500">
+                                <span>{formatBytes(activeConnection.storageQuota.usedBytes || 0)} used</span>
+                                <span>{formatBytes(activeConnection.storageQuota.totalBytes || 0)}</span>
+                            </div>
+                        </div>
+                    )}
                     <a
                         href="#"
                         className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
