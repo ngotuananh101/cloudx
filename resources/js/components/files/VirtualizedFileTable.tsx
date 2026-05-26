@@ -22,7 +22,7 @@ export function VirtualizedFileTable({ files, searchQuery, capabilities, onNavig
     });
 
     return (
-        <div className="flex h-[calc(100vh-280px)] min-h-[400px] flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+        <div className="flex h-[calc(100vh-180px)] min-h-[400px] flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
             <div className="flex items-center border-b border-gray-100 bg-gray-50/50 py-3 pr-6 pl-6 text-[11px] font-extrabold tracking-wider text-gray-400">
                 <div className="flex-1 pr-4">NAME</div>
                 <div className="w-32 shrink-0 pr-4">SIZE</div>
