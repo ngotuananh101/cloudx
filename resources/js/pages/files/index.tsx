@@ -2,7 +2,6 @@ import { Head, router } from '@inertiajs/react';
 import { useMemo, useState } from 'react';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { FileToolbar } from '@/components/files/FileToolbar';
-import { StorageQuotaPanel } from '@/components/files/StorageQuotaPanel';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
@@ -45,7 +44,7 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
 
             <FileBrowserHeader connection={connection} decodedPath={decodedPath} onNavigateHome={handleNavigateHome} />
 
-            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div className="grid grid-cols-1 gap-6">
                 <div className="min-w-0 space-y-4">
                     <FileToolbar
                         decodedPath={decodedPath}
@@ -61,8 +60,6 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
                         onNavigate={handleNavigate}
                     />
                 </div>
-
-                <StorageQuotaPanel connection={connection} currentPath={decodedPath} />
             </div>
 
             <style dangerouslySetInnerHTML={{__html: `
