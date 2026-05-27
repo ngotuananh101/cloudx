@@ -102,8 +102,8 @@ export default function AuthenticatedLayout({
 
                                     return (
                                         <li key={connection.id}>
-                                            <Link href={storageUrl} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
-                                                {isActive && <div className="absolute top-1/2 left-0 h-6 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
+                                            <Link href={storageUrl} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-3 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
+                                                {isActive && <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
                                                 <div className="flex items-center gap-3 truncate">
                                                     {connection.provider_icon?.endsWith('.svg') ? (
                                                         <img
@@ -144,7 +144,7 @@ export default function AuthenticatedLayout({
                                         type="button"
                                         variant="outline"
                                         onClick={cloudActions.onCreateFolder}
-                                        className="h-10 w-full justify-start rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700"
+                                        className="h-10 w-full justify-center rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700"
                                     >
                                         <FolderPlus className="h-4 w-4" />
                                         New Folder
@@ -154,7 +154,7 @@ export default function AuthenticatedLayout({
                                     <Button
                                         type="button"
                                         onClick={cloudActions.onUpload}
-                                        className="h-10 w-full justify-start rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]"
+                                        className="h-10 w-full justify-center rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]"
                                     >
                                         <Upload className="h-4 w-4" />
                                         Upload
