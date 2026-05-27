@@ -76,7 +76,7 @@ export default function ConnectionActionsMenu({ connection, onEditName, onDelete
                         }}
                     >
                         <Trash2 className="h-4 w-4" />
-                        Xoá connection
+                        Delete connection
                     </DropdownMenuItem>
                 )}
             </DropdownMenuContent>

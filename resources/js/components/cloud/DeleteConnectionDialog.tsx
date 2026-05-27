@@ -33,7 +33,7 @@ export default function DeleteConnectionDialog({ connection, onClose }: DeleteCo
         <AlertDialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Xoá connection?</AlertDialogTitle>
+                    <AlertDialogTitle>Delete connection?</AlertDialogTitle>
                     <AlertDialogDescription>
                         This will remove {connection?.name} from your connected storage list. You can reconnect it later through OAuth.
                     </AlertDialogDescription>
@@ -41,7 +41,7 @@ export default function DeleteConnectionDialog({ connection, onClose }: DeleteCo
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction className="bg-red-600 text-white hover:bg-red-700" onClick={deleteConnection}>
-                        Xoá connection
+                        Delete connection
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
