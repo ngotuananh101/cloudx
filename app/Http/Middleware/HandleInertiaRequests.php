@@ -56,6 +56,7 @@ class HandleInertiaRequests extends Middleware
                                 'provider_icon' => CloudProvider::getIcon($connection->provider->value),
                                 'status' => $connection->status->description,
                                 'status_value' => $connection->status->value,
+                                'actions' => $connection->actions(),
                             ];
                         }),
                 ] : null,

@@ -11,14 +11,19 @@ import {
     Settings2,
     Upload,
 } from 'lucide-react';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
+import ConnectionNavItem from '@/components/cloud/ConnectionNavItem';
+import DeleteConnectionDialog from '@/components/cloud/DeleteConnectionDialog';
+import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import { formatBytes } from '@/lib/format-bytes';
 import { index as storageIndex } from '@/routes/storage';
+import type { CloudConnection } from '@/types/cloud';
 
 interface AuthenticatedLayoutProps {
     children: ReactNode;
@@ -48,7 +53,9 @@ export default function AuthenticatedLayout({
     const pageConnection = props.connection as any;
     const activeConnection = pageConnection?.storageQuota
         ? pageConnection
-        : connections.find((connection: any) => url.startsWith(storageIndex.url({ connection: connection.id })));
+        : connections.find((connection: CloudConnection) => url.startsWith(storageIndex.url({ connection: connection.id })));
+    const [connectionBeingRenamed, setConnectionBeingRenamed] = useState<CloudConnection | null>(null);
+    const [connectionBeingDeleted, setConnectionBeingDeleted] = useState<CloudConnection | null>(null);
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans text-gray-900 antialiased">
@@ -96,33 +103,19 @@ export default function AuthenticatedLayout({
                         </div>
                         {connections && connections.length > 0 ? (
                             <ul className="space-y-1">
-                                {connections.map((connection: any) => {
+                                {connections.map((connection: CloudConnection) => {
                                     const storageUrl = storageIndex.url({ connection: connection.id });
                                     const isActive = url.startsWith(storageUrl);
 
                                     return (
-                                        <li key={connection.id}>
-                                            <Link href={storageUrl} className={`group relative flex cursor-pointer items-center justify-between rounded-lg px-3 py-3 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}>
-                                                {isActive && <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
-                                                <div className="flex items-center gap-3 truncate">
-                                                    {connection.provider_icon?.endsWith('.svg') ? (
-                                                        <img
-                                                            src={connection.provider_icon}
-                                                            className="h-4.5 w-4.5 shrink-0"
-                                                            alt={connection.name}
-                                                        />
-                                                    ) : (
-                                                        <Cloud className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-brand' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                                                    )}
-                                                    <span
-                                                        className={`truncate font-bold ${isActive ? 'text-brand' : 'text-gray-700'}`}
-                                                        title={connection.name}
-                                                    >
-                                                        {connection.name}
-                                                    </span>
-                                                </div>
-                                            </Link>
-                                        </li>
+                                        <ConnectionNavItem
+                                            key={connection.id}
+                                            connection={connection}
+                                            href={storageUrl}
+                                            isActive={isActive}
+                                            onEditName={setConnectionBeingRenamed}
+                                            onDelete={setConnectionBeingDeleted}
+                                        />
                                     );
                                 })}
                             </ul>
@@ -278,6 +271,14 @@ export default function AuthenticatedLayout({
                     <div className="mx-auto max-w-7xl">{children}</div>
                 </main>
             </div>
+            <EditConnectionNameDialog
+                connection={connectionBeingRenamed}
+                onClose={() => setConnectionBeingRenamed(null)}
+            />
+            <DeleteConnectionDialog
+                connection={connectionBeingDeleted}
+                onClose={() => setConnectionBeingDeleted(null)}
+            />
         </div>
     );
 }

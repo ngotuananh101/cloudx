@@ -22,7 +22,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Cloud Connections OAuth Flow
     Route::get('/oauth/{provider}/redirect', [CloudConnectionController::class, 'redirect'])->name('oauth.redirect');
     Route::get('/oauth/{provider}/callback', [CloudConnectionController::class, 'callback'])->name('oauth.callback');
+    Route::get('/connections/{connection}/reconnect', [CloudConnectionController::class, 'reconnect'])->name('cloud-connections.reconnect');
     Route::delete('/connections/{connection}', [CloudConnectionController::class, 'disconnect'])->name('cloud-connections.destroy');
+    Route::patch('/connections/{connection}/name', [CloudConnectionController::class, 'updateName'])->name('cloud-connections.name.update');
     Route::delete('/connections/{connection}/cache', [CloudConnectionCacheController::class, 'destroy'])->name('cloud-connections.cache.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
 

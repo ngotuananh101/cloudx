@@ -257,7 +257,7 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
                     <form onSubmit={createFolder} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-black text-gray-900">Create folder</h2>
+                                <h2 className="text-lg font-bold text-gray-900">Create folder</h2>
                                 <p className="mt-1 text-sm font-medium text-gray-500">Add a new folder in the current cloud path.</p>
                             </div>
                             <Button type="button" variant="ghost" size="icon" onClick={() => setIsCreateFolderOpen(false)}>

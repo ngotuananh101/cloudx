@@ -60,6 +60,42 @@ class CloudConnection extends Model
         return $this->hasMany(CloudTask::class);
     }
 
+    public function canReconnect(): bool
+    {
+        return in_array($this->provider->value, [
+            CloudProvider::GOOGLE_DRIVE,
+            CloudProvider::ONEDRIVE,
+        ], true);
+    }
+
+    public function canEditName(): bool
+    {
+        return $this->canReconnect();
+    }
+
+    public function canEditConnection(): bool
+    {
+        return false;
+    }
+
+    public function canDelete(): bool
+    {
+        return true;
+    }
+
+    /**
+     * @return array{canReconnect: bool, canEditName: bool, canEditConnection: bool, canDelete: bool}
+     */
+    public function actions(): array
+    {
+        return [
+            'canReconnect' => $this->canReconnect(),
+            'canEditName' => $this->canEditName(),
+            'canEditConnection' => $this->canEditConnection(),
+            'canDelete' => $this->canDelete(),
+        ];
+    }
+
     /**
      * Get the dynamically built Flysystem disk for this connection.
      */

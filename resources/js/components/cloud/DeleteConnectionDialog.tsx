@@ -1,0 +1,50 @@
+import { router } from '@inertiajs/react';
+import { disconnect } from '@/actions/App/Http/Controllers/CloudConnectionController';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import type { CloudConnection } from '@/types/cloud';
+
+interface DeleteConnectionDialogProps {
+    connection: CloudConnection | null;
+    onClose: () => void;
+}
+
+export default function DeleteConnectionDialog({ connection, onClose }: DeleteConnectionDialogProps) {
+    const deleteConnection = () => {
+        if (!connection) {
+            return;
+        }
+
+        router.delete(disconnect.url(connection), {
+            preserveScroll: true,
+            onFinish: onClose,
+        });
+    };
+
+    return (
+        <AlertDialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Xoá connection?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will remove {connection?.name} from your connected storage list. You can reconnect it later through OAuth.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="bg-red-600 text-white hover:bg-red-700" onClick={deleteConnection}>
+                        Xoá connection
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+}

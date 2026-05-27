@@ -25,6 +25,13 @@ export interface CloudStorageQuota {
     supported: boolean;
 }
 
+export interface CloudConnectionActions {
+    canReconnect: boolean;
+    canEditName: boolean;
+    canEditConnection: boolean;
+    canDelete: boolean;
+}
+
 export interface CloudConnection {
     id: number;
     name: string;
@@ -41,6 +48,7 @@ export interface CloudConnection {
     percent?: number;
     storageQuota?: CloudStorageQuota;
     capabilities?: ProviderCapabilities;
+    actions?: CloudConnectionActions;
 }
 
 export interface CloudFile {
