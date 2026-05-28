@@ -68,7 +68,7 @@ export function FileTableRow({
     return (
         <div
             style={style}
-            className="group absolute top-0 left-0 flex h-14 w-full items-center border-b border-gray-50 bg-white px-6 transition-colors hover:bg-gray-50/80"
+            className="group absolute top-0 left-0 flex h-12 w-full items-center border-b border-gray-50 bg-white px-6 transition-colors hover:bg-gray-50/80"
         >
             {/* Name Column */}
             <div
@@ -81,7 +81,7 @@ export function FileTableRow({
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
                     {getIcon()}
                 </div>
-                <span className="truncate text-sm font-semibold text-gray-900 transition-colors group-hover:text-blue-600">
+                <span className="truncate text-sm font-medium text-gray-900 transition-colors group-hover:text-blue-600">
                     {item.name}
                 </span>
             </div>
