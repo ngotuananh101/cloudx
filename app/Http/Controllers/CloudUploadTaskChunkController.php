@@ -7,6 +7,8 @@ use App\Enums\CloudTaskType;
 use App\Jobs\UploadCloudTaskFileJob;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
+use App\Support\CloudUploadTaskBroadcaster;
+use App\Support\CloudUploadTaskData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +17,8 @@ use Illuminate\Validation\ValidationException;
 
 class CloudUploadTaskChunkController extends Controller
 {
+    public function __construct(private readonly CloudUploadTaskBroadcaster $broadcaster) {}
+
     public function store(Request $request, CloudConnection $connection, CloudTask $task): JsonResponse
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
@@ -63,6 +67,12 @@ class CloudUploadTaskChunkController extends Controller
         DB::transaction(function () use ($task, $index, $chunk, $validated): void {
             $lockedTask = CloudTask::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
 
+            if (! $lockedTask->status->in([CloudTaskStatus::Pending(), CloudTaskStatus::Uploading(), CloudTaskStatus::Paused()])) {
+                throw ValidationException::withMessages([
+                    'chunk' => 'This upload task can no longer receive chunks.',
+                ]);
+            }
+
             $lockedTask->chunks()->updateOrCreate([
                 'index' => $index,
             ], [
@@ -83,7 +93,7 @@ class CloudUploadTaskChunkController extends Controller
                         'queued_at' => now(),
                     ])->save();
 
-                    UploadCloudTaskFileJob::dispatch($lockedTask->id);
+                    UploadCloudTaskFileJob::dispatch($lockedTask->id)->afterCommit();
                 }
 
                 return;
@@ -102,13 +112,13 @@ class CloudUploadTaskChunkController extends Controller
 
         $task->refresh()->load('chunks');
 
-        return response()->json([
-            'id' => $task->id,
-            'status' => $task->status->description,
-            'status_value' => $task->status->value,
-            'payload' => $task->payload,
-            'uploaded_chunks' => $task->chunks->pluck('index')->values()->all(),
-        ]);
+        if ($task->status->is(CloudTaskStatus::Queued())) {
+            $this->broadcaster->broadcastStatus($task);
+        } else {
+            $this->broadcaster->broadcastProgressIfNeeded($task);
+        }
+
+        return response()->json(CloudUploadTaskData::fromTask($task));
     }
 
     private function chunkPath(CloudTask $task, int $index): string

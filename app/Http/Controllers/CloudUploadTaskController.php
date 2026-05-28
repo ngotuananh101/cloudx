@@ -6,12 +6,17 @@ use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
+use App\Support\CloudUploadTaskBroadcaster;
+use App\Support\CloudUploadTaskData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CloudUploadTaskController extends Controller
 {
+    public function __construct(private readonly CloudUploadTaskBroadcaster $broadcaster) {}
+
     public function index(Request $request, CloudConnection $connection): JsonResponse
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
@@ -21,7 +26,7 @@ class CloudUploadTaskController extends Controller
             ->latest()
             ->limit(20)
             ->get()
-            ->map(fn (CloudTask $task): array => $this->taskData($task))
+            ->map(fn (CloudTask $task): array => CloudUploadTaskData::fromTask($task))
             ->all();
 
         return response()->json(['tasks' => $tasks]);
@@ -68,14 +73,16 @@ class CloudUploadTaskController extends Controller
             ],
         ]);
 
-        return response()->json($this->taskData($task));
+        $this->broadcaster->broadcastStatus($task);
+
+        return response()->json(CloudUploadTaskData::fromTask($task));
     }
 
     public function show(Request $request, CloudConnection $connection, CloudTask $task): JsonResponse
     {
         $this->authorizeTask($request, $connection, $task);
 
-        return response()->json($this->taskData($task->load('chunks')));
+        return response()->json(CloudUploadTaskData::fromTask($task->load('chunks')));
     }
 
     public function pause(Request $request, CloudConnection $connection, CloudTask $task): JsonResponse
@@ -84,9 +91,10 @@ class CloudUploadTaskController extends Controller
 
         if ($task->status->in([CloudTaskStatus::Pending(), CloudTaskStatus::Uploading()])) {
             $task->forceFill(['status' => CloudTaskStatus::Paused()])->save();
+            $this->broadcaster->broadcastStatus($task);
         }
 
-        return response()->json($this->taskData($task));
+        return response()->json(CloudUploadTaskData::fromTask($task));
     }
 
     public function resume(Request $request, CloudConnection $connection, CloudTask $task): JsonResponse
@@ -95,21 +103,44 @@ class CloudUploadTaskController extends Controller
 
         if ($task->status->is(CloudTaskStatus::Paused())) {
             $task->forceFill(['status' => CloudTaskStatus::Uploading()])->save();
+            $this->broadcaster->broadcastStatus($task);
         }
 
-        return response()->json($this->taskData($task->load('chunks')));
+        return response()->json(CloudUploadTaskData::fromTask($task->load('chunks')));
     }
 
     public function destroy(Request $request, CloudConnection $connection, CloudTask $task): JsonResponse
     {
         $this->authorizeTask($request, $connection, $task);
 
-        $task->forceFill([
-            'status' => CloudTaskStatus::Cancelled(),
-            'cancelled_at' => now(),
-        ])->save();
+        [$task, $wasCancelled] = DB::transaction(function () use ($task): array {
+            $lockedTask = CloudTask::query()
+                ->whereKey($task->getKey())
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        return response()->json($this->taskData($task));
+            if (! $lockedTask->status->in([
+                CloudTaskStatus::Pending(),
+                CloudTaskStatus::Uploading(),
+                CloudTaskStatus::Paused(),
+                CloudTaskStatus::Queued(),
+            ])) {
+                return [$lockedTask->load('chunks'), false];
+            }
+
+            $lockedTask->forceFill([
+                'status' => CloudTaskStatus::Cancelled(),
+                'cancelled_at' => now(),
+            ])->save();
+
+            return [$lockedTask->refresh()->load('chunks'), true];
+        });
+
+        if ($wasCancelled) {
+            $this->broadcaster->broadcastStatus($task);
+        }
+
+        return response()->json(CloudUploadTaskData::fromTask($task));
     }
 
     private function authorizeTask(Request $request, CloudConnection $connection, CloudTask $task): void
@@ -117,21 +148,5 @@ class CloudUploadTaskController extends Controller
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
         abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
         abort_if(! $task->type->is(CloudTaskType::Upload()), 404);
-    }
-
-    private function taskData(CloudTask $task): array
-    {
-        return [
-            'id' => $task->id,
-            'name' => $task->name,
-            'type' => $task->type->description,
-            'status' => $task->status->description,
-            'status_value' => $task->status->value,
-            'target_path' => $task->target_path,
-            'payload' => $task->payload,
-            'result' => $task->result,
-            'error_message' => $task->error_message,
-            'uploaded_chunks' => $task->relationLoaded('chunks') ? $task->chunks->pluck('index')->values()->all() : [],
-        ];
     }
 }
