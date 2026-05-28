@@ -9,76 +9,21 @@ import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
+import { requestJson } from '@/lib/request-json';
 import connections from '@/routes/connections';
 import { index as storageIndex } from '@/routes/storage';
-import type { CloudConnection, CloudFile } from '@/types/cloud';
+import type {
+    CloudConnection,
+    CloudFile,
+    CloudUploadTask,
+    UploadQueueItem,
+} from '@/types/cloud';
 
 interface FileBrowserProps {
     connection: CloudConnection;
     decodedPath: string;
     files: CloudFile[];
 }
-
-interface UploadTask {
-    id: number;
-    name: string;
-    status: string;
-    status_value: number;
-    payload: {
-        chunk_size: number;
-        total_chunks: number;
-        uploaded_chunks_count: number;
-    };
-    uploaded_chunks: number[];
-}
-
-interface UploadQueueItem {
-    key: string;
-    file: File;
-    task?: UploadTask;
-    progress: number;
-    status:
-        | 'pending'
-        | 'uploading'
-        | 'paused'
-        | 'queued'
-        | 'completed'
-        | 'failed'
-        | 'cancelled';
-    error?: string;
-}
-
-const csrfToken = () => {
-    const cookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-
-    return cookie ? decodeURIComponent(cookie) : '';
-};
-
-const requestJson = async <T,>(
-    url: string,
-    options: RequestInit = {},
-): Promise<T> => {
-    const response = await fetch(url, {
-        ...options,
-        headers: {
-            Accept: 'application/json',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-XSRF-TOKEN': csrfToken(),
-            ...(options.headers || {}),
-        },
-    });
-
-    if (!response.ok) {
-        const payload = await response.json().catch(() => null);
-
-        throw new Error(payload?.message || 'Request failed.');
-    }
-
-    return response.json();
-};
 
 export default function FileBrowser({
     connection,
@@ -136,7 +81,7 @@ export default function FileBrowser({
     const uploadFile = async (
         key: string,
         file: File,
-        existingTask?: UploadTask,
+        existingTask?: CloudUploadTask,
     ) => {
         try {
             updateUploadItem(key, {
@@ -147,7 +92,7 @@ export default function FileBrowser({
 
             const task =
                 existingTask ||
-                (await requestJson<UploadTask>(
+                (await requestJson<CloudUploadTask>(
                     connections.uploadTasks.store({ connection: connection.id })
                         .url,
                     {
@@ -193,7 +138,7 @@ export default function FileBrowser({
                 );
                 formData.append('index', String(index));
 
-                const updatedTask = await requestJson<UploadTask>(
+                const updatedTask = await requestJson<CloudUploadTask>(
                     connections.uploadTasks.chunks.store({
                         connection: connection.id,
                         task: task.id,
@@ -238,6 +183,8 @@ export default function FileBrowser({
         const queueItems = selectedFiles.map((file) => ({
             key: `${file.name}-${file.size}-${file.lastModified}`,
             file,
+            connectionId: connection.id,
+            path: decodedPath,
             progress: 0,
             status: 'pending' as const,
         }));
@@ -250,7 +197,7 @@ export default function FileBrowser({
         pausedUploads.current.add(item.key);
 
         if (item.task) {
-            await requestJson<UploadTask>(
+            await requestJson<CloudUploadTask>(
                 connections.uploadTasks.pause({
                     connection: connection.id,
                     task: item.task.id,
@@ -268,7 +215,7 @@ export default function FileBrowser({
         }
 
         pausedUploads.current.delete(item.key);
-        const task = await requestJson<UploadTask>(
+        const task = await requestJson<CloudUploadTask>(
             connections.uploadTasks.resume({
                 connection: connection.id,
                 task: item.task.id,
@@ -283,7 +230,7 @@ export default function FileBrowser({
         pausedUploads.current.add(item.key);
 
         if (item.task) {
-            await requestJson<UploadTask>(
+            await requestJson<CloudUploadTask>(
                 connections.uploadTasks.destroy({
                     connection: connection.id,
                     task: item.task.id,
