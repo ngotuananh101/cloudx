@@ -1,4 +1,10 @@
-import { MoreHorizontal, Pencil, RefreshCw, Settings2, Trash2 } from 'lucide-react';
+import {
+    MoreHorizontal,
+    Pencil,
+    RefreshCw,
+    Settings2,
+    Trash2,
+} from 'lucide-react';
 import { reconnect } from '@/actions/App/Http/Controllers/CloudConnectionController';
 import { Button } from '@/components/ui/button';
 import {
@@ -16,10 +22,20 @@ interface ConnectionActionsMenuProps {
     onDelete: (connection: CloudConnection) => void;
 }
 
-export default function ConnectionActionsMenu({ connection, onEditName, onDelete }: ConnectionActionsMenuProps) {
+export default function ConnectionActionsMenu({
+    connection,
+    onEditName,
+    onDelete,
+}: ConnectionActionsMenuProps) {
     const actions = connection.actions;
 
-    if (!actions || (!actions.canReconnect && !actions.canEditName && !actions.canEditConnection && !actions.canDelete)) {
+    if (
+        !actions ||
+        (!actions.canReconnect &&
+            !actions.canEditName &&
+            !actions.canEditConnection &&
+            !actions.canDelete)
+    ) {
         return null;
     }
 
@@ -30,7 +46,7 @@ export default function ConnectionActionsMenu({ connection, onEditName, onDelete
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 shrink-0 rounded-lg text-gray-400 opacity-0 transition-opacity hover:bg-white/70 hover:text-gray-700 group-hover:opacity-100 data-[state=open]:bg-white/70 data-[state=open]:opacity-100"
+                    className="h-7 w-7 shrink-0 rounded-lg text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white/70 hover:text-gray-700 data-[state=open]:bg-white/70 data-[state=open]:opacity-100"
                     aria-label={`Open actions for ${connection.name}`}
                     onClick={(event) => {
                         event.preventDefault();
@@ -66,7 +82,10 @@ export default function ConnectionActionsMenu({ connection, onEditName, onDelete
                         Edit connection
                     </DropdownMenuItem>
                 )}
-                {actions.canDelete && (actions.canReconnect || actions.canEditName || actions.canEditConnection) && <DropdownMenuSeparator />}
+                {actions.canDelete &&
+                    (actions.canReconnect ||
+                        actions.canEditName ||
+                        actions.canEditConnection) && <DropdownMenuSeparator />}
                 {actions.canDelete && (
                     <DropdownMenuItem
                         variant="destructive"

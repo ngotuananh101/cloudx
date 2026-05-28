@@ -23,21 +23,38 @@ interface FileTableRowProps {
     onNavigate?: (item: CloudFile) => void;
 }
 
-export function FileTableRow({ item, style, capabilities, onNavigate }: FileTableRowProps) {
+export function FileTableRow({
+    item,
+    style,
+    capabilities,
+    onNavigate,
+}: FileTableRowProps) {
     const getIcon = () => {
         switch (item.type) {
-            case 'folder': return <Folder className="h-4.5 w-4.5 text-blue-500 fill-blue-500/20" />;
-            case 'document': return <FileText className="h-4.5 w-4.5 text-gray-500" />;
-            case 'image': return <FileImage className="h-4.5 w-4.5 text-emerald-500" />;
-            case 'code': return <FileCode className="h-4.5 w-4.5 text-amber-500" />;
-            case 'archive': return <FileArchive className="h-4.5 w-4.5 text-red-500" />;
-            case 'video': return <FileVideo className="h-4.5 w-4.5 text-purple-500" />;
-            case 'audio': return <FileAudio className="h-4.5 w-4.5 text-pink-500" />;
-            default: return <File className="h-4.5 w-4.5 text-gray-400" />;
+            case 'folder':
+                return (
+                    <Folder className="h-4.5 w-4.5 fill-blue-500/20 text-blue-500" />
+                );
+            case 'document':
+                return <FileText className="h-4.5 w-4.5 text-gray-500" />;
+            case 'image':
+                return <FileImage className="h-4.5 w-4.5 text-emerald-500" />;
+            case 'code':
+                return <FileCode className="h-4.5 w-4.5 text-amber-500" />;
+            case 'archive':
+                return <FileArchive className="h-4.5 w-4.5 text-red-500" />;
+            case 'video':
+                return <FileVideo className="h-4.5 w-4.5 text-purple-500" />;
+            case 'audio':
+                return <FileAudio className="h-4.5 w-4.5 text-pink-500" />;
+            default:
+                return <File className="h-4.5 w-4.5 text-gray-400" />;
         }
     };
 
-    const hasActions = Boolean(capabilities?.share || capabilities?.download || capabilities?.delete);
+    const hasActions = Boolean(
+        capabilities?.share || capabilities?.download || capabilities?.delete,
+    );
 
     const handleFolderKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
         if (!item.isDirectory || (event.key !== 'Enter' && event.key !== ' ')) {
@@ -49,8 +66,8 @@ export function FileTableRow({ item, style, capabilities, onNavigate }: FileTabl
     };
 
     return (
-        <div 
-            style={style} 
+        <div
+            style={style}
             className="group absolute top-0 left-0 flex h-14 w-full items-center border-b border-gray-50 bg-white px-6 transition-colors hover:bg-gray-50/80"
         >
             {/* Name Column */}
@@ -88,19 +105,34 @@ export function FileTableRow({ item, style, capabilities, onNavigate }: FileTabl
             <div className="flex w-24 shrink-0 justify-end gap-1">
                 {hasActions && (
                     <>
-                        <div className="flex opacity-0 transition-opacity duration-200 group-hover:opacity-100 group-focus-within:opacity-100">
+                        <div className="flex opacity-0 transition-opacity duration-200 group-focus-within:opacity-100 group-hover:opacity-100">
                             {capabilities?.share && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900" aria-label={`Share ${item.name}`}>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900"
+                                    aria-label={`Share ${item.name}`}
+                                >
                                     <Share2 className="h-4 w-4" />
                                 </Button>
                             )}
                             {capabilities?.download && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900" aria-label={`Download ${item.name}`}>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900"
+                                    aria-label={`Download ${item.name}`}
+                                >
                                     <Download className="h-4 w-4" />
                                 </Button>
                             )}
                             {capabilities?.delete && (
-                                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-600" aria-label={`Delete ${item.name}`}>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-600"
+                                    aria-label={`Delete ${item.name}`}
+                                >
                                     <Trash2 className="h-4 w-4" />
                                 </Button>
                             )}

@@ -55,7 +55,15 @@ export interface CloudFile {
     id: string | number;
     path: string;
     name: string;
-    type: 'folder' | 'document' | 'image' | 'code' | 'archive' | 'video' | 'audio' | 'other';
+    type:
+        | 'folder'
+        | 'document'
+        | 'image'
+        | 'code'
+        | 'archive'
+        | 'video'
+        | 'audio'
+        | 'other';
     size: number;
     updatedAt: string;
     isDirectory: boolean;

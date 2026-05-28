@@ -39,13 +39,17 @@ export default function StorageOverviewCards({
         return (
             <div className="flex flex-col items-center justify-center rounded-3xl border border-gray-200/60 bg-white p-12 text-center shadow-sm">
                 <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-100 bg-gray-50 text-gray-400">
-                    <CloudOff className="h-8 w-8 text-gray-400" strokeWidth={1.5} />
+                    <CloudOff
+                        className="h-8 w-8 text-gray-400"
+                        strokeWidth={1.5}
+                    />
                 </div>
                 <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
                     No Connected Storages
                 </h3>
                 <p className="mt-2 max-w-sm text-sm leading-relaxed font-medium text-gray-500">
-                    Connect your cloud storage providers to start centralizing and managing your files safely within one unified dashboard.
+                    Connect your cloud storage providers to start centralizing
+                    and managing your files safely within one unified dashboard.
                 </p>
                 <div className="mt-6">
                     <Button
@@ -68,11 +72,20 @@ export default function StorageOverviewCards({
                 >
                     <CardContent className="p-0">
                         <div className="mb-4 flex items-center justify-between">
-                            <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${getProviderColorClass(connection.provider_value)}`}>
+                            <div
+                                className={`flex h-11 w-11 items-center justify-center rounded-xl ${getProviderColorClass(connection.provider_value)}`}
+                            >
                                 {connection.provider_icon?.endsWith('.svg') ? (
-                                    <img src={connection.provider_icon} className="h-6 w-6" alt={connection.provider} />
+                                    <img
+                                        src={connection.provider_icon}
+                                        className="h-6 w-6"
+                                        alt={connection.provider}
+                                    />
                                 ) : (
-                                    <HardDrive className="h-6 w-6" strokeWidth={2} />
+                                    <HardDrive
+                                        className="h-6 w-6"
+                                        strokeWidth={2}
+                                    />
                                 )}
                             </div>
                             <div className="flex items-center gap-2">
@@ -81,12 +94,20 @@ export default function StorageOverviewCards({
                                 </span>
                                 <button
                                     type="button"
-                                    onClick={() => onDisconnect(connection.id, connection.name)}
-                                    className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all group-hover:opacity-100 focus:opacity-100 hover:bg-red-50 hover:text-red-600"
+                                    onClick={() =>
+                                        onDisconnect(
+                                            connection.id,
+                                            connection.name,
+                                        )
+                                    }
+                                    className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus:opacity-100"
                                     aria-label={`Disconnect ${connection.name}`}
                                     title="Disconnect Storage"
                                 >
-                                    <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                    <Trash2
+                                        className="h-4 w-4"
+                                        aria-hidden="true"
+                                    />
                                 </button>
                             </div>
                         </div>
@@ -106,7 +127,10 @@ export default function StorageOverviewCards({
                         </div>
 
                         <div className="relative pt-1">
-                            <Progress value={connection.percent} className="h-2 bg-gray-100 [&>div]:bg-brand" />
+                            <Progress
+                                value={connection.percent}
+                                className="h-2 bg-gray-100 [&>div]:bg-brand"
+                            />
                         </div>
 
                         <div className="mt-3 truncate text-[10px] font-bold text-gray-500">

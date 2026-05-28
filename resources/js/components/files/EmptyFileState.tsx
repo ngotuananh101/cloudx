@@ -11,10 +11,14 @@ export function EmptyFileState({ searchQuery }: EmptyFileStateProps) {
                 <Search className="h-7 w-7 text-gray-300" />
             </div>
             <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
-                {searchQuery ? 'No matching files found' : 'This folder is empty'}
+                {searchQuery
+                    ? 'No matching files found'
+                    : 'This folder is empty'}
             </h3>
             <p className="mt-1 text-sm font-medium text-gray-500">
-                {searchQuery ? 'Try adjusting your search query.' : 'Upload some files or create a new folder to get started.'}
+                {searchQuery
+                    ? 'Try adjusting your search query.'
+                    : 'Upload some files or create a new folder to get started.'}
             </p>
         </div>
     );

@@ -16,7 +16,10 @@ interface DashboardProps {
     availableProviders: AvailableProvider[];
 }
 
-export default function Dashboard({ connections = [], availableProviders = [] }: DashboardProps) {
+export default function Dashboard({
+    connections = [],
+    availableProviders = [],
+}: DashboardProps) {
     const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 
     const handleDisconnect = (id: number, name: string) => {
@@ -60,13 +63,20 @@ export default function Dashboard({ connections = [], availableProviders = [] }:
                                 Cloud Hub
                             </h4>
                             <p className="mt-2 text-xs leading-relaxed font-medium text-gray-500">
-                                Centralize your data. Connect another provider to manage all files from one dashboard.
+                                Centralize your data. Connect another provider
+                                to manage all files from one dashboard.
                             </p>
 
                             <div className="my-6 grid grid-cols-3 gap-3">
                                 {availableProviders.map((provider) => {
-                                    const miniIcon = provider.icon?.endsWith('.svg') ? (
-                                        <img src={provider.icon} className="h-5 w-5" alt={provider.label} />
+                                    const miniIcon = provider.icon?.endsWith(
+                                        '.svg',
+                                    ) ? (
+                                        <img
+                                            src={provider.icon}
+                                            className="h-5 w-5"
+                                            alt={provider.label}
+                                        />
                                     ) : provider.key === 'aws-s3' ? (
                                         <Database className="h-5 w-5 text-gray-400" />
                                     ) : (

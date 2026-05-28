@@ -10,7 +10,12 @@ interface FileToolbarProps {
     capabilities?: ProviderCapabilities;
 }
 
-export function FileToolbar({ decodedPath, searchQuery, setSearchQuery, capabilities }: FileToolbarProps) {
+export function FileToolbar({
+    decodedPath,
+    searchQuery,
+    setSearchQuery,
+    capabilities,
+}: FileToolbarProps) {
     return (
         <div className="mb-3 flex flex-col items-center gap-3 rounded-2xl border border-gray-100/50 bg-white p-2.5 shadow-sm sm:flex-row">
             <div className="relative w-full flex-1">

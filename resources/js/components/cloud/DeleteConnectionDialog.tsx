@@ -17,7 +17,10 @@ interface DeleteConnectionDialogProps {
     onClose: () => void;
 }
 
-export default function DeleteConnectionDialog({ connection, onClose }: DeleteConnectionDialogProps) {
+export default function DeleteConnectionDialog({
+    connection,
+    onClose,
+}: DeleteConnectionDialogProps) {
     const deleteConnection = () => {
         if (!connection) {
             return;
@@ -30,17 +33,24 @@ export default function DeleteConnectionDialog({ connection, onClose }: DeleteCo
     };
 
     return (
-        <AlertDialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
+        <AlertDialog
+            open={connection !== null}
+            onOpenChange={(open) => !open && onClose()}
+        >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete connection?</AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will remove {connection?.name} from your connected storage list. You can reconnect it later through OAuth.
+                        This will remove {connection?.name} from your connected
+                        storage list. You can reconnect it later through OAuth.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <AlertDialogAction className="bg-red-600 text-white hover:bg-red-700" onClick={deleteConnection}>
+                    <AlertDialogAction
+                        className="bg-red-600 text-white hover:bg-red-700"
+                        onClick={deleteConnection}
+                    >
                         Delete connection
                     </AlertDialogAction>
                 </AlertDialogFooter>

@@ -10,10 +10,15 @@ function isSvgIcon(icon: string | null | undefined): icon is string {
 }
 
 export default function ProviderOption({ provider }: ProviderOptionProps) {
-    const isActive = provider.status === 'active' && Boolean(provider.redirectUrl);
+    const isActive =
+        provider.status === 'active' && Boolean(provider.redirectUrl);
 
     const icon = isSvgIcon(provider.icon) ? (
-        <img src={provider.icon} className="h-6 w-6" alt={`${provider.label} icon`} />
+        <img
+            src={provider.icon}
+            className="h-6 w-6"
+            alt={`${provider.label} icon`}
+        />
     ) : (
         <Cloud className="h-6 w-6" aria-hidden="true" />
     );
@@ -34,7 +39,10 @@ export default function ProviderOption({ provider }: ProviderOptionProps) {
                         </span>
                     </div>
                 </div>
-                <Lock className="mr-1 h-4 w-4 text-gray-300" aria-hidden="true" />
+                <Lock
+                    className="mr-1 h-4 w-4 text-gray-300"
+                    aria-hidden="true"
+                />
             </div>
         );
     }
@@ -60,7 +68,10 @@ export default function ProviderOption({ provider }: ProviderOptionProps) {
                     </span>
                 </div>
             </div>
-            <ChevronRight className="h-5 w-5 text-gray-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600" aria-hidden="true" />
+            <ChevronRight
+                className="h-5 w-5 text-gray-400 transition-all group-hover:translate-x-1 group-hover:text-blue-600"
+                aria-hidden="true"
+            />
         </button>
     );
 }

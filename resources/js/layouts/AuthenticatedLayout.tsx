@@ -53,9 +53,13 @@ export default function AuthenticatedLayout({
     const pageConnection = props.connection as any;
     const activeConnection = pageConnection?.storageQuota
         ? pageConnection
-        : connections.find((connection: CloudConnection) => url.startsWith(storageIndex.url({ connection: connection.id })));
-    const [connectionBeingRenamed, setConnectionBeingRenamed] = useState<CloudConnection | null>(null);
-    const [connectionBeingDeleted, setConnectionBeingDeleted] = useState<CloudConnection | null>(null);
+        : connections.find((connection: CloudConnection) =>
+              url.startsWith(storageIndex.url({ connection: connection.id })),
+          );
+    const [connectionBeingRenamed, setConnectionBeingRenamed] =
+        useState<CloudConnection | null>(null);
+    const [connectionBeingDeleted, setConnectionBeingDeleted] =
+        useState<CloudConnection | null>(null);
 
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans text-gray-900 antialiased">
@@ -88,8 +92,12 @@ export default function AuthenticatedLayout({
                                     href="/dashboard"
                                     className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                 >
-                                    {(url === '/dashboard' || url === '/') && <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />}
-                                    <LayoutDashboard className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-brand' : 'text-gray-400'}`} />
+                                    {(url === '/dashboard' || url === '/') && (
+                                        <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />
+                                    )}
+                                    <LayoutDashboard
+                                        className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-brand' : 'text-gray-400'}`}
+                                    />
                                     DASHBOARD
                                 </Link>
                             </li>
@@ -103,21 +111,30 @@ export default function AuthenticatedLayout({
                         </div>
                         {connections && connections.length > 0 ? (
                             <ul className="space-y-1">
-                                {connections.map((connection: CloudConnection) => {
-                                    const storageUrl = storageIndex.url({ connection: connection.id });
-                                    const isActive = url.startsWith(storageUrl);
+                                {connections.map(
+                                    (connection: CloudConnection) => {
+                                        const storageUrl = storageIndex.url({
+                                            connection: connection.id,
+                                        });
+                                        const isActive =
+                                            url.startsWith(storageUrl);
 
-                                    return (
-                                        <ConnectionNavItem
-                                            key={connection.id}
-                                            connection={connection}
-                                            href={storageUrl}
-                                            isActive={isActive}
-                                            onEditName={setConnectionBeingRenamed}
-                                            onDelete={setConnectionBeingDeleted}
-                                        />
-                                    );
-                                })}
+                                        return (
+                                            <ConnectionNavItem
+                                                key={connection.id}
+                                                connection={connection}
+                                                href={storageUrl}
+                                                isActive={isActive}
+                                                onEditName={
+                                                    setConnectionBeingRenamed
+                                                }
+                                                onDelete={
+                                                    setConnectionBeingDeleted
+                                                }
+                                            />
+                                        );
+                                    },
+                                )}
                             </ul>
                         ) : (
                             <div className="px-3 py-1.5 text-[11px] font-medium text-gray-400 italic">
@@ -126,36 +143,40 @@ export default function AuthenticatedLayout({
                         )}
                     </div>
 
-                    {activeConnection && (cloudActions?.canCreateFolder || cloudActions?.canUpload) && (
-                        <div>
-                            <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
-                                CLOUD ACTIONS
+                    {activeConnection &&
+                        (cloudActions?.canCreateFolder ||
+                            cloudActions?.canUpload) && (
+                            <div>
+                                <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
+                                    CLOUD ACTIONS
+                                </div>
+                                <div className="space-y-2 px-3">
+                                    {cloudActions?.canCreateFolder && (
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={
+                                                cloudActions.onCreateFolder
+                                            }
+                                            className="h-10 w-full justify-center rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700"
+                                        >
+                                            <FolderPlus className="h-4 w-4" />
+                                            New Folder
+                                        </Button>
+                                    )}
+                                    {cloudActions?.canUpload && (
+                                        <Button
+                                            type="button"
+                                            onClick={cloudActions.onUpload}
+                                            className="h-10 w-full justify-center rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]"
+                                        >
+                                            <Upload className="h-4 w-4" />
+                                            Upload
+                                        </Button>
+                                    )}
+                                </div>
                             </div>
-                            <div className="space-y-2 px-3">
-                                {cloudActions?.canCreateFolder && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={cloudActions.onCreateFolder}
-                                        className="h-10 w-full justify-center rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700"
-                                    >
-                                        <FolderPlus className="h-4 w-4" />
-                                        New Folder
-                                    </Button>
-                                )}
-                                {cloudActions?.canUpload && (
-                                    <Button
-                                        type="button"
-                                        onClick={cloudActions.onUpload}
-                                        className="h-10 w-full justify-center rounded-xl bg-brand text-xs font-bold tracking-wide text-white shadow-sm hover:bg-[#a0181e]"
-                                    >
-                                        <Upload className="h-4 w-4" />
-                                        Upload
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                    )}
+                        )}
 
                     {/* System Section */}
                     <div>
@@ -185,15 +206,34 @@ export default function AuthenticatedLayout({
                                     STORAGE
                                 </span>
                                 <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-extrabold text-brand">
-                                    {activeConnection.storageQuota.usedPercent ?? 0}%
+                                    {activeConnection.storageQuota
+                                        .usedPercent ?? 0}
+                                    %
                                 </span>
                             </div>
                             <div className="mt-3">
-                                <Progress value={activeConnection.storageQuota.usedPercent ?? 0} className="h-2 bg-gray-200 [&>div]:bg-brand" />
+                                <Progress
+                                    value={
+                                        activeConnection.storageQuota
+                                            .usedPercent ?? 0
+                                    }
+                                    className="h-2 bg-gray-200 [&>div]:bg-brand"
+                                />
                             </div>
                             <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500">
-                                <span>{formatBytes(activeConnection.storageQuota.usedBytes || 0)} used</span>
-                                <span>{formatBytes(activeConnection.storageQuota.totalBytes || 0)}</span>
+                                <span>
+                                    {formatBytes(
+                                        activeConnection.storageQuota
+                                            .usedBytes || 0,
+                                    )}{' '}
+                                    used
+                                </span>
+                                <span>
+                                    {formatBytes(
+                                        activeConnection.storageQuota
+                                            .totalBytes || 0,
+                                    )}
+                                </span>
                             </div>
                         </div>
                     )}
@@ -230,7 +270,9 @@ export default function AuthenticatedLayout({
                                     type="text"
                                     placeholder={cloudSearch.placeholder}
                                     value={cloudSearch.value}
-                                    onChange={(event) => cloudSearch.onChange(event.target.value)}
+                                    onChange={(event) =>
+                                        cloudSearch.onChange(event.target.value)
+                                    }
                                     className="h-11 w-full rounded-xl border-none bg-gray-50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
                                 />
                             </div>

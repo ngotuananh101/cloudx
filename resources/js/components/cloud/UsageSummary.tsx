@@ -7,7 +7,10 @@ interface UsageSummaryProps {
 }
 
 export default function UsageSummary({ connections }: UsageSummaryProps) {
-    const totalUsedBytes = connections.reduce((acc, connection) => acc + (connection.used_space || 0), 0);
+    const totalUsedBytes = connections.reduce(
+        (acc, connection) => acc + (connection.used_space || 0),
+        0,
+    );
 
     return (
         <div className="group relative overflow-hidden rounded-2xl bg-[#bd1e24] p-6 text-white shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -26,11 +29,13 @@ export default function UsageSummary({ connections }: UsageSummaryProps) {
 
                 {connections.length > 0 ? (
                     <p className="mt-4 text-xs leading-relaxed font-medium text-white/80">
-                        Monitoring active sync over {connections.length} connected cloud storage accounts.
+                        Monitoring active sync over {connections.length}{' '}
+                        connected cloud storage accounts.
                     </p>
                 ) : (
                     <p className="mt-4 text-xs leading-relaxed font-medium text-white/80">
-                        No storages connected. Connect a cloud storage service to track active usage.
+                        No storages connected. Connect a cloud storage service
+                        to track active usage.
                     </p>
                 )}
             </div>

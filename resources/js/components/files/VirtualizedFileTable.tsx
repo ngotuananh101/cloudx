@@ -11,7 +11,12 @@ interface VirtualizedFileTableProps {
     onNavigate: (item: CloudFile) => void;
 }
 
-export function VirtualizedFileTable({ files, searchQuery, capabilities, onNavigate }: VirtualizedFileTableProps) {
+export function VirtualizedFileTable({
+    files,
+    searchQuery,
+    capabilities,
+    onNavigate,
+}: VirtualizedFileTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
     const rowVirtualizer = useVirtualizer({
@@ -32,7 +37,10 @@ export function VirtualizedFileTable({ files, searchQuery, capabilities, onNavig
                 <div className="w-3.5 shrink-0" />
             </div>
 
-            <div ref={parentRef} className="custom-scrollbar flex-1 overflow-x-hidden overflow-y-scroll">
+            <div
+                ref={parentRef}
+                className="custom-scrollbar flex-1 overflow-x-hidden overflow-y-scroll"
+            >
                 {files.length === 0 ? (
                     <EmptyFileState searchQuery={searchQuery} />
                 ) : (

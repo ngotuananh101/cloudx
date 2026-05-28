@@ -1,7 +1,6 @@
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { Cloud, Eye, EyeOff } from 'lucide-react';
+import { Cloud } from 'lucide-react';
 import type { FormEventHandler } from 'react';
-import { useState } from 'react';
 import { store } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,6 @@ import GuestLayout from '@/layouts/GuestLayout';
 
 export default function Login() {
     const { status } = usePage().props as { status?: string };
-    const [showPassword, setShowPassword] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
         email: '',
@@ -91,30 +89,15 @@ export default function Login() {
                             Forgot Password?
                         </Link>
                     </div>
-                    <div className="relative">
-                        <Input
-                            id="password"
-                            type={showPassword ? 'text' : 'password'}
-                            placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
-                            value={data.password}
-                            onChange={(e) =>
-                                setData('password', e.target.value)
-                            }
-                            autoComplete="current-password"
-                        />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                        >
-                            {showPassword ? (
-                                <EyeOff className="h-5 w-5" />
-                            ) : (
-                                <Eye className="h-5 w-5" />
-                            )}
-                        </button>
-                    </div>
+                    <Input
+                        id="password"
+                        type="password"
+                        placeholder="********"
+                        className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
+                        autoComplete="current-password"
+                    />
                     {errors.password && (
                         <p className="mt-1 text-xs font-medium text-red-500">
                             {errors.password}

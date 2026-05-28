@@ -7,7 +7,10 @@ interface ConnectStorageModalProps {
     onClose: () => void;
 }
 
-export default function ConnectStorageModal({ providers, onClose }: ConnectStorageModalProps) {
+export default function ConnectStorageModal({
+    providers,
+    onClose,
+}: ConnectStorageModalProps) {
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm">
             <div className="relative w-full max-w-md overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl transition-all">
@@ -31,7 +34,10 @@ export default function ConnectStorageModal({ providers, onClose }: ConnectStora
 
                 <div className="space-y-3">
                     {providers.map((provider) => (
-                        <ProviderOption key={provider.key} provider={provider} />
+                        <ProviderOption
+                            key={provider.key}
+                            provider={provider}
+                        />
                     ))}
                 </div>
             </div>

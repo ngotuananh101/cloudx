@@ -39,7 +39,10 @@ export default function RecentActivityList() {
                 <h3 className="text-lg font-bold tracking-tight text-gray-900">
                     Recent Activity
                 </h3>
-                <a href="#" className="flex items-center gap-0.5 text-xs font-bold text-brand hover:underline">
+                <a
+                    href="#"
+                    className="flex items-center gap-0.5 text-xs font-bold text-brand hover:underline"
+                >
                     View History <ChevronRight className="h-3 w-3" />
                 </a>
             </div>
@@ -51,8 +54,13 @@ export default function RecentActivityList() {
                         className="flex cursor-pointer items-center justify-between rounded-2xl border border-gray-100/50 bg-white p-5 shadow-sm transition-all duration-300 hover:border-gray-200/50 hover:shadow-md"
                     >
                         <div className="flex items-center gap-4">
-                            <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${activity.iconColor}`}>
-                                <activity.icon className="h-6 w-6" strokeWidth={2} />
+                            <div
+                                className={`flex h-12 w-12 items-center justify-center rounded-xl ${activity.iconColor}`}
+                            >
+                                <activity.icon
+                                    className="h-6 w-6"
+                                    strokeWidth={2}
+                                />
                             </div>
                             <div>
                                 <h4 className="text-sm font-bold text-gray-900">
@@ -69,7 +77,9 @@ export default function RecentActivityList() {
                                     <span className="font-bold text-gray-800">
                                         {activity.target}
                                     </span>
-                                    <span className="mx-1.5 text-gray-300">•</span>
+                                    <span className="mx-1.5 text-gray-300">
+                                        •
+                                    </span>
                                     <span>{activity.time}</span>
                                 </p>
                             </div>

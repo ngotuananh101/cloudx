@@ -37,7 +37,14 @@ interface UploadQueueItem {
     file: File;
     task?: UploadTask;
     progress: number;
-    status: 'pending' | 'uploading' | 'paused' | 'queued' | 'completed' | 'failed' | 'cancelled';
+    status:
+        | 'pending'
+        | 'uploading'
+        | 'paused'
+        | 'queued'
+        | 'completed'
+        | 'failed'
+        | 'cancelled';
     error?: string;
 }
 
@@ -50,7 +57,10 @@ const csrfToken = () => {
     return cookie ? decodeURIComponent(cookie) : '';
 };
 
-const requestJson = async <T,>(url: string, options: RequestInit = {}): Promise<T> => {
+const requestJson = async <T,>(
+    url: string,
+    options: RequestInit = {},
+): Promise<T> => {
     const response = await fetch(url, {
         ...options,
         headers: {
@@ -70,7 +80,11 @@ const requestJson = async <T,>(url: string, options: RequestInit = {}): Promise<
     return response.json();
 };
 
-export default function FileBrowser({ connection, decodedPath, files }: FileBrowserProps) {
+export default function FileBrowser({
+    connection,
+    decodedPath,
+    files,
+}: FileBrowserProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [folderName, setFolderName] = useState('');
@@ -84,7 +98,9 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
             return files || [];
         }
 
-        return (files || []).filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        return (files || []).filter((file) =>
+            file.name.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
     }, [files, searchQuery]);
 
     const handleNavigate = (file: CloudFile) => {
@@ -93,36 +109,62 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         }
 
         const encodedPath = encodeCloudPath(file.path);
-        router.visit(storageIndex.url({ connection: connection.id, path: encodedPath }));
+        router.visit(
+            storageIndex.url({ connection: connection.id, path: encodedPath }),
+        );
     };
 
     const handleNavigateHome = () => {
         router.visit(storageIndex.url({ connection: connection.id }));
     };
 
-    const updateUploadItem = (key: string, changes: Partial<UploadQueueItem>) => {
-        setUploadQueue((items) => items.map((item) => (item.key === key ? { ...item, ...changes } : item)));
+    const updateUploadItem = (
+        key: string,
+        changes: Partial<UploadQueueItem>,
+    ) => {
+        setUploadQueue((items) =>
+            items.map((item) =>
+                item.key === key ? { ...item, ...changes } : item,
+            ),
+        );
     };
 
     const refreshFiles = () => {
         router.reload({ only: ['files', 'connection'] });
     };
 
-    const uploadFile = async (key: string, file: File, existingTask?: UploadTask) => {
+    const uploadFile = async (
+        key: string,
+        file: File,
+        existingTask?: UploadTask,
+    ) => {
         try {
-            updateUploadItem(key, { status: 'uploading', progress: 0, error: undefined });
-
-            const task = existingTask || await requestJson<UploadTask>(connections.uploadTasks.store({ connection: connection.id }).url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    path: decodedPath,
-                    filename: file.name,
-                    mime_type: file.type || null,
-                    size: file.size,
-                    chunk_size: Math.min(5 * 1024 * 1024, Math.max(1024, file.size)),
-                }),
+            updateUploadItem(key, {
+                status: 'uploading',
+                progress: 0,
+                error: undefined,
             });
+
+            const task =
+                existingTask ||
+                (await requestJson<UploadTask>(
+                    connections.uploadTasks.store({ connection: connection.id })
+                        .url,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            path: decodedPath,
+                            filename: file.name,
+                            mime_type: file.type || null,
+                            size: file.size,
+                            chunk_size: Math.min(
+                                5 * 1024 * 1024,
+                                Math.max(1024, file.size),
+                            ),
+                        }),
+                    },
+                ));
 
             updateUploadItem(key, { task });
 
@@ -141,25 +183,47 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
                 }
 
                 const formData = new FormData();
-                formData.append('chunk', file.slice(index * chunkSize, Math.min(file.size, (index + 1) * chunkSize)), file.name);
+                formData.append(
+                    'chunk',
+                    file.slice(
+                        index * chunkSize,
+                        Math.min(file.size, (index + 1) * chunkSize),
+                    ),
+                    file.name,
+                );
                 formData.append('index', String(index));
 
-                const updatedTask = await requestJson<UploadTask>(connections.uploadTasks.chunks.store({ connection: connection.id, task: task.id }).url, {
-                    method: 'POST',
-                    body: formData,
-                });
+                const updatedTask = await requestJson<UploadTask>(
+                    connections.uploadTasks.chunks.store({
+                        connection: connection.id,
+                        task: task.id,
+                    }).url,
+                    {
+                        method: 'POST',
+                        body: formData,
+                    },
+                );
 
                 updateUploadItem(key, {
                     task: updatedTask,
-                    progress: Math.round((updatedTask.payload.uploaded_chunks_count / updatedTask.payload.total_chunks) * 100),
-                    status: updatedTask.status_value >= 4 ? 'queued' : 'uploading',
+                    progress: Math.round(
+                        (updatedTask.payload.uploaded_chunks_count /
+                            updatedTask.payload.total_chunks) *
+                            100,
+                    ),
+                    status:
+                        updatedTask.status_value >= 4 ? 'queued' : 'uploading',
                 });
             }
 
             updateUploadItem(key, { status: 'queued', progress: 100 });
             refreshFiles();
         } catch (error) {
-            updateUploadItem(key, { status: 'failed', error: error instanceof Error ? error.message : 'Upload failed.' });
+            updateUploadItem(key, {
+                status: 'failed',
+                error:
+                    error instanceof Error ? error.message : 'Upload failed.',
+            });
         }
     };
 
@@ -186,7 +250,13 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         pausedUploads.current.add(item.key);
 
         if (item.task) {
-            await requestJson<UploadTask>(connections.uploadTasks.pause({ connection: connection.id, task: item.task.id }).url, { method: 'PATCH' });
+            await requestJson<UploadTask>(
+                connections.uploadTasks.pause({
+                    connection: connection.id,
+                    task: item.task.id,
+                }).url,
+                { method: 'PATCH' },
+            );
         }
 
         updateUploadItem(item.key, { status: 'paused' });
@@ -198,7 +268,13 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         }
 
         pausedUploads.current.delete(item.key);
-        const task = await requestJson<UploadTask>(connections.uploadTasks.resume({ connection: connection.id, task: item.task.id }).url, { method: 'PATCH' });
+        const task = await requestJson<UploadTask>(
+            connections.uploadTasks.resume({
+                connection: connection.id,
+                task: item.task.id,
+            }).url,
+            { method: 'PATCH' },
+        );
         updateUploadItem(item.key, { task, status: 'uploading' });
         void uploadFile(item.key, item.file, task);
     };
@@ -207,7 +283,13 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         pausedUploads.current.add(item.key);
 
         if (item.task) {
-            await requestJson<UploadTask>(connections.uploadTasks.destroy({ connection: connection.id, task: item.task.id }).url, { method: 'DELETE' });
+            await requestJson<UploadTask>(
+                connections.uploadTasks.destroy({
+                    connection: connection.id,
+                    task: item.task.id,
+                }).url,
+                { method: 'DELETE' },
+            );
         }
 
         updateUploadItem(item.key, { status: 'cancelled' });
@@ -217,18 +299,23 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         event.preventDefault();
         setFolderError(null);
 
-        router.post(connections.folders.store({ connection: connection.id }).url, {
-            path: decodedPath,
-            name: folderName,
-        }, {
-            preserveScroll: true,
-            onSuccess: () => {
-                setFolderName('');
-                setIsCreateFolderOpen(false);
-                refreshFiles();
+        router.post(
+            connections.folders.store({ connection: connection.id }).url,
+            {
+                path: decodedPath,
+                name: folderName,
             },
-            onError: (errors) => setFolderError(errors.name || 'Could not create folder.'),
-        });
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    setFolderName('');
+                    setIsCreateFolderOpen(false);
+                    refreshFiles();
+                },
+                onError: (errors) =>
+                    setFolderError(errors.name || 'Could not create folder.'),
+            },
+        );
     };
 
     return (
@@ -248,35 +335,70 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
         >
             <Head title="Files & Folders" />
 
-            <FileBrowserHeader connection={connection} decodedPath={decodedPath} onNavigateHome={handleNavigateHome} />
+            <FileBrowserHeader
+                connection={connection}
+                decodedPath={decodedPath}
+                onNavigateHome={handleNavigateHome}
+            />
 
-            <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleUploadFiles} />
+            <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleUploadFiles}
+            />
 
             {isCreateFolderOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-                    <form onSubmit={createFolder} className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+                    <form
+                        onSubmit={createFolder}
+                        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+                    >
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">Create folder</h2>
-                                <p className="mt-1 text-sm font-medium text-gray-500">Add a new folder in the current cloud path.</p>
+                                <h2 className="text-lg font-bold text-gray-900">
+                                    Create folder
+                                </h2>
+                                <p className="mt-1 text-sm font-medium text-gray-500">
+                                    Add a new folder in the current cloud path.
+                                </p>
                             </div>
-                            <Button type="button" variant="ghost" size="icon" onClick={() => setIsCreateFolderOpen(false)}>
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setIsCreateFolderOpen(false)}
+                            >
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
                         <Input
                             autoFocus
                             value={folderName}
-                            onChange={(event) => setFolderName(event.target.value)}
+                            onChange={(event) =>
+                                setFolderName(event.target.value)
+                            }
                             placeholder="Folder name"
                             className="h-11 rounded-xl"
                         />
-                        {folderError && <p className="mt-2 text-sm font-semibold text-red-600">{folderError}</p>}
+                        {folderError && (
+                            <p className="mt-2 text-sm font-semibold text-red-600">
+                                {folderError}
+                            </p>
+                        )}
                         <div className="mt-6 flex justify-end gap-2">
-                            <Button type="button" variant="outline" onClick={() => setIsCreateFolderOpen(false)}>
+                            <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() => setIsCreateFolderOpen(false)}
+                            >
                                 Cancel
                             </Button>
-                            <Button type="submit" className="bg-brand text-white hover:bg-[#a0181e]">
+                            <Button
+                                type="submit"
+                                className="bg-brand text-white hover:bg-[#a0181e]"
+                            >
                                 Create
                             </Button>
                         </div>
@@ -286,35 +408,74 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
 
             {uploadQueue.length > 0 && (
                 <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <div className="mb-3 text-xs font-black tracking-widest text-gray-400">UPLOAD QUEUE</div>
+                    <div className="mb-3 text-xs font-black tracking-widest text-gray-400">
+                        UPLOAD QUEUE
+                    </div>
                     <div className="space-y-3">
                         {uploadQueue.map((item) => (
-                            <div key={item.key} className="rounded-xl border border-gray-100 bg-gray-50 p-3">
+                            <div
+                                key={item.key}
+                                className="rounded-xl border border-gray-100 bg-gray-50 p-3"
+                            >
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0 flex-1">
-                                        <div className="truncate text-sm font-bold text-gray-900">{item.file.name}</div>
-                                        <div className="mt-1 text-xs font-semibold text-gray-500">{item.status}</div>
+                                        <div className="truncate text-sm font-bold text-gray-900">
+                                            {item.file.name}
+                                        </div>
+                                        <div className="mt-1 text-xs font-semibold text-gray-500">
+                                            {item.status}
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         {item.status === 'uploading' && (
-                                            <Button type="button" variant="ghost" size="icon-sm" onClick={() => void pauseUpload(item)}>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() =>
+                                                    void pauseUpload(item)
+                                                }
+                                            >
                                                 <Pause className="h-4 w-4" />
                                             </Button>
                                         )}
                                         {item.status === 'paused' && (
-                                            <Button type="button" variant="ghost" size="icon-sm" onClick={() => void resumeUpload(item)}>
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() =>
+                                                    void resumeUpload(item)
+                                                }
+                                            >
                                                 <Play className="h-4 w-4" />
                                             </Button>
                                         )}
-                                        {!['completed', 'cancelled'].includes(item.status) && (
-                                            <Button type="button" variant="ghost" size="icon-sm" onClick={() => void cancelUpload(item)}>
+                                        {!['completed', 'cancelled'].includes(
+                                            item.status,
+                                        ) && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() =>
+                                                    void cancelUpload(item)
+                                                }
+                                            >
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         )}
                                     </div>
                                 </div>
-                                <Progress value={item.progress} className="mt-3 h-2 bg-gray-200 [&>div]:bg-brand" />
-                                {item.error && <p className="mt-2 text-xs font-semibold text-red-600">{item.error}</p>}
+                                <Progress
+                                    value={item.progress}
+                                    className="mt-3 h-2 bg-gray-200 [&>div]:bg-brand"
+                                />
+                                {item.error && (
+                                    <p className="mt-2 text-xs font-semibold text-red-600">
+                                        {item.error}
+                                    </p>
+                                )}
                             </div>
                         ))}
                     </div>
@@ -332,7 +493,9 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
                 </div>
             </div>
 
-            <style dangerouslySetInnerHTML={{__html: `
+            <style
+                dangerouslySetInnerHTML={{
+                    __html: `
                 .custom-scrollbar::-webkit-scrollbar {
                     width: 14px;
                 }
@@ -348,7 +511,9 @@ export default function FileBrowser({ connection, decodedPath, files }: FileBrow
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background-color: #94a3b8;
                 }
-            `}} />
+            `,
+                }}
+            />
         </AuthenticatedLayout>
     );
 }
