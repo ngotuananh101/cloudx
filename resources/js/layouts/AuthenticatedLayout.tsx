@@ -17,6 +17,7 @@ import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import ConnectionNavItem from '@/components/cloud/ConnectionNavItem';
 import DeleteConnectionDialog from '@/components/cloud/DeleteConnectionDialog';
 import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialog';
+import UploadProgressPanel from '@/components/files/UploadProgressPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -328,6 +329,7 @@ export default function AuthenticatedLayout({
                     connection={connectionBeingDeleted}
                     onClose={() => setConnectionBeingDeleted(null)}
                 />
+                <UploadProgressPanel />
             </div>
         </UploadManagerProvider>
     );

@@ -286,11 +286,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
         [],
     );
 
-    const channel = user?.id ? `users.${user.id}.cloud-tasks` : null;
-
-    useEcho<CloudUploadTask>(
-        channel,
-        '.CloudUploadTaskUpdated',
+    const mergeBroadcastTask = useCallback(
         (task: CloudUploadTask) => {
             setItems((currentItems) =>
                 currentItems.map((item) =>
@@ -310,6 +306,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 refreshFilesIfActive(task);
             }
         },
+        [refreshFilesIfActive],
     );
 
     const value = useMemo(
@@ -339,9 +336,31 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 
     return (
         <UploadManagerContext.Provider value={value}>
+            {user?.id ? (
+                <CloudTaskBroadcastListener
+                    userId={user.id}
+                    onUpdate={mergeBroadcastTask}
+                />
+            ) : null}
             {children}
         </UploadManagerContext.Provider>
     );
+}
+
+function CloudTaskBroadcastListener({
+    userId,
+    onUpdate,
+}: {
+    userId: number;
+    onUpdate: (task: CloudUploadTask) => void;
+}) {
+    useEcho<CloudUploadTask>(
+        `users.${userId}.cloud-tasks`,
+        '.CloudUploadTaskUpdated',
+        onUpdate,
+    );
+
+    return null;
 }
 
 export function useUploadManager() {

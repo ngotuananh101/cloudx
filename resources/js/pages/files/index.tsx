@@ -1,24 +1,17 @@
 import { Head, router } from '@inertiajs/react';
-import { Pause, Play, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Progress } from '@/components/ui/progress';
 import { useUploadManager } from '@/contexts/UploadManagerContext';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
-import { requestJson } from '@/lib/request-json';
 import connections from '@/routes/connections';
 import { index as storageIndex } from '@/routes/storage';
-import type {
-    CloudConnection,
-    CloudFile,
-    CloudUploadTask,
-    UploadQueueItem,
-} from '@/types/cloud';
+import type { CloudConnection, CloudFile } from '@/types/cloud';
 
 interface FileBrowserProps {
     connection: CloudConnection;
@@ -35,10 +28,8 @@ export default function FileBrowser({
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [folderName, setFolderName] = useState('');
     const [folderError, setFolderError] = useState<string | null>(null);
-    const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const pausedUploads = useRef(new Set<string>());
 
     useEffect(() => {
         uploadManager.registerFileBrowserLocation({
@@ -74,113 +65,8 @@ export default function FileBrowser({
         router.visit(storageIndex.url({ connection: connection.id }));
     };
 
-    const updateUploadItem = (
-        key: string,
-        changes: Partial<UploadQueueItem>,
-    ) => {
-        setUploadQueue((items) =>
-            items.map((item) =>
-                item.key === key ? { ...item, ...changes } : item,
-            ),
-        );
-    };
-
     const refreshFiles = () => {
         router.reload({ only: ['files', 'connection'] });
-    };
-
-    const uploadFile = async (
-        key: string,
-        file: File,
-        existingTask?: CloudUploadTask,
-    ) => {
-        try {
-            updateUploadItem(key, {
-                status: 'uploading',
-                progress: 0,
-                error: undefined,
-            });
-
-            const task =
-                existingTask ||
-                (await requestJson<CloudUploadTask>(
-                    connections.uploadTasks.store({ connection: connection.id })
-                        .url,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            path: decodedPath,
-                            filename: file.name,
-                            mime_type: file.type || null,
-                            size: file.size,
-                            chunk_size: Math.min(
-                                5 * 1024 * 1024,
-                                Math.max(1024, file.size),
-                            ),
-                        }),
-                    },
-                ));
-
-            updateUploadItem(key, { task });
-
-            const chunkSize = task.payload.chunk_size;
-            const uploadedChunks = new Set(task.uploaded_chunks || []);
-
-            for (let index = 0; index < task.payload.total_chunks; index++) {
-                if (pausedUploads.current.has(key)) {
-                    updateUploadItem(key, { status: 'paused' });
-
-                    return;
-                }
-
-                if (uploadedChunks.has(index)) {
-                    continue;
-                }
-
-                const formData = new FormData();
-                formData.append(
-                    'chunk',
-                    file.slice(
-                        index * chunkSize,
-                        Math.min(file.size, (index + 1) * chunkSize),
-                    ),
-                    file.name,
-                );
-                formData.append('index', String(index));
-
-                const updatedTask = await requestJson<CloudUploadTask>(
-                    connections.uploadTasks.chunks.store({
-                        connection: connection.id,
-                        task: task.id,
-                    }).url,
-                    {
-                        method: 'POST',
-                        body: formData,
-                    },
-                );
-
-                updateUploadItem(key, {
-                    task: updatedTask,
-                    progress: Math.round(
-                        (updatedTask.payload.uploaded_chunks_count /
-                            updatedTask.payload.total_chunks) *
-                            100,
-                    ),
-                    status:
-                        updatedTask.status_value >= 4 ? 'queued' : 'uploading',
-                });
-            }
-
-            updateUploadItem(key, { status: 'queued', progress: 100 });
-            refreshFiles();
-        } catch (error) {
-            updateUploadItem(key, {
-                status: 'failed',
-                error:
-                    error instanceof Error ? error.message : 'Upload failed.',
-            });
-        }
     };
 
     const handleUploadFiles = (event: ChangeEvent<HTMLInputElement>) => {
@@ -195,55 +81,6 @@ export default function FileBrowser({
             connectionId: connection.id,
             path: decodedPath,
         });
-    };
-
-    const pauseUpload = async (item: UploadQueueItem) => {
-        pausedUploads.current.add(item.key);
-
-        if (item.task) {
-            await requestJson<CloudUploadTask>(
-                connections.uploadTasks.pause({
-                    connection: connection.id,
-                    task: item.task.id,
-                }).url,
-                { method: 'PATCH' },
-            );
-        }
-
-        updateUploadItem(item.key, { status: 'paused' });
-    };
-
-    const resumeUpload = async (item: UploadQueueItem) => {
-        if (!item.task) {
-            return;
-        }
-
-        pausedUploads.current.delete(item.key);
-        const task = await requestJson<CloudUploadTask>(
-            connections.uploadTasks.resume({
-                connection: connection.id,
-                task: item.task.id,
-            }).url,
-            { method: 'PATCH' },
-        );
-        updateUploadItem(item.key, { task, status: 'uploading' });
-        void uploadFile(item.key, item.file, task);
-    };
-
-    const cancelUpload = async (item: UploadQueueItem) => {
-        pausedUploads.current.add(item.key);
-
-        if (item.task) {
-            await requestJson<CloudUploadTask>(
-                connections.uploadTasks.destroy({
-                    connection: connection.id,
-                    task: item.task.id,
-                }).url,
-                { method: 'DELETE' },
-            );
-        }
-
-        updateUploadItem(item.key, { status: 'cancelled' });
     };
 
     const createFolder = (event: { preventDefault: () => void }) => {
@@ -354,82 +191,6 @@ export default function FileBrowser({
                             </Button>
                         </div>
                     </form>
-                </div>
-            )}
-
-            {uploadQueue.length > 0 && (
-                <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm">
-                    <div className="mb-3 text-xs font-black tracking-widest text-gray-400">
-                        UPLOAD QUEUE
-                    </div>
-                    <div className="space-y-3">
-                        {uploadQueue.map((item) => (
-                            <div
-                                key={item.key}
-                                className="rounded-xl border border-gray-100 bg-gray-50 p-3"
-                            >
-                                <div className="flex items-start justify-between gap-3">
-                                    <div className="min-w-0 flex-1">
-                                        <div className="truncate text-sm font-bold text-gray-900">
-                                            {item.file.name}
-                                        </div>
-                                        <div className="mt-1 text-xs font-semibold text-gray-500">
-                                            {item.status}
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                        {item.status === 'uploading' && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon-sm"
-                                                onClick={() =>
-                                                    void pauseUpload(item)
-                                                }
-                                            >
-                                                <Pause className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                        {item.status === 'paused' && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon-sm"
-                                                onClick={() =>
-                                                    void resumeUpload(item)
-                                                }
-                                            >
-                                                <Play className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                        {!['completed', 'cancelled'].includes(
-                                            item.status,
-                                        ) && (
-                                            <Button
-                                                type="button"
-                                                variant="ghost"
-                                                size="icon-sm"
-                                                onClick={() =>
-                                                    void cancelUpload(item)
-                                                }
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        )}
-                                    </div>
-                                </div>
-                                <Progress
-                                    value={item.progress}
-                                    className="mt-3 h-2 bg-gray-200 [&>div]:bg-brand"
-                                />
-                                {item.error && (
-                                    <p className="mt-2 text-xs font-semibold text-red-600">
-                                        {item.error}
-                                    </p>
-                                )}
-                            </div>
-                        ))}
-                    </div>
                 </div>
             )}
 
