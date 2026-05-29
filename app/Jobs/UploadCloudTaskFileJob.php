@@ -6,8 +6,10 @@ use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Models\CloudTask;
 use App\Services\CloudStorage\CloudStorageCache;
+use App\Support\CloudUploadTaskBroadcaster;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
@@ -30,21 +32,35 @@ class UploadCloudTaskFileJob implements ShouldQueue
         return [10, 60, 300];
     }
 
-    public function handle(CloudStorageCache $cache): void
+    public function handle(CloudStorageCache $cache, CloudUploadTaskBroadcaster $broadcaster): void
     {
-        $task = CloudTask::query()->with('connection')->findOrFail($this->taskId);
+        $task = DB::transaction(function (): ?CloudTask {
+            $task = CloudTask::query()
+                ->whereKey($this->taskId)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        if (! $task->type->is(CloudTaskType::Upload()) || ! $task->status->is(CloudTaskStatus::Queued())) {
-            return;
-        }
+            if (! $task->type->is(CloudTaskType::Upload()) || ! $task->status->is(CloudTaskStatus::Queued())) {
+                return null;
+            }
 
-        try {
             $task->forceFill([
                 'status' => CloudTaskStatus::Processing(),
                 'processing_at' => now(),
                 'error_message' => null,
             ])->save();
 
+            return $task;
+        });
+
+        if ($task === null) {
+            return;
+        }
+
+        $task->load('connection');
+        $broadcaster->broadcastStatus($task);
+
+        try {
             $payload = $task->payload;
             $totalChunks = (int) ($payload['total_chunks'] ?? 0);
             $filename = (string) ($payload['filename'] ?? $task->name);
@@ -101,6 +117,7 @@ class UploadCloudTaskFileJob implements ShouldQueue
                 'result' => ['path' => $targetPath],
                 'completed_at' => now(),
             ])->save();
+            $broadcaster->broadcastStatus($task);
 
             $this->deleteTempFiles($task, $totalChunks, $tempPath);
             $cache->flushFolder($task->connection, $task->target_path);
@@ -111,6 +128,7 @@ class UploadCloudTaskFileJob implements ShouldQueue
                 'error_message' => $exception->getMessage(),
                 'failed_at' => now(),
             ])->save();
+            $broadcaster->broadcastStatus($task);
 
             throw $exception;
         }

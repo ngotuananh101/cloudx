@@ -68,3 +68,52 @@ export interface CloudFile {
     updatedAt: string;
     isDirectory: boolean;
 }
+
+export type UploadTaskStatus =
+    | 'pending'
+    | 'uploading'
+    | 'paused'
+    | 'queued'
+    | 'processing'
+    | 'completed'
+    | 'failed'
+    | 'cancelled';
+
+export interface CloudUploadTaskPayload {
+    filename: string;
+    mime_type: string | null;
+    size: number;
+    chunk_size: number;
+    total_chunks: number;
+    uploaded_chunks_count: number;
+    last_broadcast_progress?: number;
+}
+
+export interface CloudUploadTask {
+    id: number;
+    connection_id: number;
+    name: string;
+    type: string;
+    status: UploadTaskStatus;
+    status_value: number;
+    target_path: string;
+    payload: CloudUploadTaskPayload;
+    progress: number;
+    uploaded_chunks_count: number;
+    total_chunks: number;
+    result: { path?: string } | null;
+    error_message: string | null;
+    uploaded_chunks: number[];
+    updated_at: string | null;
+}
+
+export interface UploadQueueItem {
+    key: string;
+    file: File;
+    connectionId: number;
+    path: string;
+    task?: CloudUploadTask;
+    progress: number;
+    status: UploadTaskStatus;
+    error?: string;
+}

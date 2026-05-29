@@ -4,12 +4,17 @@ namespace App\Models;
 
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
+use Database\Factories\CloudTaskFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class CloudTask extends Model
 {
+    /** @use HasFactory<CloudTaskFactory> */
+    use HasFactory;
+
     protected $table = 'cloud_task';
 
     protected $fillable = [
