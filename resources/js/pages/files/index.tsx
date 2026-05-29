@@ -1,12 +1,13 @@
 import { Head, router } from '@inertiajs/react';
 import { Pause, Play, X } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import { useUploadManager } from '@/contexts/UploadManagerContext';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { requestJson } from '@/lib/request-json';
@@ -35,8 +36,18 @@ export default function FileBrowser({
     const [folderName, setFolderName] = useState('');
     const [folderError, setFolderError] = useState<string | null>(null);
     const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
+    const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pausedUploads = useRef(new Set<string>());
+
+    useEffect(() => {
+        uploadManager.registerFileBrowserLocation({
+            connectionId: connection.id,
+            path: decodedPath,
+        });
+
+        return () => uploadManager.registerFileBrowserLocation(null);
+    }, [connection.id, decodedPath, uploadManager]);
 
     const filteredFiles = useMemo(() => {
         if (!searchQuery) {
@@ -180,17 +191,10 @@ export default function FileBrowser({
             return;
         }
 
-        const queueItems = selectedFiles.map((file) => ({
-            key: `${file.name}-${file.size}-${file.lastModified}`,
-            file,
+        uploadManager.enqueue(selectedFiles, {
             connectionId: connection.id,
             path: decodedPath,
-            progress: 0,
-            status: 'pending' as const,
-        }));
-
-        setUploadQueue((items) => [...queueItems, ...items]);
-        queueItems.forEach((item) => void uploadFile(item.key, item.file));
+        });
     };
 
     const pauseUpload = async (item: UploadQueueItem) => {
