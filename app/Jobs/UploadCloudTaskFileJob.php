@@ -124,14 +124,29 @@ class UploadCloudTaskFileJob implements ShouldQueue
             $cache->flushQuota($task->connection);
         } catch (Throwable $exception) {
             $task->forceFill([
-                'status' => CloudTaskStatus::Failed(),
                 'error_message' => $exception->getMessage(),
-                'failed_at' => now(),
             ])->save();
             $broadcaster->broadcastStatus($task);
 
             throw $exception;
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $task = CloudTask::query()->find($this->taskId);
+
+        if ($task === null || ! $task->status->is(CloudTaskStatus::Processing())) {
+            return;
+        }
+
+        $task->forceFill([
+            'status' => CloudTaskStatus::Failed(),
+            'error_message' => $exception?->getMessage() ?? 'Upload job failed.',
+            'failed_at' => now(),
+        ])->save();
+
+        app(CloudUploadTaskBroadcaster::class)->broadcastStatus($task);
     }
 
     private function deleteTempFiles(CloudTask $task, int $totalChunks, string $tempPath): void
