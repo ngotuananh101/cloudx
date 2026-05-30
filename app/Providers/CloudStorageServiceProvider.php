@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\CloudStorageManager;
+use App\Services\CloudStorage\Connectors\FtpConnector;
 use App\Services\CloudStorage\Connectors\GoogleDriveConnector;
 use App\Services\CloudStorage\Connectors\OneDriveConnector;
 use App\Services\OneDrive\OneDriveAdapter;
@@ -41,6 +42,7 @@ class CloudStorageServiceProvider extends ServiceProvider
             return new CloudProviderRegistry([
                 $app->make(GoogleDriveConnector::class),
                 $app->make(OneDriveConnector::class),
+                $app->make(FtpConnector::class),
             ]);
         });
 
