@@ -75,12 +75,16 @@ class CloudConnection extends Model
 
     public function canEditName(): bool
     {
-        return $this->canReconnect();
+        return in_array($this->provider->value, [
+            CloudProvider::GOOGLE_DRIVE,
+            CloudProvider::ONEDRIVE,
+            CloudProvider::FTP,
+        ], true);
     }
 
     public function canEditConnection(): bool
     {
-        return false;
+        return $this->provider->is(CloudProvider::FTP);
     }
 
     public function canDelete(): bool

@@ -2,6 +2,7 @@
 
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
+use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\Connectors\FtpConnector;
@@ -26,6 +27,20 @@ it('reports the expected FTP provider capabilities', function () {
         createFolder: true,
         share: false,
     ));
+});
+
+it('reports editable FTP connection actions without reconnect', function () {
+    $connection = CloudConnection::factory()->make([
+        'provider' => CloudProvider::FTP,
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    expect($connection->actions())->toBe([
+        'canReconnect' => false,
+        'canEditName' => true,
+        'canEditConnection' => true,
+        'canDelete' => true,
+    ]);
 });
 
 it('builds an FTP disk from encrypted connection credentials', function () {

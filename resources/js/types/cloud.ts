@@ -13,6 +13,7 @@ export interface AvailableProvider {
     value: number;
     icon: string;
     status: 'active' | 'disabled' | 'coming-soon';
+    authType: 'oauth' | 'credentials';
     redirectUrl: string | null;
     capabilities: ProviderCapabilities;
 }
