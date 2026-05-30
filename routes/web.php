@@ -5,6 +5,7 @@ use App\Http\Controllers\CloudConnectionController;
 use App\Http\Controllers\CloudFolderController;
 use App\Http\Controllers\CloudUploadTaskChunkController;
 use App\Http\Controllers\CloudUploadTaskController;
+use App\Http\Controllers\FtpConnectionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\StorageBrowserController;
 use Illuminate\Support\Facades\Route;
@@ -25,6 +26,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/connections/{connection}/reconnect', [CloudConnectionController::class, 'reconnect'])->name('cloud-connections.reconnect');
     Route::delete('/connections/{connection}', [CloudConnectionController::class, 'disconnect'])->name('cloud-connections.destroy');
     Route::patch('/connections/{connection}/name', [CloudConnectionController::class, 'updateName'])->name('cloud-connections.name.update');
+    Route::post('/connections/ftp', [FtpConnectionController::class, 'store'])->name('connections.ftp.store');
+    Route::patch('/connections/{connection}/ftp', [FtpConnectionController::class, 'update'])->name('connections.ftp.update');
     Route::delete('/connections/{connection}/cache', [CloudConnectionCacheController::class, 'destroy'])->name('cloud-connections.cache.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
 

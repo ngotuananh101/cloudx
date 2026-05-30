@@ -31,7 +31,15 @@ class FtpConnector implements CloudProviderConnector
 
     public function disk(CloudConnection $connection): Filesystem
     {
-        return Storage::build($this->diskConfig($connection->credentials));
+        return $this->diskFromCredentials($connection->credentials);
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     */
+    public function diskFromCredentials(array $credentials): Filesystem
+    {
+        return Storage::build($this->diskConfig($credentials));
     }
 
     /**
