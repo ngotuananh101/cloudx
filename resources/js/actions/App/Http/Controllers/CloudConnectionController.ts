@@ -1,0 +1,310 @@
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
+/**
+* @see \App\Http\Controllers\CloudConnectionController::redirect
+ * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @route '/oauth/{provider}/redirect'
+ */
+export const redirect = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: redirect.url(args, options),
+    method: 'get',
+})
+
+redirect.definition = {
+    methods: ["get","head"],
+    url: '/oauth/{provider}/redirect',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::redirect
+ * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @route '/oauth/{provider}/redirect'
+ */
+redirect.url = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { provider: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    provider: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        provider: args.provider,
+                }
+
+    return redirect.definition.url
+            .replace('{provider}', parsedArgs.provider.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::redirect
+ * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @route '/oauth/{provider}/redirect'
+ */
+redirect.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: redirect.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\CloudConnectionController::redirect
+ * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @route '/oauth/{provider}/redirect'
+ */
+redirect.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: redirect.url(args, options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::callback
+ * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @route '/oauth/{provider}/callback'
+ */
+export const callback = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: callback.url(args, options),
+    method: 'get',
+})
+
+callback.definition = {
+    methods: ["get","head"],
+    url: '/oauth/{provider}/callback',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::callback
+ * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @route '/oauth/{provider}/callback'
+ */
+callback.url = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { provider: args }
+    }
+
+    
+    if (Array.isArray(args)) {
+        args = {
+                    provider: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        provider: args.provider,
+                }
+
+    return callback.definition.url
+            .replace('{provider}', parsedArgs.provider.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::callback
+ * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @route '/oauth/{provider}/callback'
+ */
+callback.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: callback.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\CloudConnectionController::callback
+ * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @route '/oauth/{provider}/callback'
+ */
+callback.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: callback.url(args, options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+export const reconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: reconnect.url(args, options),
+    method: 'get',
+})
+
+reconnect.definition = {
+    methods: ["get","head"],
+    url: '/connections/{connection}/reconnect',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+reconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { connection: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+            args = { connection: args.id }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    connection: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        connection: typeof args.connection === 'object'
+                ? args.connection.id
+                : args.connection,
+                }
+
+    return reconnect.definition.url
+            .replace('{connection}', parsedArgs.connection.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+reconnect.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: reconnect.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+reconnect.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: reconnect.url(args, options),
+    method: 'head',
+})
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::disconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @route '/connections/{connection}'
+ */
+export const disconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: disconnect.url(args, options),
+    method: 'delete',
+})
+
+disconnect.definition = {
+    methods: ["delete"],
+    url: '/connections/{connection}',
+} satisfies RouteDefinition<["delete"]>
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::disconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @route '/connections/{connection}'
+ */
+disconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { connection: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+            args = { connection: args.id }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    connection: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        connection: typeof args.connection === 'object'
+                ? args.connection.id
+                : args.connection,
+                }
+
+    return disconnect.definition.url
+            .replace('{connection}', parsedArgs.connection.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::disconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @route '/connections/{connection}'
+ */
+disconnect.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+    url: disconnect.url(args, options),
+    method: 'delete',
+})
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::updateName
+ * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @route '/connections/{connection}/name'
+ */
+export const updateName = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: updateName.url(args, options),
+    method: 'patch',
+})
+
+updateName.definition = {
+    methods: ["patch"],
+    url: '/connections/{connection}/name',
+} satisfies RouteDefinition<["patch"]>
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::updateName
+ * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @route '/connections/{connection}/name'
+ */
+updateName.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { connection: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+            args = { connection: args.id }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    connection: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        connection: typeof args.connection === 'object'
+                ? args.connection.id
+                : args.connection,
+                }
+
+    return updateName.definition.url
+            .replace('{connection}', parsedArgs.connection.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\CloudConnectionController::updateName
+ * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @route '/connections/{connection}/name'
+ */
+updateName.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+    url: updateName.url(args, options),
+    method: 'patch',
+})
+const CloudConnectionController = { redirect, callback, reconnect, disconnect, updateName }
+
+export default CloudConnectionController

@@ -33,6 +33,21 @@ export interface CloudConnectionActions {
     canDelete: boolean;
 }
 
+export interface FtpConnectionConfig {
+    host?: string;
+    port?: number;
+    username?: string;
+    root?: string;
+    ssl?: boolean;
+    passive?: boolean;
+    timeout?: number;
+    utf8?: boolean;
+    ignore_passive_address?: boolean;
+    system_type?: 'unix' | 'windows' | null;
+    recurse_manually?: boolean;
+    timestamps_on_unix_listings_enabled?: boolean;
+}
+
 export interface CloudConnection {
     id: number;
     name: string;
@@ -50,6 +65,7 @@ export interface CloudConnection {
     storageQuota?: CloudStorageQuota;
     capabilities?: ProviderCapabilities;
     actions?: CloudConnectionActions;
+    ftp_config?: FtpConnectionConfig;
 }
 
 export interface CloudFile {

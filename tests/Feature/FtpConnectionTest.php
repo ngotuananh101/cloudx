@@ -94,6 +94,33 @@ it('creates FTP connection after testing credentials', function () {
         ->and($connection->credentials)->toMatchArray(ftpCredentials());
 });
 
+it('shares safe FTP config for dashboard connections without password', function () {
+    $this->withoutVite();
+
+    $user = User::factory()->create();
+    CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::FTP,
+        'credentials' => ftpCredentials(['password' => 'super-secret']),
+    ]);
+    CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::GOOGLE_DRIVE,
+        'credentials' => ['access_token' => 'google-token'],
+    ]);
+
+    $response = $this->actingAs($user)->get(route('dashboard'));
+
+    $response->assertOk();
+    $page = $response->viewData('page');
+
+    expect(data_get($page, 'props.auth.user.connections.0.ftp_config.host'))->toBe('ftp.example.test')
+        ->and(data_get($page, 'props.auth.user.connections.0.ftp_config.port'))->toBe(2121)
+        ->and(data_get($page, 'props.auth.user.connections.0.ftp_config.ignore_passive_address'))->toBeFalse()
+        ->and(data_get($page, 'props.auth.user.connections.0.ftp_config.password'))->toBeNull()
+        ->and(data_get($page, 'props.auth.user.connections.1.ftp_config'))->toBeNull();
+});
+
 it('preserves password on update when password is blank', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->create([
