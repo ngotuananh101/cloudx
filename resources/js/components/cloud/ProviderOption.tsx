@@ -3,15 +3,22 @@ import type { AvailableProvider } from '@/types/cloud';
 
 interface ProviderOptionProps {
     provider: AvailableProvider;
+    onSelectCredentialsProvider: (provider: AvailableProvider) => void;
 }
 
 function isSvgIcon(icon: string | null | undefined): icon is string {
     return Boolean(icon?.endsWith('.svg'));
 }
 
-export default function ProviderOption({ provider }: ProviderOptionProps) {
+export default function ProviderOption({
+    provider,
+    onSelectCredentialsProvider,
+}: ProviderOptionProps) {
+    const isSupportedCredentialsProvider =
+        provider.authType === 'credentials' && provider.key === 'ftp';
     const isActive =
-        provider.status === 'active' && Boolean(provider.redirectUrl);
+        provider.status === 'active' &&
+        (isSupportedCredentialsProvider || Boolean(provider.redirectUrl));
 
     const icon = isSvgIcon(provider.icon) ? (
         <img
@@ -51,7 +58,15 @@ export default function ProviderOption({ provider }: ProviderOptionProps) {
         <button
             type="button"
             onClick={() => {
-                window.location.href = provider.redirectUrl as string;
+                if (isSupportedCredentialsProvider) {
+                    onSelectCredentialsProvider(provider);
+
+                    return;
+                }
+
+                if (provider.redirectUrl) {
+                    window.location.href = provider.redirectUrl;
+                }
             }}
             className="group flex w-full items-center justify-between rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-sm transition-all duration-300 hover:border-blue-200 hover:bg-blue-50/20"
         >

@@ -19,12 +19,14 @@ import type { CloudConnection } from '@/types/cloud';
 interface ConnectionActionsMenuProps {
     connection: CloudConnection;
     onEditName: (connection: CloudConnection) => void;
+    onEditConnection: (connection: CloudConnection) => void;
     onDelete: (connection: CloudConnection) => void;
 }
 
 export default function ConnectionActionsMenu({
     connection,
     onEditName,
+    onEditConnection,
     onDelete,
 }: ConnectionActionsMenuProps) {
     const actions = connection.actions;
@@ -77,7 +79,12 @@ export default function ConnectionActionsMenu({
                     </DropdownMenuItem>
                 )}
                 {actions.canEditConnection && (
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                        onSelect={(event) => {
+                            event.preventDefault();
+                            onEditConnection(connection);
+                        }}
+                    >
                         <Settings2 className="h-4 w-4" />
                         Edit connection
                     </DropdownMenuItem>

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Enums\CloudProvider;
+use App\Models\CloudConnection;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -47,8 +48,8 @@ class HandleInertiaRequests extends Middleware
                     'connections' => $request->user()->cloudConnections()
                         ->latest()
                         ->get()
-                        ->map(function ($connection) {
-                            return [
+                        ->map(function (CloudConnection $connection): array {
+                            $payload = [
                                 'id' => $connection->id,
                                 'name' => $connection->name,
                                 'provider' => $connection->provider->description,
@@ -58,6 +59,14 @@ class HandleInertiaRequests extends Middleware
                                 'status_value' => $connection->status->value,
                                 'actions' => $connection->actions(),
                             ];
+
+                            if ($connection->provider->is(CloudProvider::FTP)) {
+                                $payload['ftp_config'] = collect($connection->credentials)
+                                    ->except('password')
+                                    ->all();
+                            }
+
+                            return $payload;
                         }),
                 ] : null,
             ],

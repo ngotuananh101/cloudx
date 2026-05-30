@@ -17,6 +17,7 @@ import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
 import ConnectionNavItem from '@/components/cloud/ConnectionNavItem';
 import DeleteConnectionDialog from '@/components/cloud/DeleteConnectionDialog';
 import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialog';
+import EditFtpConnectionDialog from '@/components/cloud/EditFtpConnectionDialog';
 import UploadProgressPanel from '@/components/files/UploadProgressPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -58,6 +59,8 @@ export default function AuthenticatedLayout({
               url.startsWith(storageIndex.url({ connection: connection.id })),
           );
     const [connectionBeingRenamed, setConnectionBeingRenamed] =
+        useState<CloudConnection | null>(null);
+    const [connectionBeingEdited, setConnectionBeingEdited] =
         useState<CloudConnection | null>(null);
     const [connectionBeingDeleted, setConnectionBeingDeleted] =
         useState<CloudConnection | null>(null);
@@ -128,6 +131,9 @@ export default function AuthenticatedLayout({
                                                 isActive={isActive}
                                                 onEditName={
                                                     setConnectionBeingRenamed
+                                                }
+                                                onEditConnection={
+                                                    setConnectionBeingEdited
                                                 }
                                                 onDelete={
                                                     setConnectionBeingDeleted
@@ -317,6 +323,10 @@ export default function AuthenticatedLayout({
             <EditConnectionNameDialog
                 connection={connectionBeingRenamed}
                 onClose={() => setConnectionBeingRenamed(null)}
+            />
+            <EditFtpConnectionDialog
+                connection={connectionBeingEdited}
+                onClose={() => setConnectionBeingEdited(null)}
             />
             <DeleteConnectionDialog
                 connection={connectionBeingDeleted}

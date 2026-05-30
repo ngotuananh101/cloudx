@@ -45,13 +45,14 @@ class HomeController extends Controller
     }
 
     /**
-     * @return array<int, array{key: string, label: string, value: int, icon: string, status: string, redirectUrl: string, capabilities: array{browse: bool, upload: bool, download: bool, delete: bool, createFolder: bool, share: bool}}>
+     * @return array<int, array{key: string, label: string, value: int, icon: string, status: string, authType: 'oauth'|'credentials', redirectUrl: string|null, capabilities: array{browse: bool, upload: bool, download: bool, delete: bool, createFolder: bool, share: bool}}>
      */
     public function availableProviders(): array
     {
         return collect($this->cloudStorageManager->connectors())
             ->map(function ($connector): array {
                 $provider = $connector->provider();
+                $authType = $provider->is(CloudProvider::FTP) ? 'credentials' : 'oauth';
 
                 return [
                     'key' => $provider->slug(),
@@ -59,7 +60,10 @@ class HomeController extends Controller
                     'value' => $provider->value,
                     'icon' => CloudProvider::getIcon($provider->value),
                     'status' => 'active',
-                    'redirectUrl' => route('oauth.redirect', ['provider' => $provider->slug()]),
+                    'authType' => $authType,
+                    'redirectUrl' => $authType === 'oauth'
+                        ? route('oauth.redirect', ['provider' => $provider->slug()])
+                        : null,
                     'capabilities' => $connector->capabilities()->toArray(),
                 ];
             })

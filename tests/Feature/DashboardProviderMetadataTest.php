@@ -11,6 +11,8 @@ use Inertia\Testing\AssertableInertia as Assert;
 uses(RefreshDatabase::class);
 
 it('provides available cloud provider metadata to the dashboard', function () {
+    $this->withoutVite();
+
     $user = User::factory()->create([
         'email_verified_at' => now(),
     ]);
@@ -37,10 +39,22 @@ it('provides available cloud provider metadata to the dashboard', function () {
         share: false,
     ));
 
+    $ftpConnector = Mockery::mock(CloudProviderConnector::class);
+    $ftpConnector->shouldReceive('provider')->andReturn(CloudProvider::FTP());
+    $ftpConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
+        browse: true,
+        upload: true,
+        download: true,
+        delete: true,
+        createFolder: true,
+        share: false,
+    ));
+
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connectors')->once()->andReturn([
         $googleConnector,
         $oneDriveConnector,
+        $ftpConnector,
     ]);
 
     $this->app->instance(CloudStorageManager::class, $manager);
@@ -51,12 +65,13 @@ it('provides available cloud provider metadata to the dashboard', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('dashboard')
-            ->has('availableProviders', 2)
+            ->has('availableProviders', 3)
             ->where('availableProviders.0.key', 'google-drive')
             ->where('availableProviders.0.label', 'Google Drive')
             ->where('availableProviders.0.value', CloudProvider::GOOGLE_DRIVE)
             ->where('availableProviders.0.icon', '/assets/svg/GoogleDrive.svg')
             ->where('availableProviders.0.status', 'active')
+            ->where('availableProviders.0.authType', 'oauth')
             ->where('availableProviders.0.redirectUrl', route('oauth.redirect', ['provider' => 'google-drive']))
             ->where('availableProviders.0.capabilities', [
                 'browse' => true,
@@ -71,8 +86,24 @@ it('provides available cloud provider metadata to the dashboard', function () {
             ->where('availableProviders.1.value', CloudProvider::ONEDRIVE)
             ->where('availableProviders.1.icon', '/assets/svg/OneDrive.svg')
             ->where('availableProviders.1.status', 'active')
+            ->where('availableProviders.1.authType', 'oauth')
             ->where('availableProviders.1.redirectUrl', route('oauth.redirect', ['provider' => 'onedrive']))
             ->where('availableProviders.1.capabilities', [
+                'browse' => true,
+                'upload' => true,
+                'download' => true,
+                'delete' => true,
+                'createFolder' => true,
+                'share' => false,
+            ])
+            ->where('availableProviders.2.key', 'ftp')
+            ->where('availableProviders.2.label', 'FTP Server')
+            ->where('availableProviders.2.value', CloudProvider::FTP)
+            ->where('availableProviders.2.icon', '/assets/svg/Ftp.svg')
+            ->where('availableProviders.2.status', 'active')
+            ->where('availableProviders.2.authType', 'credentials')
+            ->where('availableProviders.2.redirectUrl', null)
+            ->where('availableProviders.2.capabilities', [
                 'browse' => true,
                 'upload' => true,
                 'download' => true,
