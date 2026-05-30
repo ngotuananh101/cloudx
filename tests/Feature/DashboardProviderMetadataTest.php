@@ -11,6 +11,8 @@ use Inertia\Testing\AssertableInertia as Assert;
 uses(RefreshDatabase::class);
 
 it('provides available cloud provider metadata to the dashboard', function () {
+    $this->withoutVite();
+
     $user = User::factory()->create([
         'email_verified_at' => now(),
     ]);
