@@ -9,6 +9,7 @@ use App\Http\Controllers\FtpConnectionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SftpConnectionController;
 use App\Http\Controllers\StorageBrowserController;
+use App\Http\Controllers\System\CloudTaskController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
@@ -16,6 +17,7 @@ require __DIR__.'/auth.php';
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::get('/dashboard', HomeController::class)->name('dashboard');
+    Route::get('/system/cloud-tasks', CloudTaskController::class)->name('system.cloud-tasks.index');
 
     // Cloud Storage Browsing Route
     Route::get('/storage/{connection}/{path?}', [StorageBrowserController::class, 'index'])

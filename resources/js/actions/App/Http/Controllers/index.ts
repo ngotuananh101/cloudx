@@ -1,5 +1,6 @@
 import Auth from './Auth'
 import HomeController from './HomeController'
+import System from './System'
 import StorageBrowserController from './StorageBrowserController'
 import CloudConnectionController from './CloudConnectionController'
 import FtpConnectionController from './FtpConnectionController'
@@ -11,6 +12,7 @@ import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
 const Controllers = {
     Auth: Object.assign(Auth, Auth),
 HomeController: Object.assign(HomeController, HomeController),
+System: Object.assign(System, System),
 StorageBrowserController: Object.assign(StorageBrowserController, StorageBrowserController),
 CloudConnectionController: Object.assign(CloudConnectionController, CloudConnectionController),
 FtpConnectionController: Object.assign(FtpConnectionController, FtpConnectionController),

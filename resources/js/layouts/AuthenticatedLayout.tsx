@@ -8,8 +8,8 @@ import {
     Bell,
     FolderPlus,
     Search,
-    Settings2,
     Upload,
+    ListTodo,
 } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -193,13 +193,18 @@ export default function AuthenticatedLayout({
                         </div>
                         <ul className="space-y-1">
                             <li>
-                                <a
-                                    href="#"
-                                    className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                                <Link
+                                    href="/system/cloud-tasks"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/cloud-tasks') ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
                                 >
-                                    <Settings2 className="h-4.5 w-4.5 text-gray-400" />
-                                    SETTINGS
-                                </a>
+                                    {url.startsWith('/system/cloud-tasks') && (
+                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-brand" />
+                                    )}
+                                    <ListTodo
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-brand' : 'text-gray-400'}`}
+                                    />
+                                    TASKS
+                                </Link>
                             </li>
                         </ul>
                     </div>
