@@ -91,7 +91,7 @@ jobs:
           REMOTE_PORT: ${{ secrets.SERVER_PORT || 22 }}
           TARGET: ${{ secrets.DEPLOY_PATH }}
           # Exclude files/folders that shouldn't be overridden or uploaded
-          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/, /deploy.sh"
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/, /deploy.sh, /.user.ini, /.htaccess"
 
       - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1
