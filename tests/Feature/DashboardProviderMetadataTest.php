@@ -114,3 +114,16 @@ it('provides available cloud provider metadata to the dashboard', function () {
             ->has('connections')
         );
 });
+
+it('marks sftp as a credential based provider', function () {
+    $user = User::factory()->create();
+
+    $response = $this->actingAs($user)->get('/dashboard');
+
+    $providers = collect($response->viewData('page')['props']['availableProviders']);
+    $sftp = $providers->firstWhere('key', 'sftp');
+
+    expect($sftp)->not->toBeNull()
+        ->and($sftp['authType'])->toBe('credentials')
+        ->and($sftp['redirectUrl'])->toBeNull();
+});

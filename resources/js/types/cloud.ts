@@ -48,6 +48,17 @@ export interface FtpConnectionConfig {
     timestamps_on_unix_listings_enabled?: boolean;
 }
 
+export interface SftpConnectionConfig {
+    host?: string;
+    port?: number;
+    username?: string;
+    root?: string;
+    hostFingerprint?: string;
+    timeout?: number;
+    maxTries?: number;
+}
+
+
 export interface CloudConnection {
     id: number;
     name: string;
@@ -66,6 +77,7 @@ export interface CloudConnection {
     capabilities?: ProviderCapabilities;
     actions?: CloudConnectionActions;
     ftp_config?: FtpConnectionConfig;
+    sftp_config?: SftpConnectionConfig;
 }
 
 export interface CloudFile {

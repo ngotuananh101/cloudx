@@ -18,6 +18,7 @@ import ConnectionNavItem from '@/components/cloud/ConnectionNavItem';
 import DeleteConnectionDialog from '@/components/cloud/DeleteConnectionDialog';
 import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialog';
 import EditFtpConnectionDialog from '@/components/cloud/EditFtpConnectionDialog';
+import EditSftpConnectionDialog from '@/components/cloud/EditSftpConnectionDialog';
 import UploadProgressPanel from '@/components/files/UploadProgressPanel';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -325,7 +326,11 @@ export default function AuthenticatedLayout({
                 onClose={() => setConnectionBeingRenamed(null)}
             />
             <EditFtpConnectionDialog
-                connection={connectionBeingEdited}
+                connection={connectionBeingEdited?.type === 'ftp' ? connectionBeingEdited : null}
+                onClose={() => setConnectionBeingEdited(null)}
+            />
+            <EditSftpConnectionDialog
+                connection={connectionBeingEdited?.type === 'sftp' ? connectionBeingEdited : null}
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <DeleteConnectionDialog

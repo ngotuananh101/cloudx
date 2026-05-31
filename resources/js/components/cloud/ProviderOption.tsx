@@ -15,7 +15,7 @@ export default function ProviderOption({
     onSelectCredentialsProvider,
 }: ProviderOptionProps) {
     const isSupportedCredentialsProvider =
-        provider.authType === 'credentials' && provider.key === 'ftp';
+        provider.authType === 'credentials' && (provider.key === 'ftp' || provider.key === 'sftp');
     const isActive =
         provider.status === 'active' &&
         (isSupportedCredentialsProvider || Boolean(provider.redirectUrl));

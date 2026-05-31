@@ -52,7 +52,7 @@ class HomeController extends Controller
         return collect($this->cloudStorageManager->connectors())
             ->map(function ($connector): array {
                 $provider = $connector->provider();
-                $authType = $provider->is(CloudProvider::FTP) ? 'credentials' : 'oauth';
+                $authType = $provider->is(CloudProvider::FTP) || $provider->is(CloudProvider::SFTP) ? 'credentials' : 'oauth';
 
                 return [
                     'key' => $provider->slug(),

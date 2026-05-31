@@ -79,12 +79,16 @@ class CloudConnection extends Model
             CloudProvider::GOOGLE_DRIVE,
             CloudProvider::ONEDRIVE,
             CloudProvider::FTP,
+            CloudProvider::SFTP,
         ], true);
     }
 
     public function canEditConnection(): bool
     {
-        return $this->provider->is(CloudProvider::FTP);
+        return in_array($this->provider->value, [
+            CloudProvider::FTP,
+            CloudProvider::SFTP,
+        ], true);
     }
 
     public function canDelete(): bool

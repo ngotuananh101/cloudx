@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { useState } from 'react';
 import FtpConnectionForm from '@/components/cloud/FtpConnectionForm';
+import SftpConnectionForm from '@/components/cloud/SftpConnectionForm';
 import ProviderOption from '@/components/cloud/ProviderOption';
 import type { AvailableProvider } from '@/types/cloud';
 
@@ -17,6 +18,8 @@ export default function ConnectStorageModal({
         useState<AvailableProvider | null>(null);
 
     const isFtpSelected = selectedCredentialsProvider?.key === 'ftp';
+    const isSftpSelected = selectedCredentialsProvider?.key === 'sftp';
+    const isCredentialsSelected = isFtpSelected || isSftpSelected;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm">
@@ -24,7 +27,7 @@ export default function ConnectStorageModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="connect-storage-modal-title"
-                className={`relative w-full overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl transition-all ${isFtpSelected ? 'max-w-2xl' : 'max-w-md'}`}
+                className={`relative w-full overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl transition-all ${isCredentialsSelected ? 'max-w-2xl' : 'max-w-md'}`}
             >
                 <button
                     type="button"
@@ -40,21 +43,32 @@ export default function ConnectStorageModal({
                         id="connect-storage-modal-title"
                         className="text-xl font-extrabold tracking-tight text-gray-900"
                     >
-                        {isFtpSelected ? 'Connect FTP' : 'Connect Storage'}
+                        {isFtpSelected && 'Connect FTP'}
+                        {isSftpSelected && 'Connect SFTP'}
+                        {!isCredentialsSelected && 'Connect Storage'}
                     </h3>
                     <p className="mt-1 text-xs text-gray-400">
-                        {isFtpSelected
-                            ? 'Enter your FTP server credentials to test and link the connection'
+                        {isCredentialsSelected
+                            ? `Enter your ${isFtpSelected ? 'FTP' : 'SFTP'} server credentials to test and link the connection`
                             : 'Select a cloud storage provider to link your account'}
                     </p>
                 </div>
 
-                {isFtpSelected ? (
+                {isFtpSelected && (
                     <FtpConnectionForm
                         onCancel={() => setSelectedCredentialsProvider(null)}
                         onSuccess={onClose}
                     />
-                ) : (
+                )}
+                
+                {isSftpSelected && (
+                    <SftpConnectionForm
+                        onCancel={() => setSelectedCredentialsProvider(null)}
+                        onSuccess={onClose}
+                    />
+                )}
+                
+                {!isCredentialsSelected && (
                     <div className="space-y-3">
                         {providers.map((provider) => (
                             <ProviderOption

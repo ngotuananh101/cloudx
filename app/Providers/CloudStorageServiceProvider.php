@@ -8,6 +8,7 @@ use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Connectors\FtpConnector;
 use App\Services\CloudStorage\Connectors\GoogleDriveConnector;
 use App\Services\CloudStorage\Connectors\OneDriveConnector;
+use App\Services\CloudStorage\Connectors\SftpConnector;
 use App\Services\OneDrive\OneDriveAdapter;
 use App\Services\OneDrive\OneDriveClient;
 use Google\Client;
@@ -43,6 +44,7 @@ class CloudStorageServiceProvider extends ServiceProvider
                 $app->make(GoogleDriveConnector::class),
                 $app->make(OneDriveConnector::class),
                 $app->make(FtpConnector::class),
+                $app->make(SftpConnector::class),
             ]);
         });
 
