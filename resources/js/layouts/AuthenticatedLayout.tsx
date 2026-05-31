@@ -326,11 +326,11 @@ export default function AuthenticatedLayout({
                 onClose={() => setConnectionBeingRenamed(null)}
             />
             <EditFtpConnectionDialog
-                connection={connectionBeingEdited?.type === 'ftp' ? connectionBeingEdited : null}
+                connection={connectionBeingEdited?.provider_value === 5 ? connectionBeingEdited : null}
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <EditSftpConnectionDialog
-                connection={connectionBeingEdited?.type === 'sftp' ? connectionBeingEdited : null}
+                connection={connectionBeingEdited?.provider_value === 6 ? connectionBeingEdited : null}
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <DeleteConnectionDialog
