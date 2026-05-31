@@ -181,7 +181,7 @@ function TaskDetailModal({
                                     <span className="font-medium text-gray-500">
                                         {label}
                                     </span>
-                                    <span className="text-right font-medium text-gray-600">
+                                    <span className="text-right font-medium text-gray-900">
                                         {formatDate(value)}
                                     </span>
                                 </div>

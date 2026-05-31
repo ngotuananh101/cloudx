@@ -7,14 +7,17 @@ use App\Models\CloudConnection;
 use App\Models\CloudTask;
 use App\Models\User;
 use App\Services\CloudStorage\CloudStorageCache;
+use App\Services\CloudStorage\CloudStorageManager;
 use App\Support\CloudUploadTaskBroadcaster;
 use App\Support\CloudUploadTaskData;
 use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Pusher\Pusher;
 
 it('authorizes users to subscribe to their cloud task channel', function () {
@@ -207,6 +210,64 @@ it('does not start processing after a queued upload task is cancelled', function
         ->and($task->processing_at)->toBeNull();
 
     Event::assertNotDispatched(CloudUploadTaskUpdated::class);
+});
+
+it('marks an upload task as failed when provider upload fails', function () {
+    config()->set('cloud-storage.uploads.temp_disk', 'local');
+    config()->set('cloud-storage.uploads.temp_path', 'testing-cloud-task-uploads');
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->for($user)->create();
+    $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
+        'status' => CloudTaskStatus::Queued(),
+        'target_path' => 'documents',
+        'name' => 'proposal.pdf',
+        'payload' => [
+            'filename' => 'proposal.pdf',
+            'total_chunks' => 1,
+        ],
+    ]);
+    $task->chunks()->create([
+        'index' => 0,
+        'size' => 12,
+        'checksum' => null,
+    ]);
+
+    Storage::disk('local')->put('testing-cloud-task-uploads/'.$task->id.'/0.part', 'file-content');
+
+    $disk = Mockery::mock(Filesystem::class);
+    $disk->shouldReceive('writeStream')
+        ->once()
+        ->andThrow(new RuntimeException('cURL error 60: SSL certificate problem'));
+
+    $manager = Mockery::mock(CloudStorageManager::class);
+    $manager->shouldReceive('disk')
+        ->once()
+        ->with(Mockery::on(fn (CloudConnection $cloudConnection): bool => $cloudConnection->is($connection)))
+        ->andReturn($disk);
+    $this->app->instance(CloudStorageManager::class, $manager);
+
+    $cache = Mockery::mock(CloudStorageCache::class);
+    $cache->shouldNotReceive('flushFolder');
+    $cache->shouldNotReceive('flushQuota');
+
+    Event::fake([CloudUploadTaskUpdated::class]);
+
+    expect(fn () => (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster))
+        ->toThrow(RuntimeException::class, 'cURL error 60');
+
+    $task->refresh();
+
+    expect($task->status->is(CloudTaskStatus::Failed()))->toBeTrue()
+        ->and($task->error_message)->toBe('cURL error 60: SSL certificate problem')
+        ->and($task->failed_at)->not->toBeNull();
+
+    Event::assertDispatched(CloudUploadTaskUpdated::class, function (CloudUploadTaskUpdated $event) use ($task): bool {
+        return $event->task->is($task)
+            && $event->task->status->is(CloudTaskStatus::Failed());
+    });
+
+    Storage::disk('local')->deleteDirectory('testing-cloud-task-uploads');
 });
 
 it('does not cancel an upload task after processing starts', function () {

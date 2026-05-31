@@ -124,7 +124,9 @@ class UploadCloudTaskFileJob implements ShouldQueue
             $cache->flushQuota($task->connection);
         } catch (Throwable $exception) {
             $task->forceFill([
+                'status' => CloudTaskStatus::Failed(),
                 'error_message' => $exception->getMessage(),
+                'failed_at' => now(),
             ])->save();
             $broadcaster->broadcastStatus($task);
 
