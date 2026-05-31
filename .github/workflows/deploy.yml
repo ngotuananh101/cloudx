@@ -84,7 +84,7 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          ARGS: "-avzr --delete"
+          ARGS: "-avzr --delete --no-o --no-g"
           SOURCE: "./"
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
@@ -127,7 +127,8 @@ jobs:
             php artisan queue:restart || true
             
             
-            # Fix permissions (fallback)
+            # Fix ownership and permissions
+            chown -R www:www . || true
             chmod -R 775 storage bootstrap/cache || true
             
             # Disable maintenance mode
