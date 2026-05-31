@@ -28,7 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '22'
-      
+
       - name: Install pnpm
         run: npm install -g pnpm
 
@@ -76,7 +76,7 @@ jobs:
         run: |
           composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
           pnpm install --frozen-lockfile
-          
+
       - name: Build frontend assets
         run: pnpm run build
 
@@ -84,14 +84,14 @@ jobs:
         uses: easingthemes/ssh-deploy@main
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
-          ARGS: "-avzr --delete --no-o --no-g"
-          SOURCE: "./"
+          ARGS: '-avzr --delete --no-o --no-g'
+          SOURCE: './'
           REMOTE_HOST: ${{ secrets.SERVER_HOST }}
           REMOTE_USER: ${{ secrets.SERVER_USER }}
           REMOTE_PORT: ${{ secrets.SERVER_PORT || 22 }}
           TARGET: ${{ secrets.DEPLOY_PATH }}
           # Exclude files/folders that shouldn't be overridden or uploaded
-          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/, /deploy.sh, /.user.ini, /.htaccess"
+          EXCLUDE: '/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/, /deploy.sh, /.user.ini, /.htaccess, /public/.user.ini'
 
       - name: Run post-deploy commands
         uses: appleboy/ssh-action@v1
@@ -102,35 +102,35 @@ jobs:
           port: ${{ secrets.SERVER_PORT || 22 }}
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
-            
+
             # Ensure required storage and bootstrap cache directories exist
             mkdir -p storage/framework/{sessions,views,cache}
             mkdir -p storage/logs
             mkdir -p bootstrap/cache
             chmod -R 775 storage bootstrap/cache || true
-            
+
             # Enable maintenance mode
             php artisan down --retry=30 --refresh=15 || true
-            
+
             # Run migrations
             php artisan migrate --force
-            
+
             # Optimize caches
             php artisan optimize:clear
             php artisan config:cache
             php artisan route:cache
             php artisan view:cache
             php artisan event:cache
-            
+
             # Restart queue & storage link
             php artisan storage:link || true
             php artisan queue:restart || true
-            
-            
+
+
             # Fix ownership and permissions
             chown -R www:www . || true
             chmod -R 775 storage bootstrap/cache || true
-            
+
             # Disable maintenance mode
             php artisan up || true
 
