@@ -1,10 +1,10 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudFolderController::store
  * @see app/Http/Controllers/CloudFolderController.php:15
  * @route '/connections/{connection}/folders'
  */
-export const store = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const store = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -19,7 +19,7 @@ store.definition = {
  * @see app/Http/Controllers/CloudFolderController.php:15
  * @route '/connections/{connection}/folders'
  */
-store.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+store.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -52,10 +52,32 @@ store.url = (args: { connection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/CloudFolderController.php:15
  * @route '/connections/{connection}/folders'
  */
-store.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+store.post = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
+
+    /**
+* @see \App\Http\Controllers\CloudFolderController::store
+ * @see app/Http/Controllers/CloudFolderController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+    const storeForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: store.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\CloudFolderController::store
+ * @see app/Http/Controllers/CloudFolderController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+        storeForm.post = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: store.url(args, options),
+            method: 'post',
+        })
+    
+    store.form = storeForm
 const CloudFolderController = { store }
 
 export default CloudFolderController

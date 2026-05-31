@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\FtpConnectionController::store
  * @see app/Http/Controllers/FtpConnectionController.php:19
@@ -33,12 +33,33 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     method: 'post',
 })
 
+    /**
+* @see \App\Http\Controllers\FtpConnectionController::store
+ * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @route '/connections/ftp'
+ */
+    const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: store.url(options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\FtpConnectionController::store
+ * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @route '/connections/ftp'
+ */
+        storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: store.url(options),
+            method: 'post',
+        })
+    
+    store.form = storeForm
 /**
 * @see \App\Http\Controllers\FtpConnectionController::update
  * @see app/Http/Controllers/FtpConnectionController.php:41
  * @route '/connections/{connection}/ftp'
  */
-export const update = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const update = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -53,7 +74,7 @@ update.definition = {
  * @see app/Http/Controllers/FtpConnectionController.php:41
  * @route '/connections/{connection}/ftp'
  */
-update.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -86,10 +107,42 @@ update.url = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/FtpConnectionController.php:41
  * @route '/connections/{connection}/ftp'
  */
-update.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
+
+    /**
+* @see \App\Http\Controllers\FtpConnectionController::update
+ * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @route '/connections/{connection}/ftp'
+ */
+    const updateForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: update.url(args, {
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'PATCH',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\FtpConnectionController::update
+ * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @route '/connections/{connection}/ftp'
+ */
+        updateForm.patch = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: update.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'PATCH',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    update.form = updateForm
 const FtpConnectionController = { store, update }
 
 export default FtpConnectionController

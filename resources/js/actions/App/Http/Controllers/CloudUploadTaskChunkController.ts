@@ -1,10 +1,10 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudUploadTaskChunkController::store
  * @see app/Http/Controllers/CloudUploadTaskChunkController.php:22
  * @route '/connections/{connection}/upload-tasks/{task}/chunks'
  */
-export const store = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const store = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -19,7 +19,7 @@ store.definition = {
  * @see app/Http/Controllers/CloudUploadTaskChunkController.php:22
  * @route '/connections/{connection}/upload-tasks/{task}/chunks'
  */
-store.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
+store.url = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     connection: args[0],
@@ -49,10 +49,32 @@ store.url = (args: { connection: string | number | { id: string | number }, task
  * @see app/Http/Controllers/CloudUploadTaskChunkController.php:22
  * @route '/connections/{connection}/upload-tasks/{task}/chunks'
  */
-store.post = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+store.post = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
+
+    /**
+* @see \App\Http\Controllers\CloudUploadTaskChunkController::store
+ * @see app/Http/Controllers/CloudUploadTaskChunkController.php:22
+ * @route '/connections/{connection}/upload-tasks/{task}/chunks'
+ */
+    const storeForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: store.url(args, options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\CloudUploadTaskChunkController::store
+ * @see app/Http/Controllers/CloudUploadTaskChunkController.php:22
+ * @route '/connections/{connection}/upload-tasks/{task}/chunks'
+ */
+        storeForm.post = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: store.url(args, options),
+            method: 'post',
+        })
+    
+    store.form = storeForm
 const CloudUploadTaskChunkController = { store }
 
 export default CloudUploadTaskChunkController
