@@ -1,6 +1,13 @@
 import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { store } from '@/routes/connections/ftp';
 
 interface FtpConnectionFormProps {
@@ -8,7 +15,7 @@ interface FtpConnectionFormProps {
     onSuccess: () => void;
 }
 
-type IgnorePassiveAddress = '' | 'true' | 'false';
+type IgnorePassiveAddress = 'default' | 'true' | 'false';
 type SystemType = 'auto' | 'unix' | 'windows';
 
 interface FtpConnectionFormData {
@@ -29,7 +36,7 @@ interface FtpConnectionFormData {
 }
 
 const booleanOptions = [
-    { label: 'Default', value: '' },
+    { label: 'Default', value: 'default' },
     { label: 'Yes', value: 'true' },
     { label: 'No', value: 'false' },
 ] as const;
@@ -57,7 +64,7 @@ export default function FtpConnectionForm({
         passive: true,
         timeout: '',
         utf8: false,
-        ignorePassiveAddress: '',
+        ignorePassiveAddress: 'default',
         systemType: 'auto',
         recurseManually: false,
         timestampsOnUnixListingsEnabled: true,
@@ -237,53 +244,64 @@ export default function FtpConnectionForm({
                             label="Ignore passive address"
                             error={form.errors.ignorePassiveAddress}
                         >
-                            <select
-                                id="ftp-ignore-passive-address"
+                            <Select
                                 value={form.data.ignorePassiveAddress}
-                                onChange={(event) =>
+                                onValueChange={(value) =>
                                     form.setData(
                                         'ignorePassiveAddress',
-                                        event.target
-                                            .value as IgnorePassiveAddress,
+                                        value as IgnorePassiveAddress,
                                     )
                                 }
-                                className={inputClassName}
                             >
-                                {booleanOptions.map((option) => (
-                                    <option
-                                        key={option.label}
-                                        value={option.value}
-                                    >
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="ftp-ignore-passive-address"
+                                    className="w-full"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {booleanOptions.map((option) => (
+                                        <SelectItem
+                                            key={option.label}
+                                            value={option.value}
+                                        >
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </Field>
 
                         <Field
                             label="System type"
                             error={form.errors.systemType}
                         >
-                            <select
-                                id="ftp-system-type"
+                            <Select
                                 value={form.data.systemType}
-                                onChange={(event) =>
+                                onValueChange={(value) =>
                                     form.setData(
                                         'systemType',
-                                        event.target.value as SystemType,
+                                        value as SystemType,
                                     )
                                 }
-                                className={inputClassName}
                             >
-                                {systemTypeOptions.map((option) => (
-                                    <option
-                                        key={option.value}
-                                        value={option.value}
-                                    >
-                                        {option.label}
-                                    </option>
-                                ))}
-                            </select>
+                                <SelectTrigger
+                                    id="ftp-system-type"
+                                    className="w-full"
+                                >
+                                    <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {systemTypeOptions.map((option) => (
+                                        <SelectItem
+                                            key={option.value}
+                                            value={option.value}
+                                        >
+                                            {option.label}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </Field>
 
                         <CheckboxField
@@ -293,6 +311,7 @@ export default function FtpConnectionForm({
                                 form.setData('utf8', checked)
                             }
                             error={form.errors.utf8}
+                            alignWithFields
                         />
                         <CheckboxField
                             label="Recurse manually"
@@ -301,6 +320,7 @@ export default function FtpConnectionForm({
                                 form.setData('recurseManually', checked)
                             }
                             error={form.errors.recurseManually}
+                            alignWithFields
                         />
                         <CheckboxField
                             label="Unix listing timestamps"
@@ -312,6 +332,7 @@ export default function FtpConnectionForm({
                                 )
                             }
                             error={form.errors.timestampsOnUnixListingsEnabled}
+                            alignWithFields
                         />
                     </div>
                 )}
@@ -322,14 +343,14 @@ export default function FtpConnectionForm({
                     type="button"
                     onClick={onCancel}
                     disabled={processing}
-                    className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
+                    className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
                 >
                     Back
                 </button>
                 <button
                     type="submit"
                     disabled={processing}
-                    className="rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
                 >
                     {processing ? 'Testing connection...' : 'Connect FTP'}
                 </button>
@@ -345,7 +366,7 @@ function payload(data: FtpConnectionFormData) {
         root: data.root || null,
         timeout: data.timeout ? Number(data.timeout) : null,
         ignorePassiveAddress:
-            data.ignorePassiveAddress === ''
+            data.ignorePassiveAddress === 'default'
                 ? null
                 : data.ignorePassiveAddress === 'true',
         systemType: data.systemType === 'auto' ? null : data.systemType,
@@ -389,15 +410,18 @@ function CheckboxField({
     checked,
     onChange,
     error,
+    alignWithFields = false,
 }: {
     label: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
     error?: string;
+    alignWithFields?: boolean;
 }) {
     return (
-        <div className="space-y-1">
-            <label className="flex items-center gap-3 rounded-xl border border-gray-100 bg-white px-3 py-2 text-sm font-bold text-gray-700">
+        <div className="space-y-2">
+            {alignWithFields && <div className="h-4" aria-hidden="true" />}
+            <label className="flex h-10 items-center gap-3 rounded-md border border-gray-100 bg-white px-3 text-sm font-bold text-gray-700">
                 <input
                     type="checkbox"
                     checked={checked}
@@ -422,4 +446,4 @@ function getChildId(children: React.ReactNode): string | undefined {
 }
 
 const inputClassName =
-    'h-10 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100';
+    'h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100';

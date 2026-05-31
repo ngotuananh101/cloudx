@@ -38,7 +38,7 @@ export default function EditConnectionNameDialog({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
             <form
                 onSubmit={submit}
                 className="w-full max-w-sm rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl"

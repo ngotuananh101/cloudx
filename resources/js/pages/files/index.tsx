@@ -138,7 +138,7 @@ export default function FileBrowser({
             />
 
             {isCreateFolderOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
                     <form
                         onSubmit={createFolder}
                         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
