@@ -103,6 +103,12 @@ jobs:
           script: |
             cd ${{ secrets.DEPLOY_PATH }}
             
+            # Ensure required storage and bootstrap cache directories exist
+            mkdir -p storage/framework/{sessions,views,cache}
+            mkdir -p storage/logs
+            mkdir -p bootstrap/cache
+            chmod -R 775 storage bootstrap/cache || true
+            
             # Enable maintenance mode
             php artisan down --retry=30 --refresh=15 || true
             
