@@ -56,7 +56,7 @@ class SftpConnector implements CloudProviderConnector
             'privateKey' => $credentials['privateKey'] ?? null,
             'passphrase' => $credentials['passphrase'] ?? null,
             'port' => (int) ($credentials['port'] ?? 22),
-            'root' => $credentials['root'] ?? '',
+            'root' => empty($credentials['root']) ? '/' : $credentials['root'],
             'timeout' => (int) ($credentials['timeout'] ?? 30),
             'useAgent' => (bool) ($credentials['useAgent'] ?? false),
             'hostFingerprint' => $credentials['hostFingerprint'] ?? null,
