@@ -237,7 +237,7 @@ it('renders an empty file list and flashes an error when browsing fails', functi
     $connector->shouldReceive('capabilities')->once()->andReturn(new ProviderCapabilities(true, true, true, true, true, false));
 
     $manager = Mockery::mock(CloudStorageManager::class);
-    $manager->shouldReceive('connector')->once()->andReturn($connector);
+    $manager->shouldReceive('connector')->twice()->andReturn($connector);
 
     $this->app->instance(CloudFileBrowser::class, $browser);
     $this->app->instance(CloudStorageManager::class, $manager);

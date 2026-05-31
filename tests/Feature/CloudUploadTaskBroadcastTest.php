@@ -33,7 +33,7 @@ it('authorizes users to subscribe to their cloud task channel', function () {
     {
         public function __construct() {}
 
-        public function authorizeChannel(string $channel, string $socket_id): string
+        public function authorizeChannel(string $channel, string $socket_id, ?string $custom_data = null): string
         {
             return json_encode(['auth' => "testing:{$channel}:{$socket_id}"]);
         }
