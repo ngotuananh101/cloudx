@@ -78,7 +78,7 @@ export default function AuthenticatedLayout({
                         </div>
                         <div>
                             <div className="text-base font-bold tracking-tight text-gray-900">
-                                CloudHub
+                                {props.name}
                             </div>
                             <div className="text-[9px] font-bold tracking-wider text-gray-400">
                                 THE DIGITAL CURATOR

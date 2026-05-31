@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import GuestLayout from '@/layouts/GuestLayout';
 
 export default function Login() {
-    const { status } = usePage().props as { status?: string };
+    const { status, name: appName } = usePage().props as { status?: string, name?: string };
 
     const { data, setData, post, processing, errors } = useForm({
         email: '',
@@ -29,7 +29,7 @@ export default function Login() {
             <div className="mb-6 flex items-center justify-center gap-2">
                 <Cloud className="h-6 w-6 fill-brand text-brand" />
                 <span className="text-xl font-bold tracking-tight text-brand">
-                    CloudX
+                    {appName}
                 </span>
             </div>
 
