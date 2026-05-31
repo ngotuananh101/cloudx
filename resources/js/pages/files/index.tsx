@@ -65,6 +65,14 @@ export default function FileBrowser({
         router.visit(storageIndex.url({ connection: connection.id }));
     };
 
+    const handleNavigatePath = (path: string) => {
+        const encodedPath = encodeCloudPath(path);
+
+        router.visit(
+            storageIndex.url({ connection: connection.id, path: encodedPath }),
+        );
+    };
+
     const refreshFiles = () => {
         router.reload({ only: ['files', 'connection'] });
     };
@@ -127,6 +135,7 @@ export default function FileBrowser({
                 connection={connection}
                 decodedPath={decodedPath}
                 onNavigateHome={handleNavigateHome}
+                onNavigatePath={handleNavigatePath}
             />
 
             <input
