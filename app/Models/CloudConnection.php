@@ -70,6 +70,7 @@ class CloudConnection extends Model
         return in_array($this->provider->value, [
             CloudProvider::GOOGLE_DRIVE,
             CloudProvider::ONEDRIVE,
+            CloudProvider::DROPBOX,
         ], true);
     }
 
@@ -78,6 +79,7 @@ class CloudConnection extends Model
         return in_array($this->provider->value, [
             CloudProvider::GOOGLE_DRIVE,
             CloudProvider::ONEDRIVE,
+            CloudProvider::DROPBOX,
             CloudProvider::FTP,
             CloudProvider::SFTP,
         ], true);

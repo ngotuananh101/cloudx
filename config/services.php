@@ -47,4 +47,10 @@ return [
         'redirect_uri' => env('MICROSOFT_REDIRECT_URI'),
     ],
 
+    'dropbox' => [
+        'client_id' => env('DROPBOX_CLIENT_ID'),
+        'client_secret' => env('DROPBOX_CLIENT_SECRET'),
+        'redirect_uri' => env('DROPBOX_REDIRECT_URI'),
+    ],
+
 ];

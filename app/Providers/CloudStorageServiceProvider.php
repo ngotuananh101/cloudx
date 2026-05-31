@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\CloudStorageManager;
+use App\Services\CloudStorage\Connectors\DropboxConnector;
 use App\Services\CloudStorage\Connectors\FtpConnector;
 use App\Services\CloudStorage\Connectors\GoogleDriveConnector;
 use App\Services\CloudStorage\Connectors\OneDriveConnector;
@@ -13,11 +14,15 @@ use App\Services\OneDrive\OneDriveAdapter;
 use App\Services\OneDrive\OneDriveClient;
 use Google\Client;
 use Google\Service\Drive;
+use GrahamCampbell\GuzzleFactory\GuzzleFactory;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 use League\Flysystem\Filesystem;
 use Masbug\Flysystem\GoogleDriveAdapter;
+use Spatie\Dropbox\Client as DropboxClient;
+use Spatie\FlysystemDropbox\DropboxAdapter;
 
 class CloudStorageServiceProvider extends ServiceProvider
 {
@@ -29,7 +34,7 @@ class CloudStorageServiceProvider extends ServiceProvider
         $this->app->bind(Client::class, function () {
             $client = new Client;
             if (app()->environment('local')) {
-                $client->setHttpClient(new \GuzzleHttp\Client(['verify' => false]));
+                $client->setHttpClient(new GuzzleClient(['verify' => false]));
             }
 
             return $client;
@@ -43,6 +48,7 @@ class CloudStorageServiceProvider extends ServiceProvider
             return new CloudProviderRegistry([
                 $app->make(GoogleDriveConnector::class),
                 $app->make(OneDriveConnector::class),
+                $app->make(DropboxConnector::class),
                 $app->make(FtpConnector::class),
                 $app->make(SftpConnector::class),
             ]);
@@ -70,6 +76,26 @@ class CloudStorageServiceProvider extends ServiceProvider
 
             return new FilesystemAdapter(
                 new Filesystem($adapter),
+                $adapter,
+                $config
+            );
+        });
+
+        Storage::extend('dropbox', function ($app, array $config): FilesystemAdapter {
+            $client = app()->isLocal()
+                ? new GuzzleClient([
+                    'handler' => GuzzleFactory::handler(),
+                    'verify' => false,
+                ])
+                : null;
+
+            $adapter = new DropboxAdapter(new DropboxClient(
+                (string) $config['authorization_token'],
+                $client,
+            ));
+
+            return new FilesystemAdapter(
+                new Filesystem($adapter, $config),
                 $adapter,
                 $config
             );

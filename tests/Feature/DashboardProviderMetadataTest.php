@@ -39,6 +39,17 @@ it('provides available cloud provider metadata to the dashboard', function () {
         share: false,
     ));
 
+    $dropboxConnector = Mockery::mock(CloudProviderConnector::class);
+    $dropboxConnector->shouldReceive('provider')->andReturn(CloudProvider::DROPBOX());
+    $dropboxConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
+        browse: true,
+        upload: true,
+        download: true,
+        delete: true,
+        createFolder: true,
+        share: false,
+    ));
+
     $ftpConnector = Mockery::mock(CloudProviderConnector::class);
     $ftpConnector->shouldReceive('provider')->andReturn(CloudProvider::FTP());
     $ftpConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
@@ -54,6 +65,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
     $manager->shouldReceive('connectors')->once()->andReturn([
         $googleConnector,
         $oneDriveConnector,
+        $dropboxConnector,
         $ftpConnector,
     ]);
 
@@ -65,7 +77,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
         ->assertOk()
         ->assertInertia(fn (Assert $page): Assert => $page
             ->component('dashboard')
-            ->has('availableProviders', 3)
+            ->has('availableProviders', 4)
             ->where('availableProviders.0.key', 'google-drive')
             ->where('availableProviders.0.label', 'Google Drive')
             ->where('availableProviders.0.value', CloudProvider::GOOGLE_DRIVE)
@@ -96,14 +108,29 @@ it('provides available cloud provider metadata to the dashboard', function () {
                 'createFolder' => true,
                 'share' => false,
             ])
-            ->where('availableProviders.2.key', 'ftp')
-            ->where('availableProviders.2.label', 'FTP Server')
-            ->where('availableProviders.2.value', CloudProvider::FTP)
-            ->where('availableProviders.2.icon', '/assets/svg/Ftp.svg')
+            ->where('availableProviders.2.key', 'dropbox')
+            ->where('availableProviders.2.label', 'Dropbox')
+            ->where('availableProviders.2.value', CloudProvider::DROPBOX)
+            ->where('availableProviders.2.icon', '/assets/svg/Dropbox.svg')
             ->where('availableProviders.2.status', 'active')
-            ->where('availableProviders.2.authType', 'credentials')
-            ->where('availableProviders.2.redirectUrl', null)
+            ->where('availableProviders.2.authType', 'oauth')
+            ->where('availableProviders.2.redirectUrl', route('oauth.redirect', ['provider' => 'dropbox']))
             ->where('availableProviders.2.capabilities', [
+                'browse' => true,
+                'upload' => true,
+                'download' => true,
+                'delete' => true,
+                'createFolder' => true,
+                'share' => false,
+            ])
+            ->where('availableProviders.3.key', 'ftp')
+            ->where('availableProviders.3.label', 'FTP Server')
+            ->where('availableProviders.3.value', CloudProvider::FTP)
+            ->where('availableProviders.3.icon', '/assets/svg/Ftp.svg')
+            ->where('availableProviders.3.status', 'active')
+            ->where('availableProviders.3.authType', 'credentials')
+            ->where('availableProviders.3.redirectUrl', null)
+            ->where('availableProviders.3.capabilities', [
                 'browse' => true,
                 'upload' => true,
                 'download' => true,
