@@ -24,7 +24,7 @@ export default function ConnectStorageModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="connect-storage-modal-title"
-                className="relative w-full max-w-md overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl transition-all"
+                className={`relative w-full overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl transition-all ${isFtpSelected ? 'max-w-2xl' : 'max-w-md'}`}
             >
                 <button
                     type="button"
