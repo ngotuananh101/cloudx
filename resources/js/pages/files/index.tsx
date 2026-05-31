@@ -148,7 +148,7 @@ export default function FileBrowser({
                                 <h2 className="text-lg font-bold text-gray-900">
                                     Create folder
                                 </h2>
-                                <p className="mt-1 text-sm font-medium text-gray-500">
+                                <p className="mt-1 text-sm text-gray-500">
                                     Add a new folder in the current cloud path.
                                 </p>
                             </div>
@@ -171,7 +171,7 @@ export default function FileBrowser({
                             className="h-11 rounded-xl"
                         />
                         {folderError && (
-                            <p className="mt-2 text-sm font-semibold text-red-600">
+                            <p className="mt-2 text-sm text-red-600">
                                 {folderError}
                             </p>
                         )}

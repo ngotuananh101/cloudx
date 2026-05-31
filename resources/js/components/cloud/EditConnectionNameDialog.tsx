@@ -47,7 +47,7 @@ export default function EditConnectionNameDialog({
                     <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
                         Edit connection name
                     </h3>
-                    <p className="mt-1 text-xs font-medium text-gray-400">
+                    <p className="mt-1 text-xs text-gray-400">
                         Update the display name shown in the sidebar.
                     </p>
                 </div>
@@ -64,7 +64,7 @@ export default function EditConnectionNameDialog({
                         autoFocus
                     />
                     {form.errors.name && (
-                        <p className="text-xs font-semibold text-red-600">
+                        <p className="text-xs text-red-600">
                             {form.errors.name}
                         </p>
                     )}

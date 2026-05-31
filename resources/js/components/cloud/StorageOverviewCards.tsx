@@ -45,7 +45,7 @@ export default function StorageOverviewCards({
                 <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
                     No Connected Storages
                 </h3>
-                <p className="mt-2 max-w-sm text-sm leading-relaxed font-medium text-gray-500">
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-gray-500">
                     Connect your cloud storage providers to start centralizing
                     and managing your files safely within one unified dashboard.
                 </p>

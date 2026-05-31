@@ -95,7 +95,7 @@ export default function EditFtpConnectionDialog({
                     <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
                         Edit FTP connection
                     </h3>
-                    <p className="mt-1 text-xs font-medium text-gray-400">
+                    <p className="mt-1 text-xs text-gray-400">
                         Update server settings. Leave password blank to keep the
                         current password.
                     </p>
@@ -431,7 +431,7 @@ function Field({
             {error && (
                 <p
                     id={id ? `${id}-error` : undefined}
-                    className="text-xs font-semibold text-red-600"
+                    className="text-xs text-red-600"
                 >
                     {error}
                 </p>
@@ -465,9 +465,7 @@ function CheckboxField({
                 />
                 {label}
             </label>
-            {error && (
-                <p className="text-xs font-semibold text-red-600">{error}</p>
-            )}
+            {error && <p className="text-xs text-red-600">{error}</p>}
         </div>
     );
 }

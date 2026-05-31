@@ -54,7 +54,7 @@ export default function Dashboard({
                             <h4 className="text-lg font-black tracking-tight text-gray-900">
                                 Cloud Hub
                             </h4>
-                            <p className="mt-2 text-xs leading-relaxed font-medium text-gray-500">
+                            <p className="mt-2 text-xs leading-relaxed text-gray-500">
                                 Centralize your data. Connect another provider
                                 to manage all files from one dashboard.
                             </p>

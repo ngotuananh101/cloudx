@@ -75,7 +75,7 @@ export default function ResetPassword({
                         />
                     </div>
                     {errors.email && (
-                        <p className="mt-1 text-xs font-medium text-red-500">
+                        <p className="mt-1 text-xs text-red-500">
                             {errors.email}
                         </p>
                     )}
@@ -113,7 +113,7 @@ export default function ResetPassword({
                         </button>
                     </div>
                     {errors.password && (
-                        <p className="mt-1 text-xs font-medium text-red-500">
+                        <p className="mt-1 text-xs text-red-500">
                             {errors.password}
                         </p>
                     )}
@@ -153,7 +153,7 @@ export default function ResetPassword({
                         </button>
                     </div>
                     {errors.password_confirmation && (
-                        <p className="mt-1 text-xs font-medium text-red-500">
+                        <p className="mt-1 text-xs text-red-500">
                             {errors.password_confirmation}
                         </p>
                     )}

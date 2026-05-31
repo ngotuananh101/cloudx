@@ -15,7 +15,7 @@ export function EmptyFileState({ searchQuery }: EmptyFileStateProps) {
                     ? 'No matching files found'
                     : 'This folder is empty'}
             </h3>
-            <p className="mt-1 text-sm font-medium text-gray-500">
+            <p className="mt-1 text-sm text-gray-500">
                 {searchQuery
                     ? 'Try adjusting your search query.'
                     : 'Upload some files or create a new folder to get started.'}

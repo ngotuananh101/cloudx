@@ -68,7 +68,7 @@ export default function Login() {
                         autoComplete="username"
                     />
                     {errors.email && (
-                        <p className="mt-1 text-xs font-medium text-red-500">
+                        <p className="mt-1 text-xs text-red-500">
                             {errors.email}
                         </p>
                     )}
@@ -99,7 +99,7 @@ export default function Login() {
                         autoComplete="current-password"
                     />
                     {errors.password && (
-                        <p className="mt-1 text-xs font-medium text-red-500">
+                        <p className="mt-1 text-xs text-red-500">
                             {errors.password}
                         </p>
                     )}

@@ -42,7 +42,7 @@ export default function ConnectStorageModal({
                     >
                         {isFtpSelected ? 'Connect FTP' : 'Connect Storage'}
                     </h3>
-                    <p className="mt-1 text-xs font-medium text-gray-400">
+                    <p className="mt-1 text-xs text-gray-400">
                         {isFtpSelected
                             ? 'Enter your FTP server credentials to test and link the connection'
                             : 'Select a cloud storage provider to link your account'}
