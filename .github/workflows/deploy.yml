@@ -127,10 +127,10 @@ jobs:
             php artisan queue:restart || true
             
             # Restart Reverb if running
-            if pgrep -f "artisan reverb:start" > /dev/null 2>&1; then
-                pkill -f "artisan reverb:start" || true
+            if pgrep -f "[a]rtisan reverb:start" > /dev/null 2>&1; then
+                pkill -f "[a]rtisan reverb:start" || true
                 sleep 2
-                nohup php artisan reverb:start --host=0.0.0.0 --port=8080 >> storage/logs/reverb.log 2>&1 &
+                nohup php artisan reverb:start --host=0.0.0.0 --port=8080 >> storage/logs/reverb.log 2>&1 </dev/null &
             fi
             
             # Fix permissions (fallback)
