@@ -1,0 +1,142 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
+jobs:
+  # ─── Run tests first ────────────────────────────────────────────────────────
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install Dependencies
+        run: |
+          composer install --no-interaction --prefer-dist --optimize-autoloader
+          pnpm install --frozen-lockfile
+
+      - name: Copy env & Generate key
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Build assets
+        run: pnpm run build
+
+      - name: Run tests
+        run: ./vendor/bin/pest
+
+  # ─── Build and Deploy ───────────────────────────────────────────────────────
+  deploy:
+    runs-on: ubuntu-latest
+    needs: tests
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install production dependencies
+        run: |
+          composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+          pnpm install --frozen-lockfile
+          
+      - name: Build frontend assets
+        run: pnpm run build
+
+      - name: Sync files to server via rsync
+        uses: easingthemes/ssh-deploy@main
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_KEY }}
+          ARGS: "-avzr --delete"
+          SOURCE: "./"
+          REMOTE_HOST: ${{ secrets.SERVER_HOST }}
+          REMOTE_USER: ${{ secrets.SERVER_USER }}
+          REMOTE_PORT: ${{ secrets.SERVER_PORT || 22 }}
+          TARGET: ${{ secrets.DEPLOY_PATH }}
+          # Exclude files/folders that shouldn't be overridden or uploaded
+          EXCLUDE: "/.git/, /.github/, /node_modules/, /tests/, /.env, /storage/, /deploy.sh"
+
+      - name: Run post-deploy commands
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT || 22 }}
+          script: |
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # Enable maintenance mode
+            php artisan down --retry=30 --refresh=15 || true
+            
+            # Run migrations
+            php artisan migrate --force
+            
+            # Optimize caches
+            php artisan optimize:clear
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+            php artisan event:cache
+            
+            # Restart queue & storage link
+            php artisan storage:link || true
+            php artisan queue:restart || true
+            
+            # Restart Reverb if running
+            if pgrep -f "artisan reverb:start" > /dev/null 2>&1; then
+                pkill -f "artisan reverb:start" || true
+                sleep 2
+                nohup php artisan reverb:start --host=0.0.0.0 --port=8080 >> storage/logs/reverb.log 2>&1 &
+            fi
+            
+            # Fix permissions (fallback)
+            chmod -R 775 storage bootstrap/cache || true
+            
+            # Disable maintenance mode
+            php artisan up || true
+
+      - name: Notify success
+        if: success()
+        run: echo "✅ Deployed to production successfully"
+
+      - name: Notify failure
+        if: failure()
+        run: echo "❌ Deploy failed — check the logs above"
