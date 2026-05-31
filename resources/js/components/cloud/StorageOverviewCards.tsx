@@ -1,4 +1,4 @@
-import { CloudOff, HardDrive, Trash2 } from 'lucide-react';
+import { CloudOff, HardDrive } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -7,7 +7,6 @@ import type { CloudConnection } from '@/types/cloud';
 interface StorageOverviewCardsProps {
     connections: CloudConnection[];
     onConnect: () => void;
-    onDisconnect: (id: number, name: string) => void;
 }
 
 function getProviderColorClass(providerValue?: number): string {
@@ -33,7 +32,6 @@ function getProviderColorClass(providerValue?: number): string {
 export default function StorageOverviewCards({
     connections,
     onConnect,
-    onDisconnect,
 }: StorageOverviewCardsProps) {
     if (connections.length === 0) {
         return (
@@ -88,28 +86,9 @@ export default function StorageOverviewCards({
                                     />
                                 )}
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-[10px] font-black tracking-widest text-gray-400">
-                                    {connection.provider.toUpperCase()}
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        onDisconnect(
-                                            connection.id,
-                                            connection.name,
-                                        )
-                                    }
-                                    className="rounded-lg p-1.5 text-gray-400 opacity-0 transition-all group-hover:opacity-100 hover:bg-red-50 hover:text-red-600 focus:opacity-100"
-                                    aria-label={`Disconnect ${connection.name}`}
-                                    title="Disconnect Storage"
-                                >
-                                    <Trash2
-                                        className="h-4 w-4"
-                                        aria-hidden="true"
-                                    />
-                                </button>
-                            </div>
+                            <span className="text-[10px] font-black tracking-widest text-gray-400">
+                                {connection.provider.toUpperCase()}
+                            </span>
                         </div>
 
                         <div className="mb-3 flex items-baseline justify-between">

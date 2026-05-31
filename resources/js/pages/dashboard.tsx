@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { Cloud, Database } from 'lucide-react';
 import { useState } from 'react';
 import ConnectStorageModal from '@/components/cloud/ConnectStorageModal';
@@ -8,7 +8,6 @@ import UsageSummary from '@/components/cloud/UsageSummary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
-import { destroy as destroyConnection } from '@/routes/cloud-connections';
 import type { AvailableProvider, CloudConnection } from '@/types/cloud';
 
 interface DashboardProps {
@@ -21,12 +20,6 @@ export default function Dashboard({
     availableProviders = [],
 }: DashboardProps) {
     const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
-
-    const handleDisconnect = (id: number, name: string) => {
-        if (confirm(`Are you sure you want to disconnect ${name}?`)) {
-            router.delete(destroyConnection.url(id));
-        }
-    };
 
     return (
         <AuthenticatedLayout title="Workspace">
@@ -50,7 +43,6 @@ export default function Dashboard({
             <StorageOverviewCards
                 connections={connections}
                 onConnect={() => setIsConnectModalOpen(true)}
-                onDisconnect={handleDisconnect}
             />
 
             <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-3">
