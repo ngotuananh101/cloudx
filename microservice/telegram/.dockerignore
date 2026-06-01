@@ -6,7 +6,6 @@ __pycache__/
 env/
 venv/
 .env
-sessions/
-telegram_storage.db
+storage/
 .git
 .gitignore

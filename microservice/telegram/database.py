@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, JSON
+from sqlalchemy import Column, Integer, String, DateTime, JSON, UniqueConstraint
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 import datetime
@@ -8,35 +8,45 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./storage/telegram_storage.db")
+TEMP_DIR = os.getenv("TEMP_DIR", "storage/temp")
 
-# Tự động tạo thư mục nếu chưa có (để SQLite có thể tạo file .db)
+# Auto-create directories for SQLite
 if DATABASE_URL.startswith("sqlite"):
-    # Lấy đường dẫn file từ URL (loại bỏ sqlite+aiosqlite:/// hoặc sqlite:///)
     db_path = DATABASE_URL.split("///")[-1] if "///" in DATABASE_URL else DATABASE_URL.split("//")[-1]
     db_dir = os.path.dirname(db_path)
     if db_dir and not os.path.exists(db_dir):
         os.makedirs(db_dir, exist_ok=True)
 
+# Ensure temp dir exists
+os.makedirs(TEMP_DIR, exist_ok=True)
+
 engine = create_async_engine(DATABASE_URL)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 Base = declarative_base()
 
+
 class FileIndex(Base):
+    """Index of Telegram Saved Messages with media.
+
+    Each file is uniquely identified by (session_id, message_id).
+    No virtual path — message_id is the only key.
+    """
     __tablename__ = "file_index"
+    __table_args__ = (
+        UniqueConstraint("session_id", "message_id", name="uq_file_index_session_message"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String, index=True, nullable=False)
-    path = Column(String, index=True, nullable=False)
-    message_id = Column(Integer, nullable=False)
+    message_id = Column(Integer, nullable=False, index=True)
+    original_name = Column(String)
     size = Column(Integer)
     mime_type = Column(String)
-    original_name = Column(String)
+    caption = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
-    extra_metadata = Column(JSON, default={})
+    extra_metadata = Column(JSON, default=dict)
 
-    # Note: UniqueConstraint will be added manually if needed or via alembic
-    # For a simple aiosqlite script, we just ensure path isolation by query
 
 async def init_db():
     async with engine.begin() as conn:
