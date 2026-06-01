@@ -1,0 +1,11 @@
+services:
+  telegram-storage:
+    build: .
+    container_name: telegram-storage-service
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage:/app/storage
+    env_file:
+      - .env
+    restart: unless-stopped
