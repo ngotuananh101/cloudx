@@ -4,7 +4,6 @@ import { useState } from 'react';
 import ConnectStorageModal from '@/components/cloud/ConnectStorageModal';
 import RecentActivityList from '@/components/cloud/RecentActivityList';
 import StorageOverviewCards from '@/components/cloud/StorageOverviewCards';
-import UsageSummary from '@/components/cloud/UsageSummary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
@@ -97,8 +96,6 @@ export default function Dashboard({
                             </Button>
                         </CardContent>
                     </Card>
-
-                    <UsageSummary connections={connections} />
                 </div>
             </div>
 
