@@ -2,9 +2,23 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Fix all security, correctness, and operational issues in the Telegram storage microservice so it is safe and reliable for integration with the Laravel app.
+**Goal:** Fix all security, correctness, and operational issues in the Telegram storage microservice. Remove virtual path concept — files are identified by `(session_id, message_id)` only.
 
-**Architecture:** Fix in place — no new files except `microservice/telegram/utils.py` for shared validation helpers. Changes touch `main.py`, `client.py`, `database.py`, `requirements.txt`, `Dockerfile`, `.env.example`, and `docker-compose.yml`. Each task is self-contained and testable independently.
+**Architecture:** Fix in place. New file `microservice/telegram/utils.py` for validation helpers. Each file in the microservice is rewritten with correct logic. Files are identified exclusively by Telegram `message_id` — no virtual path, no directory structure, no caption-based routing.
+
+**API contract (after fix):**
+
+| Endpoint | Method | Params | Description |
+|---|---|---|---|
+| `/auth-status` | GET | `X-Session-Id`, `X-Token` | Check if Telegram session is authorized |
+| `/request-code` | POST | `phone`, `X-Session-Id`, `X-Token` | Request Telegram login code |
+| `/login` | POST | `phone`, `code`, `password?`, `X-Session-Id`, `X-Token` | Sign in to Telegram |
+| `/write` | POST | `file` (multipart), `X-Session-Id`, `X-Token` | Upload file, returns `message_id` |
+| `/read` | GET | `message_id`, `X-Session-Id`, `X-Token` | Download file by message_id |
+| `/delete` | DELETE | `message_id`, `X-Session-Id`, `X-Token` | Delete file by message_id |
+| `/list` | GET | `limit?`, `offset?`, `X-Session-Id`, `X-Token` | List indexed files |
+| `/metadata` | GET | `message_id`, `X-Session-Id`, `X-Token` | Get file metadata by message_id |
+| `/sync` | POST | `X-Session-Id`, `X-Token` | Sync Saved Messages into index |
 
 **Tech Stack:** Python 3.12, FastAPI, Telethon, SQLAlchemy + aiosqlite, Docker
 
@@ -15,13 +29,14 @@
 | File | Action | Responsibility |
 |---|---|---|
 | `microservice/telegram/requirements.txt` | Modify | Pin dependency versions |
-| `microservice/telegram/database.py` | Modify | Add unique constraint, fix mutable default, add temp dir config |
-| `microservice/telegram/utils.py` | Create | Input validation helpers (session_id, path, temp files) |
-| `microservice/telegram/client.py` | Modify | Fix 2FA sign-in flow, add session_id validation |
-| `microservice/telegram/main.py` | Modify | Fix all endpoint bugs, security, error handling |
-| `microservice/telegram/Dockerfile` | Modify | Fix Python version, non-root user, remove chmod 777 |
+| `microservice/telegram/database.py` | Rewrite | Remove `path` column, unique on `(session_id, message_id)`, fix mutable default, add temp dir |
+| `microservice/telegram/utils.py` | Create | Validation helpers: `validate_session_id`, `make_temp_path` |
+| `microservice/telegram/client.py` | Rewrite | Fix 2FA sign-in, remove caption-as-path logic from `iter_files` |
+| `microservice/telegram/main.py` | Rewrite | All endpoints use `message_id`, fix security/DB/error handling |
+| `microservice/telegram/Dockerfile` | Modify | Python 3.12, non-root user, remove chmod 777 |
 | `microservice/telegram/docker-compose.yml` | Modify | Add healthcheck |
-| `microservice/telegram/.env.example` | Modify | Add TEMP_DIR config |
+| `microservice/telegram/.env.example` | Modify | Add TEMP_DIR |
+| `microservice/telegram/.dockerignore` | Modify | Exclude storage/ |
 
 ---
 
@@ -59,14 +74,12 @@ git commit -m "fix(telegram): pin dependency versions"
 
 ---
 
-### Task 2: Fix database model
+### Task 2: Rewrite database model — remove path, unique on message_id
 
 **Files:**
 - Modify: `microservice/telegram/database.py`
 
-- [ ] **Step 1: Add UniqueConstraint and fix mutable default**
-
-Replace the full `database.py` with:
+- [ ] **Step 1: Replace entire database.py**
 
 ```python
 from sqlalchemy import Column, Integer, String, DateTime, JSON, UniqueConstraint
@@ -97,19 +110,23 @@ Base = declarative_base()
 
 
 class FileIndex(Base):
+    """Index of Telegram Saved Messages with media.
+
+    Each file is uniquely identified by (session_id, message_id).
+    No virtual path — message_id is the only key.
+    """
     __tablename__ = "file_index"
     __table_args__ = (
-        UniqueConstraint("session_id", "path", name="uq_file_index_session_path"),
         UniqueConstraint("session_id", "message_id", name="uq_file_index_session_message"),
     )
 
     id = Column(Integer, primary_key=True, index=True)
     session_id = Column(String, index=True, nullable=False)
-    path = Column(String, index=True, nullable=False)
-    message_id = Column(Integer, nullable=False)
+    message_id = Column(Integer, nullable=False, index=True)
+    original_name = Column(String)
     size = Column(Integer)
     mime_type = Column(String)
-    original_name = Column(String)
+    caption = Column(String)
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
     extra_metadata = Column(JSON, default=dict)
@@ -120,16 +137,25 @@ async def init_db():
         await conn.run_sync(Base.metadata.create_all)
 ```
 
+Key changes vs original:
+- Removed `path` column entirely
+- Unique constraint on `(session_id, message_id)` only
+- Added `caption` column to store Telegram caption text
+- `original_name` renamed from implicit naming
+- `extra_metadata` uses `default=dict` instead of mutable `default={}`
+- Added `TEMP_DIR` from env
+- Removed old comment about manual UniqueConstraint
+
 - [ ] **Step 2: Verify SQLAlchemy model loads**
 
 Run: `cd microservice/telegram && python -c "from database import FileIndex; print(FileIndex.__table_args__)"`
-Expected: Prints the two UniqueConstraint tuples.
+Expected: Prints the UniqueConstraint tuple.
 
 - [ ] **Step 3: Commit**
 
 ```bash
 git add microservice/telegram/database.py
-git commit -m "fix(telegram): add unique constraints and fix mutable JSON default"
+git commit -m "fix(telegram): remove virtual path, unique on session_id+message_id"
 ```
 
 ---
@@ -139,7 +165,7 @@ git commit -m "fix(telegram): add unique constraints and fix mutable JSON defaul
 **Files:**
 - Create: `microservice/telegram/utils.py`
 
-- [ ] **Step 1: Write utils.py with validation functions**
+- [ ] **Step 1: Write utils.py**
 
 ```python
 import re
@@ -148,7 +174,6 @@ import tempfile
 from fastapi import HTTPException
 
 SESSION_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{1,64}$")
-PATH_MAX_LENGTH = 4096
 
 
 def validate_session_id(session_id: str) -> str:
@@ -161,49 +186,26 @@ def validate_session_id(session_id: str) -> str:
     return session_id
 
 
-def validate_path(path: str) -> str:
-    """Validate and normalize a virtual file path."""
-    if not path or not path.startswith("/"):
-        raise HTTPException(status_code=400, detail="Path must start with '/'")
-    if ".." in path:
-        raise HTTPException(status_code=400, detail="Path must not contain '..'")
-    if "\x00" in path:
-        raise HTTPException(status_code=400, detail="Path must not contain null bytes")
-    if len(path) > PATH_MAX_LENGTH:
-        raise HTTPException(status_code=400, detail=f"Path exceeds max length of {PATH_MAX_LENGTH}")
-    # Normalize multiple slashes
-    normalized = re.sub(r"/+", "/", path)
-    return normalized
-
-
-def validate_directory(directory: str) -> str:
-    """Validate and normalize a directory query. Returns normalized dir ending with '/' or ''."""
-    if not directory:
-        return ""
-    if ".." in directory:
-        raise HTTPException(status_code=400, detail="Directory must not contain '..'")
-    if "\x00" in directory:
-        raise HTTPException(status_code=400, detail="Directory must not contain null bytes")
-    normalized = re.sub(r"/+", "/", directory)
-    if not normalized.startswith("/"):
-        normalized = "/" + normalized
-    if not normalized.endswith("/"):
-        normalized = normalized + "/"
-    return normalized
+def validate_message_id(message_id: int) -> int:
+    """Validate message_id is a positive integer."""
+    if message_id <= 0:
+        raise HTTPException(status_code=400, detail="message_id must be a positive integer.")
+    return message_id
 
 
 def make_temp_path(temp_dir: str, session_id: str, filename: str) -> str:
     """Create a safe temp file path using tempfile, avoiding path traversal."""
-    # Sanitize filename: strip path separators, keep basename only
     safe_name = os.path.basename(filename) or "upload"
     fd, path = tempfile.mkstemp(prefix=f"tg_{session_id}_", suffix=f"_{safe_name}", dir=temp_dir)
     os.close(fd)
     return path
 ```
 
+Note: `validate_path` and `validate_directory` are no longer needed since we removed virtual paths.
+
 - [ ] **Step 2: Verify utils load**
 
-Run: `cd microservice/telegram && python -c "from utils import validate_session_id, validate_path; print('OK')"`
+Run: `cd microservice/telegram && python -c "from utils import validate_session_id, validate_message_id, make_temp_path; print('OK')"`
 Expected: Prints `OK`.
 
 - [ ] **Step 3: Commit**
@@ -215,12 +217,12 @@ git commit -m "feat(telegram): add input validation helpers"
 
 ---
 
-### Task 4: Fix TelegramStorageClient — 2FA and session_id safety
+### Task 4: Fix TelegramStorageClient — 2FA and cleanup
 
 **Files:**
 - Modify: `microservice/telegram/client.py`
 
-- [ ] **Step 1: Rewrite client.py with proper 2FA handling and session_id validation**
+- [ ] **Step 1: Replace entire client.py**
 
 ```python
 import os
@@ -239,7 +241,7 @@ SESSIONS_DIR = os.path.join(STORAGE_DIR, "sessions")
 
 class TelegramStorageClient:
     def __init__(self):
-        self.clients = {}  # sessionId -> TelegramClient
+        self.clients = {}  # session_id -> TelegramClient
 
     async def get_client(self, session_id: str):
         if session_id not in self.clients:
@@ -262,17 +264,13 @@ class TelegramStorageClient:
         return result.phone_code_hash if hasattr(result, "phone_code_hash") else result
 
     async def sign_in(self, session_id: str, phone: str, code: str, phone_code_hash: Optional[str] = None, password: Optional[str] = None):
-        """
-        Sign in with phone+code. If 2FA is required, returns dict with
-        password_required=True instead of swallowing the error.
-        """
+        """Sign in with phone+code. Handles 2FA properly."""
         client = await self.get_client(session_id)
         try:
             result = await client.sign_in(phone, code, password=password, phone_code_hash=phone_code_hash)
             return {"success": True, "user": str(result)}
         except SessionPasswordNeededError:
             if password:
-                # Try signing in with 2FA password
                 try:
                     result = await client.sign_in(password=password)
                     return {"success": True, "user": str(result)}
@@ -282,50 +280,67 @@ class TelegramStorageClient:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def upload_file(self, session_id: str, file_path, caption=None):
+    async def upload_file(self, session_id: str, file_path: str, caption: Optional[str] = None):
         client = await self.get_client(session_id)
         message = await client.send_file("me", file_path, caption=caption)
         return message
 
-    async def download_file(self, session_id: str, message_id, output_path=None):
+    async def download_file(self, session_id: str, message_id: int, output_path=None):
         client = await self.get_client(session_id)
         message = await client.get_messages("me", ids=message_id)
         if message and message.media:
             return await client.download_media(message, file=output_path)
         return None
 
-    async def delete_file(self, session_id: str, message_id):
+    async def delete_file(self, session_id: str, message_id: int):
         client = await self.get_client(session_id)
         return await client.delete_messages("me", message_id)
 
-    async def get_message(self, session_id: str, message_id):
+    async def get_message(self, session_id: str, message_id: int):
         client = await self.get_client(session_id)
         return await client.get_messages("me", ids=message_id)
 
     async def iter_files(self, session_id: str):
+        """Iterate all media messages in Saved Messages.
+
+        Yields dicts with message_id, filename, caption, size, date.
+        No path logic — message_id is the key.
+        """
         client = await self.get_client(session_id)
         async for message in client.iter_messages("me"):
-            if message.media is not None:
-                filename = "unnamed_file"
-                if hasattr(message.media, "document"):
-                    for attr in message.media.document.attributes:
-                        if hasattr(attr, "file_name"):
-                            filename = attr.file_name
-                            break
-                elif hasattr(message.media, "photo"):
-                    filename = f"photo_{message.id}.jpg"
+            if message.media is None:
+                continue
 
-                yield {
-                    "message_id": message.id,
-                    "filename": filename,
-                    "caption": message.message,
-                    "size": getattr(message.media, "document", message.media).size if hasattr(message.media, "document") else 0,
-                    "date": message.date,
-                }
+            filename = "unnamed_file"
+            file_size = 0
+            if hasattr(message.media, "document") and message.media.document:
+                for attr in message.media.document.attributes:
+                    if hasattr(attr, "file_name"):
+                        filename = attr.file_name
+                        break
+                file_size = message.media.document.size or 0
+            elif hasattr(message.media, "photo"):
+                filename = f"photo_{message.id}.jpg"
+
+            yield {
+                "message_id": message.id,
+                "filename": filename,
+                "caption": message.message or "",
+                "size": file_size,
+                "date": message.date,
+            }
 
 
 telegram_client = TelegramStorageClient()
 ```
+
+Key changes vs original:
+- Properly handles `SessionPasswordNeededError` with two-step sign-in
+- Returns structured dicts instead of swallowing errors
+- `iter_files` yields clean data without path logic
+- Removes unused `asyncio` import
+- Removes debug `print` calls
+- Stores caption as-is, no path interpretation
 
 - [ ] **Step 2: Verify client loads**
 
@@ -336,28 +351,28 @@ Expected: Prints `<class 'client.TelegramStorageClient'>`.
 
 ```bash
 git add microservice/telegram/client.py
-git commit -m "fix(telegram): handle 2FA properly and remove debug prints"
+git commit -m "fix(telegram): handle 2FA properly, remove path logic from iter_files"
 ```
 
 ---
 
-### Task 5: Fix main.py — security, endpoints, error handling
+### Task 5: Rewrite main.py — message_id as key, fix all bugs
 
 **Files:**
 - Modify: `microservice/telegram/main.py`
 
-This is the largest task — it addresses all remaining issues in `main.py`:
+This task rewrites all endpoints to use `message_id` instead of `path`, and fixes all security/correctness issues:
 
-- Remove token logging (issue 2)
-- Add token protection to `/auth-status` (issue 1)
-- Sanitize session_id via `validate_session_id` (issue 3)
-- Use `make_temp_path` for uploads (issue 4)
-- Fix 2FA response handling in `/login` (issue 5)
-- Fix DB session lifecycle in `/login` (issue 6)
-- Fix None caption crash in `perform_sync` (issue 7)
-- Handle stale index in `/read` (issue 11)
-- Fix `/list` directory boundary (issue 10)
-- Stream from temp file in `/read` instead of BytesIO (issue 9)
+- Remove token logging (review issue 2)
+- Add token protection to `/auth-status` (review issue 1)
+- Sanitize session_id via `validate_session_id` (review issue 3)
+- Use `make_temp_path` for uploads (review issue 4)
+- Fix 2FA response handling in `/login` (review issue 5)
+- Fix DB session lifecycle in `/login` (review issue 6)
+- Fix None caption crash in `perform_sync` (review issue 7)
+- Handle stale index in `/read` (review issue 11)
+- Stream via temp file in `/read` instead of BytesIO (review issue 9)
+- `/list` returns flat list, no directory boundary issue (review issue 10)
 
 - [ ] **Step 1: Replace entire main.py**
 
@@ -367,13 +382,12 @@ import logging
 from typing import Optional
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, UploadFile, File, Header, HTTPException, Depends, Query
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select, func
 from database import AsyncSessionLocal, FileIndex, init_db, TEMP_DIR
 from client import telegram_client
-from utils import validate_session_id, validate_path, validate_directory, make_temp_path
+from utils import validate_session_id, validate_message_id, make_temp_path
 from pydantic import BaseModel
 import uvicorn
 from dotenv import load_dotenv
@@ -398,34 +412,23 @@ async def perform_sync(session_id: str, db: AsyncSession):
     """Sync Telegram Saved Messages into the local file index."""
     count = 0
     async for item in telegram_client.iter_files(session_id):
-        caption = item.get("caption") or ""
-        path = caption if caption.startswith("/") else f"/telegram-imports/{item['message_id']}_{item['filename']}"
-
         # Skip if already indexed by message_id
         result = await db.execute(
-            select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.message_id == item["message_id"])
+            select(FileIndex).where(
+                FileIndex.session_id == session_id,
+                FileIndex.message_id == item["message_id"],
+            )
         )
         if result.scalar_one_or_none():
             continue
 
-        # Handle path collision: append message_id for auto-generated paths
-        path_result = await db.execute(
-            select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.path == path)
-        )
-        if path_result.scalar_one_or_none():
-            if not caption.startswith("/"):
-                path = f"/telegram-imports/{item['message_id']}_{item['filename']}"
-            else:
-                # User-set path collides — skip to avoid overwriting
-                continue
-
         new_file = FileIndex(
             session_id=session_id,
-            path=path,
             message_id=item["message_id"],
+            original_name=item["filename"],
             size=item["size"],
             mime_type="application/octet-stream",
-            original_name=item["filename"],
+            caption=item["caption"],
             created_at=item["date"],
         )
         db.add(new_file)
@@ -486,64 +489,42 @@ async def login(data: LoginModel, x_session_id: str = Header(...), db: AsyncSess
     if isinstance(result, dict) and result.get("password_required"):
         return {"success": False, "password_required": True, "message": result.get("error", "2FA password required.")}
 
-    return {"success": False, "message": "Login failed", "detail": result.get("error", str(result)) if isinstance(result, dict) else str(result)}
+    error_msg = result.get("error", str(result)) if isinstance(result, dict) else str(result)
+    return {"success": False, "message": "Login failed", "detail": error_msg}
 
 
 @app.post("/write")
 async def write_file(
-    path: str = Query(...),
     file: UploadFile = File(...),
     x_session_id: str = Header(...),
     db: AsyncSession = Depends(get_db),
     token: str = Depends(verify_token),
 ):
     session_id = validate_session_id(x_session_id)
-    path = validate_path(path)
-
     temp_path = make_temp_path(TEMP_DIR, session_id, file.filename or "upload")
+
     try:
+        content = await file.read()
         with open(temp_path, "wb") as buffer:
-            content = await file.read()
             buffer.write(content)
 
-        message = await telegram_client.upload_file(session_id, temp_path, caption=path)
+        message = await telegram_client.upload_file(session_id, temp_path, caption=file.filename or "")
 
+        # Index the new file
         new_file = FileIndex(
             session_id=session_id,
-            path=path,
             message_id=message.id,
+            original_name=file.filename,
             size=file.size,
             mime_type=file.content_type,
-            original_name=file.filename,
+            caption=file.filename or "",
         )
 
-        # Upsert: try insert first, handle unique constraint violation
-        try:
-            db.add(new_file)
-            await db.commit()
-        except IntegrityError:
-            await db.rollback()
-            # Path or message_id exists — update it
-            existing = await db.execute(
-                select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.path == path)
-            )
-            existing_file = existing.scalar_one_or_none()
-            if existing_file:
-                # Delete old Telegram message (best-effort)
-                try:
-                    await telegram_client.delete_file(session_id, existing_file.message_id)
-                except Exception:
-                    pass
-                existing_file.message_id = message.id
-                existing_file.size = file.size
-                existing_file.mime_type = file.content_type
-                existing_file.original_name = file.filename
-                await db.commit()
-            else:
-                # message_id collision with different path — re-raise
-                raise HTTPException(status_code=409, detail="File index conflict")
+        db.add(new_file)
+        await db.commit()
 
         return {"success": True, "message_id": message.id}
+
     finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
@@ -551,16 +532,16 @@ async def write_file(
 
 @app.get("/read")
 async def read_file(
-    path: str = Query(...),
+    message_id: int = Query(...),
     x_session_id: str = Header(...),
     db: AsyncSession = Depends(get_db),
     token: str = Depends(verify_token),
 ):
     session_id = validate_session_id(x_session_id)
-    path = validate_path(path)
+    message_id = validate_message_id(message_id)
 
     result = await db.execute(
-        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.path == path)
+        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.message_id == message_id)
     )
     file_info = result.scalar_one_or_none()
 
@@ -577,7 +558,8 @@ async def read_file(
             await db.commit()
             raise HTTPException(status_code=404, detail="File no longer exists in Telegram (stale index removed)")
 
-        await (await telegram_client.get_client(session_id)).download_media(msg, file=download_path)
+        client = await telegram_client.get_client(session_id)
+        await client.download_media(msg, file=download_path)
 
         return FileResponse(
             path=download_path,
@@ -585,28 +567,28 @@ async def read_file(
             filename=file_info.original_name or "download",
         )
     except HTTPException:
+        # Clean up temp file on known errors
+        if os.path.exists(download_path):
+            os.remove(download_path)
         raise
     except Exception:
+        if os.path.exists(download_path):
+            os.remove(download_path)
         raise HTTPException(status_code=500, detail="Failed to download file from Telegram")
-    finally:
-        # FileResponse streams then deletes; we schedule cleanup
-        # FastAPI/Starlette will read the file before returning, so we clean up after
-        # For safety, leave cleanup to a background task or periodic sweep
-        pass
 
 
 @app.delete("/delete")
 async def delete_file(
-    path: str = Query(...),
+    message_id: int = Query(...),
     x_session_id: str = Header(...),
     db: AsyncSession = Depends(get_db),
     token: str = Depends(verify_token),
 ):
     session_id = validate_session_id(x_session_id)
-    path = validate_path(path)
+    message_id = validate_message_id(message_id)
 
     result = await db.execute(
-        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.path == path)
+        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.message_id == message_id)
     )
     file_info = result.scalar_one_or_none()
 
@@ -622,29 +604,46 @@ async def delete_file(
 
 @app.get("/list")
 async def list_files(
-    directory: str = Query(""),
+    limit: int = Query(100, ge=1, le=1000),
+    offset: int = Query(0, ge=0),
     x_session_id: str = Header(...),
     db: AsyncSession = Depends(get_db),
     token: str = Depends(verify_token),
 ):
     session_id = validate_session_id(x_session_id)
-    normalized_dir = validate_directory(directory)
 
-    pattern = f"{normalized_dir}%" if normalized_dir else "%"
+    # Get total count
+    count_result = await db.execute(
+        select(func.count()).select_from(FileIndex).where(FileIndex.session_id == session_id)
+    )
+    total = count_result.scalar() or 0
+
+    # Get page
     result = await db.execute(
-        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.path.like(pattern))
+        select(FileIndex)
+        .where(FileIndex.session_id == session_id)
+        .order_by(FileIndex.message_id.desc())
+        .limit(limit)
+        .offset(offset)
     )
     files = result.scalars().all()
 
-    return [
-        {
-            "path": f.path,
-            "size": f.size,
-            "mime_type": f.mime_type,
-            "created_at": f.created_at.isoformat() if f.created_at else None,
-        }
-        for f in files
-    ]
+    return {
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+        "files": [
+            {
+                "message_id": f.message_id,
+                "original_name": f.original_name,
+                "size": f.size,
+                "mime_type": f.mime_type,
+                "caption": f.caption,
+                "created_at": f.created_at.isoformat() if f.created_at else None,
+            }
+            for f in files
+        ],
+    }
 
 
 @app.post("/sync")
@@ -656,16 +655,16 @@ async def sync_endpoint(x_session_id: str = Header(...), db: AsyncSession = Depe
 
 @app.get("/metadata")
 async def get_metadata(
-    path: str = Query(...),
+    message_id: int = Query(...),
     x_session_id: str = Header(...),
     db: AsyncSession = Depends(get_db),
     token: str = Depends(verify_token),
 ):
     session_id = validate_session_id(x_session_id)
-    path = validate_path(path)
+    message_id = validate_message_id(message_id)
 
     result = await db.execute(
-        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.path == path)
+        select(FileIndex).where(FileIndex.session_id == session_id, FileIndex.message_id == message_id)
     )
     file_info = result.scalar_one_or_none()
 
@@ -673,9 +672,11 @@ async def get_metadata(
         raise HTTPException(status_code=404, detail="File not found")
 
     return {
-        "path": file_info.path,
+        "message_id": file_info.message_id,
+        "original_name": file_info.original_name,
         "size": file_info.size,
         "mime_type": file_info.mime_type,
+        "caption": file_info.caption,
         "created_at": file_info.created_at.isoformat() if file_info.created_at else None,
         "updated_at": file_info.updated_at.isoformat() if file_info.updated_at else None,
     }
@@ -694,7 +695,7 @@ Expected: Prints `OK`.
 
 ```bash
 git add microservice/telegram/main.py
-git commit -m "fix(telegram): fix security, 2FA, DB lifecycle, stale index, list boundary"
+git commit -m "fix(telegram): use message_id as key, fix all security and correctness bugs"
 ```
 
 ---
@@ -747,13 +748,14 @@ git commit -m "fix(telegram): use Python 3.12, non-root user, remove chmod 777"
 
 ---
 
-### Task 7: Fix docker-compose and .env.example
+### Task 7: Fix docker-compose, .env.example, .dockerignore
 
 **Files:**
 - Modify: `microservice/telegram/docker-compose.yml`
 - Modify: `microservice/telegram/.env.example`
+- Modify: `microservice/telegram/.dockerignore`
 
-- [ ] **Step 1: Update docker-compose.yml with healthcheck**
+- [ ] **Step 1: Update docker-compose.yml**
 
 ```yaml
 services:
@@ -786,9 +788,7 @@ TEMP_DIR=storage/temp
 TELEGRAM_STORAGE_TOKEN=change-me-in-production
 ```
 
-- [ ] **Step 3: Update .dockerignore to include temp dir**
-
-Replace contents of `.dockerignore`:
+- [ ] **Step 3: Update .dockerignore**
 
 ```
 __pycache__/
@@ -808,7 +808,7 @@ storage/
 
 ```bash
 git add microservice/telegram/docker-compose.yml microservice/telegram/.env.example microservice/telegram/.dockerignore
-git commit -m "fix(telegram): add healthcheck, update env example and dockerignore"
+git commit -m "fix(telegram): add healthcheck, update env and dockerignore"
 ```
 
 ---
@@ -825,22 +825,22 @@ Expected: Server starts on port 8000.
 - [ ] **Step 2: Verify /auth-status requires token**
 
 Run: `curl -s http://localhost:8000/auth-status -H "X-Session-Id: test"`
-Expected: `403` with `{"detail":"Invalid API Token"}` (not 200).
+Expected: `403` with `{"detail":"Invalid API Token"}`.
 
-- [ ] **Step 3: Verify session_id validation**
+- [ ] **Step 3: Verify session_id validation rejects path traversal**
 
 Run: `curl -s http://localhost:8000/auth-status -H "X-Session-Id: ../etc/passwd" -H "X-Token: change-me-in-production"`
 Expected: `400` with invalid session_id error.
 
-- [ ] **Step 4: Verify path validation**
+- [ ] **Step 4: Verify /list returns flat paginated list**
 
-Run: `curl -s "http://localhost:8000/metadata?path=../../etc/passwd" -H "X-Session-Id: test" -H "X-Token: change-me-in-production"`
-Expected: `400` with path must start with `/`.
+Run: `curl -s "http://localhost:8000/list?limit=10&offset=0" -H "X-Session-Id: test" -H "X-Token: change-me-in-production"`
+Expected: `200` with `{"total": 0, "limit": 10, "offset": 0, "files": []}`.
 
-- [ ] **Step 5: Verify /list directory boundary**
+- [ ] **Step 5: Verify /read rejects invalid message_id**
 
-Run: `curl -s "http://localhost:8000/list?directory=/foo" -H "X-Session-Id: test" -H "X-Token: change-me-in-production"`
-Expected: `200` with empty list (not error).
+Run: `curl -s "http://localhost:8000/read?message_id=0" -H "X-Session-Id: test" -H "X-Token: change-me-in-production"`
+Expected: `400` with message_id must be positive.
 
 - [ ] **Step 6: Commit final state if any additional fixes were needed**
 
