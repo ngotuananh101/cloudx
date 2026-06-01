@@ -13,6 +13,7 @@ use BenSampo\Enum\Enum;
  * @method static static AWS_S3()
  * @method static static FTP()
  * @method static static SFTP()
+ * @method static static TELEGRAM()
  */
 final class CloudProvider extends Enum
 {
@@ -28,6 +29,8 @@ final class CloudProvider extends Enum
 
     const SFTP = 6;
 
+    const TELEGRAM = 7;
+
     public function slug(): string
     {
         return match ($this->value) {
@@ -37,6 +40,7 @@ final class CloudProvider extends Enum
             self::AWS_S3 => 'aws-s3',
             self::FTP => 'ftp',
             self::SFTP => 'sftp',
+            self::TELEGRAM => 'telegram',
         };
     }
 
@@ -49,6 +53,7 @@ final class CloudProvider extends Enum
             'aws-s3' => self::AWS_S3(),
             'ftp' => self::FTP(),
             'sftp' => self::SFTP(),
+            'telegram' => self::TELEGRAM(),
             default => null,
         };
     }
@@ -62,6 +67,7 @@ final class CloudProvider extends Enum
             self::AWS_S3 => 'AWS S3',
             self::FTP => 'FTP Server',
             self::SFTP => 'SFTP Server',
+            self::TELEGRAM => 'Telegram',
             default => parent::getDescription($value),
         };
     }
@@ -75,6 +81,7 @@ final class CloudProvider extends Enum
             self::AWS_S3 => '/assets/svg/S3.svg',
             self::FTP => '/assets/svg/Ftp.svg',
             self::SFTP => '/assets/svg/Sftp.svg',
+            self::TELEGRAM => '/assets/svg/Telegram.svg',
             default => 'cloud',
         };
     }
