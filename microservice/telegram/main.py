@@ -26,7 +26,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Telegram Storage Microservice", lifespan=lifespan)
 
-API_SECRET_TOKEN = os.getenv("TELEGRAM_STORAGE_TOKEN")
+API_SECRET_TOKEN = os.getenv("ACCESS_TOKEN")
 
 
 async def perform_sync(session_id: str, db: AsyncSession):
