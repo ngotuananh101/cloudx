@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { useState } from 'react';
 import FtpConnectionForm from '@/components/cloud/FtpConnectionForm';
 import SftpConnectionForm from '@/components/cloud/SftpConnectionForm';
+import TelegramConnectionForm from '@/components/cloud/TelegramConnectionForm';
 import ProviderOption from '@/components/cloud/ProviderOption';
 import type { AvailableProvider } from '@/types/cloud';
 
@@ -19,7 +20,9 @@ export default function ConnectStorageModal({
 
     const isFtpSelected = selectedCredentialsProvider?.key === 'ftp';
     const isSftpSelected = selectedCredentialsProvider?.key === 'sftp';
-    const isCredentialsSelected = isFtpSelected || isSftpSelected;
+    const isTelegramSelected = selectedCredentialsProvider?.key === 'telegram';
+    const isCredentialsSelected =
+        isFtpSelected || isSftpSelected || isTelegramSelected;
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 p-4 backdrop-blur-sm">
@@ -45,12 +48,14 @@ export default function ConnectStorageModal({
                     >
                         {isFtpSelected && 'Connect FTP'}
                         {isSftpSelected && 'Connect SFTP'}
+                        {isTelegramSelected && 'Connect Telegram'}
                         {!isCredentialsSelected && 'Connect Storage'}
                     </h3>
                     <p className="mt-1 text-xs text-gray-400">
-                        {isCredentialsSelected
-                            ? `Enter your ${isFtpSelected ? 'FTP' : 'SFTP'} server credentials to test and link the connection`
-                            : 'Select a cloud storage provider to link your account'}
+                        {isFtpSelected && 'Enter your FTP server credentials to test and link the connection'}
+                        {isSftpSelected && 'Enter your SFTP server credentials to test and link the connection'}
+                        {isTelegramSelected && 'Connect your Telegram account to store files in Saved Messages'}
+                        {!isCredentialsSelected && 'Select a cloud storage provider to link your account'}
                     </p>
                 </div>
 
@@ -60,14 +65,21 @@ export default function ConnectStorageModal({
                         onSuccess={onClose}
                     />
                 )}
-                
+
                 {isSftpSelected && (
                     <SftpConnectionForm
                         onCancel={() => setSelectedCredentialsProvider(null)}
                         onSuccess={onClose}
                     />
                 )}
-                
+
+                {isTelegramSelected && (
+                    <TelegramConnectionForm
+                        onCancel={() => setSelectedCredentialsProvider(null)}
+                        onSuccess={onClose}
+                    />
+                )}
+
                 {!isCredentialsSelected && (
                     <div className="space-y-3">
                         {providers.map((provider) => (
