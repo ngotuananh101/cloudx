@@ -9,6 +9,7 @@ use App\Http\Controllers\FtpConnectionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SftpConnectionController;
 use App\Http\Controllers\StorageBrowserController;
+use App\Http\Controllers\TelegramConnectionController;
 use App\Http\Controllers\System\CloudTaskController;
 use Illuminate\Support\Facades\Route;
 
@@ -33,6 +34,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/connections/{connection}/ftp', [FtpConnectionController::class, 'update'])->name('connections.ftp.update');
     Route::post('/connections/sftp', [SftpConnectionController::class, 'store'])->name('connections.sftp.store');
     Route::patch('/connections/{connection}/sftp', [SftpConnectionController::class, 'update'])->name('connections.sftp.update');
+    Route::post('/connections/telegram/request-code', [TelegramConnectionController::class, 'requestCode'])->name('connections.telegram.request-code');
+    Route::post('/connections/telegram', [TelegramConnectionController::class, 'store'])->name('connections.telegram.store');
     Route::delete('/connections/{connection}/cache', [CloudConnectionCacheController::class, 'destroy'])->name('cloud-connections.cache.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
 
