@@ -59,6 +59,10 @@ export interface SftpConnectionConfig {
 }
 
 
+export interface TelegramConnectionConfig {
+    session_id?: string;
+}
+
 export interface CloudConnection {
     id: number;
     name: string;
@@ -78,6 +82,7 @@ export interface CloudConnection {
     actions?: CloudConnectionActions;
     ftp_config?: FtpConnectionConfig;
     sftp_config?: SftpConnectionConfig;
+    telegram_config?: TelegramConnectionConfig;
 }
 
 export interface CloudFile {
