@@ -76,7 +76,7 @@ class CloudFileBrowser
             ->reject(fn (StorageAttributes $item): bool => str_starts_with(basename($item->path()), '.'))
             ->map(function (StorageAttributes $item): array {
                 $isDirectory = $item->isDir();
-                $name = basename($item->path());
+                $name = $item->extraMetadata()['file_name'] ?? basename($item->path());
 
                 return $this->fileData(
                     id: $item->path(),

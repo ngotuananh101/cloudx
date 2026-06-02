@@ -172,6 +172,9 @@ class TelegramAdapter implements FilesystemAdapter
             visibility: null,
             lastModified: is_string($createdAt) ? strtotime($createdAt) : null,
             mimeType: isset($file['mime_type']) ? (string) $file['mime_type'] : null,
+            extraMetadata: [
+                'file_name' => $file['file_name'] ?? null,
+            ],
         );
     }
 }
