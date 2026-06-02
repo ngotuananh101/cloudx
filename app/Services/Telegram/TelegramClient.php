@@ -155,6 +155,77 @@ class TelegramClient
         return (int) ($response->json('added') ?? 0);
     }
 
+    /**
+     * @return string phone_code_hash
+     */
+    public function sendCodeRequest(string $phone): string
+    {
+        $response = $this->request()
+            ->asJson()
+            ->post($this->url.'/request-code', ['phone' => $phone]);
+
+        $this->assertAuthenticated($response);
+
+        if ($response->failed()) {
+            throw new RuntimeException('Telegram storage API error: '.$response->body());
+        }
+
+        $data = $response->json();
+
+        if (! is_array($data) || ! isset($data['phone_code_hash'])) {
+            throw new RuntimeException('Microservice did not return a phone code hash.');
+        }
+
+        return (string) $data['phone_code_hash'];
+    }
+
+    /**
+     * @return array{success: bool, password_required: bool, message: string, synced: int}
+     */
+    public function login(string $phone, string $code, ?string $phoneCodeHash = null, ?string $password = null): array
+    {
+        $payload = [
+            'phone' => $phone,
+            'code' => $code,
+        ];
+
+        if ($phoneCodeHash !== null) {
+            $payload['phone_code_hash'] = $phoneCodeHash;
+        }
+
+        if ($password !== null) {
+            $payload['password'] = $password;
+        }
+
+        $response = $this->request()
+            ->asJson()
+            ->post($this->url.'/login', $payload);
+
+        $this->assertAuthenticated($response);
+
+        if ($response->failed()) {
+            throw new RuntimeException('Telegram storage API error: '.$response->body());
+        }
+
+        $data = $response->json();
+
+        if (! is_array($data)) {
+            return [
+                'success' => false,
+                'password_required' => false,
+                'message' => 'Unexpected response from microservice.',
+                'synced' => 0,
+            ];
+        }
+
+        return [
+            'success' => (bool) ($data['success'] ?? false),
+            'password_required' => (bool) ($data['password_required'] ?? false),
+            'message' => (string) ($data['message'] ?? ''),
+            'synced' => (int) ($data['synced'] ?? 0),
+        ];
+    }
+
     private function request(): PendingRequest
     {
         return Http::connectTimeout(5)
