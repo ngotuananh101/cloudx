@@ -18,7 +18,7 @@ class CloudFileDownloadController extends Controller
         private CloudStorageManager $cloudStorage,
     ) {}
 
-    public function download(CloudConnection $connection, string $path): StreamedResponse|RedirectResponse
+    public function download(CloudConnection $connection, ?string $path = null): StreamedResponse|RedirectResponse
     {
         abort_if($connection->user_id !== auth()->id(), 403, 'Unauthorized access to this connection.');
 
