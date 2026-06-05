@@ -12,7 +12,9 @@ import {
     Share2,
 } from 'lucide-react';
 import type { CSSProperties, KeyboardEvent } from 'react';
+import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
+import files from '@/routes/cloud/files';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { Button } from './ui/button';
 
@@ -21,6 +23,7 @@ interface FileTableRowProps {
     style: CSSProperties;
     capabilities?: ProviderCapabilities;
     onNavigate?: (item: CloudFile) => void;
+    connectionId?: number;
 }
 
 export function FileTableRow({
@@ -28,6 +31,7 @@ export function FileTableRow({
     style,
     capabilities,
     onNavigate,
+    connectionId,
 }: FileTableRowProps) {
     const getIcon = () => {
         switch (item.type) {
@@ -63,6 +67,19 @@ export function FileTableRow({
 
         event.preventDefault();
         onNavigate?.(item);
+    };
+
+    const handleDownload = () => {
+        if (item.isDirectory || !connectionId) {
+            return;
+        }
+
+        const url = files.download.url({
+            connection: connectionId,
+            query: { path: encodeCloudPath(item.path) },
+        });
+
+        window.location.href = url;
     };
 
     return (
@@ -120,6 +137,7 @@ export function FileTableRow({
                                 <Button
                                     variant="ghost"
                                     size="icon"
+                                    onClick={handleDownload}
                                     className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900"
                                     aria-label={`Download ${item.name}`}
                                 >

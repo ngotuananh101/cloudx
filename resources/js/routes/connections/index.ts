@@ -1,10 +1,12 @@
 import ftp from './ftp'
 import sftp from './sftp'
+import telegram from './telegram'
 import folders from './folders'
 import uploadTasks from './upload-tasks'
 const connections = {
     ftp: Object.assign(ftp, ftp),
 sftp: Object.assign(sftp, sftp),
+telegram: Object.assign(telegram, telegram),
 folders: Object.assign(folders, folders),
 uploadTasks: Object.assign(uploadTasks, uploadTasks),
 }

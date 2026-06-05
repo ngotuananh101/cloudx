@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
  * @see app/Http/Controllers/CloudConnectionController.php:21
@@ -61,41 +61,6 @@ redirect.head = (args: { provider: string | number } | [provider: string | numbe
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
- * @route '/oauth/{provider}/redirect'
- */
-    const redirectForm = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: redirect.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
- * @route '/oauth/{provider}/redirect'
- */
-        redirectForm.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: redirect.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
- * @route '/oauth/{provider}/redirect'
- */
-        redirectForm.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: redirect.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    redirect.form = redirectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
  * @see app/Http/Controllers/CloudConnectionController.php:51
@@ -157,42 +122,6 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
     url: callback.url(args, options),
     method: 'head',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
- * @route '/oauth/{provider}/callback'
- */
-    const callbackForm = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: callback.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
- * @route '/oauth/{provider}/callback'
- */
-        callbackForm.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: callback.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
- * @route '/oauth/{provider}/callback'
- */
-        callbackForm.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: callback.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    callback.form = callbackForm
 const oauth = {
     redirect: Object.assign(redirect, redirect),
 callback: Object.assign(callback, callback),

@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionCacheController::destroy
  * @see app/Http/Controllers/CloudConnectionCacheController.php:14
@@ -56,38 +56,6 @@ destroy.delete = (args: { connection: number | { id: number } } | [connection: n
     url: destroy.url(args, options),
     method: 'delete',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudConnectionCacheController::destroy
- * @see app/Http/Controllers/CloudConnectionCacheController.php:14
- * @route '/connections/{connection}/cache'
- */
-    const destroyForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: destroy.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'DELETE',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionCacheController::destroy
- * @see app/Http/Controllers/CloudConnectionCacheController.php:14
- * @route '/connections/{connection}/cache'
- */
-        destroyForm.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: destroy.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'DELETE',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    destroy.form = destroyForm
 const cache = {
     destroy: Object.assign(destroy, destroy),
 }

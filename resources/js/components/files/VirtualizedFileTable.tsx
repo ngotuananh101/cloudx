@@ -9,6 +9,7 @@ interface VirtualizedFileTableProps {
     searchQuery: string;
     capabilities?: ProviderCapabilities;
     onNavigate: (item: CloudFile) => void;
+    connectionId: number;
 }
 
 export function VirtualizedFileTable({
@@ -16,6 +17,7 @@ export function VirtualizedFileTable({
     searchQuery,
     capabilities,
     onNavigate,
+    connectionId,
 }: VirtualizedFileTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
@@ -60,6 +62,7 @@ export function VirtualizedFileTable({
                                     item={file}
                                     capabilities={capabilities}
                                     onNavigate={onNavigate}
+                                    connectionId={connectionId}
                                     style={{
                                         position: 'absolute',
                                         top: 0,

@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 import chunks from './chunks'
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
@@ -67,41 +67,6 @@ index.head = (args: { connection: number | { id: number } } | [connection: numbe
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:20
- * @route '/connections/{connection}/upload-tasks'
- */
-    const indexForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: index.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:20
- * @route '/connections/{connection}/upload-tasks'
- */
-        indexForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: index.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:20
- * @route '/connections/{connection}/upload-tasks'
- */
-        indexForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: index.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    index.form = indexForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::store
  * @see app/Http/Controllers/CloudUploadTaskController.php:35
@@ -160,27 +125,6 @@ store.post = (args: { connection: number | { id: number } } | [connection: numbe
     method: 'post',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:35
- * @route '/connections/{connection}/upload-tasks'
- */
-    const storeForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: store.url(args, options),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:35
- * @route '/connections/{connection}/upload-tasks'
- */
-        storeForm.post = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: store.url(args, options),
-            method: 'post',
-        })
-    
-    store.form = storeForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
@@ -245,41 +189,6 @@ show.head = (args: { connection: number | { id: number }, task: number | { id: n
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:81
- * @route '/connections/{connection}/upload-tasks/{task}'
- */
-    const showForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: show.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:81
- * @route '/connections/{connection}/upload-tasks/{task}'
- */
-        showForm.get = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: show.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:81
- * @route '/connections/{connection}/upload-tasks/{task}'
- */
-        showForm.head = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: show.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    show.form = showForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::pause
  * @see app/Http/Controllers/CloudUploadTaskController.php:88
@@ -335,37 +244,6 @@ pause.patch = (args: { connection: number | { id: number }, task: number | { id:
     method: 'patch',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:88
- * @route '/connections/{connection}/upload-tasks/{task}/pause'
- */
-    const pauseForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: pause.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'PATCH',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:88
- * @route '/connections/{connection}/upload-tasks/{task}/pause'
- */
-        pauseForm.patch = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: pause.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'PATCH',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    pause.form = pauseForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::resume
  * @see app/Http/Controllers/CloudUploadTaskController.php:100
@@ -421,37 +299,6 @@ resume.patch = (args: { connection: number | { id: number }, task: number | { id
     method: 'patch',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:100
- * @route '/connections/{connection}/upload-tasks/{task}/resume'
- */
-    const resumeForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: resume.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'PATCH',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:100
- * @route '/connections/{connection}/upload-tasks/{task}/resume'
- */
-        resumeForm.patch = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: resume.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'PATCH',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    resume.form = resumeForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::destroy
  * @see app/Http/Controllers/CloudUploadTaskController.php:112
@@ -506,38 +353,6 @@ destroy.delete = (args: { connection: number | { id: number }, task: number | { 
     url: destroy.url(args, options),
     method: 'delete',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:112
- * @route '/connections/{connection}/upload-tasks/{task}'
- */
-    const destroyForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: destroy.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'DELETE',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:112
- * @route '/connections/{connection}/upload-tasks/{task}'
- */
-        destroyForm.delete = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: destroy.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'DELETE',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    destroy.form = destroyForm
 const uploadTasks = {
     index: Object.assign(index, index),
 store: Object.assign(store, store),

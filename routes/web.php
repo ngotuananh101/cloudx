@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\CloudConnectionCacheController;
 use App\Http\Controllers\CloudConnectionController;
+use App\Http\Controllers\CloudFileDownloadController;
 use App\Http\Controllers\CloudFolderController;
 use App\Http\Controllers\CloudUploadTaskChunkController;
 use App\Http\Controllers\CloudUploadTaskController;
@@ -24,6 +25,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/storage/{connection}/{path?}', [StorageBrowserController::class, 'index'])
         ->name('storage.index')
         ->where('path', '.*');
+
+    Route::get('/connections/{connection}/files/download/{path?}', [CloudFileDownloadController::class, 'download'])
+        ->name('cloud.files.download')
+        ->where('path', '.*');
+
     // Cloud Connections OAuth Flow
     Route::get('/oauth/{provider}/redirect', [CloudConnectionController::class, 'redirect'])->name('oauth.redirect');
     Route::get('/oauth/{provider}/callback', [CloudConnectionController::class, 'callback'])->name('oauth.callback');

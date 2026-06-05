@@ -7,6 +7,7 @@ use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
+use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -14,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
-class GoogleDriveConnector implements CloudProviderConnector
+class GoogleDriveConnector implements CloudProviderConnector, ProvidesDirectDownloadLink
 {
     public function provider(): CloudProvider
     {
@@ -91,6 +92,41 @@ class GoogleDriveConnector implements CloudProviderConnector
             createFolder: true,
             share: false,
         );
+    }
+
+    public function directDownloadLink(CloudConnection $connection, string $path): ?string
+    {
+        $client = $this->client();
+        $this->configureClient($client);
+        $client->setAccessToken($connection->credentials);
+
+        // Check if token is expired and we have a refresh token
+        if ($client->isAccessTokenExpired() && $client->getRefreshToken()) {
+            $refreshToken = $client->getRefreshToken();
+            $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            if (! isset($newAccessToken['error']) && isset($newAccessToken['access_token'])) {
+                $connection->update([
+                    'credentials' => array_merge(
+                        $connection->credentials,
+                        ['refresh_token' => $connection->credentials['refresh_token'] ?? $refreshToken],
+                        $newAccessToken,
+                    ),
+                    'last_synced_at' => now(),
+                ]);
+            }
+        }
+
+        $drive = new Drive($client);
+
+        try {
+            $file = $drive->files->get($path, ['fields' => 'webContentLink']);
+            $url = $file->getWebContentLink();
+
+            return is_string($url) && $url !== '' ? $url : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     private function client(): Client

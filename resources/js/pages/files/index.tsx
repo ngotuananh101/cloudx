@@ -210,6 +210,7 @@ export default function FileBrowser({
                         searchQuery={searchQuery}
                         capabilities={connection.capabilities}
                         onNavigate={handleNavigate}
+                        connectionId={connection.id}
                     />
                 </div>
             </div>

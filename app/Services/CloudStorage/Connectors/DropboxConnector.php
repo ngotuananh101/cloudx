@@ -7,6 +7,9 @@ use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
+use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
+use GrahamCampbell\GuzzleFactory\GuzzleFactory;
+use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
@@ -14,8 +17,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
+use Spatie\Dropbox\Client as DropboxClient;
 
-class DropboxConnector implements CloudProviderConnector
+class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownloadLink
 {
     public const AUTHORIZE_URL = 'https://www.dropbox.com/oauth2/authorize';
 
@@ -113,6 +117,27 @@ class DropboxConnector implements CloudProviderConnector
             createFolder: true,
             share: false,
         );
+    }
+
+    public function directDownloadLink(CloudConnection $connection, string $path): ?string
+    {
+        $credentials = $this->freshCredentials($connection);
+
+        $client = app()->isLocal()
+            ? new GuzzleClient([
+                'handler' => GuzzleFactory::handler(),
+                'verify' => false,
+            ])
+            : null;
+
+        $dropboxClient = new DropboxClient(
+            (string) $credentials['access_token'],
+            $client,
+        );
+
+        $url = $dropboxClient->getTemporaryLink($path);
+
+        return is_string($url) && $url !== '' ? $url : null;
     }
 
     private function stateSessionKey(): string

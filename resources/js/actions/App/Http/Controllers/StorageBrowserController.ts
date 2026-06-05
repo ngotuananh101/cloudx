@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults, validateParameters } from './../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults, validateParameters } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\StorageBrowserController::index
  * @see app/Http/Controllers/StorageBrowserController.php:23
@@ -64,42 +64,6 @@ index.head = (args: { connection: number | { id: number }, path?: string | numbe
     url: index.url(args, options),
     method: 'head',
 })
-
-    /**
-* @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
- * @route '/storage/{connection}/{path?}'
- */
-    const indexForm = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: index.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
- * @route '/storage/{connection}/{path?}'
- */
-        indexForm.get = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: index.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
- * @route '/storage/{connection}/{path?}'
- */
-        indexForm.head = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: index.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    index.form = indexForm
 const StorageBrowserController = { index }
 
 export default StorageBrowserController

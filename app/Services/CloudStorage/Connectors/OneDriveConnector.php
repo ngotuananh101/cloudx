@@ -8,6 +8,7 @@ use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
+use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
 use App\Services\OneDrive\OneDriveClient;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -18,7 +19,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 
-class OneDriveConnector implements CloudProviderConnector, ReportsStorageQuota
+class OneDriveConnector implements CloudProviderConnector, ProvidesDirectDownloadLink, ReportsStorageQuota
 {
     public const AUTHORIZE_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
 
@@ -153,5 +154,18 @@ class OneDriveConnector implements CloudProviderConnector, ReportsStorageQuota
             remainingBytes: $remainingBytes,
             usedPercent: $totalBytes > 0 && $usedBytes !== null ? round(($usedBytes / $totalBytes) * 100, 1) : null,
         );
+    }
+
+    public function directDownloadLink(CloudConnection $connection, string $path): ?string
+    {
+        $item = (new OneDriveClient($connection))->item($path);
+
+        if (! is_array($item)) {
+            return null;
+        }
+
+        $url = $item['@microsoft.graph.downloadUrl'] ?? null;
+
+        return is_string($url) && $url !== '' ? $url : null;
     }
 }

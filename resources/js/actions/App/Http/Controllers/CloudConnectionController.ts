@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
  * @see app/Http/Controllers/CloudConnectionController.php:21
@@ -61,41 +61,6 @@ redirect.head = (args: { provider: string | number } | [provider: string | numbe
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
- * @route '/oauth/{provider}/redirect'
- */
-    const redirectForm = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: redirect.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
- * @route '/oauth/{provider}/redirect'
- */
-        redirectForm.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: redirect.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
- * @route '/oauth/{provider}/redirect'
- */
-        redirectForm.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: redirect.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    redirect.form = redirectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
  * @see app/Http/Controllers/CloudConnectionController.php:51
@@ -158,41 +123,6 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
- * @route '/oauth/{provider}/callback'
- */
-    const callbackForm = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: callback.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
- * @route '/oauth/{provider}/callback'
- */
-        callbackForm.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: callback.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
- * @route '/oauth/{provider}/callback'
- */
-        callbackForm.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: callback.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    callback.form = callbackForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
  * @see app/Http/Controllers/CloudConnectionController.php:32
@@ -260,41 +190,6 @@ reconnect.head = (args: { connection: number | { id: number } } | [connection: n
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
- * @route '/connections/{connection}/reconnect'
- */
-    const reconnectForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: reconnect.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
- * @route '/connections/{connection}/reconnect'
- */
-        reconnectForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: reconnect.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
- * @route '/connections/{connection}/reconnect'
- */
-        reconnectForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: reconnect.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    reconnect.form = reconnectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::disconnect
  * @see app/Http/Controllers/CloudConnectionController.php:134
@@ -353,37 +248,6 @@ disconnect.delete = (args: { connection: number | { id: number } } | [connection
     method: 'delete',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
- * @route '/connections/{connection}'
- */
-    const disconnectForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: disconnect.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'DELETE',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
- * @route '/connections/{connection}'
- */
-        disconnectForm.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: disconnect.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'DELETE',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    disconnect.form = disconnectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::updateName
  * @see app/Http/Controllers/CloudConnectionController.php:110
@@ -441,38 +305,6 @@ updateName.patch = (args: { connection: number | { id: number } } | [connection:
     url: updateName.url(args, options),
     method: 'patch',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
- * @route '/connections/{connection}/name'
- */
-    const updateNameForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: updateName.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'PATCH',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
- * @route '/connections/{connection}/name'
- */
-        updateNameForm.patch = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: updateName.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'PATCH',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    updateName.form = updateNameForm
 const CloudConnectionController = { redirect, callback, reconnect, disconnect, updateName }
 
 export default CloudConnectionController
