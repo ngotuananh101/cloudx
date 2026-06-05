@@ -87,7 +87,7 @@ it('streams file contents from the disk when no direct link is available', funct
     ]);
 
     $connector = Mockery::mock(CloudProviderConnector::class);
-    $connector->shouldReceive('disk')->once()->with($connection)->andReturn(Storage::disk('telegram-test'));
+    $connector->shouldReceive('disk')->once()->with(Mockery::on(fn ($c) => $c->id === $connection->id))->andReturn(Storage::disk('telegram-test'));
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->andReturn($connector);
@@ -100,7 +100,7 @@ it('streams file contents from the disk when no direct link is available', funct
             'path' => PathEncoder::encode('docs/readme.txt'),
         ]))
         ->assertOk()
-        ->assertHeader('Content-Type', 'text/plain')
+        ->assertHeader('Content-Type', 'text/plain; charset=utf-8')
         ->assertHeader('Content-Length', '11')
         ->assertHeader('Content-Disposition', 'attachment; filename=readme.txt');
 });
@@ -153,7 +153,7 @@ it('falls back to streaming when ProvidesDirectDownloadLink returns null', funct
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->andReturn($connector);
-    $manager->shouldReceive('disk')->zeroOrMoreTimes()->with($connection)->andReturn(Storage::disk('dropbox-test'));
+    $manager->shouldReceive('disk')->zeroOrMoreTimes()->with(Mockery::on(fn ($c) => $c->id === $connection->id))->andReturn(Storage::disk('dropbox-test'));
 
     $this->app->instance(CloudStorageManager::class, $manager);
 
@@ -197,7 +197,7 @@ it('returns 404 when the file does not exist on disk', function () {
     ]);
 
     $connector = Mockery::mock(CloudProviderConnector::class);
-    $connector->shouldReceive('disk')->once()->with($connection)->andReturn(Storage::disk('telegram-test'));
+    $connector->shouldReceive('disk')->once()->with(Mockery::on(fn ($c) => $c->id === $connection->id))->andReturn(Storage::disk('telegram-test'));
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->andReturn($connector);
