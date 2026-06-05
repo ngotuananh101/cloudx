@@ -7,7 +7,6 @@ use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
-use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -15,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
-class GoogleDriveConnector implements CloudProviderConnector, ProvidesDirectDownloadLink
+class GoogleDriveConnector implements CloudProviderConnector
 {
     public function provider(): CloudProvider
     {
