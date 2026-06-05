@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionController::update
  * @see app/Http/Controllers/CloudConnectionController.php:110
@@ -56,6 +56,38 @@ update.patch = (args: { connection: number | { id: number } } | [connection: num
     url: update.url(args, options),
     method: 'patch',
 })
+
+    /**
+* @see \App\Http\Controllers\CloudConnectionController::update
+ * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @route '/connections/{connection}/name'
+ */
+    const updateForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: update.url(args, {
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'PATCH',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\CloudConnectionController::update
+ * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @route '/connections/{connection}/name'
+ */
+        updateForm.patch = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: update.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'PATCH',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    update.form = updateForm
 const name = {
     update: Object.assign(update, update),
 }

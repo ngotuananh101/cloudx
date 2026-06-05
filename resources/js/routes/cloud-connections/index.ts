@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 import name from './name'
 import cache from './cache'
 /**
@@ -68,6 +68,41 @@ reconnect.head = (args: { connection: number | { id: number } } | [connection: n
     method: 'head',
 })
 
+    /**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+    const reconnectForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: reconnect.url(args, options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+        reconnectForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: reconnect.url(args, options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\CloudConnectionController::reconnect
+ * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @route '/connections/{connection}/reconnect'
+ */
+        reconnectForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: reconnect.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    reconnect.form = reconnectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::destroy
  * @see app/Http/Controllers/CloudConnectionController.php:134
@@ -125,6 +160,38 @@ destroy.delete = (args: { connection: number | { id: number } } | [connection: n
     url: destroy.url(args, options),
     method: 'delete',
 })
+
+    /**
+* @see \App\Http\Controllers\CloudConnectionController::destroy
+ * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @route '/connections/{connection}'
+ */
+    const destroyForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: destroy.url(args, {
+                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                        _method: 'DELETE',
+                        ...(options?.query ?? options?.mergeQuery ?? {}),
+                    }
+                }),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\CloudConnectionController::destroy
+ * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @route '/connections/{connection}'
+ */
+        destroyForm.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: destroy.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'DELETE',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'post',
+        })
+    
+    destroy.form = destroyForm
 const cloudConnections = {
     reconnect: Object.assign(reconnect, reconnect),
 destroy: Object.assign(destroy, destroy),

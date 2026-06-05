@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Auth\VerifyEmailController::show
  * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
@@ -42,6 +42,41 @@ show.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     method: 'head',
 })
 
+    /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::show
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @route '/verify-email'
+ */
+    const showForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: show.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::show
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @route '/verify-email'
+ */
+        showForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: show.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::show
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:17
+ * @route '/verify-email'
+ */
+        showForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: show.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    show.form = showForm
 /**
 * @see \App\Http\Controllers\Auth\VerifyEmailController::verify
  * @see app/Http/Controllers/Auth/VerifyEmailController.php:41
@@ -102,6 +137,41 @@ verify.head = (args: { id: string | number, hash: string | number } | [id: strin
     method: 'head',
 })
 
+    /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::verify
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:41
+ * @route '/verify-email/{id}/{hash}'
+ */
+    const verifyForm = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: verify.url(args, options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::verify
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:41
+ * @route '/verify-email/{id}/{hash}'
+ */
+        verifyForm.get = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: verify.url(args, options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::verify
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:41
+ * @route '/verify-email/{id}/{hash}'
+ */
+        verifyForm.head = (args: { id: string | number, hash: string | number } | [id: string | number, hash: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: verify.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    verify.form = verifyForm
 /**
 * @see \App\Http\Controllers\Auth\VerifyEmailController::resend
  * @see app/Http/Controllers/Auth/VerifyEmailController.php:27
@@ -135,6 +205,28 @@ resend.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: resend.url(options),
     method: 'post',
 })
+
+    /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::resend
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:27
+ * @route '/email/verification-notification'
+ */
+    const resendForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: resend.url(options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\Auth\VerifyEmailController::resend
+ * @see app/Http/Controllers/Auth/VerifyEmailController.php:27
+ * @route '/email/verification-notification'
+ */
+        resendForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: resend.url(options),
+            method: 'post',
+        })
+    
+    resend.form = resendForm
 const VerifyEmailController = { show, verify, resend }
 
 export default VerifyEmailController

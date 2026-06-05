@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition } from './../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../wayfinder'
 /**
 * @see \App\Http\Controllers\Auth\LoginController::login
  * @see app/Http/Controllers/Auth/LoginController.php:17
@@ -42,6 +42,41 @@ login.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     method: 'head',
 })
 
+    /**
+* @see \App\Http\Controllers\Auth\LoginController::login
+ * @see app/Http/Controllers/Auth/LoginController.php:17
+ * @route '/login'
+ */
+    const loginForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: login.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Auth\LoginController::login
+ * @see app/Http/Controllers/Auth/LoginController.php:17
+ * @route '/login'
+ */
+        loginForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: login.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Auth\LoginController::login
+ * @see app/Http/Controllers/Auth/LoginController.php:17
+ * @route '/login'
+ */
+        loginForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: login.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    login.form = loginForm
 /**
 * @see \App\Http\Controllers\Auth\LoginController::logout
  * @see app/Http/Controllers/Auth/LoginController.php:46
@@ -76,6 +111,27 @@ logout.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     method: 'post',
 })
 
+    /**
+* @see \App\Http\Controllers\Auth\LoginController::logout
+ * @see app/Http/Controllers/Auth/LoginController.php:46
+ * @route '/logout'
+ */
+    const logoutForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        action: logout.url(options),
+        method: 'post',
+    })
+
+            /**
+* @see \App\Http\Controllers\Auth\LoginController::logout
+ * @see app/Http/Controllers/Auth/LoginController.php:46
+ * @route '/logout'
+ */
+        logoutForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+            action: logout.url(options),
+            method: 'post',
+        })
+    
+    logout.form = logoutForm
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
  * @see app/Http/Controllers/HomeController.php:17
@@ -119,6 +175,41 @@ home.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     method: 'head',
 })
 
+    /**
+* @see \App\Http\Controllers\HomeController::__invoke
+ * @see app/Http/Controllers/HomeController.php:17
+ * @route '/'
+ */
+    const homeForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: home.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\HomeController::__invoke
+ * @see app/Http/Controllers/HomeController.php:17
+ * @route '/'
+ */
+        homeForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: home.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\HomeController::__invoke
+ * @see app/Http/Controllers/HomeController.php:17
+ * @route '/'
+ */
+        homeForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: home.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    home.form = homeForm
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
  * @see app/Http/Controllers/HomeController.php:17
@@ -161,3 +252,39 @@ dashboard.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: dashboard.url(options),
     method: 'head',
 })
+
+    /**
+* @see \App\Http\Controllers\HomeController::__invoke
+ * @see app/Http/Controllers/HomeController.php:17
+ * @route '/dashboard'
+ */
+    const dashboardForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: dashboard.url(options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\HomeController::__invoke
+ * @see app/Http/Controllers/HomeController.php:17
+ * @route '/dashboard'
+ */
+        dashboardForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: dashboard.url(options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\HomeController::__invoke
+ * @see app/Http/Controllers/HomeController.php:17
+ * @route '/dashboard'
+ */
+        dashboardForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: dashboard.url({
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    dashboard.form = dashboardForm

@@ -76,7 +76,7 @@ export function FileTableRow({
 
         const url = files.download.url({
             connection: connectionId,
-            query: { path: encodeCloudPath(item.path) },
+            path: encodeCloudPath(item.path),
         });
 
         window.location.href = url;
