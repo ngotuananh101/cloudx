@@ -81,7 +81,7 @@ export default function FilePreviewModal({
 
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80">
             <div
                 className={`flex flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl transition-all ${isFullscreen
                     ? 'h-screen w-screen max-w-none rounded-none'
