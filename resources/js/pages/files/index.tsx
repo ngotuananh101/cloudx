@@ -173,17 +173,17 @@ export default function FileBrowser({
             />
 
             {isCreateFolderOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
                     <form
                         onSubmit={createFolder}
-                        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+                        className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl"
                     >
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900">
+                                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
                                     Create folder
                                 </h2>
-                                <p className="mt-1 text-sm text-gray-500">
+                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                                     Add a new folder in the current cloud path.
                                 </p>
                             </div>
@@ -259,6 +259,14 @@ export default function FileBrowser({
                 }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
                     background-color: #94a3b8;
+                }
+                @media (prefers-color-scheme: dark) {
+                    .custom-scrollbar::-webkit-scrollbar-thumb {
+                        background-color: #475569;
+                    }
+                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                        background-color: #64748b;
+                    }
                 }
             `,
                 }}

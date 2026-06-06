@@ -53,7 +53,7 @@ export function DeleteItemDialog({
                     <AlertDialogTitle>Delete {item?.isDirectory ? 'folder' : 'file'}?</AlertDialogTitle>
                     <AlertDialogDescription>
                         This will permanently remove{' '}
-                        <span className="font-semibold text-gray-900 break-all">
+                        <span className="font-semibold text-gray-900 dark:text-gray-100 break-all">
                             "{item?.name}"
                         </span>{' '}
                         from your cloud storage. This action cannot be undone.

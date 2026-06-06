@@ -39,10 +39,10 @@ export function FileTableRow({
         switch (item.type) {
             case 'folder':
                 return (
-                    <Folder className="h-4.5 w-4.5 fill-blue-500/20 text-blue-500" />
+                    <Folder className="h-4.5 w-4.5 fill-blue-500/20 text-blue-500 dark:fill-blue-500/30 dark:text-blue-400" />
                 );
             case 'document':
-                return <FileText className="h-4.5 w-4.5 text-gray-500" />;
+                return <FileText className="h-4.5 w-4.5 text-gray-500 dark:text-gray-400" />;
             case 'image':
                 return <FileImage className="h-4.5 w-4.5 text-emerald-500" />;
             case 'code':
@@ -54,7 +54,7 @@ export function FileTableRow({
             case 'audio':
                 return <FileAudio className="h-4.5 w-4.5 text-pink-500" />;
             default:
-                return <File className="h-4.5 w-4.5 text-gray-400" />;
+                return <File className="h-4.5 w-4.5 text-gray-400 dark:text-gray-500" />;
         }
     };
 
@@ -87,7 +87,7 @@ export function FileTableRow({
     return (
         <div
             style={style}
-            className="group absolute top-0 left-0 flex h-12 w-full items-center border-b border-gray-50 bg-white px-6 transition-colors hover:bg-gray-50/80"
+            className="group absolute top-0 left-0 flex h-12 w-full items-center border-b border-gray-50 dark:border-gray-800 bg-white dark:bg-gray-900 px-6 transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/80"
         >
             {/* Name Column */}
             <div
@@ -97,26 +97,26 @@ export function FileTableRow({
                 role={item.isDirectory ? 'button' : undefined}
                 tabIndex={item.isDirectory ? 0 : undefined}
             >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 group-hover:bg-white">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 group-hover:bg-white dark:group-hover:bg-gray-900">
                     {getIcon()}
                 </div>
-                <span className="truncate text-sm font-medium text-gray-900 transition-colors group-hover:text-blue-600">
+                <span className="truncate text-sm font-medium text-gray-900 dark:text-gray-100 transition-colors group-hover:text-blue-600 dark:group-hover:text-blue-400">
                     {item.name}
                 </span>
             </div>
 
             {/* Size Column */}
-            <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500">
+            <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400">
                 {item.isDirectory ? '--' : formatBytes(item.size)}
             </div>
 
             {/* Type Column */}
-            <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500 capitalize">
+            <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400 capitalize">
                 {item.type}
             </div>
 
             {/* Date Column */}
-            <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500">
+            <div className="w-32 shrink-0 pr-4 text-xs font-medium text-gray-500 dark:text-gray-400">
                 {item.updatedAt}
             </div>
 
@@ -129,7 +129,7 @@ export function FileTableRow({
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900"
+                                    className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                                     aria-label={`Share ${item.name}`}
                                 >
                                     <Share2 className="h-4 w-4" />
@@ -140,7 +140,7 @@ export function FileTableRow({
                                     variant="ghost"
                                     size="icon"
                                     onClick={handleDownload}
-                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-gray-900"
+                                    className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                                     aria-label={`Download ${item.name}`}
                                 >
                                     <Download className="h-4 w-4" />
@@ -154,7 +154,7 @@ export function FileTableRow({
                                         e.stopPropagation();
                                         onDelete?.(item);
                                     }}
-                                    className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-600"
+                                    className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-red-600 dark:hover:text-red-400"
                                     aria-label={`Delete ${item.name}`}
                                 >
                                     <Trash2 className="h-4 w-4" />

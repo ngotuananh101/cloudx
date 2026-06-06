@@ -31,8 +31,8 @@ export function VirtualizedFileTable({
     });
 
     return (
-        <div className="flex h-[calc(100vh-180px)] min-h-100 flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
-            <div className="flex items-center border-b border-gray-100 bg-gray-50/50 py-3 pr-6 pl-6 text-[11px] font-extrabold tracking-wider text-gray-400">
+        <div className="flex h-[calc(100vh-180px)] min-h-100 flex-col overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+            <div className="flex items-center border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 py-3 pr-6 pl-6 text-[11px] font-extrabold tracking-wider text-gray-400 dark:text-gray-500">
                 <div className="flex-1 pr-4">NAME</div>
                 <div className="w-32 shrink-0 pr-4">SIZE</div>
                 <div className="w-32 shrink-0 pr-4">TYPE</div>
