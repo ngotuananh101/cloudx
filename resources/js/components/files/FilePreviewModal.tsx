@@ -1,7 +1,7 @@
 import DocViewer, { DocViewerRenderers } from '@iamjariwala/react-doc-viewer';
 import '@iamjariwala/react-doc-viewer/dist/index.css';
 import { usePage } from '@inertiajs/react';
-import { Download, Maximize2, Minimize2, X } from 'lucide-react';
+import { Download, Maximize2, Minimize2, X, File } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
 import type { CloudFile } from '@/types/cloud';
@@ -52,6 +52,23 @@ export default function FilePreviewModal({
     const handleDownload = () => {
         window.location.href = downloadUrl;
     };
+
+    const NoRendererFallback = () => (
+        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-950">
+            <div className="mb-4 rounded-full bg-gray-100 dark:bg-gray-800 p-4">
+                <File className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+            </div>
+            <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                Preview not supported
+            </h4>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                This file type cannot be previewed in the browser.
+            </p>
+            <Button className="mt-6" onClick={handleDownload}>
+                Download File
+            </Button>
+        </div>
+    );
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
@@ -132,6 +149,9 @@ export default function FilePreviewModal({
                                 themeMode: isDark ? 'dark' : 'light',
                                 header: {
                                     disableHeader: true,
+                                },
+                                noRenderer: {
+                                    overrideComponent: NoRendererFallback,
                                 },
                             }}
                         />
