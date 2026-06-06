@@ -85,14 +85,14 @@ export default function TelegramConnectionForm({
     if (step === 'done') {
         return (
             <div className="space-y-6 text-center py-8">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100">
-                    <svg className="h-8 w-8 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
+                    <svg className="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
-                    <h4 className="text-lg font-bold text-gray-900">Telegram Connected!</h4>
-                    <p className="mt-1 text-sm text-gray-500">
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">Telegram Connected!</h4>
+                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
                         &quot;{name}&quot; is ready to use.
                         {syncedCount > 0 && (
                             <span className="mt-1 block">{syncedCount} files synced from Saved Messages.</span>
@@ -113,7 +113,7 @@ export default function TelegramConnectionForm({
     }
 
     const stepBar = (position: number, currentStep: number, highlight: boolean = false) => {
-        let color = 'bg-gray-200';
+        let color = 'bg-gray-200 dark:bg-gray-700';
         if (highlight) {
             color = 'bg-amber-500';
         } else if (currentStep <= position) {
@@ -142,7 +142,7 @@ export default function TelegramConnectionForm({
 
             {/* Error message */}
             {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
                     {error}
                 </div>
             )}
@@ -151,7 +151,7 @@ export default function TelegramConnectionForm({
             {step === 'phone' && (
                 <form onSubmit={sendCode} className="space-y-4">
                     <div>
-                        <label htmlFor="tg-name" className="text-xs font-bold text-gray-600">
+                        <label htmlFor="tg-name" className="text-xs font-bold text-gray-600 dark:text-gray-400">
                             Connection Name <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -163,7 +163,7 @@ export default function TelegramConnectionForm({
                         />
                     </div>
                     <div>
-                        <label htmlFor="tg-phone" className="text-xs font-bold text-gray-600">
+                        <label htmlFor="tg-phone" className="text-xs font-bold text-gray-600 dark:text-gray-400">
                             Phone Number <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -173,14 +173,14 @@ export default function TelegramConnectionForm({
                             className={inputClassName}
                             placeholder="+84 912 345 678"
                         />
-                        <p className="mt-1 text-[11px] text-gray-400">Use international format with country code</p>
+                        <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">Use international format with country code</p>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <button
                             type="button"
                             onClick={onCancel}
                             disabled={loading}
-                            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
+                            className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
                         >
                             Cancel
                         </button>
@@ -198,22 +198,22 @@ export default function TelegramConnectionForm({
             {/* Step 2: Code */}
             {step === 'code' && (
                 <form onSubmit={(e) => verify(e)} className="space-y-4">
-                    <div className="rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-700">
+                    <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 px-4 py-3 text-sm text-blue-700 dark:text-blue-400">
                         💬 Code sent to your Telegram app. Enter it below.
                     </div>
                     <div>
-                        <label htmlFor="tg-phone-display" className="text-xs font-bold text-gray-600">
+                        <label htmlFor="tg-phone-display" className="text-xs font-bold text-gray-600 dark:text-gray-400">
                             Phone Number
                         </label>
                         <div
                             id="tg-phone-display"
-                            className="h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 text-sm font-medium text-gray-500 flex items-center"
+                            className="h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-3 text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center"
                         >
                             {phone}
                         </div>
                     </div>
                     <div>
-                        <label htmlFor="tg-code" className="text-xs font-bold text-gray-600">
+                        <label htmlFor="tg-code" className="text-xs font-bold text-gray-600 dark:text-gray-400">
                             Verification Code <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -231,7 +231,7 @@ export default function TelegramConnectionForm({
                             type="button"
                             onClick={() => setStep('phone')}
                             disabled={loading}
-                            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
+                            className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
                         >
                             ← Back
                         </button>
@@ -249,11 +249,11 @@ export default function TelegramConnectionForm({
             {/* Step 2b: Password (2FA) */}
             {step === 'password' && (
                 <form onSubmit={(e) => verify(e, true)} className="space-y-4">
-                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                    <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
                         🔒 Your Telegram account has two-factor authentication enabled. Enter your 2FA password.
                     </div>
                     <div>
-                        <label htmlFor="tg-password" className="text-xs font-bold text-gray-600">
+                        <label htmlFor="tg-password" className="text-xs font-bold text-gray-600 dark:text-gray-400">
                             2FA Password <span className="text-red-500">*</span>
                         </label>
                         <input
@@ -270,7 +270,7 @@ export default function TelegramConnectionForm({
                             type="button"
                             onClick={() => setStep('code')}
                             disabled={loading}
-                            className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
+                            className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
                         >
                             ← Back
                         </button>
@@ -289,4 +289,4 @@ export default function TelegramConnectionForm({
 }
 
 const inputClassName =
-    'h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100';
+    'h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50';

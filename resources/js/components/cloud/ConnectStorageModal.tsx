@@ -30,12 +30,12 @@ export default function ConnectStorageModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="connect-storage-modal-title"
-                className={`relative w-full overflow-hidden rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl transition-all ${isCredentialsSelected ? 'max-w-2xl' : 'max-w-md'}`}
+                className={`relative w-full overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-2xl transition-all ${isCredentialsSelected ? 'max-w-2xl' : 'max-w-md'}`}
             >
                 <button
                     type="button"
                     onClick={onClose}
-                    className="absolute top-4 right-4 rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700"
+                    className="absolute top-4 right-4 rounded-xl p-2 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300"
                     aria-label="Close connect storage modal"
                 >
                     <X className="h-5 w-5" aria-hidden="true" />
@@ -44,14 +44,14 @@ export default function ConnectStorageModal({
                 <div className="mb-6">
                     <h3
                         id="connect-storage-modal-title"
-                        className="text-xl font-extrabold tracking-tight text-gray-900"
+                        className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100"
                     >
                         {isFtpSelected && 'Connect FTP'}
                         {isSftpSelected && 'Connect SFTP'}
                         {isTelegramSelected && 'Connect Telegram'}
                         {!isCredentialsSelected && 'Connect Storage'}
                     </h3>
-                    <p className="mt-1 text-xs text-gray-400">
+                    <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                         {isFtpSelected && 'Enter your FTP server credentials to test and link the connection'}
                         {isSftpSelected && 'Enter your SFTP server credentials to test and link the connection'}
                         {isTelegramSelected && 'Connect your Telegram account to store files in Saved Messages'}
