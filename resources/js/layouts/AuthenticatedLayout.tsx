@@ -22,6 +22,7 @@ import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialo
 import EditFtpConnectionDialog from '@/components/cloud/EditFtpConnectionDialog';
 import EditSftpConnectionDialog from '@/components/cloud/EditSftpConnectionDialog';
 import UploadProgressPanel from '@/components/files/UploadProgressPanel';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -71,9 +72,9 @@ export default function AuthenticatedLayout({
         useState<CloudConnection | null>(null);
 
     return (
-        <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans text-gray-900 antialiased">
+        <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] dark:bg-gray-950 font-sans text-gray-900 dark:text-gray-100 antialiased">
             {/* Sidebar */}
-            <aside className="flex h-full w-65 shrink-0 flex-col border-r border-gray-200 bg-white">
+            <aside className="flex h-full w-65 shrink-0 flex-col border-r border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900">
                 {/* Logo and Brand */}
                 <div className="flex h-18 items-center px-6">
                     <div className="flex items-center gap-3">
@@ -81,10 +82,10 @@ export default function AuthenticatedLayout({
                             <Cloud className="h-6 w-6" strokeWidth={2.5} />
                         </div>
                         <div>
-                            <div className="text-base font-bold tracking-tight text-gray-900">
+                            <div className="text-base font-bold tracking-tight text-gray-900 dark:text-gray-100">
                                 {props.name}
                             </div>
-                            <div className="text-[9px] font-bold tracking-wider text-gray-400">
+                            <div className="text-[9px] font-bold tracking-wider text-gray-400 dark:text-gray-500">
                                 THE DIGITAL CURATOR
                             </div>
                         </div>
@@ -99,13 +100,13 @@ export default function AuthenticatedLayout({
                             <li>
                                 <Link
                                     href="/dashboard"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-red-50/50 text-brand dark:bg-red-950/30' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}`}
                                 >
                                     {(url === '/dashboard' || url === '/') && (
                                         <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-brand" />
                                     )}
                                     <LayoutDashboard
-                                        className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-brand' : 'text-gray-400'}`}
+                                        className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-brand' : 'text-gray-400 dark:text-gray-500'}`}
                                     />
                                     DASHBOARD
                                 </Link>
@@ -115,7 +116,7 @@ export default function AuthenticatedLayout({
 
                     {/* Connected Storage */}
                     <div>
-                        <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
+                        <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500">
                             CONNECTED STORAGE
                         </div>
                         {connections && connections.length > 0 ? (
@@ -149,7 +150,7 @@ export default function AuthenticatedLayout({
                                 )}
                             </ul>
                         ) : (
-                            <div className="px-3 py-1.5 text-[11px] font-medium text-gray-400 italic">
+                            <div className="px-3 py-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 italic">
                                 No storage connected
                             </div>
                         )}
@@ -159,7 +160,7 @@ export default function AuthenticatedLayout({
                         (cloudActions?.canCreateFolder ||
                             cloudActions?.canUpload) && (
                             <div>
-                                <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
+                                <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500">
                                     CLOUD ACTIONS
                                 </div>
                                 <div className="space-y-2 px-3">
@@ -170,7 +171,7 @@ export default function AuthenticatedLayout({
                                             onClick={
                                                 cloudActions.onCreateFolder
                                             }
-                                            className="h-10 w-full justify-center rounded-xl border-gray-200 text-xs font-bold tracking-wide text-gray-700"
+                                            className="h-10 w-full justify-center rounded-xl border-gray-200 dark:border-gray-800 text-xs font-bold tracking-wide text-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
                                         >
                                             <FolderPlus className="h-4 w-4" />
                                             New Folder
@@ -192,20 +193,20 @@ export default function AuthenticatedLayout({
 
                     {/* System Section */}
                     <div>
-                        <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400">
+                        <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-gray-400 dark:text-gray-500">
                             SYSTEM
                         </div>
                         <ul className="space-y-1">
                             <li>
                                 <Link
                                     href="/system/cloud-tasks"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/cloud-tasks') ? 'bg-red-50/50 text-brand' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}`}
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/cloud-tasks') ? 'bg-red-50/50 text-brand dark:bg-red-950/30' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}`}
                                 >
                                     {url.startsWith('/system/cloud-tasks') && (
                                         <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-brand" />
                                     )}
                                     <ListTodo
-                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-brand' : 'text-gray-400'}`}
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-brand' : 'text-gray-400 dark:text-gray-500'}`}
                                     />
                                     TASKS
                                 </Link>
@@ -215,14 +216,14 @@ export default function AuthenticatedLayout({
                 </div>
 
                 {/* Sidebar Footer */}
-                <div className="space-y-1 border-t border-gray-100 p-4">
+                <div className="space-y-1 border-t border-gray-100 dark:border-gray-800 p-4">
                     {activeConnection?.storageQuota?.supported && (
-                        <div className="rounded-2xl border border-gray-100 bg-gray-50 p-4">
+                        <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 p-4">
                             <div className="mb-2 flex items-center justify-between gap-2">
-                                <span className="text-[10px] font-black tracking-widest text-gray-400">
+                                <span className="text-[10px] font-black tracking-widest text-gray-400 dark:text-gray-500">
                                     STORAGE
                                 </span>
-                                <span className="rounded-full bg-red-50 px-2 py-0.5 text-[10px] font-extrabold text-brand">
+                                <span className="rounded-full bg-red-50 dark:bg-red-950/30 px-2 py-0.5 text-[10px] font-extrabold text-brand">
                                     {activeConnection.storageQuota
                                         .usedPercent ?? 0}
                                     %
@@ -237,7 +238,7 @@ export default function AuthenticatedLayout({
                                     className="h-2 bg-gray-200 [&>div]:bg-brand"
                                 />
                             </div>
-                            <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500">
+                            <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500 dark:text-gray-400">
                                 <span>
                                     {formatBytes(
                                         activeConnection.storageQuota
@@ -256,18 +257,18 @@ export default function AuthenticatedLayout({
                     )}
                     <a
                         href="#"
-                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                     >
-                        <HelpCircle className="h-4.5 w-4.5 text-gray-400" />
+                        <HelpCircle className="h-4.5 w-4.5 text-gray-400 dark:text-gray-500" />
                         HELP
                     </a>
                     <Link
                         href={destroy.url()}
                         method="post"
                         as="button"
-                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                        className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
                     >
-                        <LogOut className="h-4.5 w-4.5 text-gray-400" />
+                        <LogOut className="h-4.5 w-4.5 text-gray-400 dark:text-gray-500" />
                         LOGOUT
                     </Link>
                 </div>
@@ -276,13 +277,13 @@ export default function AuthenticatedLayout({
             {/* Main Area */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Navbar */}
-                <header className="flex h-18 w-full shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8">
+                <header className="flex h-18 w-full shrink-0 items-center justify-between border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-8">
                     <div className="flex min-w-0 flex-1 items-center gap-6">
                         {cloudSearch && activeConnection && (
                             <div className="flex w-full max-w-2xl items-center gap-2">
                                 <div className="relative w-full max-w-md">
                                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                        <Search className="h-4 w-4 text-gray-400" />
+                                        <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
                                     </div>
                                     <Input
                                         type="text"
@@ -291,7 +292,7 @@ export default function AuthenticatedLayout({
                                         onChange={(event) =>
                                             cloudSearch.onChange(event.target.value)
                                         }
-                                        className="h-11 w-full rounded-xl border-none bg-gray-50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
+                                        className="h-11 w-full rounded-xl border-none bg-gray-50 dark:bg-gray-800 pl-11 font-semibold text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-200 dark:focus-visible:ring-gray-700"
                                     />
                                 </div>
 
@@ -299,9 +300,9 @@ export default function AuthenticatedLayout({
                                     type="button"
                                     title="Clear Cache"
                                     onClick={cloudActions?.onClearCache}
-                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                                 >
-                                    <Eraser className="h-5 w-5 text-gray-600" />
+                                    <Eraser className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                 </button>
 
                                 {activeConnection.provider == '7' && (
@@ -309,9 +310,9 @@ export default function AuthenticatedLayout({
                                         type="button"
                                         title="Sync"
                                         onClick={cloudActions?.onSync}
-                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50"
+                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50 dark:hover:bg-gray-800"
                                     >
-                                        <RefreshCw className="h-5 w-5 text-gray-600" />
+                                        <RefreshCw className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                                     </button>
                                 )}
                             </div>
@@ -321,20 +322,22 @@ export default function AuthenticatedLayout({
                     {/* Right: Actions and User */}
                     <div className="flex items-center gap-4">
                         {/* Notification Bell */}
-                        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-gray-50">
-                            <Bell className="h-5 w-5 text-gray-600" />
+                        <button className="relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <Bell className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                             <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-brand" />
                         </button>
 
                         {/* Settings Button */}
-                        <button className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-gray-50">
-                            <Settings className="h-5 w-5 text-gray-600" />
+                        <button className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-gray-50 dark:hover:bg-gray-800">
+                            <Settings className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                         </button>
 
+                        <ThemeToggle />
+
                         {/* User Avatar */}
-                        <Avatar className="h-10 w-10 cursor-pointer border border-gray-200 shadow-sm">
+                        <Avatar className="h-10 w-10 cursor-pointer border border-gray-200 dark:border-gray-800 shadow-sm">
                             <AvatarImage src="" />
-                            <AvatarFallback className="bg-red-50 text-sm font-bold text-brand">
+                            <AvatarFallback className="bg-red-50 dark:bg-red-950/30 text-sm font-bold text-brand">
                                 {user?.name
                                     ? user.name
                                         .split(' ')
@@ -348,7 +351,7 @@ export default function AuthenticatedLayout({
                 </header>
 
                 {/* Content scroll wrapper */}
-                <main className="flex-1 overflow-y-auto bg-[#f8f9fa] p-6">
+                <main className="flex-1 overflow-y-auto bg-[#f8f9fa] dark:bg-gray-950 p-6">
                     <div className="mx-auto max-w-7xl">{children}</div>
                 </main>
             </div>

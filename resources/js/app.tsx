@@ -4,6 +4,8 @@ import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import { UploadManagerProvider } from '@/contexts/UploadManagerContext';
 
+import { ThemeProvider } from '@/components/ThemeProvider';
+
 configureEcho({
     broadcaster: 'pusher',
 });
@@ -21,15 +23,16 @@ createInertiaApp({
         }
 
         createRoot(el).render(
-            createElement(App, {
-                ...props,
-                children: ({ Component, props: pageProps, key }) =>
-                    createElement(
-                        UploadManagerProvider,
-                        null,
-                        createElement(Component, { ...pageProps, key }),
-                    ),
-            }),
+            <ThemeProvider defaultTheme="system" storageKey="cloudx-ui-theme">
+                <App
+                    {...props}
+                    children={({ Component, props: pageProps, key }) => (
+                        <UploadManagerProvider>
+                            <Component {...pageProps} key={key} />
+                        </UploadManagerProvider>
+                    )}
+                />
+            </ThemeProvider>
         );
     },
 });

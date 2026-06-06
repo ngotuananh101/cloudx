@@ -19,7 +19,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
             <Head title="Email Verification" />
 
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7] dark:bg-gray-800">
                     <div className="flex items-center justify-center">
                         <MailCheck
                             className="h-8 w-8 text-brand"
@@ -28,10 +28,10 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     </div>
                 </div>
 
-                <h1 className="mb-3 text-2xl font-semibold text-gray-900">
+                <h1 className="mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     Verify your email
                 </h1>
-                <p className="mx-auto text-sm text-gray-500">
+                <p className="mx-auto text-sm text-gray-500 dark:text-gray-400">
                     Thanks for signing up! Before getting started, could you
                     verify your email address by clicking on the link we just
                     emailed to you? If you didn't receive the email, we will
@@ -61,7 +61,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     href={destroy.url()}
                     method="post"
                     as="button"
-                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-700"
+                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log Out

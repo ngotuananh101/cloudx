@@ -25,7 +25,7 @@ export default function ForgotPassword() {
             <Head title="Forgot Password" />
 
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7] dark:bg-gray-800">
                     <div className="relative flex items-center justify-center">
                         <RotateCcw
                             className="h-8 w-8 text-brand"
@@ -40,10 +40,10 @@ export default function ForgotPassword() {
                     </div>
                 </div>
 
-                <h1 className="mb-3 text-2xl font-semibold text-gray-900">
+                <h1 className="mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     Reset your password
                 </h1>
-                <p className="mx-auto max-w-xs text-sm text-gray-500">
+                <p className="mx-auto max-w-xs text-sm text-gray-500 dark:text-gray-400">
                     Enter your email address and we'll send you a link to reset
                     your password.
                 </p>
@@ -71,7 +71,7 @@ export default function ForgotPassword() {
                             id="email"
                             type="email"
                             placeholder="name@company.com"
-                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                         />
@@ -94,7 +94,7 @@ export default function ForgotPassword() {
             <div className="mt-8 text-center">
                 <Link
                     href="/login"
-                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-700"
+                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
                 >
                     <ArrowLeft className="mr-2 h-4 w-4" />
                     Back to Login

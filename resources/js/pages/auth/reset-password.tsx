@@ -35,7 +35,7 @@ export default function ResetPassword({
             <Head title="Reset Password" />
 
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7]">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7] dark:bg-gray-800">
                     <div className="flex items-center justify-center">
                         <KeyRound
                             className="h-8 w-8 text-brand"
@@ -44,10 +44,10 @@ export default function ResetPassword({
                     </div>
                 </div>
 
-                <h1 className="mb-3 text-2xl font-semibold text-gray-900">
+                <h1 className="mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     Set new password
                 </h1>
-                <p className="mx-auto max-w-xs text-sm text-gray-500">
+                <p className="mx-auto max-w-xs text-sm text-gray-500 dark:text-gray-400">
                     Your new password must be different from previously used
                     passwords.
                 </p>
@@ -68,7 +68,7 @@ export default function ResetPassword({
                         <Input
                             id="email"
                             type="email"
-                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             readOnly
@@ -93,7 +93,7 @@ export default function ResetPassword({
                             id="password"
                             type={showPassword ? 'text' : 'password'}
                             placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
                             value={data.password}
                             onChange={(e) =>
                                 setData('password', e.target.value)
@@ -131,7 +131,7 @@ export default function ResetPassword({
                             id="password_confirmation"
                             type={showConfirmPassword ? 'text' : 'password'}
                             placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
                             value={data.password_confirmation}
                             onChange={(e) =>
                                 setData('password_confirmation', e.target.value)

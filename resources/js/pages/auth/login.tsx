@@ -35,10 +35,10 @@ export default function Login() {
 
             {/* Headers */}
             <div className="mb-8 text-center">
-                <h1 className="mb-2 text-2xl font-semibold text-gray-900">
+                <h1 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
                     Welcome Back
                 </h1>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                     Enter your credentials to access your vault
                 </p>
             </div>
@@ -62,7 +62,7 @@ export default function Login() {
                         id="email"
                         type="email"
                         placeholder="name@company.com"
-                        className={`h-11 border-0 bg-[#f4f5f7] px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                        className={`h-11 border-0 bg-[#f4f5f7] px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         autoComplete="username"
@@ -93,7 +93,7 @@ export default function Login() {
                         id="password"
                         type="password"
                         placeholder="********"
-                        className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                        className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                         autoComplete="current-password"
@@ -116,10 +116,10 @@ export default function Login() {
             {/* Divider */}
             <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-100" />
+                    <span className="w-full border-t border-gray-100 dark:border-gray-800" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-4 font-bold tracking-wider text-gray-400">
+                    <span className="bg-white px-4 font-bold tracking-wider text-gray-400 dark:bg-gray-900 dark:text-gray-500">
                         Or continue with
                     </span>
                 </div>
@@ -129,7 +129,7 @@ export default function Login() {
             <div className="grid grid-cols-2 gap-4">
                 <Button
                     variant="outline"
-                    className="h-11 rounded-lg border-0 bg-[#f4f5f7] font-medium text-gray-700 hover:bg-[#e9ebef]"
+                    className="h-11 rounded-lg border-0 bg-[#f4f5f7] font-medium text-gray-700 hover:bg-[#e9ebef] dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                         <path
@@ -153,7 +153,7 @@ export default function Login() {
                 </Button>
                 <Button
                     variant="outline"
-                    className="h-11 rounded-lg border-0 bg-[#f4f5f7] font-medium text-gray-700 hover:bg-[#e9ebef]"
+                    className="h-11 rounded-lg border-0 bg-[#f4f5f7] font-medium text-gray-700 hover:bg-[#e9ebef] dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
                 >
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 21 21">
                         <path fill="#f25022" d="M1 1h9v9H1z" />
@@ -167,7 +167,7 @@ export default function Login() {
 
             {/* Footer */}
             <div className="mt-8 text-center text-sm">
-                <span className="text-gray-500">Don't have an account? </span>
+                <span className="text-gray-500 dark:text-gray-400">Don't have an account? </span>
                 <Link href="#" className="font-bold text-brand hover:underline">
                     Create account
                 </Link>
