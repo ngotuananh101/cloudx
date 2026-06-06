@@ -23,6 +23,7 @@ interface FileTableRowProps {
     style: CSSProperties;
     capabilities?: ProviderCapabilities;
     onNavigate?: (item: CloudFile) => void;
+    onDelete?: (item: CloudFile) => void;
     connectionId?: number;
 }
 
@@ -31,6 +32,7 @@ export function FileTableRow({
     style,
     capabilities,
     onNavigate,
+    onDelete,
     connectionId,
 }: FileTableRowProps) {
     const getIcon = () => {
@@ -148,6 +150,10 @@ export function FileTableRow({
                                 <Button
                                     variant="ghost"
                                     size="icon"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDelete?.(item);
+                                    }}
                                     className="h-8 w-8 rounded-lg text-gray-400 hover:text-red-600"
                                     aria-label={`Delete ${item.name}`}
                                 >

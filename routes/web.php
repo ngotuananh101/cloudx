@@ -4,6 +4,7 @@ use App\Http\Controllers\CloudConnectionCacheController;
 use App\Http\Controllers\CloudConnectionController;
 use App\Http\Controllers\CloudFileDownloadController;
 use App\Http\Controllers\CloudFolderController;
+use App\Http\Controllers\CloudItemController;
 use App\Http\Controllers\CloudUploadTaskChunkController;
 use App\Http\Controllers\CloudUploadTaskController;
 use App\Http\Controllers\FtpConnectionController;
@@ -44,6 +45,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/connections/telegram', [TelegramConnectionController::class, 'store'])->name('connections.telegram.store');
     Route::post('/connections/{connection}/telegram/sync', [TelegramConnectionController::class, 'sync'])->name('connections.telegram.sync');
     Route::delete('/connections/{connection}/cache', [CloudConnectionCacheController::class, 'destroy'])->name('cloud-connections.cache.destroy');
+    Route::delete('/connections/{connection}/items', [CloudItemController::class, 'destroy'])->name('connections.items.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
 
     Route::get('/connections/{connection}/upload-tasks', [CloudUploadTaskController::class, 'index'])->name('connections.upload-tasks.index');

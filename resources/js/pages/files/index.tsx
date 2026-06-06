@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ export default function FileBrowser({
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [folderName, setFolderName] = useState('');
     const [folderError, setFolderError] = useState<string | null>(null);
+    const [itemToDelete, setItemToDelete] = useState<CloudFile | null>(null);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -163,6 +165,13 @@ export default function FileBrowser({
                 onChange={handleUploadFiles}
             />
 
+            <DeleteItemDialog
+                item={itemToDelete}
+                connectionId={connection.id}
+                onClose={() => setItemToDelete(null)}
+                onDeleted={refreshFiles}
+            />
+
             {isCreateFolderOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
                     <form
@@ -227,6 +236,7 @@ export default function FileBrowser({
                         searchQuery={searchQuery}
                         capabilities={connection.capabilities}
                         onNavigate={handleNavigate}
+                        onDelete={setItemToDelete}
                         connectionId={connection.id}
                     />
                 </div>

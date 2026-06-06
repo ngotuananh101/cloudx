@@ -8,6 +8,7 @@ import FtpConnectionController from './FtpConnectionController'
 import SftpConnectionController from './SftpConnectionController'
 import TelegramConnectionController from './TelegramConnectionController'
 import CloudConnectionCacheController from './CloudConnectionCacheController'
+import CloudItemController from './CloudItemController'
 import CloudFolderController from './CloudFolderController'
 import CloudUploadTaskController from './CloudUploadTaskController'
 import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
@@ -22,6 +23,7 @@ FtpConnectionController: Object.assign(FtpConnectionController, FtpConnectionCon
 SftpConnectionController: Object.assign(SftpConnectionController, SftpConnectionController),
 TelegramConnectionController: Object.assign(TelegramConnectionController, TelegramConnectionController),
 CloudConnectionCacheController: Object.assign(CloudConnectionCacheController, CloudConnectionCacheController),
+CloudItemController: Object.assign(CloudItemController, CloudItemController),
 CloudFolderController: Object.assign(CloudFolderController, CloudFolderController),
 CloudUploadTaskController: Object.assign(CloudUploadTaskController, CloudUploadTaskController),
 CloudUploadTaskChunkController: Object.assign(CloudUploadTaskChunkController, CloudUploadTaskChunkController),
