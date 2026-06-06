@@ -352,7 +352,7 @@ export default function AuthenticatedLayout({
 
                 {/* Content scroll wrapper */}
                 <main className="flex-1 overflow-y-auto bg-[#f8f9fa] dark:bg-gray-950 p-6">
-                    <div className="mx-auto max-w-7xl">{children}</div>
+                    <div className="mx-auto max-w-full">{children}</div>
                 </main>
             </div>
             <EditConnectionNameDialog
