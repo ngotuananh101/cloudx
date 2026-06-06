@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { UploadManagerProvider } from '@/contexts/UploadManagerContext';
 
 configureEcho({
-    broadcaster: 'reverb',
+    broadcaster: 'pusher',
 });
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';

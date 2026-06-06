@@ -10,7 +10,12 @@ class CloudUploadTaskBroadcaster
 {
     public function broadcastStatus(CloudTask $task): void
     {
-        CloudUploadTaskUpdated::dispatch($task->refresh());
+        try {
+            CloudUploadTaskUpdated::dispatch($task->refresh());
+        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+            // Ignore broadcast exceptions to prevent upload failures
+            \Illuminate\Support\Facades\Log::warning('Broadcast failed for task ' . $task->id . ': ' . $e->getMessage());
+        }
     }
 
     public function broadcastProgressIfNeeded(CloudTask $task): void
@@ -44,6 +49,10 @@ class CloudUploadTaskBroadcaster
             return;
         }
 
-        CloudUploadTaskUpdated::dispatch($task->refresh());
+        try {
+            CloudUploadTaskUpdated::dispatch($task->refresh());
+        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+            \Illuminate\Support\Facades\Log::warning('Broadcast progress failed for task ' . $task->id . ': ' . $e->getMessage());
+        }
     }
 }
