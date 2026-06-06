@@ -32,6 +32,7 @@ interface UploadManagerContextValue {
     resume: (item: UploadQueueItem) => Promise<void>;
     cancel: (item: UploadQueueItem) => Promise<void>;
     retry: (item: UploadQueueItem) => void;
+    remove: (item: UploadQueueItem) => void;
     closePanel: () => void;
     registerFileBrowserLocation: (location: FileBrowserLocation | null) => void;
 }
@@ -279,6 +280,23 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 
     const closePanel = useCallback(() => setIsPanelVisible(false), []);
 
+    const remove = useCallback(
+        (item: UploadQueueItem) => {
+            setItems((currentItems) =>
+                currentItems.filter((i) => i.key !== item.key),
+            );
+            
+            // If we remove the last item, close the panel
+            setItems((currentItems) => {
+                if (currentItems.length === 0) {
+                    setIsPanelVisible(false);
+                }
+                return currentItems;
+            });
+        },
+        [],
+    );
+
     const registerFileBrowserLocation = useCallback(
         (location: FileBrowserLocation | null) => {
             fileBrowserLocation.current = location;
@@ -318,6 +336,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             resume,
             cancel,
             retry,
+            remove,
             closePanel,
             registerFileBrowserLocation,
         }),
@@ -329,6 +348,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             resume,
             cancel,
             retry,
+            remove,
             closePanel,
             registerFileBrowserLocation,
         ],

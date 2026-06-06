@@ -1,10 +1,11 @@
-import { Pause, Play, RotateCcw, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { Pause, Play, RotateCcw, X, ChevronDown, ChevronUp, Trash2, HardDrive } from 'lucide-react';
 import { useState } from 'react';
+import { usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useUploadManager } from '@/contexts/UploadManagerContext';
 import { formatBytes } from '@/lib/format-bytes';
-import type { UploadQueueItem } from '@/types/cloud';
+import type { UploadQueueItem, CloudConnection } from '@/types/cloud';
 
 const ACTIVE_STATUSES: UploadQueueItem['status'][] = [
     'pending',
@@ -46,9 +47,11 @@ function getStatusLabel(item: UploadQueueItem): string {
 }
 
 export default function UploadProgressPanel() {
-    const { items, isPanelVisible, pause, resume, cancel, retry, closePanel } =
+    const { items, isPanelVisible, pause, resume, cancel, retry, closePanel, remove } =
         useUploadManager();
     const [isMinimized, setIsMinimized] = useState(false);
+    const { props } = usePage() as any;
+    const connections = props.auth?.user?.connections || [];
 
     if (!isPanelVisible || items.length === 0) {
         return null;
@@ -127,6 +130,7 @@ export default function UploadProgressPanel() {
                 <div className="custom-scrollbar max-h-80 space-y-2 overflow-y-auto p-4 pt-0">
                 {items.map((item) => {
                     const isFailed = item.status === 'failed';
+                    const connection = connections.find((c: CloudConnection) => c.id === item.connectionId);
 
                     return (
                         <div
@@ -138,10 +142,21 @@ export default function UploadProgressPanel() {
                         >
                             <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0 flex-1">
-                                    <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
-                                        {item.file?.name ??
-                                            item.task?.name ??
-                                            'File'}
+                                    <div className="flex items-center gap-2">
+                                        {connection?.provider_icon?.endsWith('.svg') ? (
+                                            <img
+                                                src={connection.provider_icon}
+                                                className="h-4 w-4 shrink-0"
+                                                alt={connection.provider}
+                                            />
+                                        ) : (
+                                            <HardDrive className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" />
+                                        )}
+                                        <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
+                                            {item.file?.name ??
+                                                item.task?.name ??
+                                                'File'}
+                                        </div>
                                     </div>
                                     <div
                                         className={`mt-1 truncate text-xs font-semibold ${isFailed
@@ -199,6 +214,21 @@ export default function UploadProgressPanel() {
                                                 aria-label="Cancel upload"
                                             >
                                                 <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    {[
+                                        'completed',
+                                        'cancelled',
+                                        'failed',
+                                    ].includes(item.status) && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() => remove(item)}
+                                                aria-label="Remove upload"
+                                            >
+                                                <Trash2 className="h-4 w-4" />
                                             </Button>
                                         )}
                                 </div>
