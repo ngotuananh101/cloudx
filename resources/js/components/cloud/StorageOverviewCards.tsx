@@ -62,7 +62,7 @@ export default function StorageOverviewCards({
     }
 
     return (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2  lg:grid-cols-3 xl:grid-cols-4  2xl:grid-cols-5">
             {connections.map((connection) => (
                 <Card
                     key={connection.id}
@@ -86,14 +86,14 @@ export default function StorageOverviewCards({
                                     />
                                 )}
                             </div>
-                            <span className="text-[10px] font-black tracking-widest text-gray-400 dark:text-gray-500">
+                            <span className="text-[10px] font-semibold tracking-widest text-gray-400 dark:text-gray-500">
                                 {connection.provider.toUpperCase()}
                             </span>
                         </div>
 
                         <div className="mb-3 flex items-baseline justify-between">
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                                <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
                                     {connection.used_formatted}
                                 </span>
                                 <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
@@ -108,7 +108,7 @@ export default function StorageOverviewCards({
                         <div className="relative pt-1">
                             <Progress
                                 value={connection.percent}
-                                className="h-2 bg-gray-100 [&>div]:bg-brand"
+                                className="h-2 bg-gray-100 dark:bg-gray-800 [&>div]:bg-brand"
                             />
                         </div>
 

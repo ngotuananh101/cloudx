@@ -235,7 +235,7 @@ export default function AuthenticatedLayout({
                                         activeConnection.storageQuota
                                             .usedPercent ?? 0
                                     }
-                                    className="h-2 bg-gray-200 [&>div]:bg-brand"
+                                    className="h-2 bg-gray-200 dark:bg-gray-800 [&>div]:bg-brand"
                                 />
                             </div>
                             <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-gray-500 dark:text-gray-400">
@@ -255,13 +255,6 @@ export default function AuthenticatedLayout({
                             </div>
                         </div>
                     )}
-                    <a
-                        href="#"
-                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide text-gray-500 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100"
-                    >
-                        <HelpCircle className="h-4.5 w-4.5 text-gray-400 dark:text-gray-500" />
-                        HELP
-                    </a>
                     <Link
                         href={destroy.url()}
                         method="post"

@@ -1,4 +1,5 @@
-import { Pause, Play, RotateCcw, X } from 'lucide-react';
+import { Pause, Play, RotateCcw, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useUploadManager } from '@/contexts/UploadManagerContext';
@@ -47,6 +48,7 @@ function getStatusLabel(item: UploadQueueItem): string {
 export default function UploadProgressPanel() {
     const { items, isPanelVisible, pause, resume, cancel, retry, closePanel } =
         useUploadManager();
+    const [isMinimized, setIsMinimized] = useState(false);
 
     if (!isPanelVisible || items.length === 0) {
         return null;
@@ -63,78 +65,89 @@ export default function UploadProgressPanel() {
     const totalProgress =
         items.length > 0
             ? Math.round(
-                  items.reduce((sum, item) => sum + item.progress, 0) /
-                      items.length,
-              )
+                items.reduce((sum, item) => sum + item.progress, 0) /
+                items.length,
+            )
             : 0;
 
     const headerTitle =
         activeCount > 0
             ? `Uploading ${activeCount} file${activeCount === 1 ? '' : 's'}`
-            : `Uploaded ${completedCount} file${
-                  completedCount === 1 ? '' : 's'
-              }`;
+            : `Uploaded ${completedCount} file${completedCount === 1 ? '' : 's'
+            }`;
 
     return (
-        <div className="fixed right-6 bottom-6 z-50 w-[380px] overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl">
-            <div className="flex items-start justify-between gap-3 border-b border-gray-100 bg-gray-50 px-4 py-3">
+        <div className="fixed right-6 bottom-6 z-50 w-95 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 px-4 py-3">
                 <div className="min-w-0">
-                    <div className="truncate text-sm font-bold text-gray-900">
+                    <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
                         {headerTitle}
                     </div>
-                    <div className="mt-0.5 text-[11px] font-semibold text-gray-500">
+                    <div className="mt-0.5 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
                         {completedCount} completed &middot; {activeCount} active
                         &middot; {failedCount} failed
                     </div>
                 </div>
-                <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    onClick={closePanel}
-                    aria-label="Close upload panel"
-                >
-                    <X className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center gap-1">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={() => setIsMinimized(!isMinimized)}
+                        aria-label={isMinimized ? 'Expand upload panel' : 'Minimize upload panel'}
+                        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                    >
+                        {isMinimized ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon-sm"
+                        onClick={closePanel}
+                        aria-label="Close upload panel"
+                        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
-            <div className="px-4 pt-3">
-                <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-gray-500">
+            <div className="px-4 py-3">
+                <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
                     <span>Total progress</span>
                     <span>{totalProgress}%</span>
                 </div>
                 <Progress
                     value={totalProgress}
-                    className="h-2 bg-gray-200 [&>div]:bg-brand"
+                    className="h-2 bg-gray-200 dark:bg-gray-800 [&>div]:bg-brand"
                 />
             </div>
 
-            <div className="custom-scrollbar max-h-[320px] space-y-2 overflow-y-auto p-4">
+            {!isMinimized && (
+                <div className="custom-scrollbar max-h-80 space-y-2 overflow-y-auto p-4 pt-0">
                 {items.map((item) => {
                     const isFailed = item.status === 'failed';
 
                     return (
                         <div
                             key={item.key}
-                            className={`rounded-xl border p-3 ${
-                                isFailed
-                                    ? 'border-orange-200 bg-orange-50'
-                                    : 'border-gray-100 bg-gray-50'
-                            }`}
+                            className={`rounded-xl border p-3 ${isFailed
+                                ? 'border-orange-200 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-950/30'
+                                : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50'
+                                }`}
                         >
                             <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0 flex-1">
-                                    <div className="truncate text-sm font-bold text-gray-900">
+                                    <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
                                         {item.file?.name ??
                                             item.task?.name ??
                                             'File'}
                                     </div>
                                     <div
-                                        className={`mt-1 truncate text-xs font-semibold ${
-                                            isFailed
-                                                ? 'text-orange-600'
-                                                : 'text-gray-500'
-                                        }`}
+                                        className={`mt-1 truncate text-xs font-semibold ${isFailed
+                                            ? 'text-orange-600 dark:text-orange-400'
+                                            : 'text-gray-500 dark:text-gray-400'
+                                            }`}
                                     >
                                         {getStatusLabel(item)}
                                     </div>
@@ -178,30 +191,30 @@ export default function UploadProgressPanel() {
                                         'cancelled',
                                         'failed',
                                     ].includes(item.status) && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            onClick={() => void cancel(item)}
-                                            aria-label="Cancel upload"
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
-                                    )}
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() => void cancel(item)}
+                                                aria-label="Cancel upload"
+                                            >
+                                                <X className="h-4 w-4" />
+                                            </Button>
+                                        )}
                                 </div>
                             </div>
                             <Progress
                                 value={item.progress}
-                                className={`mt-3 h-1.5 bg-gray-200 ${
-                                    isFailed
-                                        ? '[&>div]:bg-orange-500'
-                                        : '[&>div]:bg-brand'
-                                }`}
+                                className={`mt-3 h-1.5 bg-gray-200 dark:bg-gray-800 ${isFailed
+                                    ? '[&>div]:bg-orange-500'
+                                    : '[&>div]:bg-brand'
+                                    }`}
                             />
                         </div>
                     );
                 })}
-            </div>
+                </div>
+            )}
         </div>
     );
 }
