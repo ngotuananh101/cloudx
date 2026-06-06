@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/connections/{connection}/sftp', [SftpConnectionController::class, 'update'])->name('connections.sftp.update');
     Route::post('/connections/telegram/request-code', [TelegramConnectionController::class, 'requestCode'])->name('connections.telegram.request-code');
     Route::post('/connections/telegram', [TelegramConnectionController::class, 'store'])->name('connections.telegram.store');
+    Route::post('/connections/{connection}/telegram/sync', [TelegramConnectionController::class, 'sync'])->name('connections.telegram.sync');
     Route::delete('/connections/{connection}/cache', [CloudConnectionCacheController::class, 'destroy'])->name('cloud-connections.cache.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
 

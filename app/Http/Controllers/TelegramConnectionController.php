@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Models\CloudConnection;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -123,6 +124,41 @@ class TelegramConnectionController extends Controller
             'success' => true,
             'connection_id' => $connection->id,
             'synced' => $synced,
+        ]);
+    }
+
+    public function sync(Request $request, CloudConnection $connection): JsonResponse
+    {
+        if ($connection->user_id !== $request->user()->id) {
+            abort(403);
+        }
+
+        if ($connection->provider !== CloudProvider::TELEGRAM()) {
+            abort(400, 'Not a Telegram connection');
+        }
+
+        $sessionId = $connection->credentials['session_id'] ?? null;
+        if (! $sessionId) {
+            abort(400, 'Invalid Telegram session');
+        }
+
+        $client = $this->telegramClient($sessionId);
+
+        try {
+            $syncedCount = $client->sync();
+        } catch (RuntimeException $e) {
+            report($e);
+            return response()->json([
+                'success' => false,
+                'message' => 'Could not sync with Telegram service.',
+            ], 422);
+        }
+
+        $connection->update(['last_synced_at' => now()]);
+
+        return response()->json([
+            'success' => true,
+            'synced' => $syncedCount,
         ]);
     }
 }

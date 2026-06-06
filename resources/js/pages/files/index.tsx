@@ -122,6 +122,13 @@ export default function FileBrowser({
         });
     };
 
+    const handleSync = () => {
+        router.post(connections.telegram.sync({ connection: connection.id }).url, {}, {
+            preserveScroll: true,
+            onSuccess: () => refreshFiles(),
+        });
+    };
+
     return (
         <AuthenticatedLayout
             title="Files"
@@ -136,6 +143,7 @@ export default function FileBrowser({
                 onCreateFolder: () => setIsCreateFolderOpen(true),
                 onUpload: () => fileInputRef.current?.click(),
                 onClearCache: handleClearCache,
+                onSync: handleSync,
             }}
         >
             <Head title="Files & Folders" />
