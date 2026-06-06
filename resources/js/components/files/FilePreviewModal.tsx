@@ -42,7 +42,7 @@ export default function FilePreviewModal({
     const previewUrl = files.preview.url({
         connection: connectionId,
         path: encodeCloudPath(item.path),
-    });
+    }) + (item.name ? `?filename=${encodeURIComponent(item.name)}` : '');
 
     const downloadUrl = files.download.url({
         connection: connectionId,
@@ -132,7 +132,7 @@ export default function FilePreviewModal({
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-hidden bg-gray-50 dark:bg-gray-950 relative">
+                <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 dark:bg-gray-950 relative">
                     {isTooLarge ? (
                         <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                             <div className="mb-4 rounded-full bg-gray-100 dark:bg-gray-800 p-4">
@@ -154,7 +154,7 @@ export default function FilePreviewModal({
                                 { uri: previewUrl, fileName: item.name },
                             ]}
                             pluginRenderers={DocViewerRenderers}
-                            style={{ width: '100%', height: '100%' }}
+                            className='my-preview'
                             config={{
                                 themeMode: isDark ? 'dark' : 'light',
                                 header: {

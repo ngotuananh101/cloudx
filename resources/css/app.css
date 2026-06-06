@@ -132,14 +132,28 @@
     * {
         @apply border-border outline-ring/50;
     }
+
     body {
         @apply bg-background text-foreground;
     }
+
     button:not(:disabled),
     [role='button']:not(:disabled) {
         cursor: pointer;
     }
+
     html {
         @apply font-sans;
     }
+}
+
+.my-preview {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 76vh !important;
+    background: transparent !important;
+}
+
+.my-preview #proxy-renderer .rdv-common-content-wrapper {
+    font-size: 0.75rem !important;
 }

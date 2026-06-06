@@ -82,6 +82,7 @@ class CloudFilePreviewController extends Controller
             'Content-Type' => $mimeType,
             'Content-Length' => $fileSize,
             'Content-Disposition' => 'inline; filename="' . addslashes($name) . '"',
+            'Cache-Control' => 'public, max-age=31536000, immutable',
         ]));
     }
 }
