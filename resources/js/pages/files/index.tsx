@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
+import FilePreviewModal from '@/components/files/FilePreviewModal';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ export default function FileBrowser({
     const [folderName, setFolderName] = useState('');
     const [folderError, setFolderError] = useState<string | null>(null);
     const [itemToDelete, setItemToDelete] = useState<CloudFile | null>(null);
+    const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -172,6 +174,12 @@ export default function FileBrowser({
                 onDeleted={refreshFiles}
             />
 
+            <FilePreviewModal 
+                item={previewItem} 
+                connectionId={connection.id}
+                onClose={() => setPreviewItem(null)} 
+            />
+
             {isCreateFolderOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
                     <form
@@ -237,6 +245,7 @@ export default function FileBrowser({
                         capabilities={connection.capabilities}
                         onNavigate={handleNavigate}
                         onDelete={setItemToDelete}
+                        onPreview={setPreviewItem}
                         connectionId={connection.id}
                     />
                 </div>

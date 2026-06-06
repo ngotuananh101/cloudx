@@ -13,6 +13,7 @@ use App\Http\Controllers\SftpConnectionController;
 use App\Http\Controllers\StorageBrowserController;
 use App\Http\Controllers\TelegramConnectionController;
 use App\Http\Controllers\System\CloudTaskController;
+use App\Http\Controllers\CloudFilePreviewController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
@@ -29,6 +30,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('/connections/{connection}/files/download/{path?}', [CloudFileDownloadController::class, 'download'])
         ->name('cloud.files.download')
+        ->where('path', '.*');
+
+    Route::get('/connections/{connection}/files/preview/{path?}', [CloudFilePreviewController::class, 'preview'])
+        ->name('cloud.files.preview')
         ->where('path', '.*');
 
     // Cloud Connections OAuth Flow

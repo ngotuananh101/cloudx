@@ -123,4 +123,16 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Max Preview Size
+    |--------------------------------------------------------------------------
+    |
+    | The maximum file size in bytes that can be previewed in the browser.
+    | Files larger than this limit will prompt the user to download instead.
+    |
+    */
+
+    'max_preview_size' => (int) env('MAX_PREVIEW_SIZE', 52428800),
+
 ];

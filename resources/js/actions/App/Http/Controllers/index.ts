@@ -3,6 +3,7 @@ import HomeController from './HomeController'
 import System from './System'
 import StorageBrowserController from './StorageBrowserController'
 import CloudFileDownloadController from './CloudFileDownloadController'
+import CloudFilePreviewController from './CloudFilePreviewController'
 import CloudConnectionController from './CloudConnectionController'
 import FtpConnectionController from './FtpConnectionController'
 import SftpConnectionController from './SftpConnectionController'
@@ -18,6 +19,7 @@ HomeController: Object.assign(HomeController, HomeController),
 System: Object.assign(System, System),
 StorageBrowserController: Object.assign(StorageBrowserController, StorageBrowserController),
 CloudFileDownloadController: Object.assign(CloudFileDownloadController, CloudFileDownloadController),
+CloudFilePreviewController: Object.assign(CloudFilePreviewController, CloudFilePreviewController),
 CloudConnectionController: Object.assign(CloudConnectionController, CloudConnectionController),
 FtpConnectionController: Object.assign(FtpConnectionController, FtpConnectionController),
 SftpConnectionController: Object.assign(SftpConnectionController, SftpConnectionController),

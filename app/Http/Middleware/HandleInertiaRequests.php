@@ -71,6 +71,7 @@ class HandleInertiaRequests extends Middleware
                 ] : null,
             ],
             'status' => fn () => $request->session()->get('status'),
+            'max_preview_size' => config('app.max_preview_size'),
         ];
     }
 }

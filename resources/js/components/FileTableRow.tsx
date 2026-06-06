@@ -10,6 +10,7 @@ import {
     Download,
     Trash2,
     Share2,
+    Eye,
 } from 'lucide-react';
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { encodeCloudPath } from '@/lib/cloud-path';
@@ -23,6 +24,7 @@ interface FileTableRowProps {
     style: CSSProperties;
     capabilities?: ProviderCapabilities;
     onNavigate?: (item: CloudFile) => void;
+    onPreview?: (item: CloudFile) => void;
     onDelete?: (item: CloudFile) => void;
     connectionId?: number;
 }
@@ -32,6 +34,7 @@ export function FileTableRow({
     style,
     capabilities,
     onNavigate,
+    onPreview,
     onDelete,
     connectionId,
 }: FileTableRowProps) {
@@ -68,7 +71,11 @@ export function FileTableRow({
         }
 
         event.preventDefault();
-        onNavigate?.(item);
+        if (item.isDirectory) {
+            onNavigate?.(item);
+        } else {
+            onPreview?.(item);
+        }
     };
 
     const handleDownload = () => {
@@ -91,11 +98,11 @@ export function FileTableRow({
         >
             {/* Name Column */}
             <div
-                className={`flex min-w-0 flex-1 items-center gap-3 pr-4 ${item.isDirectory ? 'cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200' : ''}`}
-                onClick={() => item.isDirectory && onNavigate?.(item)}
+                className={`flex min-w-0 flex-1 items-center gap-3 pr-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-200`}
+                onClick={() => item.isDirectory ? onNavigate?.(item) : onPreview?.(item)}
                 onKeyDown={handleFolderKeyDown}
-                role={item.isDirectory ? 'button' : undefined}
-                tabIndex={item.isDirectory ? 0 : undefined}
+                role="button"
+                tabIndex={0}
             >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 group-hover:bg-white dark:group-hover:bg-gray-900">
                     {getIcon()}
@@ -133,6 +140,20 @@ export function FileTableRow({
                                     aria-label={`Share ${item.name}`}
                                 >
                                     <Share2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {!item.isDirectory && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onPreview?.(item);
+                                    }}
+                                    className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                                    aria-label={`Preview ${item.name}`}
+                                >
+                                    <Eye className="h-4 w-4" />
                                 </Button>
                             )}
                             {capabilities?.download && (
