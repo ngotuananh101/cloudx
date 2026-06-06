@@ -56,6 +56,21 @@ class CloudFileDownloadController extends Controller
 
         $name = basename($path);
 
+        if (method_exists($disk, 'getAdapter')) {
+            $adapter = $disk->getAdapter();
+            if ($adapter instanceof \App\Services\Telegram\TelegramAdapter) {
+                try {
+                    $attributes = $adapter->fileSize($path);
+                    $extra = $attributes->extraMetadata();
+                    if (isset($extra['file_name']) && is_string($extra['file_name'])) {
+                        $name = $extra['file_name'];
+                    }
+                } catch (Throwable $e) {
+                    // Ignore and fall back to basename
+                }
+            }
+        }
+
         try {
             $mimeType = $disk->mimeType($path);
         } catch (Throwable $e) {
