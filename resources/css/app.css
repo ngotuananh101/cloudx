@@ -147,12 +147,7 @@
     }
 }
 
-.my-preview {
-    width: 100% !important;
-    height: 100% !important;
-    max-height: 76vh !important;
-    background: transparent !important;
-
+#react-doc-viewer {
     /* Theme variables for react-doc-viewer */
     --rdv-primary: var(--background) !important;
     --rdv-secondary: var(--muted) !important;
@@ -160,6 +155,13 @@
     --rdv-text-primary: var(--foreground) !important;
     --rdv-text-secondary: var(--muted-foreground) !important;
     --rdv-text-tertiary: var(--muted-foreground) !important;
+}
+
+.my-preview {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 76vh !important;
+    background: transparent !important;
 }
 
 .my-preview #proxy-renderer .rdv-common-content-wrapper {
