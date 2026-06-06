@@ -152,6 +152,14 @@
     height: 100% !important;
     max-height: 76vh !important;
     background: transparent !important;
+
+    /* Theme variables for react-doc-viewer */
+    --rdv-primary: var(--background) !important;
+    --rdv-secondary: var(--muted) !important;
+    --rdv-tertiary: var(--border) !important;
+    --rdv-text-primary: var(--foreground) !important;
+    --rdv-text-secondary: var(--muted-foreground) !important;
+    --rdv-text-tertiary: var(--muted-foreground) !important;
 }
 
 .my-preview #proxy-renderer .rdv-common-content-wrapper {
