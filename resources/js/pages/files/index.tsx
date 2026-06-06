@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { useUploadManager } from '@/contexts/UploadManagerContext';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
+import { destroy as clearCache } from '@/routes/cloud-connections/cache';
 import connections from '@/routes/connections';
 import { index as storageIndex } from '@/routes/storage';
 import type { CloudConnection, CloudFile } from '@/types/cloud';
@@ -114,6 +115,13 @@ export default function FileBrowser({
         );
     };
 
+    const handleClearCache = () => {
+        router.delete(clearCache.url({ connection: connection.id }), {
+            preserveScroll: true,
+            onSuccess: () => refreshFiles(),
+        });
+    };
+
     return (
         <AuthenticatedLayout
             title="Files"
@@ -127,6 +135,7 @@ export default function FileBrowser({
                 canUpload: connection.capabilities?.upload,
                 onCreateFolder: () => setIsCreateFolderOpen(true),
                 onUpload: () => fileInputRef.current?.click(),
+                onClearCache: handleClearCache,
             }}
         >
             <Head title="Files & Folders" />

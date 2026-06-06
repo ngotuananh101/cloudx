@@ -57,7 +57,7 @@ export function FileBrowserHeader({
                             <button
                                 type="button"
                                 onClick={onNavigateHome}
-                                className="text-2xl font-extrabold tracking-tight text-gray-400 transition-colors hover:text-gray-900"
+                                className="text-xl font-extrabold tracking-tight text-gray-400 transition-colors hover:text-gray-900"
                                 aria-label="Go to root folder"
                             >
                                 <Home className="h-5 w-5" />
@@ -65,7 +65,7 @@ export function FileBrowserHeader({
 
                             {hasHiddenSegments && (
                                 <>
-                                    <span className="text-lg text-gray-300">
+                                    <span className="text-base text-gray-300">
                                         /
                                     </span>
                                     <DropdownMenu>
@@ -110,11 +110,11 @@ export function FileBrowserHeader({
                                         key={segment.path}
                                         className="flex min-w-0 items-center gap-2"
                                     >
-                                        <span className="text-lg text-gray-300">
+                                        <span className="text-base text-gray-300">
                                             /
                                         </span>
                                         {isLast ? (
-                                            <h2 className="max-w-[18rem] truncate text-lg font-medium tracking-tight text-gray-900">
+                                            <h2 className="max-w-[18rem] truncate text-base font-medium tracking-tight text-gray-900">
                                                 {segment.label}
                                             </h2>
                                         ) : (
@@ -123,7 +123,7 @@ export function FileBrowserHeader({
                                                 onClick={() =>
                                                     onNavigatePath(segment.path)
                                                 }
-                                                className="max-w-40 truncate text-lg text-gray-500 transition-colors hover:text-gray-900"
+                                                className="max-w-40 truncate text-base text-gray-500 transition-colors hover:text-gray-900"
                                             >
                                                 {segment.label}
                                             </button>

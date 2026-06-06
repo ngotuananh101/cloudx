@@ -10,6 +10,8 @@ import {
     Search,
     Upload,
     ListTodo,
+    Eraser,
+    RefreshCw,
 } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -41,6 +43,8 @@ interface AuthenticatedLayoutProps {
         canUpload?: boolean;
         onCreateFolder?: () => void;
         onUpload?: () => void;
+        onClearCache?: () => void;
+        onSync?: () => void;
     };
 }
 
@@ -57,8 +61,8 @@ export default function AuthenticatedLayout({
     const activeConnection = pageConnection?.storageQuota
         ? pageConnection
         : connections.find((connection: CloudConnection) =>
-              url.startsWith(storageIndex.url({ connection: connection.id })),
-          );
+            url.startsWith(storageIndex.url({ connection: connection.id })),
+        );
     const [connectionBeingRenamed, setConnectionBeingRenamed] =
         useState<CloudConnection | null>(null);
     const [connectionBeingEdited, setConnectionBeingEdited] =
@@ -69,9 +73,9 @@ export default function AuthenticatedLayout({
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-[#f4f5f7] font-sans text-gray-900 antialiased">
             {/* Sidebar */}
-            <aside className="flex h-full w-[260px] shrink-0 flex-col border-r border-gray-200 bg-white">
+            <aside className="flex h-full w-65 shrink-0 flex-col border-r border-gray-200 bg-white">
                 {/* Logo and Brand */}
-                <div className="flex h-[72px] items-center px-6">
+                <div className="flex h-18 items-center px-6">
                     <div className="flex items-center gap-3">
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-white shadow-md">
                             <Cloud className="h-6 w-6" strokeWidth={2.5} />
@@ -272,22 +276,44 @@ export default function AuthenticatedLayout({
             {/* Main Area */}
             <div className="flex flex-1 flex-col overflow-hidden">
                 {/* Navbar */}
-                <header className="flex h-[72px] w-full flex-shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8">
+                <header className="flex h-18 w-full shrink-0 items-center justify-between border-b border-gray-200 bg-white px-8">
                     <div className="flex min-w-0 flex-1 items-center gap-6">
                         {cloudSearch && activeConnection && (
-                            <div className="relative w-full max-w-md">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                    <Search className="h-4 w-4 text-gray-400" />
+                            <div className="flex w-full max-w-2xl items-center gap-2">
+                                <div className="relative w-full max-w-md">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                        <Search className="h-4 w-4 text-gray-400" />
+                                    </div>
+                                    <Input
+                                        type="text"
+                                        placeholder={cloudSearch.placeholder}
+                                        value={cloudSearch.value}
+                                        onChange={(event) =>
+                                            cloudSearch.onChange(event.target.value)
+                                        }
+                                        className="h-11 w-full rounded-xl border-none bg-gray-50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
+                                    />
                                 </div>
-                                <Input
-                                    type="text"
-                                    placeholder={cloudSearch.placeholder}
-                                    value={cloudSearch.value}
-                                    onChange={(event) =>
-                                        cloudSearch.onChange(event.target.value)
-                                    }
-                                    className="h-11 w-full rounded-xl border-none bg-gray-50 pl-11 font-semibold text-gray-900 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200"
-                                />
+
+                                <button
+                                    type="button"
+                                    title="Clear Cache"
+                                    onClick={cloudActions?.onClearCache}
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50"
+                                >
+                                    <Eraser className="h-5 w-5 text-gray-500" />
+                                </button>
+
+                                {activeConnection.provider === 'telegram' && (
+                                    <button
+                                        type="button"
+                                        title="Sync"
+                                        onClick={cloudActions?.onSync}
+                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50"
+                                    >
+                                        <RefreshCw className="h-5 w-5 text-gray-500" />
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
@@ -311,10 +337,10 @@ export default function AuthenticatedLayout({
                             <AvatarFallback className="bg-red-50 text-sm font-bold text-brand">
                                 {user?.name
                                     ? user.name
-                                          .split(' ')
-                                          .map((n: string) => n[0])
-                                          .join('')
-                                          .toUpperCase()
+                                        .split(' ')
+                                        .map((n: string) => n[0])
+                                        .join('')
+                                        .toUpperCase()
                                     : 'U'}
                             </AvatarFallback>
                         </Avatar>
