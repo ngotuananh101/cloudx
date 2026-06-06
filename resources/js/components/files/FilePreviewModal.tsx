@@ -42,7 +42,7 @@ export default function FilePreviewModal({
     const previewUrl = files.preview.url({
         connection: connectionId,
         path: encodeCloudPath(item.path),
-    }) + (item.name ? `?filename=${encodeURIComponent(item.name)}` : '');
+    });
 
     const downloadUrl = files.download.url({
         connection: connectionId,
