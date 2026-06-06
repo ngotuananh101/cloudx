@@ -299,9 +299,9 @@ export default function AuthenticatedLayout({
                                     type="button"
                                     title="Clear Cache"
                                     onClick={cloudActions?.onClearCache}
-                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50"
+                                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-sm transition-colors hover:bg-[#a0181e]"
                                 >
-                                    <Eraser className="h-5 w-5 text-gray-500" />
+                                    <Eraser className="h-5 w-5" />
                                 </button>
 
                                 {activeConnection.provider === 'telegram' && (
@@ -309,9 +309,9 @@ export default function AuthenticatedLayout({
                                         type="button"
                                         title="Sync"
                                         onClick={cloudActions?.onSync}
-                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-colors hover:bg-gray-50"
+                                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand text-white shadow-sm transition-colors hover:bg-[#a0181e]"
                                     >
-                                        <RefreshCw className="h-5 w-5 text-gray-500" />
+                                        <RefreshCw className="h-5 w-5" />
                                     </button>
                                 )}
                             </div>
