@@ -1,7 +1,7 @@
 import DocViewer, { DocViewerRenderers } from '@iamjariwala/react-doc-viewer';
 import '@iamjariwala/react-doc-viewer/dist/index.css';
 import { usePage } from '@inertiajs/react';
-import { Download, Maximize2, Minimize2, X, File } from 'lucide-react';
+import { Download, Maximize2, Minimize2, X, File, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
 import type { CloudFile } from '@/types/cloud';
@@ -69,6 +69,16 @@ export default function FilePreviewModal({
             </Button>
         </div>
     );
+
+    const LoadingRenderer = () => (
+        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-950">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                Loading preview...
+            </p>
+        </div>
+    );
+
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
@@ -152,6 +162,10 @@ export default function FilePreviewModal({
                                 },
                                 noRenderer: {
                                     overrideComponent: NoRendererFallback,
+                                },
+                                loadingRenderer: {
+                                    overrideComponent: LoadingRenderer,
+                                    showLoadingTimeout: 500,
                                 },
                             }}
                         />
