@@ -58,6 +58,7 @@ it('serializes cloud storage data objects to arrays', function () {
         delete: true,
         createFolder: true,
         share: false,
+        move: false,
     );
 
     expect(method_exists($account, 'toArray'))->toBeFalse()

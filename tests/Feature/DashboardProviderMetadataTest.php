@@ -26,6 +26,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
         delete: true,
         createFolder: true,
         share: true,
+        move: false,
     ));
 
     $oneDriveConnector = Mockery::mock(CloudProviderConnector::class);
@@ -37,6 +38,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
         delete: true,
         createFolder: true,
         share: false,
+        move: false,
     ));
 
     $dropboxConnector = Mockery::mock(CloudProviderConnector::class);
@@ -48,6 +50,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
         delete: true,
         createFolder: true,
         share: false,
+        move: false,
     ));
 
     $ftpConnector = Mockery::mock(CloudProviderConnector::class);
@@ -59,6 +62,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
         delete: true,
         createFolder: true,
         share: false,
+        move: false,
     ));
 
     $manager = Mockery::mock(CloudStorageManager::class);
@@ -92,6 +96,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
                 'delete' => true,
                 'createFolder' => true,
                 'share' => true,
+                'move' => false,
             ])
             ->where('availableProviders.1.key', 'onedrive')
             ->where('availableProviders.1.label', 'OneDrive')
@@ -107,6 +112,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
                 'delete' => true,
                 'createFolder' => true,
                 'share' => false,
+                'move' => false,
             ])
             ->where('availableProviders.2.key', 'dropbox')
             ->where('availableProviders.2.label', 'Dropbox')
@@ -122,6 +128,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
                 'delete' => true,
                 'createFolder' => true,
                 'share' => false,
+                'move' => false,
             ])
             ->where('availableProviders.3.key', 'ftp')
             ->where('availableProviders.3.label', 'FTP Server')
@@ -137,6 +144,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
                 'delete' => true,
                 'createFolder' => true,
                 'share' => false,
+                'move' => false,
             ])
             ->has('connections')
         );

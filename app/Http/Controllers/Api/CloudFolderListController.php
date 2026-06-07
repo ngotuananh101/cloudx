@@ -19,10 +19,7 @@ class CloudFolderListController extends Controller
         $path = $request->query('path', '');
         
         try {
-            $files = $this->fileBrowser->list($connection, (string) $path);
-            
-            // Filter only directories
-            $folders = array_values(array_filter($files, fn ($file) => $file->isDirectory));
+            $folders = $this->fileBrowser->listDirectories($connection, (string) $path);
             
             return response()->json($folders);
         } catch (\Throwable $exception) {

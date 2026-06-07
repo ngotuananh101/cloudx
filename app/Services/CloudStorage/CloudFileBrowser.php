@@ -43,6 +43,52 @@ class CloudFileBrowser
         return $files;
     }
 
+    /**
+     * @return array<int, array{id: string, path: string, name: string, type: string, size: int|null, updatedAt: string|null, isDirectory: bool}>
+     */
+    public function listDirectories(CloudConnection $connection, string $encodedPath): array
+    {
+        $decodedPath = $this->decodedPath($encodedPath);
+        $folders = $this->cache->rememberDirectoryListing($connection, $decodedPath, function () use ($connection, $decodedPath): array {
+            $connector = $this->cloudStorage->connector($connection->provider);
+
+            if ($connector instanceof BrowsesCloudFiles) {
+                return collect($connector->listContents($connection, $decodedPath))
+                    ->filter(fn (array $item): bool => $item['isDirectory'] === true)
+                    ->reject(fn (array $item): bool => str_starts_with((string) $item['name'], '.'))
+                    ->map(fn (array $item): array => $this->fileData(
+                        id: (string) $item['id'],
+                        path: (string) $item['path'],
+                        name: (string) $item['name'],
+                        isDirectory: true,
+                        size: 0,
+                        lastModifiedTimestamp: $item['lastModifiedTimestamp'] ?? null,
+                    )->toArray())
+                    ->values()
+                    ->all();
+            }
+
+            return collect($this->cloudStorage->disk($connection)->directories($decodedPath))
+                ->reject(fn (string $path): bool => str_starts_with(basename($path), '.'))
+                ->map(fn (string $path): array => $this->fileData(
+                    id: $path,
+                    path: $path,
+                    name: basename($path),
+                    isDirectory: true,
+                    size: 0,
+                    lastModifiedTimestamp: null,
+                )->toArray())
+                ->values()
+                ->all();
+        });
+
+        usort($folders, function (array $first, array $second): int {
+            return strnatcasecmp($first['name'], $second['name']);
+        });
+
+        return $folders;
+    }
+
     public function decodedPath(string $encodedPath): string
     {
         return PathEncoder::decode($encodedPath);

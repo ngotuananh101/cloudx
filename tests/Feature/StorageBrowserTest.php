@@ -90,7 +90,7 @@ it('lists files via a direct browsing connector with normalized metadata and sor
 
         public function capabilities(): ProviderCapabilities
         {
-            return new ProviderCapabilities(true, true, true, true, true, false);
+            return new ProviderCapabilities(true, true, true, true, true, false, false);
         }
 
         /**
@@ -197,7 +197,7 @@ it('renders owner storage browser with capabilities and files', function () {
     ]);
 
     $connector = Mockery::mock(CloudProviderConnector::class);
-    $connector->shouldReceive('capabilities')->once()->andReturn(new ProviderCapabilities(true, true, false, false, true, false));
+    $connector->shouldReceive('capabilities')->once()->andReturn(new ProviderCapabilities(true, true, false, false, true, false, false));
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->twice()->with(Mockery::type(CloudProvider::class))->andReturn($connector);
@@ -234,7 +234,7 @@ it('renders an empty file list and flashes an error when browsing fails', functi
     $browser->shouldReceive('list')->once()->andThrow(new RuntimeException('Provider failed.'));
 
     $connector = Mockery::mock(CloudProviderConnector::class);
-    $connector->shouldReceive('capabilities')->once()->andReturn(new ProviderCapabilities(true, true, true, true, true, false));
+    $connector->shouldReceive('capabilities')->once()->andReturn(new ProviderCapabilities(true, true, true, true, true, false, false));
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->twice()->andReturn($connector);

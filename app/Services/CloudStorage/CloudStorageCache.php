@@ -32,6 +32,21 @@ class CloudStorageCache
      * @param  Closure(): TReturn  $callback
      * @return TReturn
      */
+    public function rememberDirectoryListing(CloudConnection $connection, string $path, Closure $callback): mixed
+    {
+        return $this->repository($this->folderTags($connection, $path))->remember(
+            $this->folderKey($connection, $path) . ':dirs',
+            $this->ttl(),
+            $callback,
+        );
+    }
+
+    /**
+     * @template TReturn
+     *
+     * @param  Closure(): TReturn  $callback
+     * @return TReturn
+     */
     public function rememberQuota(CloudConnection $connection, Closure $callback): mixed
     {
         return $this->repository($this->quotaTags($connection))->remember(
