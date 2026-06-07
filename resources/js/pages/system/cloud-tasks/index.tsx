@@ -226,9 +226,6 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
 
             <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                 <div>
-                    <span className="text-[10px] font-extrabold tracking-widest text-gray-400 dark:text-gray-500">
-                        SYSTEM
-                    </span>
                     <h2 className="mt-1 text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                         Tasks
                     </h2>
