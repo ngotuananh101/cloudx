@@ -75,6 +75,7 @@ class FtpConnector implements CloudProviderConnector
             delete: true,
             createFolder: true,
             share: false,
+            move: true,
         );
     }
 }

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
 import FilePreviewModal from '@/components/files/FilePreviewModal';
+import MoveItemModal from '@/components/files/MoveItemModal';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ export default function FileBrowser({
     const [folderError, setFolderError] = useState<string | null>(null);
     const [itemToDelete, setItemToDelete] = useState<CloudFile | null>(null);
     const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
+    const [itemToMove, setItemToMove] = useState<CloudFile | null>(null);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -180,6 +182,15 @@ export default function FileBrowser({
                 onClose={() => setPreviewItem(null)} 
             />
 
+            <MoveItemModal
+                isOpen={!!itemToMove}
+                onClose={() => setItemToMove(null)}
+                item={itemToMove}
+                connectionId={connection.id}
+                currentParentPath={decodedPath}
+                onMoved={refreshFiles}
+            />
+
             {isCreateFolderOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
                     <form
@@ -246,6 +257,7 @@ export default function FileBrowser({
                         onNavigate={handleNavigate}
                         onDelete={setItemToDelete}
                         onPreview={setPreviewItem}
+                        onMove={setItemToMove}
                         connectionId={connection.id}
                     />
                 </div>

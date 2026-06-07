@@ -116,6 +116,7 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
             delete: true,
             createFolder: true,
             share: false,
+            move: true,
         );
     }
 

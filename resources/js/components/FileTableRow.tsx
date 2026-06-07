@@ -11,6 +11,8 @@ import {
     Trash2,
     Share2,
     Eye,
+    HardDrive,
+    ArrowRightLeft,
 } from 'lucide-react';
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { encodeCloudPath } from '@/lib/cloud-path';
@@ -25,6 +27,7 @@ interface FileTableRowProps {
     capabilities?: ProviderCapabilities;
     onNavigate?: (item: CloudFile) => void;
     onPreview?: (item: CloudFile) => void;
+    onMove?: (item: CloudFile) => void;
     onDelete?: (item: CloudFile) => void;
     connectionId?: number;
 }
@@ -35,6 +38,7 @@ export function FileTableRow({
     capabilities,
     onNavigate,
     onPreview,
+    onMove,
     onDelete,
     connectionId,
 }: FileTableRowProps) {
@@ -140,6 +144,20 @@ export function FileTableRow({
                                     aria-label={`Share ${item.name}`}
                                 >
                                     <Share2 className="h-4 w-4" />
+                                </Button>
+                            )}
+                            {capabilities?.move && (
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onMove?.(item);
+                                    }}
+                                    className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
+                                    aria-label={`Move ${item.name}`}
+                                >
+                                    <ArrowRightLeft className="h-4 w-4" />
                                 </Button>
                             )}
 

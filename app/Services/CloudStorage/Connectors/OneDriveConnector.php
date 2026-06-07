@@ -132,6 +132,7 @@ class OneDriveConnector implements CloudProviderConnector, ProvidesDirectDownloa
             delete: true,
             createFolder: true,
             share: false,
+            move: true,
         );
     }
 

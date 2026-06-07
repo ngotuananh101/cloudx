@@ -5,6 +5,7 @@ export interface ProviderCapabilities {
     delete: boolean;
     createFolder: boolean;
     share: boolean;
+    move: boolean;
 }
 
 export interface AvailableProvider {

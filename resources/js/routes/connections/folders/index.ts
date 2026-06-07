@@ -78,8 +78,111 @@ store.post = (args: { connection: number | { id: number } } | [connection: numbe
         })
     
     store.form = storeForm
+/**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+export const index = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: index.url(args, options),
+    method: 'get',
+})
+
+index.definition = {
+    methods: ["get","head"],
+    url: '/connections/{connection}/folders',
+} satisfies RouteDefinition<["get","head"]>
+
+/**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+index.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+    if (typeof args === 'string' || typeof args === 'number') {
+        args = { connection: args }
+    }
+
+            if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+            args = { connection: args.id }
+        }
+    
+    if (Array.isArray(args)) {
+        args = {
+                    connection: args[0],
+                }
+    }
+
+    args = applyUrlDefaults(args)
+
+    const parsedArgs = {
+                        connection: typeof args.connection === 'object'
+                ? args.connection.id
+                : args.connection,
+                }
+
+    return index.definition.url
+            .replace('{connection}', parsedArgs.connection.toString())
+            .replace(/\/+$/, '') + queryParams(options)
+}
+
+/**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+index.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+    url: index.url(args, options),
+    method: 'get',
+})
+/**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+index.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+    url: index.url(args, options),
+    method: 'head',
+})
+
+    /**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+    const indexForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        action: index.url(args, options),
+        method: 'get',
+    })
+
+            /**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+        indexForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: index.url(args, options),
+            method: 'get',
+        })
+            /**
+* @see \App\Http\Controllers\Api\CloudFolderListController::index
+ * @see app/Http/Controllers/Api/CloudFolderListController.php:15
+ * @route '/connections/{connection}/folders'
+ */
+        indexForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+            action: index.url(args, {
+                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
+                            _method: 'HEAD',
+                            ...(options?.query ?? options?.mergeQuery ?? {}),
+                        }
+                    }),
+            method: 'get',
+        })
+    
+    index.form = indexForm
 const folders = {
     store: Object.assign(store, store),
+index: Object.assign(index, index),
 }
 
 export default folders

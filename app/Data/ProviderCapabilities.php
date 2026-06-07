@@ -11,6 +11,7 @@ readonly class ProviderCapabilities
         public bool $delete,
         public bool $createFolder,
         public bool $share,
+        public bool $move,
     ) {}
 
     /**
@@ -25,6 +26,7 @@ readonly class ProviderCapabilities
             'delete' => $this->delete,
             'createFolder' => $this->createFolder,
             'share' => $this->share,
+            'move' => $this->move,
         ];
     }
 }

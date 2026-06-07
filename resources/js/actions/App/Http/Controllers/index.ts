@@ -11,6 +11,8 @@ import TelegramConnectionController from './TelegramConnectionController'
 import CloudConnectionCacheController from './CloudConnectionCacheController'
 import CloudItemController from './CloudItemController'
 import CloudFolderController from './CloudFolderController'
+import Api from './Api'
+import CloudItemMoveController from './CloudItemMoveController'
 import CloudUploadTaskController from './CloudUploadTaskController'
 import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
 const Controllers = {
@@ -27,6 +29,8 @@ TelegramConnectionController: Object.assign(TelegramConnectionController, Telegr
 CloudConnectionCacheController: Object.assign(CloudConnectionCacheController, CloudConnectionCacheController),
 CloudItemController: Object.assign(CloudItemController, CloudItemController),
 CloudFolderController: Object.assign(CloudFolderController, CloudFolderController),
+Api: Object.assign(Api, Api),
+CloudItemMoveController: Object.assign(CloudItemMoveController, CloudItemMoveController),
 CloudUploadTaskController: Object.assign(CloudUploadTaskController, CloudUploadTaskController),
 CloudUploadTaskChunkController: Object.assign(CloudUploadTaskChunkController, CloudUploadTaskChunkController),
 }
