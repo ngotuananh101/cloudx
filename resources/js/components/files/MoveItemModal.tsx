@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Folder, ChevronRight, CornerLeftUp, Loader2 } from 'lucide-react';
 import type { CloudFile } from '@/types/cloud';
+import { encodeCloudPath } from '@/lib/cloud-path';
 import connections from '@/routes/connections';
 
 interface MoveItemModalProps {
@@ -52,10 +53,7 @@ export default function MoveItemModal({
         setError(null);
         try {
             const response = await fetch(
-                connections.folders.index.url({
-                    connection: connectionId,
-                    path: path,
-                })
+                `${connections.folders.index.url({ connection: connectionId })}?path=${encodeCloudPath(path)}`
             );
             if (!response.ok) {
                 throw new Error('Failed to fetch folders');
