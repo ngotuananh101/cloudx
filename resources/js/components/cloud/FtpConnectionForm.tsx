@@ -396,7 +396,7 @@ function Field({
             {error && (
                 <p
                     id={id ? `${id}-error` : undefined}
-                    className="text-xs text-red-600"
+                    className="text-xs text-red-600 dark:text-red-400"
                 >
                     {error}
                 </p>
@@ -430,7 +430,7 @@ function CheckboxField({
                 />
                 {label}
             </label>
-            {error && <p className="text-xs text-red-600">{error}</p>}
+            {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 }

@@ -294,7 +294,7 @@ function Field({
             {error && (
                 <p
                     id={id ? `${id}-error` : undefined}
-                    className="text-xs text-red-600"
+                    className="text-xs text-red-600 dark:text-red-400"
                 >
                     {error}
                 </p>

@@ -40,7 +40,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
             </div>
 
             {status === 'verification-link-sent' && (
-                <div className="mb-6 rounded-md bg-green-50 p-4 text-sm text-green-600">
+                <div className="mb-6 rounded-md bg-green-50 dark:bg-green-900/30 p-4 text-sm text-green-600 dark:text-green-400">
                     A new verification link has been sent to the email address
                     you provided during registration.
                 </div>

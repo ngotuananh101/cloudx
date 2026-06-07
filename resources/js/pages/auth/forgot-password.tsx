@@ -50,7 +50,7 @@ export default function ForgotPassword() {
             </div>
 
             {status && (
-                <div className="mb-4 rounded-md bg-green-50 p-4 text-sm text-green-600">
+                <div className="mb-4 rounded-md bg-green-50 dark:bg-green-900/30 p-4 text-sm text-green-600 dark:text-green-400">
                     {status}
                 </div>
             )}

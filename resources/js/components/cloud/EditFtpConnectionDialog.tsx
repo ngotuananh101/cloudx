@@ -94,13 +94,13 @@ export default function EditFtpConnectionDialog({
 
     return (
         <Dialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-y-auto rounded-3xl p-0 shadow-2xl [&>button]:right-6 [&>button]:top-6 [&>button]:z-10">
+            <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-y-auto rounded-3xl p-0 shadow-2xl bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 [&>button]:right-6 [&>button]:top-6 [&>button]:z-10">
                 <form onSubmit={submit} className="p-6">
                     <DialogHeader className="mb-5 text-left">
-                        <DialogTitle className="text-lg font-extrabold tracking-tight text-gray-900">
+                        <DialogTitle className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                             Edit FTP connection
                         </DialogTitle>
-                        <DialogDescription className="mt-1 text-xs text-gray-400">
+                        <DialogDescription className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                             Update server settings. Leave password blank to keep the
                             current password.
                         </DialogDescription>
@@ -207,11 +207,11 @@ export default function EditFtpConnectionDialog({
                     />
                 </div>
 
-                <div className="mt-5 rounded-2xl border border-gray-100 bg-gray-50/50">
+                <div className="mt-5 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
                     <button
                         type="button"
                         onClick={() => setShowAdvanced((current) => !current)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-gray-700"
+                        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300"
                         aria-expanded={showAdvanced}
                         aria-controls="edit-ftp-advanced-settings"
                     >
@@ -225,7 +225,7 @@ export default function EditFtpConnectionDialog({
                     {showAdvanced && (
                         <div
                             id="edit-ftp-advanced-settings"
-                            className="grid gap-4 border-t border-gray-100 p-4 sm:grid-cols-2"
+                            className="grid gap-4 border-t border-gray-100 dark:border-gray-800 p-4 sm:grid-cols-2"
                         >
                             <Field label="Timeout" error={form.errors.timeout}>
                                 <input
@@ -352,7 +352,7 @@ export default function EditFtpConnectionDialog({
                         type="button"
                         onClick={onClose}
                         disabled={processing}
-                        className="rounded-md border border-gray-200 px-4 py-2 text-sm font-bold text-gray-600 transition-colors hover:bg-gray-50 disabled:opacity-60"
+                        className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
                     >
                         Cancel
                     </button>
@@ -429,7 +429,7 @@ function Field({
 
     return (
         <div className="space-y-2">
-            <label htmlFor={id} className="text-xs font-bold text-gray-600">
+            <label htmlFor={id} className="text-xs font-bold text-gray-600 dark:text-gray-400">
                 {label}
                 {required && <span className="text-red-500"> *</span>}
             </label>
@@ -437,7 +437,7 @@ function Field({
             {error && (
                 <p
                     id={id ? `${id}-error` : undefined}
-                    className="text-xs text-red-600"
+                    className="text-xs text-red-600 dark:text-red-400"
                 >
                     {error}
                 </p>
@@ -462,7 +462,7 @@ function CheckboxField({
     return (
         <div className="space-y-2">
             {alignWithFields && <div className="h-4" aria-hidden="true" />}
-            <label className="flex h-10 items-center gap-3 rounded-md border border-gray-100 bg-white px-3 text-sm font-bold text-gray-700">
+            <label className="flex h-10 items-center gap-3 rounded-md border border-gray-100 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-bold text-gray-700 dark:text-gray-300">
                 <input
                     type="checkbox"
                     checked={checked}
@@ -471,7 +471,7 @@ function CheckboxField({
                 />
                 {label}
             </label>
-            {error && <p className="text-xs text-red-600">{error}</p>}
+            {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
         </div>
     );
 }
@@ -485,4 +485,4 @@ function getChildId(children: React.ReactNode): string | undefined {
 }
 
 const inputClassName =
-    'h-10 w-full rounded-md border border-gray-200 bg-white px-3 text-sm font-medium text-gray-900 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100';
+    'h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 px-3 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50';
