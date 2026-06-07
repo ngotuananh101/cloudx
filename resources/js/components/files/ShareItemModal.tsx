@@ -39,7 +39,7 @@ export default function ShareItemModal({
 }: ShareItemModalProps) {
     const [shares, setShares] = useState<CloudShare[]>([]);
     const [isLoadingShares, setIsLoadingShares] = useState(false);
-    
+
     // Form state
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [type, setType] = useState<'public' | 'password'>('public');
@@ -65,7 +65,7 @@ export default function ShareItemModal({
 
     const fetchShares = async () => {
         if (!item) return;
-        
+
         setIsLoadingShares(true);
         try {
             const url = `${connections.shares.index.url({ connection: connectionId })}?path=${encodeURIComponent(item.path)}`;
@@ -146,7 +146,7 @@ export default function ShareItemModal({
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="space-y-6">
+                <div className="space-y-6 min-w-0">
                     {/* Create Share Form */}
                     <div className="space-y-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 p-4">
                         <div className="space-y-3">
@@ -227,7 +227,7 @@ export default function ShareItemModal({
                                 {shares.map((share) => (
                                     <div key={share.id} className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-white dark:bg-gray-900">
                                         <div className="flex flex-col min-w-0 pr-2">
-                                            <div className="flex items-center gap-2 mb-1">
+                                            <div className="flex items-center gap-2 mb-1 min-w-0">
                                                 {share.type === 'public' ? (
                                                     <Globe className="h-3 w-3 text-blue-500 shrink-0" />
                                                 ) : (
