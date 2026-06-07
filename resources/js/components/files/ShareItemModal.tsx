@@ -161,19 +161,29 @@ export default function ShareItemModal({
             // Fallback for non-secure contexts (e.g., http:// custom local domains)
             const textArea = document.createElement("textarea");
             textArea.value = url;
-            textArea.style.position = "absolute";
-            textArea.style.left = "-999999px";
-            document.body.prepend(textArea);
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            
+            // Append to dialog to prevent Radix focus trap from blocking selection
+            const container = document.querySelector('[role="dialog"]') || document.body;
+            container.appendChild(textArea);
+            
+            textArea.focus();
             textArea.select();
+            
             try {
-                document.execCommand('copy');
-                setCopiedId(id);
-                toast.success('Link copied to clipboard');
-                setTimeout(() => setCopiedId(null), 2000);
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    setCopiedId(id);
+                    toast.success('Link copied to clipboard');
+                    setTimeout(() => setCopiedId(null), 2000);
+                } else {
+                    toast.error('Failed to copy link');
+                }
             } catch (error) {
                 toast.error('Failed to copy link');
             } finally {
-                textArea.remove();
+                container.removeChild(textArea);
             }
         }
     };
