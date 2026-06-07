@@ -10,6 +10,13 @@ import {
 } from '@/components/ui/select';
 import { update } from '@/routes/connections/ftp';
 import type { CloudConnection } from '@/types/cloud';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface EditFtpConnectionDialogProps {
     connection: CloudConnection | null;
@@ -86,20 +93,18 @@ export default function EditFtpConnectionDialog({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
-            <form
-                onSubmit={submit}
-                className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl"
-            >
-                <div className="mb-5">
-                    <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
-                        Edit FTP connection
-                    </h3>
-                    <p className="mt-1 text-xs text-gray-400">
-                        Update server settings. Leave password blank to keep the
-                        current password.
-                    </p>
-                </div>
+        <Dialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-y-auto rounded-3xl p-0 shadow-2xl [&>button]:right-6 [&>button]:top-6 [&>button]:z-10">
+                <form onSubmit={submit} className="p-6">
+                    <DialogHeader className="mb-5 text-left">
+                        <DialogTitle className="text-lg font-extrabold tracking-tight text-gray-900">
+                            Edit FTP connection
+                        </DialogTitle>
+                        <DialogDescription className="mt-1 text-xs text-gray-400">
+                            Update server settings. Leave password blank to keep the
+                            current password.
+                        </DialogDescription>
+                    </DialogHeader>
 
                 <div className="grid gap-4 sm:grid-cols-2">
                     <Field label="Name" error={form.errors.name} required>
@@ -359,8 +364,9 @@ export default function EditFtpConnectionDialog({
                         {processing ? 'Testing connection...' : 'Save'}
                     </button>
                 </div>
-            </form>
-        </div>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }
 

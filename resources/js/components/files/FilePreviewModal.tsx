@@ -9,6 +9,13 @@ import { Button } from '@/components/ui/button';
 import { formatBytes } from '@/lib/format-bytes';
 import files from '@/routes/cloud/files';
 import { encodeCloudPath } from '@/lib/cloud-path';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function FilePreviewModal({
     item,
@@ -81,13 +88,17 @@ export default function FilePreviewModal({
 
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80">
-            <div
-                className={`flex flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl transition-all ${isFullscreen
-                    ? 'h-screen w-screen max-w-none rounded-none'
-                    : 'max-h-[85vh] min-h-100 w-full max-w-4xl rounded-xl border border-gray-100 dark:border-gray-800'
+        <Dialog open={item !== null} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent
+                className={`flex flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl transition-all p-0 [&>button]:hidden ${isFullscreen
+                    ? 'h-screen w-screen max-w-none sm:max-w-none rounded-none'
+                    : 'max-h-[85vh] min-h-100 w-full sm:max-w-4xl rounded-xl border border-gray-100 dark:border-gray-800'
                     }`}
             >
+                <DialogHeader className="hidden">
+                    <DialogTitle>{item.name}</DialogTitle>
+                    <DialogDescription>Previewing {item.name}</DialogDescription>
+                </DialogHeader>
                 <div className="flex shrink-0 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 py-3">
                     <div className="min-w-0 flex-1 pr-4">
                         <h3 className="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
@@ -171,7 +182,7 @@ export default function FilePreviewModal({
                         />
                     )}
                 </div>
-            </div>
-        </div>
+            </DialogContent>
+        </Dialog>
     );
 }

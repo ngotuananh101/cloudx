@@ -4,6 +4,14 @@ import { updateName } from '@/actions/App/Http/Controllers/CloudConnectionContro
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import type { CloudConnection } from '@/types/cloud';
 
 interface EditConnectionNameDialogProps {
@@ -38,52 +46,51 @@ export default function EditConnectionNameDialog({
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 px-4">
-            <form
-                onSubmit={submit}
-                className="w-full max-w-sm rounded-3xl border border-gray-100 bg-white p-6 shadow-2xl"
-            >
-                <div className="mb-5">
-                    <h3 className="text-lg font-extrabold tracking-tight text-gray-900">
-                        Edit connection name
-                    </h3>
-                    <p className="mt-1 text-xs text-gray-400">
-                        Update the display name shown in the sidebar.
-                    </p>
-                </div>
+        <Dialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
+            <DialogContent className="sm:max-w-sm rounded-3xl p-6 shadow-2xl">
+                <form onSubmit={submit}>
+                    <DialogHeader className="mb-5">
+                        <DialogTitle className="text-lg font-extrabold tracking-tight text-gray-900">
+                            Edit connection name
+                        </DialogTitle>
+                        <DialogDescription className="mt-1 text-xs text-gray-400">
+                            Update the display name shown in the sidebar.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <div className="space-y-2">
-                    <Label htmlFor="connection-name">Name</Label>
-                    <Input
-                        id="connection-name"
-                        value={form.data.name}
-                        onChange={(event) =>
-                            form.setData('name', event.target.value)
-                        }
-                        maxLength={255}
-                        autoFocus
-                    />
-                    {form.errors.name && (
-                        <p className="text-xs text-red-600">
-                            {form.errors.name}
-                        </p>
-                    )}
-                </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="connection-name">Name</Label>
+                        <Input
+                            id="connection-name"
+                            value={form.data.name}
+                            onChange={(event) =>
+                                form.setData('name', event.target.value)
+                            }
+                            maxLength={255}
+                            autoFocus
+                        />
+                        {form.errors.name && (
+                            <p className="text-xs text-red-600">
+                                {form.errors.name}
+                            </p>
+                        )}
+                    </div>
 
-                <div className="mt-6 flex justify-end gap-2">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={onClose}
-                        disabled={form.processing}
-                    >
-                        Cancel
-                    </Button>
-                    <Button type="submit" disabled={form.processing}>
-                        Save
-                    </Button>
-                </div>
-            </form>
-        </div>
+                    <DialogFooter className="mt-6 flex justify-end gap-2">
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={onClose}
+                            disabled={form.processing}
+                        >
+                            Cancel
+                        </Button>
+                        <Button type="submit" disabled={form.processing}>
+                            Save
+                        </Button>
+                    </DialogFooter>
+                </form>
+            </DialogContent>
+        </Dialog>
     );
 }
