@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\CloudConnection;
 use App\Models\CloudShare;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -28,7 +29,7 @@ class CloudShareController extends Controller
         return response()->json($shares);
     }
 
-    public function store(Request $request, CloudConnection $connection): JsonResponse
+    public function store(Request $request, CloudConnection $connection): RedirectResponse
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
 
@@ -60,19 +61,16 @@ class CloudShareController extends Controller
 
         $share->save();
 
-        return response()->json([
-            'message' => 'Share link created successfully.',
-            'share' => $share,
-        ], 201);
+        return back()->with('success', 'Share link created successfully.');
     }
 
-    public function destroy(Request $request, CloudConnection $connection, CloudShare $share): JsonResponse
+    public function destroy(Request $request, CloudConnection $connection, CloudShare $share): RedirectResponse
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
         abort_if($share->cloud_connection_id !== $connection->id, 404, 'Share not found on this connection.');
 
         $share->delete();
 
-        return response()->json(['message' => 'Share link deleted successfully.']);
+        return back()->with('success', 'Share link deleted successfully.');
     }
 }
