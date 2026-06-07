@@ -61,7 +61,7 @@ class TelegramConnector implements CloudProviderConnector
             download: true,
             delete: true,
             createFolder: false,
-            share: false,
+            share: true,
             move: false,
         );
     }

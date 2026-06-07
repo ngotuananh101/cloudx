@@ -5,6 +5,7 @@ import type { ChangeEvent } from 'react';
 import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
 import FilePreviewModal from '@/components/files/FilePreviewModal';
 import MoveItemModal from '@/components/files/MoveItemModal';
+import ShareItemModal from '@/components/files/ShareItemModal';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ export default function FileBrowser({
     const [itemToDelete, setItemToDelete] = useState<CloudFile | null>(null);
     const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
     const [itemToMove, setItemToMove] = useState<CloudFile | null>(null);
+    const [itemToShare, setItemToShare] = useState<CloudFile | null>(null);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -191,6 +193,13 @@ export default function FileBrowser({
                 onMoved={refreshFiles}
             />
 
+            <ShareItemModal
+                isOpen={!!itemToShare}
+                onClose={() => setItemToShare(null)}
+                item={itemToShare}
+                connectionId={connection.id}
+            />
+
             {isCreateFolderOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
                     <form
@@ -258,6 +267,7 @@ export default function FileBrowser({
                         onDelete={setItemToDelete}
                         onPreview={setPreviewItem}
                         onMove={setItemToMove}
+                        onShare={setItemToShare}
                         connectionId={connection.id}
                     />
                 </div>

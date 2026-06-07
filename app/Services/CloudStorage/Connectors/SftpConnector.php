@@ -71,7 +71,7 @@ class SftpConnector implements CloudProviderConnector
             download: true,
             delete: true,
             createFolder: true,
-            share: false,
+            share: true,
             move: true,
         );
     }

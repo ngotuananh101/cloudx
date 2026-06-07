@@ -12,6 +12,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\SftpConnectionController;
 use App\Http\Controllers\StorageBrowserController;
 use App\Http\Controllers\Api\CloudFolderListController;
+use App\Http\Controllers\Api\CloudShareController;
 use App\Http\Controllers\CloudItemMoveController;
 use App\Http\Controllers\TelegramConnectionController;
 use App\Http\Controllers\System\CloudTaskController;
@@ -55,6 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/connections/{connection}/items', [CloudItemController::class, 'destroy'])->name('connections.items.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
     Route::get('/connections/{connection}/folders', [CloudFolderListController::class, 'index'])->name('connections.folders.index');
+    Route::get('/connections/{connection}/shares', [CloudShareController::class, 'index'])->name('connections.shares.index');
+    Route::post('/connections/{connection}/shares', [CloudShareController::class, 'store'])->name('connections.shares.store');
+    Route::delete('/connections/{connection}/shares/{share}', [CloudShareController::class, 'destroy'])->name('connections.shares.destroy');
     Route::post('/connections/{connection}/move', CloudItemMoveController::class)->name('connections.items.move');
 
     Route::get('/connections/{connection}/upload-tasks', [CloudUploadTaskController::class, 'index'])->name('connections.upload-tasks.index');

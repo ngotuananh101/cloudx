@@ -11,6 +11,7 @@ interface VirtualizedFileTableProps {
     onNavigate: (item: CloudFile) => void;
     onPreview?: (item: CloudFile) => void;
     onMove?: (item: CloudFile) => void;
+    onShare?: (item: CloudFile) => void;
     onDelete?: (item: CloudFile) => void;
     connectionId: number;
 }
@@ -22,6 +23,7 @@ export function VirtualizedFileTable({
     onNavigate,
     onPreview,
     onMove,
+    onShare,
     onDelete,
     connectionId,
 }: VirtualizedFileTableProps) {
@@ -70,6 +72,7 @@ export function VirtualizedFileTable({
                                     onNavigate={onNavigate}
                                     onPreview={onPreview}
                                     onMove={onMove}
+                                    onShare={onShare}
                                     onDelete={onDelete}
                                     connectionId={connectionId}
                                     style={{

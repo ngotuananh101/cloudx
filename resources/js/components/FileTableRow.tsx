@@ -28,6 +28,7 @@ interface FileTableRowProps {
     onNavigate?: (item: CloudFile) => void;
     onPreview?: (item: CloudFile) => void;
     onMove?: (item: CloudFile) => void;
+    onShare?: (item: CloudFile) => void;
     onDelete?: (item: CloudFile) => void;
     connectionId?: number;
 }
@@ -39,6 +40,7 @@ export function FileTableRow({
     onNavigate,
     onPreview,
     onMove,
+    onShare,
     onDelete,
     connectionId,
 }: FileTableRowProps) {
@@ -140,6 +142,10 @@ export function FileTableRow({
                                 <Button
                                     variant="ghost"
                                     size="icon"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onShare?.(item);
+                                    }}
                                     className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
                                     aria-label={`Share ${item.name}`}
                                 >
