@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client';
 import { UploadManagerProvider } from '@/contexts/UploadManagerContext';
 
 import { ThemeProvider } from '@/components/ThemeProvider';
+import { Toaster } from '@/components/ui/sonner';
 
 configureEcho({
     broadcaster: 'pusher',
@@ -32,6 +33,7 @@ createInertiaApp({
                         </UploadManagerProvider>
                     )}
                 />
+                <Toaster position="top-right" />
             </ThemeProvider>
         );
     },

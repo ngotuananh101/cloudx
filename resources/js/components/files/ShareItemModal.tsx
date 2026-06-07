@@ -7,12 +7,23 @@ import {
     DialogTitle,
     DialogDescription,
 } from '@/components/ui/dialog';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Copy, Trash2, Globe, Lock, Loader2, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import type { CloudFile } from '@/types/cloud';
 import connections from '@/routes/connections';
 
@@ -49,6 +60,10 @@ export default function ShareItemModal({
 
     // Copy state
     const [copiedId, setCopiedId] = useState<number | null>(null);
+
+    // Delete state
+    const [shareToDelete, setShareToDelete] = useState<CloudShare | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     useEffect(() => {
         if (!isOpen || !item) {
@@ -115,28 +130,58 @@ export default function ShareItemModal({
         );
     };
 
-    const handleDeleteShare = (shareId: number, uuid: string) => {
+    const confirmDeleteShare = () => {
+        if (!shareToDelete) return;
+        setIsDeleting(true);
         router.delete(
-            connections.shares.destroy.url({ connection: connectionId, share: shareId }),
+            connections.shares.destroy.url({ connection: connectionId, share: shareToDelete.id }),
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setShares(shares.filter(s => s.id !== shareId));
-                }
+                    setShares(shares.filter(s => s.id !== shareToDelete.id));
+                    setShareToDelete(null);
+                },
+                onFinish: () => setIsDeleting(false),
             }
         );
     };
 
     const handleCopy = (id: number, uuid: string) => {
         const url = `${window.location.origin}/s/${uuid}`;
-        navigator.clipboard.writeText(url);
-        setCopiedId(id);
-        setTimeout(() => setCopiedId(null), 2000);
+        
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(() => {
+                setCopiedId(id);
+                toast.success('Link copied to clipboard');
+                setTimeout(() => setCopiedId(null), 2000);
+            }).catch(() => {
+                toast.error('Failed to copy link');
+            });
+        } else {
+            // Fallback for non-secure contexts (e.g., http:// custom local domains)
+            const textArea = document.createElement("textarea");
+            textArea.value = url;
+            textArea.style.position = "absolute";
+            textArea.style.left = "-999999px";
+            document.body.prepend(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                setCopiedId(id);
+                toast.success('Link copied to clipboard');
+                setTimeout(() => setCopiedId(null), 2000);
+            } catch (error) {
+                toast.error('Failed to copy link');
+            } finally {
+                textArea.remove();
+            }
+        }
     };
 
     return (
+        <>
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
+            <DialogContent className="sm:max-w-xl bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
                 <DialogHeader className="mb-4">
                     <DialogTitle className="text-gray-900 dark:text-gray-100">
                         Share "{item?.name}"
@@ -260,7 +305,7 @@ export default function ShareItemModal({
                                                 variant="ghost"
                                                 size="icon"
                                                 className="h-8 w-8 text-gray-500 hover:text-red-600 dark:hover:text-red-400"
-                                                onClick={() => handleDeleteShare(share.id, share.uuid)}
+                                                onClick={() => setShareToDelete(share)}
                                                 title="Delete Link"
                                             >
                                                 <Trash2 className="h-4 w-4" />
@@ -274,5 +319,33 @@ export default function ShareItemModal({
                 </div>
             </DialogContent>
         </Dialog>
+
+        <AlertDialog open={!!shareToDelete} onOpenChange={(open) => !open && setShareToDelete(null)}>
+            <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-2xl">
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-gray-900 dark:text-gray-100">Delete Share Link?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
+                        Are you sure you want to delete this share link? Anyone with this link will no longer have access. This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel disabled={isDeleting} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={(e) => {
+                            e.preventDefault();
+                            confirmDeleteShare();
+                        }}
+                        className="bg-red-600 hover:bg-red-700 text-white border-0"
+                        disabled={isDeleting}
+                    >
+                        {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                        Delete
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+        </>
     );
 }
