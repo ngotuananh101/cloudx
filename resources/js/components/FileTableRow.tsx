@@ -142,20 +142,7 @@ export function FileTableRow({
                                     <Share2 className="h-4 w-4" />
                                 </Button>
                             )}
-                            {!item.isDirectory && (
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        onPreview?.(item);
-                                    }}
-                                    className="h-8 w-8 rounded-lg text-gray-400 dark:text-gray-500 hover:text-gray-900 dark:hover:text-gray-100"
-                                    aria-label={`Preview ${item.name}`}
-                                >
-                                    <Eye className="h-4 w-4" />
-                                </Button>
-                            )}
+
                             {capabilities?.download && (
                                 <Button
                                     variant="ghost"
