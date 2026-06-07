@@ -16,13 +16,45 @@ class SharedLinkController extends Controller
      */
     public function index(Request $request): Response
     {
-        $shares = CloudShare::with('cloudConnection')
-            ->where('user_id', $request->user()->id)
-            ->orderBy('created_at', 'desc')
-            ->paginate(15);
+        $query = CloudShare::with('cloudConnection')
+            ->where('user_id', $request->user()->id);
+
+        if ($request->filled('connection') && $request->connection !== 'all') {
+            $query->where('cloud_connection_id', $request->connection);
+        }
+
+        if ($request->filled('access_type') && $request->access_type !== 'all') {
+            $query->where('type', $request->access_type);
+        }
+
+        if ($request->filled('expires') && $request->expires !== 'all') {
+            if ($request->expires === 'active') {
+                $query->where(function ($q) {
+                    $q->whereNull('expires_at')
+                      ->orWhere('expires_at', '>', now());
+                });
+            } else {
+                $query->whereNotNull('expires_at')->where('expires_at', '<=', now());
+            }
+        }
+
+        if ($request->filled('name')) {
+            $query->where('name', 'like', '%' . $request->name . '%');
+        }
+
+        if ($request->filled('url')) {
+            $query->where('uuid', 'like', '%' . $request->url . '%');
+        }
+
+        if ($request->filled('created_date')) {
+            $query->whereDate('created_at', $request->created_date);
+        }
+
+        $shares = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
 
         return Inertia::render('system/shared-links/index', [
             'shares' => $shares,
+            'filters' => $request->only(['connection', 'access_type', 'expires', 'name', 'url', 'created_date']),
         ]);
     }
 

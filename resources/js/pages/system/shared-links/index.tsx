@@ -1,8 +1,11 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { index as sharedLinksIndex } from '@/routes/system/shared-links';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Trash2, Copy, Globe, Lock, Clock, HardDrive, Check, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Trash2, Copy, Globe, Lock, Clock, HardDrive, Check, Link as LinkIcon, Loader2, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -49,15 +52,48 @@ interface PaginatedData<T> {
 
 interface SharedLinksPageProps {
     shares: PaginatedData<CloudShare>;
+    filters?: {
+        connection?: string;
+        access_type?: string;
+        expires?: string;
+        name?: string;
+        url?: string;
+        created_date?: string;
+    };
 }
 
-export default function SharedLinksPage({ shares }: SharedLinksPageProps) {
+export default function SharedLinksPage({ shares, filters: initialFilters = {} }: SharedLinksPageProps) {
     const { props } = usePage() as any;
     const userConnections = props.auth?.user?.connections || [];
+
+    const [filters, setFilters] = useState({
+        connection: initialFilters.connection || 'all',
+        access_type: initialFilters.access_type || 'all',
+        expires: initialFilters.expires || 'all',
+        name: initialFilters.name || '',
+        url: initialFilters.url || '',
+        created_date: initialFilters.created_date || '',
+    });
 
     const [copiedId, setCopiedId] = useState<number | null>(null);
     const [shareToDelete, setShareToDelete] = useState<CloudShare | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+
+    const applyFilters = () => {
+        router.get(sharedLinksIndex.url(), filters as any, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const clearFilters = () => {
+        const defaultFilters = { connection: 'all', access_type: 'all', expires: 'all', name: '', url: '', created_date: '' };
+        setFilters(defaultFilters);
+        router.get(sharedLinksIndex.url(), defaultFilters as any, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
 
     const handleCopy = (id: number, uuid: string) => {
         const url = `${window.location.origin}/s/${uuid}`;
@@ -119,6 +155,79 @@ export default function SharedLinksPage({ shares }: SharedLinksPageProps) {
                     </p>
                 </div>
             </div>
+
+            <Card className="mb-6 border-gray-200 dark:border-gray-800 shadow-sm gap-0">
+                <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 pb-4">
+                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-gray-500" />
+                        Filter Links
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="p-4 pb-0">
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Connection</label>
+                            <Select value={filters.connection} onValueChange={(v) => setFilters({...filters, connection: v})}>
+                                <SelectTrigger className="h-9 w-full">
+                                    <SelectValue placeholder="All Connections" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Connections</SelectItem>
+                                    {userConnections.map((c: CloudConnection) => (
+                                        <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Access Type</label>
+                            <Select value={filters.access_type} onValueChange={(v) => setFilters({...filters, access_type: v})}>
+                                <SelectTrigger className="h-9 w-full">
+                                    <SelectValue placeholder="All Types" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">All Types</SelectItem>
+                                    <SelectItem value="public">Public</SelectItem>
+                                    <SelectItem value="password">Password Protected</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Expires</label>
+                            <Select value={filters.expires} onValueChange={(v) => setFilters({...filters, expires: v})}>
+                                <SelectTrigger className="h-9 w-full">
+                                    <SelectValue placeholder="Any Time" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Any Time</SelectItem>
+                                    <SelectItem value="active">Active</SelectItem>
+                                    <SelectItem value="expired">Expired</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">File/Folder Name</label>
+                            <Input value={filters.name} onChange={(e) => setFilters({...filters, name: e.target.value})} placeholder="Search name..." className="h-9" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">URL</label>
+                            <Input value={filters.url} onChange={(e) => setFilters({...filters, url: e.target.value})} placeholder="Search URL..." className="h-9" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Created Date</label>
+                            <Input value={filters.created_date} onChange={(e) => setFilters({...filters, created_date: e.target.value})} type="date" className="h-9" />
+                        </div>
+                    </div>
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                        <Button onClick={clearFilters} variant="ghost" size="sm" className="h-9 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                            Clear Filters
+                        </Button>
+                        <Button onClick={applyFilters} size="sm" className="h-9 bg-brand text-white hover:bg-[#a0181e] dark:bg-brand dark:hover:bg-[#a0181e]">
+                            Apply Filters
+                        </Button>
+                    </div>
+                </CardContent>
+            </Card>
 
             <Card className="border-gray-200 dark:border-gray-800 shadow-sm pt-0">
                 <CardContent className="p-0">
