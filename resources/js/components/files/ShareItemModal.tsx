@@ -292,10 +292,15 @@ export default function ShareItemModal({
                                                     {window.location.origin}/s/{share.uuid}
                                                 </span>
                                             </div>
-                                            <span className="text-xs text-gray-500 dark:text-gray-400">
-                                                Created {new Date(share.created_at).toLocaleDateString()}
-                                                {share.expires_at ? ` · Expires ${new Date(share.expires_at).toLocaleDateString()}` : ' · Never expires'}
-                                            </span>
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                <span className={`font-medium capitalize ${share.type === 'public' ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                                    {share.type}
+                                                </span>
+                                                <span>•</span>
+                                                <span>Created {new Date(share.created_at).toLocaleDateString()}</span>
+                                                <span>•</span>
+                                                <span>{share.expires_at ? `Expires ${new Date(share.expires_at).toLocaleDateString()}` : 'Never expires'}</span>
+                                            </div>
                                         </div>
                                         <div className="flex items-center gap-1 shrink-0">
                                             <Button
