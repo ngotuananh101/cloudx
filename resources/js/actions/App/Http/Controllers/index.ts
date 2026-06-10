@@ -1,4 +1,5 @@
 import Auth from './Auth'
+import ShareViewController from './ShareViewController'
 import HomeController from './HomeController'
 import System from './System'
 import StorageBrowserController from './StorageBrowserController'
@@ -17,6 +18,7 @@ import CloudUploadTaskController from './CloudUploadTaskController'
 import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
 const Controllers = {
     Auth: Object.assign(Auth, Auth),
+ShareViewController: Object.assign(ShareViewController, ShareViewController),
 HomeController: Object.assign(HomeController, HomeController),
 System: Object.assign(System, System),
 StorageBrowserController: Object.assign(StorageBrowserController, StorageBrowserController),

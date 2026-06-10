@@ -198,7 +198,7 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-export const reconnect = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const reconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: reconnect.url(args, options),
     method: 'get',
 })
@@ -213,7 +213,7 @@ reconnect.definition = {
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-reconnect.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+reconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -246,7 +246,7 @@ reconnect.url = (args: { connection: number | { id: number } } | [connection: nu
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-reconnect.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+reconnect.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: reconnect.url(args, options),
     method: 'get',
 })
@@ -255,7 +255,7 @@ reconnect.get = (args: { connection: number | { id: number } } | [connection: nu
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-reconnect.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+reconnect.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: reconnect.url(args, options),
     method: 'head',
 })
@@ -265,7 +265,7 @@ reconnect.head = (args: { connection: number | { id: number } } | [connection: n
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-    const reconnectForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const reconnectForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: reconnect.url(args, options),
         method: 'get',
     })
@@ -275,7 +275,7 @@ reconnect.head = (args: { connection: number | { id: number } } | [connection: n
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-        reconnectForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        reconnectForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: reconnect.url(args, options),
             method: 'get',
         })
@@ -284,7 +284,7 @@ reconnect.head = (args: { connection: number | { id: number } } | [connection: n
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-        reconnectForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        reconnectForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: reconnect.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -300,7 +300,7 @@ reconnect.head = (args: { connection: number | { id: number } } | [connection: n
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-export const disconnect = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const disconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: disconnect.url(args, options),
     method: 'delete',
 })
@@ -315,7 +315,7 @@ disconnect.definition = {
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-disconnect.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+disconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -348,7 +348,7 @@ disconnect.url = (args: { connection: number | { id: number } } | [connection: n
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-disconnect.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+disconnect.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: disconnect.url(args, options),
     method: 'delete',
 })
@@ -358,7 +358,7 @@ disconnect.delete = (args: { connection: number | { id: number } } | [connection
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-    const disconnectForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const disconnectForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: disconnect.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -373,7 +373,7 @@ disconnect.delete = (args: { connection: number | { id: number } } | [connection
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-        disconnectForm.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        disconnectForm.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: disconnect.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
@@ -389,7 +389,7 @@ disconnect.delete = (args: { connection: number | { id: number } } | [connection
  * @see app/Http/Controllers/CloudConnectionController.php:110
  * @route '/connections/{connection}/name'
  */
-export const updateName = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const updateName = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: updateName.url(args, options),
     method: 'patch',
 })
@@ -404,7 +404,7 @@ updateName.definition = {
  * @see app/Http/Controllers/CloudConnectionController.php:110
  * @route '/connections/{connection}/name'
  */
-updateName.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
+updateName.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -437,7 +437,7 @@ updateName.url = (args: { connection: number | { id: number } } | [connection: n
  * @see app/Http/Controllers/CloudConnectionController.php:110
  * @route '/connections/{connection}/name'
  */
-updateName.patch = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+updateName.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: updateName.url(args, options),
     method: 'patch',
 })
@@ -447,7 +447,7 @@ updateName.patch = (args: { connection: number | { id: number } } | [connection:
  * @see app/Http/Controllers/CloudConnectionController.php:110
  * @route '/connections/{connection}/name'
  */
-    const updateNameForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const updateNameForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: updateName.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -462,7 +462,7 @@ updateName.patch = (args: { connection: number | { id: number } } | [connection:
  * @see app/Http/Controllers/CloudConnectionController.php:110
  * @route '/connections/{connection}/name'
  */
-        updateNameForm.patch = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateNameForm.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: updateName.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
