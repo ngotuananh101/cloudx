@@ -229,7 +229,7 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
                 </CardContent>
             </Card>
 
-            <Card className="rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm pt-0">
+            <Card className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm pt-0 overflow-hidden">
                 <CardContent className="p-0">
                     {shares.data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
