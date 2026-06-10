@@ -157,7 +157,7 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
             </div>
 
             <Card className="mb-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm gap-0">
-                <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 pb-4">
+                <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-4">
                     <CardTitle className="text-[10px] font-extrabold tracking-widest uppercase text-gray-400 dark:text-gray-500 flex items-center gap-2">
                         <Filter className="h-4 w-4 text-gray-500" />
                         Filter Links

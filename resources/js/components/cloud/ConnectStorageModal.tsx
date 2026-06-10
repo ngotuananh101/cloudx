@@ -33,7 +33,7 @@ export default function ConnectStorageModal({
 
     return (
         <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className={`relative w-full overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-2xl transition-all [&>button]:right-6 [&>button]:top-6 [&>button]:z-10 ${isCredentialsSelected ? 'sm:max-w-2xl' : 'sm:max-w-md'}`}>
+            <DialogContent className={`w-full overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-2xl transition-all [&>button]:right-6 [&>button]:top-6 [&>button]:z-10 ${isCredentialsSelected ? 'sm:max-w-2xl' : 'sm:max-w-md xl:max-w-2xl'}`}>
                 <div className="mb-6">
                     <DialogHeader className="text-left">
                         <DialogTitle className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
@@ -73,7 +73,7 @@ export default function ConnectStorageModal({
                 )}
 
                 {!isCredentialsSelected && (
-                    <div className="space-y-3">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-2 content-start">
                         {providers.map((provider) => (
                             <ProviderOption
                                 key={provider.key}
