@@ -5,7 +5,7 @@ import chunks from './chunks'
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-export const index = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const index = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(args, options),
     method: 'get',
 })
@@ -20,7 +20,7 @@ index.definition = {
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-index.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+index.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -53,7 +53,7 @@ index.url = (args: { connection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-index.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+index.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(args, options),
     method: 'get',
 })
@@ -62,7 +62,7 @@ index.get = (args: { connection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-index.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+index.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(args, options),
     method: 'head',
 })
@@ -72,7 +72,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-    const indexForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const indexForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: index.url(args, options),
         method: 'get',
     })
@@ -82,7 +82,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-        indexForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        indexForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(args, options),
             method: 'get',
         })
@@ -91,7 +91,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:20
  * @route '/connections/{connection}/upload-tasks'
  */
-        indexForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        indexForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -107,7 +107,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:35
  * @route '/connections/{connection}/upload-tasks'
  */
-export const store = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const store = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -122,7 +122,7 @@ store.definition = {
  * @see app/Http/Controllers/CloudUploadTaskController.php:35
  * @route '/connections/{connection}/upload-tasks'
  */
-store.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+store.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -155,7 +155,7 @@ store.url = (args: { connection: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/CloudUploadTaskController.php:35
  * @route '/connections/{connection}/upload-tasks'
  */
-store.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+store.post = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -165,7 +165,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:35
  * @route '/connections/{connection}/upload-tasks'
  */
-    const storeForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const storeForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: store.url(args, options),
         method: 'post',
     })
@@ -175,7 +175,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:35
  * @route '/connections/{connection}/upload-tasks'
  */
-        storeForm.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        storeForm.post = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: store.url(args, options),
             method: 'post',
         })
@@ -186,7 +186,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-export const show = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -201,7 +201,7 @@ show.definition = {
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-show.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
+show.url = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     connection: args[0],
@@ -231,7 +231,7 @@ show.url = (args: { connection: string | number | { id: string | number }, task:
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-show.get = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -240,7 +240,7 @@ show.get = (args: { connection: string | number | { id: string | number }, task:
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-show.head = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -250,7 +250,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-    const showForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const showForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: show.url(args, options),
         method: 'get',
     })
@@ -260,7 +260,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-        showForm.get = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showForm.get = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(args, options),
             method: 'get',
         })
@@ -269,7 +269,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
  * @see app/Http/Controllers/CloudUploadTaskController.php:81
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-        showForm.head = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showForm.head = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -285,7 +285,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
  * @see app/Http/Controllers/CloudUploadTaskController.php:88
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
-export const pause = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const pause = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: pause.url(args, options),
     method: 'patch',
 })
@@ -300,7 +300,7 @@ pause.definition = {
  * @see app/Http/Controllers/CloudUploadTaskController.php:88
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
-pause.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
+pause.url = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     connection: args[0],
@@ -330,7 +330,7 @@ pause.url = (args: { connection: string | number | { id: string | number }, task
  * @see app/Http/Controllers/CloudUploadTaskController.php:88
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
-pause.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+pause.patch = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: pause.url(args, options),
     method: 'patch',
 })
@@ -340,7 +340,7 @@ pause.patch = (args: { connection: string | number | { id: string | number }, ta
  * @see app/Http/Controllers/CloudUploadTaskController.php:88
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
-    const pauseForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const pauseForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: pause.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -355,7 +355,7 @@ pause.patch = (args: { connection: string | number | { id: string | number }, ta
  * @see app/Http/Controllers/CloudUploadTaskController.php:88
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
-        pauseForm.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        pauseForm.patch = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: pause.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
@@ -371,7 +371,7 @@ pause.patch = (args: { connection: string | number | { id: string | number }, ta
  * @see app/Http/Controllers/CloudUploadTaskController.php:100
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
-export const resume = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+export const resume = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: resume.url(args, options),
     method: 'patch',
 })
@@ -386,7 +386,7 @@ resume.definition = {
  * @see app/Http/Controllers/CloudUploadTaskController.php:100
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
-resume.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
+resume.url = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     connection: args[0],
@@ -416,7 +416,7 @@ resume.url = (args: { connection: string | number | { id: string | number }, tas
  * @see app/Http/Controllers/CloudUploadTaskController.php:100
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
-resume.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+resume.patch = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: resume.url(args, options),
     method: 'patch',
 })
@@ -426,7 +426,7 @@ resume.patch = (args: { connection: string | number | { id: string | number }, t
  * @see app/Http/Controllers/CloudUploadTaskController.php:100
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
-    const resumeForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const resumeForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: resume.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PATCH',
@@ -441,7 +441,7 @@ resume.patch = (args: { connection: string | number | { id: string | number }, t
  * @see app/Http/Controllers/CloudUploadTaskController.php:100
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
-        resumeForm.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        resumeForm.patch = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: resume.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
@@ -457,7 +457,7 @@ resume.patch = (args: { connection: string | number | { id: string | number }, t
  * @see app/Http/Controllers/CloudUploadTaskController.php:112
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-export const destroy = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -472,7 +472,7 @@ destroy.definition = {
  * @see app/Http/Controllers/CloudUploadTaskController.php:112
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-destroy.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
+destroy.url = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     connection: args[0],
@@ -502,7 +502,7 @@ destroy.url = (args: { connection: string | number | { id: string | number }, ta
  * @see app/Http/Controllers/CloudUploadTaskController.php:112
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-destroy.delete = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -512,7 +512,7 @@ destroy.delete = (args: { connection: string | number | { id: string | number },
  * @see app/Http/Controllers/CloudUploadTaskController.php:112
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-    const destroyForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -527,7 +527,7 @@ destroy.delete = (args: { connection: string | number | { id: string | number },
  * @see app/Http/Controllers/CloudUploadTaskController.php:112
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
-        destroyForm.delete = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { connection: number | { id: number }, task: number | { id: number } } | [connection: number | { id: number }, task: number | { id: number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',
