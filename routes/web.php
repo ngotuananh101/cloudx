@@ -14,6 +14,7 @@ use App\Http\Controllers\StorageBrowserController;
 use App\Http\Controllers\Api\CloudFolderListController;
 use App\Http\Controllers\Api\CloudShareController;
 use App\Http\Controllers\CloudItemMoveController;
+use App\Http\Controllers\ShareViewController;
 use App\Http\Controllers\TelegramConnectionController;
 use App\Http\Controllers\System\CloudTaskController;
 use App\Http\Controllers\System\SharedLinkController;
@@ -21,6 +22,18 @@ use App\Http\Controllers\CloudFilePreviewController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
+
+// Public share routes (no auth required)
+Route::prefix('s')->group(function () {
+    Route::get('{uuid}', [ShareViewController::class, 'index'])->name('share.view');
+    Route::post('{uuid}/verify', [ShareViewController::class, 'verify'])->name('share.verify');
+    Route::get('{uuid}/preview/{path?}', [ShareViewController::class, 'preview'])
+        ->name('share.preview')
+        ->where('path', '.*');
+    Route::get('{uuid}/download/{path?}', [ShareViewController::class, 'download'])
+        ->name('share.download')
+        ->where('path', '.*');
+});
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
