@@ -42,7 +42,7 @@ it('returns correct capabilities', function () {
         ->and($caps->download)->toBeTrue()
         ->and($caps->delete)->toBeTrue()
         ->and($caps->createFolder)->toBeFalse()
-        ->and($caps->share)->toBeFalse();
+        ->and($caps->share)->toBeTrue();
 });
 
 it('builds a filesystem disk from connection', function () {

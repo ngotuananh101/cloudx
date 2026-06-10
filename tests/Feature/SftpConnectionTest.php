@@ -24,7 +24,7 @@ it('exposes sftp provider capabilities', function () {
             'download' => true,
             'delete' => true,
             'createFolder' => true,
-            'share' => false,
+            'share' => true,
         ]);
 });
 

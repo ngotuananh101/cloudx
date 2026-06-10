@@ -27,7 +27,7 @@ it('reports the expected FTP provider capabilities', function () {
         download: true,
         delete: true,
         createFolder: true,
-        share: false,
+        share: true,
         move: true,
     ));
 });

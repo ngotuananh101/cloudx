@@ -202,7 +202,7 @@ it('exposes Dropbox provider capabilities', function () {
         'download' => true,
         'delete' => true,
         'createFolder' => true,
-        'share' => false,
+        'share' => true,
     ]);
 });
 
