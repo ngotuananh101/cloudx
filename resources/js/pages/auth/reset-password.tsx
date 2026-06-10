@@ -1,7 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
-import { KeyRound, Mail, Eye, EyeOff, ArrowRight } from 'lucide-react';
+import { KeyRound, Mail, ArrowRight } from 'lucide-react';
 import type { FormEventHandler } from 'react';
-import { useState } from 'react';
+
 import { store } from '@/actions/App/Http/Controllers/Auth/ResetPasswordController';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,8 +15,6 @@ export default function ResetPassword({
     token: string;
     email: string;
 }) {
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     const { data, setData, post, processing, errors } = useForm({
         token: token,
@@ -91,26 +89,15 @@ export default function ResetPassword({
                     <div className="relative">
                         <Input
                             id="password"
-                            type={showPassword ? 'text' : 'password'}
+                            type="password"
                             placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
                             value={data.password}
                             onChange={(e) =>
                                 setData('password', e.target.value)
                             }
                             autoComplete="new-password"
                         />
-                        <button
-                            type="button"
-                            onClick={() => setShowPassword(!showPassword)}
-                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                        >
-                            {showPassword ? (
-                                <EyeOff className="h-5 w-5" />
-                            ) : (
-                                <Eye className="h-5 w-5" />
-                            )}
-                        </button>
                     </div>
                     {errors.password && (
                         <p className="mt-1 text-xs text-red-500">
@@ -129,28 +116,15 @@ export default function ResetPassword({
                     <div className="relative">
                         <Input
                             id="password_confirmation"
-                            type={showConfirmPassword ? 'text' : 'password'}
+                            type="password"
                             placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 pr-10 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
                             value={data.password_confirmation}
                             onChange={(e) =>
                                 setData('password_confirmation', e.target.value)
                             }
                             autoComplete="new-password"
                         />
-                        <button
-                            type="button"
-                            onClick={() =>
-                                setShowConfirmPassword(!showConfirmPassword)
-                            }
-                            className="absolute top-1/2 right-3 -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
-                        >
-                            {showConfirmPassword ? (
-                                <EyeOff className="h-5 w-5" />
-                            ) : (
-                                <Eye className="h-5 w-5" />
-                            )}
-                        </button>
                     </div>
                     {errors.password_confirmation && (
                         <p className="mt-1 text-xs text-red-500">
