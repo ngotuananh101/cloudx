@@ -147,7 +147,7 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
 
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                    <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                         Shared Links
                     </h1>
                     <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -156,9 +156,9 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
                 </div>
             </div>
 
-            <Card className="mb-6 border-gray-200 dark:border-gray-800 shadow-sm gap-0">
+            <Card className="mb-6 rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm gap-0">
                 <CardHeader className="bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 pb-4">
-                    <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <CardTitle className="text-[10px] font-extrabold tracking-widest uppercase text-gray-400 dark:text-gray-500 flex items-center gap-2">
                         <Filter className="h-4 w-4 text-gray-500" />
                         Filter Links
                     </CardTitle>
@@ -229,14 +229,14 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
                 </CardContent>
             </Card>
 
-            <Card className="border-gray-200 dark:border-gray-800 shadow-sm pt-0">
+            <Card className="rounded-xl border border-gray-100 dark:border-gray-800 shadow-sm pt-0">
                 <CardContent className="p-0">
                     {shares.data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
                             <div className="rounded-full bg-gray-50 dark:bg-gray-800 p-4 mb-4">
                                 <LinkIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
                             </div>
-                            <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">No shared links</h3>
+                            <h3 className="text-lg font-extrabold text-gray-900 dark:text-gray-100">No shared links</h3>
                             <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
                                 You haven't shared any files or folders yet.
                             </p>
@@ -364,7 +364,7 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
             </Card>
 
             <AlertDialog open={!!shareToDelete} onOpenChange={(open) => !open && setShareToDelete(null)}>
-                <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-2xl">
+                <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-xl">
                     <AlertDialogHeader>
                         <AlertDialogTitle className="text-gray-900 dark:text-gray-100">Delete Shared Link?</AlertDialogTitle>
                         <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
