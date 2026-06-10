@@ -45,7 +45,7 @@ Route::prefix('s')->group(function () {
 **`download(string $uuid)`** — File download endpoint
 - Same verification as preview
 - For files: redirect to signed download URL or stream with Content-Disposition header
-- For folders: zip the folder contents and stream download (using cloud connector)
+- For folders: download each file individually (zip streaming across providers is complex and deferred to a future iteration). The "Download All" button iterates file downloads in sequence via JS.
 
 ### Pages
 
