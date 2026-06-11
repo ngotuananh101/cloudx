@@ -96,12 +96,16 @@ class UploadCloudTaskFileJob implements ShouldQueue
                 }
 
                 stream_copy_to_stream($chunkStream, $stream);
-                fclose($chunkStream);
+                if (is_resource($chunkStream)) {
+                    fclose($chunkStream);
+                }
             }
 
             rewind($stream);
             $tempDisk->put($tempPath, $stream);
-            fclose($stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
 
             $uploadStream = $tempDisk->readStream($tempPath);
 
@@ -110,7 +114,9 @@ class UploadCloudTaskFileJob implements ShouldQueue
             }
 
             $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
-            fclose($uploadStream);
+            if (is_resource($uploadStream)) {
+                fclose($uploadStream);
+            }
 
             $task->forceFill([
                 'status' => CloudTaskStatus::Completed(),
