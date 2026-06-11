@@ -9,9 +9,9 @@ import {
     File,
     Download,
 } from 'lucide-react';
-import { formatBytes } from '@/lib/format-bytes';
-import { encodeCloudPath } from '@/lib/cloud-path';
 import { Button } from '@/components/ui/button';
+import { encodeCloudPath } from '@/lib/cloud-path';
+import { formatBytes } from '@/lib/format-bytes';
 import type { CloudFile } from '@/types/cloud';
 
 interface ShareFileTableProps {

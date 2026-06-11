@@ -42,6 +42,7 @@ export function ThemeProvider({
                 : 'light';
 
             root.classList.add(systemTheme);
+
             return;
         }
 
@@ -60,6 +61,7 @@ export function ThemeProvider({
         };
 
         mediaQuery.addEventListener('change', handleChange);
+
         return () => mediaQuery.removeEventListener('change', handleChange);
     }, [theme]);
 
@@ -81,8 +83,9 @@ export function ThemeProvider({
 export const useTheme = () => {
     const context = useContext(ThemeProviderContext);
 
-    if (context === undefined)
-        throw new Error('useTheme must be used within a ThemeProvider');
+    if (context === undefined) {
+throw new Error('useTheme must be used within a ThemeProvider');
+}
 
     return context;
 };

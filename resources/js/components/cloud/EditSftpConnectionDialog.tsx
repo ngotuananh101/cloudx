@@ -1,8 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
-import { update } from '@/routes/connections/sftp';
-import type { CloudConnection } from '@/types/cloud';
+import {  useEffect, useState } from 'react';
+import type {FormEvent} from 'react';
 import {
     Dialog,
     DialogContent,
@@ -10,6 +9,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { update } from '@/routes/connections/sftp';
+import type { CloudConnection } from '@/types/cloud';
 
 interface EditSftpConnectionDialogProps {
     connection: CloudConnection | null;

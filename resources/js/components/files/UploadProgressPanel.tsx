@@ -1,6 +1,6 @@
+import { usePage } from '@inertiajs/react';
 import { Pause, Play, RotateCcw, X, ChevronDown, ChevronUp, Trash2, HardDrive } from 'lucide-react';
 import { useState } from 'react';
-import { usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { useUploadManager } from '@/contexts/UploadManagerContext';

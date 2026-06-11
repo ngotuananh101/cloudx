@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useState  } from 'react';
+import type {FormEvent} from 'react';
 
 interface TelegramConnectionFormProps {
     onCancel: () => void;
@@ -37,6 +38,7 @@ export default function TelegramConnectionForm({
         })
             .then(async (res) => {
                 const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+
                 if (!res.ok) {
                     throw new Error((data.message as string) ?? 'Failed to send code');
                 }
@@ -52,6 +54,7 @@ export default function TelegramConnectionForm({
         setError(null);
 
         const payload: Record<string, string | undefined> = { code };
+
         if (isPasswordStep || (step === 'password' && password)) {
             payload.password = password || undefined;
         }
@@ -67,9 +70,11 @@ export default function TelegramConnectionForm({
         })
             .then(async (res) => {
                 const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+
                 if (!res.ok) {
                     throw new Error((data.message as string) ?? 'Verification failed');
                 }
+
                 return data;
             })
             .then((data) => {
@@ -114,18 +119,29 @@ export default function TelegramConnectionForm({
 
     const stepBar = (position: number, currentStep: number, highlight: boolean = false) => {
         let color = 'bg-gray-200 dark:bg-gray-700';
+
         if (highlight) {
             color = 'bg-amber-500';
         } else if (currentStep <= position) {
             color = 'bg-blue-600';
         }
+
         return <div className={`flex-1 h-1 rounded-full transition-colors ${color}`} />;
     };
 
     const stepProgress = () => {
-        if (step === 'phone') return [1, 2, 3];
-        if (step === 'code') return [2, 2, 3];
-        if (step === 'password') return [2, 3, 3];
+        if (step === 'phone') {
+return [1, 2, 3];
+}
+
+        if (step === 'code') {
+return [2, 2, 3];
+}
+
+        if (step === 'password') {
+return [2, 3, 3];
+}
+
         return [3, 3, 3];
     };
 

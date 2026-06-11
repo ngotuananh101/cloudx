@@ -1,6 +1,14 @@
 import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
-import { type FormEvent, useEffect, useState } from 'react';
+import {  useEffect, useState } from 'react';
+import type {FormEvent} from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import {
     Select,
     SelectContent,
@@ -10,13 +18,6 @@ import {
 } from '@/components/ui/select';
 import { update } from '@/routes/connections/ftp';
 import type { CloudConnection } from '@/types/cloud';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
 
 interface EditFtpConnectionDialogProps {
     connection: CloudConnection | null;

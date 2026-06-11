@@ -1,6 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
-import { type FormEvent, useState } from 'react';
+import {  useState } from 'react';
+import type {FormEvent} from 'react';
 import {
     Select,
     SelectContent,

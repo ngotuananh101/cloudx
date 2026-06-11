@@ -11,8 +11,8 @@ import {
 import type { ReactNode } from 'react';
 import { requestJson } from '@/lib/request-json';
 import connections from '@/routes/connections';
-import type { CloudUploadTask, UploadQueueItem } from '@/types/cloud';
 import type { User } from '@/types';
+import type { CloudUploadTask, UploadQueueItem } from '@/types/cloud';
 
 interface FileBrowserLocation {
     connectionId: number;
@@ -291,6 +291,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 if (currentItems.length === 0) {
                     setIsPanelVisible(false);
                 }
+
                 return currentItems;
             });
         },

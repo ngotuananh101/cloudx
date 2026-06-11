@@ -1,10 +1,4 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
-import { index as sharedLinksIndex } from '@/routes/system/shared-links';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Trash2, Copy, Globe, Lock, Clock, HardDrive, Check, Link as LinkIcon, Loader2, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -18,6 +12,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
+import { index as sharedLinksIndex } from '@/routes/system/shared-links';
 
 interface CloudConnection {
     id: number;
@@ -112,6 +112,7 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
+
             try {
                 if (document.execCommand('copy')) {
                     setCopiedId(id);
@@ -129,7 +130,10 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
     };
 
     const confirmDeleteShare = () => {
-        if (!shareToDelete) return;
+        if (!shareToDelete) {
+return;
+}
+
         setIsDeleting(true);
         router.delete(`/system/shared-links/${shareToDelete.id}`, {
             preserveScroll: true,

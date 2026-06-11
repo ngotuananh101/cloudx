@@ -1,5 +1,4 @@
 import { router } from '@inertiajs/react';
-import { destroy } from '@/routes/connections/items';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -10,6 +9,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { destroy } from '@/routes/connections/items';
 import type { CloudFile } from '@/types/cloud';
 
 interface DeleteItemDialogProps {

@@ -11,9 +11,9 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import type { CloudConnection } from '@/types/cloud';
 
 interface CloudTaskEnumValue {

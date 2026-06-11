@@ -1,12 +1,7 @@
-import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-} from '@/components/ui/dialog';
+import { Copy, Trash2, Globe, Lock, Loader2, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -18,14 +13,19 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Copy, Trash2, Globe, Lock, Loader2, Check } from 'lucide-react';
-import { toast } from 'sonner';
-import type { CloudFile } from '@/types/cloud';
 import connections from '@/routes/connections';
+import type { CloudFile } from '@/types/cloud';
 
 interface CloudShare {
     id: number;
@@ -72,6 +72,7 @@ export default function ShareItemModal({
             setType('public');
             setPassword('');
             setExpiresInDays('0');
+
             return;
         }
 
@@ -79,13 +80,20 @@ export default function ShareItemModal({
     }, [isOpen, item, connectionId]);
 
     const fetchShares = async () => {
-        if (!item) return;
+        if (!item) {
+return;
+}
 
         setIsLoadingShares(true);
+
         try {
             const url = `${connections.shares.index.url({ connection: connectionId })}?path=${encodeURIComponent(item.path)}`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error('Failed to fetch shares');
+
+            if (!response.ok) {
+throw new Error('Failed to fetch shares');
+}
+
             const data = await response.json();
             setShares(data);
         } catch (err) {
@@ -96,7 +104,9 @@ export default function ShareItemModal({
     };
 
     const handleCreateShare = () => {
-        if (!item) return;
+        if (!item) {
+return;
+}
 
         setError(null);
         setIsSubmitting(true);
@@ -131,7 +141,10 @@ export default function ShareItemModal({
     };
 
     const confirmDeleteShare = () => {
-        if (!shareToDelete) return;
+        if (!shareToDelete) {
+return;
+}
+
         setIsDeleting(true);
         router.delete(
             connections.shares.destroy.url({ connection: connectionId, share: shareToDelete.id }),
@@ -173,6 +186,7 @@ export default function ShareItemModal({
             
             try {
                 const successful = document.execCommand('copy');
+
                 if (successful) {
                     setCopiedId(id);
                     toast.success('Link copied to clipboard');

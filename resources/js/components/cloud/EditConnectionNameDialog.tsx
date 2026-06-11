@@ -1,9 +1,8 @@
 import { useForm } from '@inertiajs/react';
-import { type FormEvent, useEffect } from 'react';
+import {  useEffect } from 'react';
+import type {FormEvent} from 'react';
 import { updateName } from '@/actions/App/Http/Controllers/CloudConnectionController';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import {
     Dialog,
     DialogContent,
@@ -12,6 +11,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import type { CloudConnection } from '@/types/cloud';
 
 interface EditConnectionNameDialogProps {

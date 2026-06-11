@@ -1,7 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { Clock, Search, ShieldAlert } from 'lucide-react';
-import ShareLayout from '@/layouts/ShareLayout';
 import { Button } from '@/components/ui/button';
+import ShareLayout from '@/layouts/ShareLayout';
 
 const errorConfig = {
     not_found: {

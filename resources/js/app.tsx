@@ -2,10 +2,10 @@ import { createInertiaApp } from '@inertiajs/react';
 import { configureEcho } from '@laravel/echo-react';
 import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
-import { UploadManagerProvider } from '@/contexts/UploadManagerContext';
 
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Toaster } from '@/components/ui/sonner';
+import { UploadManagerProvider } from '@/contexts/UploadManagerContext';
 
 configureEcho({
     broadcaster: 'pusher',

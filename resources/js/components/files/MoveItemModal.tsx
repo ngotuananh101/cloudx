@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
+import { Folder, ChevronRight, CornerLeftUp, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
 import {
     Dialog,
     DialogContent,
@@ -8,11 +10,9 @@ import {
     DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Folder, ChevronRight, CornerLeftUp, Loader2 } from 'lucide-react';
-import type { CloudFile } from '@/types/cloud';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import connections from '@/routes/connections';
+import type { CloudFile } from '@/types/cloud';
 
 interface MoveItemModalProps {
     isOpen: boolean;
@@ -42,6 +42,7 @@ export default function MoveItemModal({
             setDestinationPath(currentParentPath);
             setFolders([]);
             setError(null);
+
             return;
         }
 
@@ -51,13 +52,16 @@ export default function MoveItemModal({
     const fetchFolders = async (path: string) => {
         setIsLoading(true);
         setError(null);
+
         try {
             const response = await fetch(
                 `${connections.folders.index.url({ connection: connectionId })}?path=${encodeCloudPath(path)}`
             );
+
             if (!response.ok) {
                 throw new Error('Failed to fetch folders');
             }
+
             const data = await response.json();
             setFolders(data);
             setDestinationPath(path);
@@ -69,7 +73,9 @@ export default function MoveItemModal({
     };
 
     const handleMove = () => {
-        if (!item) return;
+        if (!item) {
+return;
+}
 
         setIsMoving(true);
         router.post(
@@ -100,19 +106,25 @@ export default function MoveItemModal({
 
     // Prevent moving a folder into itself
     const isDestinationValid = () => {
-        if (!item) return false;
+        if (!item) {
+return false;
+}
 
         // Cannot move to the exact same directory it's already in
-        if (destinationPath === currentParentPath) return false;
+        if (destinationPath === currentParentPath) {
+return false;
+}
 
         if (item.isDirectory) {
             // Cannot move into itself or a subfolder of itself
             const destWithSlash = destinationPath ? `${destinationPath}/` : '';
             const itemWithSlash = `${item.path}/`;
+
             if (destinationPath === item.path || destWithSlash.startsWith(itemWithSlash)) {
                 return false;
             }
         }
+
         return true;
     };
 

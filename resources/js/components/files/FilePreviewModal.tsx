@@ -4,11 +4,7 @@ import { usePage } from '@inertiajs/react';
 import { Download, Maximize2, Minimize2, X, File, Loader2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
-import type { CloudFile } from '@/types/cloud';
 import { Button } from '@/components/ui/button';
-import { formatBytes } from '@/lib/format-bytes';
-import files from '@/routes/cloud/files';
-import { encodeCloudPath } from '@/lib/cloud-path';
 import {
     Dialog,
     DialogContent,
@@ -16,6 +12,10 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import { encodeCloudPath } from '@/lib/cloud-path';
+import { formatBytes } from '@/lib/format-bytes';
+import files from '@/routes/cloud/files';
+import type { CloudFile } from '@/types/cloud';
 
 export default function FilePreviewModal({
     item,
@@ -41,7 +41,9 @@ export default function FilePreviewModal({
         }
     }, [item]);
 
-    if (!item) return null;
+    if (!item) {
+return null;
+}
 
     const isTooLarge = item.size > maxSize;
 

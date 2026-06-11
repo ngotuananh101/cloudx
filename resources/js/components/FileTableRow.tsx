@@ -77,6 +77,7 @@ export function FileTableRow({
         }
 
         event.preventDefault();
+
         if (item.isDirectory) {
             onNavigate?.(item);
         } else {
