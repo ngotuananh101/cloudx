@@ -14,11 +14,11 @@ import {
     Lock,
 } from 'lucide-react';
 import { useState } from 'react';
-import ShareLayout from '@/layouts/ShareLayout';
-import { Button } from '@/components/ui/button';
 import { ShareBreadcrumb } from '@/components/share/ShareBreadcrumb';
 import { ShareFileTable } from '@/components/share/ShareFileTable';
 import { SharePreview } from '@/components/share/SharePreview';
+import { Button } from '@/components/ui/button';
+import ShareLayout from '@/layouts/ShareLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
 import type { CloudFile } from '@/types/cloud';
@@ -51,6 +51,7 @@ function getLargeIcon(type: string, isDirectory: boolean) {
     if (isDirectory) {
         return { icon: Folder, bg: 'bg-amber-50 dark:bg-amber-950', color: 'text-amber-500' };
     }
+
     switch (type) {
         case 'image':
             return { icon: FileImage, bg: 'bg-emerald-50 dark:bg-emerald-950', color: 'text-emerald-500' };
@@ -112,12 +113,8 @@ export default function ShareView({
         if (!file || !downloadUrl) {
             return;
         }
+        
         window.location.href = downloadUrl;
-    };
-
-    const handleDownloadFolderFile = (fileItem: CloudFile) => {
-        const encodedPath = encodeCloudPath(fileItem.path);
-        window.location.href = `/s/${share.uuid}/download/${encodedPath}`;
     };
 
     const isAtRoot = currentPath === shareBasePath || currentPath === '';
@@ -202,32 +199,17 @@ export default function ShareView({
                     </div>
 
                     {/* Action buttons */}
-                    <div className="mb-6 flex justify-center gap-3">
-                        {!isDirectory && (
-                            <>
-                                <Button
-                                    onClick={handleDownload}
-                                    className="bg-blue-600 text-white hover:bg-blue-700"
-                                >
-                                    <Download className="mr-2 h-4 w-4" />
-                                    Download
-                                </Button>
-                            </>
-                        )}
-                        {isDirectory && files.length > 0 && (
+                    {!isDirectory && (
+                        <div className="mb-6 flex justify-center gap-3">
                             <Button
-                                onClick={() => {
-                                    // Download each file individually
-                                    const downloadableFiles = files.filter((f) => !f.isDirectory);
-                                    downloadableFiles.forEach((f) => handleDownloadFolderFile(f));
-                                }}
+                                onClick={handleDownload}
                                 className="bg-blue-600 text-white hover:bg-blue-700"
                             >
                                 <Download className="mr-2 h-4 w-4" />
-                                Download All
+                                Download
                             </Button>
-                        )}
-                    </div>
+                        </div>
+                    )}
 
                     {/* Preview area for single file */}
                     {!isDirectory && previewUrl && downloadUrl && file && (
