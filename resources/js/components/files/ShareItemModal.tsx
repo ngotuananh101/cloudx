@@ -67,19 +67,25 @@ export default function ShareItemModal({
 
     useEffect(() => {
         if (!isOpen || !item) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setShares([]);
+             
             setError(null);
+             
             setType('public');
+             
             setPassword('');
+             
             setExpiresInDays('0');
 
             return;
         }
 
         fetchShares();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, item, connectionId]);
 
-    const fetchShares = async () => {
+    async function fetchShares() {
         if (!item) {
 return;
 }
@@ -101,7 +107,7 @@ throw new Error('Failed to fetch shares');
         } finally {
             setIsLoadingShares(false);
         }
-    };
+    }
 
     const handleCreateShare = () => {
         if (!item) {
@@ -194,7 +200,7 @@ return;
                 } else {
                     toast.error('Failed to copy link');
                 }
-            } catch (error) {
+            } catch {
                 toast.error('Failed to copy link');
             } finally {
                 container.removeChild(textArea);

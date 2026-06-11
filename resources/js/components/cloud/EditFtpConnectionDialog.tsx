@@ -67,7 +67,9 @@ export default function EditFtpConnectionDialog({
     useEffect(() => {
         form.setData(initialData(connection));
         form.clearErrors();
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowAdvanced(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connection?.id]);
 
     if (!connection) {

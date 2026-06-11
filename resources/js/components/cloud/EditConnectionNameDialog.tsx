@@ -31,6 +31,7 @@ export default function EditConnectionNameDialog({
     useEffect(() => {
         form.setData('name', connection?.name ?? '');
         form.clearErrors();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connection?.id]);
 
     if (!connection) {

@@ -1,4 +1,3 @@
-import { X } from 'lucide-react';
 import { useState } from 'react';
 import FtpConnectionForm from '@/components/cloud/FtpConnectionForm';
 import ProviderOption from '@/components/cloud/ProviderOption';

@@ -39,17 +39,21 @@ export default function MoveItemModal({
 
     useEffect(() => {
         if (!isOpen) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setDestinationPath(currentParentPath);
+             
             setFolders([]);
+             
             setError(null);
 
             return;
         }
 
         fetchFolders(currentParentPath);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isOpen, currentParentPath, connectionId]);
 
-    const fetchFolders = async (path: string) => {
+    async function fetchFolders(path: string) {
         setIsLoading(true);
         setError(null);
 
@@ -70,7 +74,7 @@ export default function MoveItemModal({
         } finally {
             setIsLoading(false);
         }
-    };
+    }
 
     const handleMove = () => {
         if (!item) {

@@ -1,6 +1,5 @@
 import { createInertiaApp } from '@inertiajs/react';
 import { configureEcho } from '@laravel/echo-react';
-import { createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import { ThemeProvider } from '@/components/ThemeProvider';

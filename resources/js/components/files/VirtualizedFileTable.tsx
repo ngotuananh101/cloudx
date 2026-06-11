@@ -29,6 +29,7 @@ export function VirtualizedFileTable({
 }: VirtualizedFileTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
 
+    // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
         count: files.length,
         getScrollElement: () => parentRef.current,

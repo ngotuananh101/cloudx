@@ -10,8 +10,6 @@ import {
     Download,
     Trash2,
     Share2,
-    Eye,
-    HardDrive,
     ArrowRightLeft,
 } from 'lucide-react';
 import type { CSSProperties, KeyboardEvent } from 'react';

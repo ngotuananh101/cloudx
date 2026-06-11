@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Trash2, Copy, Globe, Lock, Clock, HardDrive, Check, Link as LinkIcon, Loader2, Filter } from 'lucide-react';
+import { Trash2, Copy, Globe, Lock, HardDrive, Check, Link as LinkIcon, Loader2, Filter } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -13,7 +13,7 @@ import {
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
@@ -121,7 +121,7 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
                 } else {
                     toast.error('Failed to copy link');
                 }
-            } catch (error) {
+            } catch {
                 toast.error('Failed to copy link');
             } finally {
                 document.body.removeChild(textArea);
