@@ -7,12 +7,14 @@ use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
+use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use LogicException;
+use Throwable;
 
-class S3Connector implements CloudProviderConnector
+class S3Connector implements CloudProviderConnector, ProvidesDirectDownloadLink
 {
     public function provider(): CloudProvider
     {
@@ -81,6 +83,49 @@ class S3Connector implements CloudProviderConnector
             share: true,
             move: true,
         );
+    }
+
+    public function directDownloadLink(CloudConnection $connection, string $path): ?string
+    {
+        try {
+            $client = new \Aws\S3\S3Client($this->s3ClientConfig($connection->credentials));
+            $cmd = $client->getCommand('GetObject', [
+                'Bucket' => $connection->credentials['bucket'],
+                'Key' => ltrim($path, '/'),
+            ]);
+
+            $request = $client->createPresignedRequest($cmd, '+6 hours');
+
+            return (string) $request->getUri();
+        } catch (Throwable $e) {
+            report($e);
+            return null;
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $credentials
+     * @return array<string, mixed>
+     */
+    private function s3ClientConfig(array $credentials): array
+    {
+        $providerPreset = $credentials['provider_preset'] ?? 'aws';
+        $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
+        $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
+            ? (bool) $credentials['use_path_style_endpoint']
+            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
+
+        return array_filter([
+            'version' => 'latest',
+            'region' => $credentials['region'] ?? 'us-east-1',
+            'credentials' => [
+                'key' => $credentials['access_key_id'] ?? null,
+                'secret' => $credentials['secret_access_key'] ?? null,
+                'token' => $credentials['session_token'] ?? null,
+            ],
+            'endpoint' => $endpoint,
+            'use_path_style_endpoint' => $usePathStyleEndpoint,
+        ], static fn (mixed $value): bool => $value !== null);
     }
 
     private function defaultEndpointForPreset(string $providerPreset): ?string
