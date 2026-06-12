@@ -7,6 +7,7 @@ import CloudFileDownloadController from './CloudFileDownloadController'
 import CloudFilePreviewController from './CloudFilePreviewController'
 import CloudConnectionController from './CloudConnectionController'
 import FtpConnectionController from './FtpConnectionController'
+import S3ConnectionController from './S3ConnectionController'
 import SftpConnectionController from './SftpConnectionController'
 import TelegramConnectionController from './TelegramConnectionController'
 import CloudConnectionCacheController from './CloudConnectionCacheController'
@@ -16,6 +17,8 @@ import Api from './Api'
 import CloudItemMoveController from './CloudItemMoveController'
 import CloudUploadTaskController from './CloudUploadTaskController'
 import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
+import CloudUploadPresignController from './CloudUploadPresignController'
+import CloudUploadDirectCompleteController from './CloudUploadDirectCompleteController'
 const Controllers = {
     Auth: Object.assign(Auth, Auth),
 ShareViewController: Object.assign(ShareViewController, ShareViewController),
@@ -26,6 +29,7 @@ CloudFileDownloadController: Object.assign(CloudFileDownloadController, CloudFil
 CloudFilePreviewController: Object.assign(CloudFilePreviewController, CloudFilePreviewController),
 CloudConnectionController: Object.assign(CloudConnectionController, CloudConnectionController),
 FtpConnectionController: Object.assign(FtpConnectionController, FtpConnectionController),
+S3ConnectionController: Object.assign(S3ConnectionController, S3ConnectionController),
 SftpConnectionController: Object.assign(SftpConnectionController, SftpConnectionController),
 TelegramConnectionController: Object.assign(TelegramConnectionController, TelegramConnectionController),
 CloudConnectionCacheController: Object.assign(CloudConnectionCacheController, CloudConnectionCacheController),
@@ -35,6 +39,8 @@ Api: Object.assign(Api, Api),
 CloudItemMoveController: Object.assign(CloudItemMoveController, CloudItemMoveController),
 CloudUploadTaskController: Object.assign(CloudUploadTaskController, CloudUploadTaskController),
 CloudUploadTaskChunkController: Object.assign(CloudUploadTaskChunkController, CloudUploadTaskChunkController),
+CloudUploadPresignController: Object.assign(CloudUploadPresignController, CloudUploadPresignController),
+CloudUploadDirectCompleteController: Object.assign(CloudUploadDirectCompleteController, CloudUploadDirectCompleteController),
 }
 
 export default Controllers

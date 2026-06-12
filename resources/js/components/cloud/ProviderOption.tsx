@@ -17,6 +17,7 @@ export default function ProviderOption({
     const isSupportedCredentialsProvider =
         provider.authType === 'credentials' &&
         (provider.key === 'ftp' ||
+            provider.key === 'aws-s3' ||
             provider.key === 'sftp' ||
             provider.key === 'telegram');
     const isActive =

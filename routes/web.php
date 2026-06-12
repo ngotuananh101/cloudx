@@ -1,24 +1,27 @@
 <?php
 
+use App\Http\Controllers\Api\CloudFolderListController;
+use App\Http\Controllers\Api\CloudShareController;
 use App\Http\Controllers\CloudConnectionCacheController;
 use App\Http\Controllers\CloudConnectionController;
 use App\Http\Controllers\CloudFileDownloadController;
+use App\Http\Controllers\CloudFilePreviewController;
 use App\Http\Controllers\CloudFolderController;
 use App\Http\Controllers\CloudItemController;
+use App\Http\Controllers\CloudItemMoveController;
+use App\Http\Controllers\CloudUploadDirectCompleteController;
+use App\Http\Controllers\CloudUploadPresignController;
 use App\Http\Controllers\CloudUploadTaskChunkController;
 use App\Http\Controllers\CloudUploadTaskController;
 use App\Http\Controllers\FtpConnectionController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\S3ConnectionController;
 use App\Http\Controllers\SftpConnectionController;
-use App\Http\Controllers\StorageBrowserController;
-use App\Http\Controllers\Api\CloudFolderListController;
-use App\Http\Controllers\Api\CloudShareController;
-use App\Http\Controllers\CloudItemMoveController;
 use App\Http\Controllers\ShareViewController;
-use App\Http\Controllers\TelegramConnectionController;
+use App\Http\Controllers\StorageBrowserController;
 use App\Http\Controllers\System\CloudTaskController;
 use App\Http\Controllers\System\SharedLinkController;
-use App\Http\Controllers\CloudFilePreviewController;
+use App\Http\Controllers\TelegramConnectionController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
@@ -39,7 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::get('/dashboard', HomeController::class)->name('dashboard');
     Route::get('/system/cloud-tasks', CloudTaskController::class)->name('system.cloud-tasks.index');
-    
+
     Route::get('/system/shared-links', [SharedLinkController::class, 'index'])->name('system.shared-links.index');
     Route::delete('/system/shared-links/{shared_link}', [SharedLinkController::class, 'destroy'])->name('system.shared-links.destroy');
 
@@ -64,6 +67,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/connections/{connection}/name', [CloudConnectionController::class, 'updateName'])->name('cloud-connections.name.update');
     Route::post('/connections/ftp', [FtpConnectionController::class, 'store'])->name('connections.ftp.store');
     Route::patch('/connections/{connection}/ftp', [FtpConnectionController::class, 'update'])->name('connections.ftp.update');
+    Route::post('/connections/s3', [S3ConnectionController::class, 'store'])->name('connections.s3.store');
+    Route::patch('/connections/{connection}/s3', [S3ConnectionController::class, 'update'])->name('connections.s3.update');
     Route::post('/connections/sftp', [SftpConnectionController::class, 'store'])->name('connections.sftp.store');
     Route::patch('/connections/{connection}/sftp', [SftpConnectionController::class, 'update'])->name('connections.sftp.update');
     Route::post('/connections/telegram/request-code', [TelegramConnectionController::class, 'requestCode'])->name('connections.telegram.request-code');
@@ -85,4 +90,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/connections/{connection}/upload-tasks/{task}/resume', [CloudUploadTaskController::class, 'resume'])->name('connections.upload-tasks.resume');
     Route::delete('/connections/{connection}/upload-tasks/{task}', [CloudUploadTaskController::class, 'destroy'])->name('connections.upload-tasks.destroy');
     Route::post('/connections/{connection}/upload-tasks/{task}/chunks', [CloudUploadTaskChunkController::class, 'store'])->name('connections.upload-tasks.chunks.store');
+    Route::post('/connections/{connection}/upload-tasks/{task}/direct/init', [CloudUploadPresignController::class, 'init'])->name('connections.upload-tasks.direct.init');
+    Route::post('/connections/{connection}/upload-tasks/{task}/direct/part', [CloudUploadPresignController::class, 'part'])->name('connections.upload-tasks.direct.part');
+    Route::post('/connections/{connection}/upload-tasks/{task}/direct/parts/{partNumber}/done', [CloudUploadDirectCompleteController::class, 'partDone'])->name('connections.upload-tasks.direct.parts.done');
+    Route::post('/connections/{connection}/upload-tasks/{task}/direct/complete', [CloudUploadDirectCompleteController::class, 'complete'])->name('connections.upload-tasks.direct.complete');
+    Route::delete('/connections/{connection}/upload-tasks/{task}/direct/abort', [CloudUploadDirectCompleteController::class, 'abort'])->name('connections.upload-tasks.direct.abort');
 });

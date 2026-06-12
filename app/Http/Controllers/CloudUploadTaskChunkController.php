@@ -25,6 +25,12 @@ class CloudUploadTaskChunkController extends Controller
         abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
         abort_if(! $task->type->is(CloudTaskType::Upload()), 404);
 
+        if (($task->payload['upload_mode'] ?? 'backend') === 'direct') {
+            throw ValidationException::withMessages([
+                'chunk' => 'This upload task uses direct upload and does not accept backend chunks.',
+            ]);
+        }
+
         if (! $task->status->in([CloudTaskStatus::Pending(), CloudTaskStatus::Uploading(), CloudTaskStatus::Paused()])) {
             throw ValidationException::withMessages([
                 'chunk' => 'This upload task can no longer receive chunks.',

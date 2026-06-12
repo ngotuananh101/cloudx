@@ -62,8 +62,23 @@ class UploadCloudTaskFileJob implements ShouldQueue
 
         try {
             $payload = $task->payload;
-            $totalChunks = (int) ($payload['total_chunks'] ?? 0);
             $filename = (string) ($payload['filename'] ?? $task->name);
+            $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
+
+            if (($payload['upload_mode'] ?? 'backend') === 'direct') {
+                $task->forceFill([
+                    'status' => CloudTaskStatus::Completed(),
+                    'result' => ['path' => $targetPath],
+                    'completed_at' => now(),
+                ])->save();
+                $broadcaster->broadcastStatus($task);
+                $cache->flushFolder($task->connection, $task->target_path);
+                $cache->flushQuota($task->connection);
+
+                return;
+            }
+
+            $totalChunks = (int) ($payload['total_chunks'] ?? 0);
 
             if ($totalChunks < 1 || $filename === '') {
                 throw new RuntimeException('Upload task payload is invalid.');
@@ -73,7 +88,6 @@ class UploadCloudTaskFileJob implements ShouldQueue
                 throw new RuntimeException('Upload task is missing chunks.');
             }
 
-            $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
             $tempPath = $this->mergedTempPath($task);
             $tempDisk = Storage::disk($this->tempDiskName());
             $stream = fopen('php://temp', 'w+');

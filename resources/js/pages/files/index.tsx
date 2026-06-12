@@ -16,7 +16,7 @@ import { encodeCloudPath } from '@/lib/cloud-path';
 import { destroy as clearCache } from '@/routes/cloud-connections/cache';
 import connections from '@/routes/connections';
 import { index as storageIndex } from '@/routes/storage';
-import type { CloudConnection, CloudFile } from '@/types/cloud';
+import type { CloudConnection, CloudFile, UploadMode } from '@/types/cloud';
 
 interface FileBrowserProps {
     connection: CloudConnection;
@@ -86,6 +86,18 @@ export default function FileBrowser({
         router.reload({ only: ['files', 'connection'] });
     };
 
+    const chooseUploadMode = (): UploadMode => {
+        if (connection.provider_value !== 4) {
+            return 'backend';
+        }
+
+        return window.confirm(
+            'Use direct upload to S3? Click OK for direct upload, Cancel for backend upload.',
+        )
+            ? 'direct'
+            : 'backend';
+    };
+
     const handleUploadFiles = (event: ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(event.target.files || []);
         event.target.value = '';
@@ -97,6 +109,7 @@ export default function FileBrowser({
         uploadManager.enqueue(selectedFiles, {
             connectionId: connection.id,
             path: decodedPath,
+            uploadMode: chooseUploadMode(),
         });
     };
 

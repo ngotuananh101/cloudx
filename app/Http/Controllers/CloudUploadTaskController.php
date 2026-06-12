@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\CloudProvider;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Models\CloudConnection;
@@ -42,6 +43,7 @@ class CloudUploadTaskController extends Controller
             'mime_type' => ['nullable', 'string', 'max:255'],
             'size' => ['required', 'integer', 'min:1', 'max:'.config('cloud-storage.uploads.max_file_size')],
             'chunk_size' => ['required', 'integer', 'min:1024', 'max:'.config('cloud-storage.uploads.chunk_size')],
+            'upload_mode' => ['nullable', 'string', 'in:backend,direct'],
         ]);
 
         $filename = trim((string) $validated['filename']);
@@ -55,6 +57,13 @@ class CloudUploadTaskController extends Controller
         $size = (int) $validated['size'];
         $chunkSize = (int) $validated['chunk_size'];
         $totalChunks = (int) ceil($size / $chunkSize);
+        $uploadMode = (string) ($validated['upload_mode'] ?? 'backend');
+
+        if ($uploadMode === 'direct' && ! $connection->provider->is(CloudProvider::AWS_S3)) {
+            throw ValidationException::withMessages([
+                'upload_mode' => 'Direct upload is only available for S3 connections.',
+            ]);
+        }
 
         $task = CloudTask::query()->create([
             'user_id' => $request->user()->id,
@@ -70,6 +79,7 @@ class CloudUploadTaskController extends Controller
                 'chunk_size' => $chunkSize,
                 'total_chunks' => $totalChunks,
                 'uploaded_chunks_count' => 0,
+                'upload_mode' => $uploadMode,
             ],
         ]);
 

@@ -80,6 +80,7 @@ class CloudConnection extends Model
             CloudProvider::GOOGLE_DRIVE,
             CloudProvider::ONEDRIVE,
             CloudProvider::DROPBOX,
+            CloudProvider::AWS_S3,
             CloudProvider::FTP,
             CloudProvider::SFTP,
         ], true);
@@ -88,6 +89,7 @@ class CloudConnection extends Model
     public function canEditConnection(): bool
     {
         return in_array($this->provider->value, [
+            CloudProvider::AWS_S3,
             CloudProvider::FTP,
             CloudProvider::SFTP,
         ], true);

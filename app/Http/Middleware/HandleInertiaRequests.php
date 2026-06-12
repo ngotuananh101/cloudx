@@ -66,6 +66,12 @@ class HandleInertiaRequests extends Middleware
                                     ->all();
                             }
 
+                            if ($connection->provider->is(CloudProvider::AWS_S3)) {
+                                $payload['s3_config'] = collect($connection->credentials)
+                                    ->except(['secret_access_key', 'session_token'])
+                                    ->all();
+                            }
+
                             return $payload;
                         }),
                 ] : null,

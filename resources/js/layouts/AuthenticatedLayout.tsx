@@ -20,6 +20,7 @@ import ConnectionNavItem from '@/components/cloud/ConnectionNavItem';
 import DeleteConnectionDialog from '@/components/cloud/DeleteConnectionDialog';
 import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialog';
 import EditFtpConnectionDialog from '@/components/cloud/EditFtpConnectionDialog';
+import EditS3ConnectionDialog from '@/components/cloud/EditS3ConnectionDialog';
 import EditSftpConnectionDialog from '@/components/cloud/EditSftpConnectionDialog';
 import UploadProgressPanel from '@/components/files/UploadProgressPanel';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -368,6 +369,10 @@ export default function AuthenticatedLayout({
             />
             <EditFtpConnectionDialog
                 connection={connectionBeingEdited?.provider_value === 5 ? connectionBeingEdited : null}
+                onClose={() => setConnectionBeingEdited(null)}
+            />
+            <EditS3ConnectionDialog
+                connection={connectionBeingEdited?.provider_value === 4 ? connectionBeingEdited : null}
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <EditSftpConnectionDialog

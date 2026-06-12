@@ -9,6 +9,7 @@ use App\Services\CloudStorage\Connectors\DropboxConnector;
 use App\Services\CloudStorage\Connectors\FtpConnector;
 use App\Services\CloudStorage\Connectors\GoogleDriveConnector;
 use App\Services\CloudStorage\Connectors\OneDriveConnector;
+use App\Services\CloudStorage\Connectors\S3Connector;
 use App\Services\CloudStorage\Connectors\SftpConnector;
 use App\Services\CloudStorage\Connectors\TelegramConnector;
 use App\Services\OneDrive\OneDriveAdapter;
@@ -50,6 +51,7 @@ class CloudStorageServiceProvider extends ServiceProvider
                 $app->make(GoogleDriveConnector::class),
                 $app->make(OneDriveConnector::class),
                 $app->make(DropboxConnector::class),
+                $app->make(S3Connector::class),
                 $app->make(FtpConnector::class),
                 $app->make(SftpConnector::class),
                 $app->make(TelegramConnector::class),

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import FtpConnectionForm from '@/components/cloud/FtpConnectionForm';
 import ProviderOption from '@/components/cloud/ProviderOption';
+import S3ConnectionForm from '@/components/cloud/S3ConnectionForm';
 import SftpConnectionForm from '@/components/cloud/SftpConnectionForm';
 import TelegramConnectionForm from '@/components/cloud/TelegramConnectionForm';
 import {
@@ -25,10 +26,11 @@ export default function ConnectStorageModal({
         useState<AvailableProvider | null>(null);
 
     const isFtpSelected = selectedCredentialsProvider?.key === 'ftp';
+    const isS3Selected = selectedCredentialsProvider?.key === 'aws-s3';
     const isSftpSelected = selectedCredentialsProvider?.key === 'sftp';
     const isTelegramSelected = selectedCredentialsProvider?.key === 'telegram';
     const isCredentialsSelected =
-        isFtpSelected || isSftpSelected || isTelegramSelected;
+        isFtpSelected || isS3Selected || isSftpSelected || isTelegramSelected;
 
     return (
         <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
@@ -37,12 +39,14 @@ export default function ConnectStorageModal({
                     <DialogHeader className="text-left">
                         <DialogTitle className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
                             {isFtpSelected && 'Connect FTP'}
+                            {isS3Selected && 'Connect S3'}
                             {isSftpSelected && 'Connect SFTP'}
                             {isTelegramSelected && 'Connect Telegram'}
                             {!isCredentialsSelected && 'Connect Storage'}
                         </DialogTitle>
                         <DialogDescription className="mt-1 text-xs text-gray-400 dark:text-gray-500">
                             {isFtpSelected && 'Enter your FTP server credentials to test and link the connection'}
+                            {isS3Selected && 'Enter your S3 or S3-compatible storage credentials to test and link the connection'}
                             {isSftpSelected && 'Enter your SFTP server credentials to test and link the connection'}
                             {isTelegramSelected && 'Connect your Telegram account to store files in Saved Messages'}
                             {!isCredentialsSelected && 'Select a cloud storage provider to link your account'}
@@ -52,6 +56,13 @@ export default function ConnectStorageModal({
 
                 {isFtpSelected && (
                     <FtpConnectionForm
+                        onCancel={() => setSelectedCredentialsProvider(null)}
+                        onSuccess={onClose}
+                    />
+                )}
+
+                {isS3Selected && (
+                    <S3ConnectionForm
                         onCancel={() => setSelectedCredentialsProvider(null)}
                         onSuccess={onClose}
                     />

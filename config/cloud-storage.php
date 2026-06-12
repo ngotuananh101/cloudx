@@ -12,4 +12,8 @@ return [
         'temp_disk' => env('CLOUD_UPLOAD_TEMP_DISK', 'local'),
         'temp_path' => env('CLOUD_UPLOAD_TEMP_PATH', 'cloud-task-uploads'),
     ],
+
+    'direct_upload' => [
+        'part_ttl_seconds' => (int) env('CLOUD_DIRECT_UPLOAD_PART_TTL_SECONDS', 900),
+    ],
 ];

@@ -49,6 +49,17 @@ export interface FtpConnectionConfig {
     timestamps_on_unix_listings_enabled?: boolean;
 }
 
+export interface S3ConnectionConfig {
+    provider_preset?: string;
+    access_key_id?: string;
+    region?: string;
+    bucket?: string;
+    endpoint?: string | null;
+    use_path_style_endpoint?: boolean;
+    root?: string;
+    cdn_url?: string | null;
+}
+
 export interface SftpConnectionConfig {
     host?: string;
     port?: number;
@@ -58,7 +69,6 @@ export interface SftpConnectionConfig {
     timeout?: number;
     maxTries?: number;
 }
-
 
 export interface TelegramConnectionConfig {
     session_id?: string;
@@ -82,27 +92,12 @@ export interface CloudConnection {
     capabilities?: ProviderCapabilities;
     actions?: CloudConnectionActions;
     ftp_config?: FtpConnectionConfig;
+    s3_config?: S3ConnectionConfig;
     sftp_config?: SftpConnectionConfig;
     telegram_config?: TelegramConnectionConfig;
 }
 
-export interface CloudFile {
-    id: string | number;
-    path: string;
-    name: string;
-    type:
-        | 'folder'
-        | 'document'
-        | 'image'
-        | 'code'
-        | 'archive'
-        | 'video'
-        | 'audio'
-        | 'other';
-    size: number;
-    updatedAt: string;
-    isDirectory: boolean;
-}
+export type UploadMode = 'backend' | 'direct';
 
 export type UploadTaskStatus =
     | 'pending'
@@ -121,6 +116,12 @@ export interface CloudUploadTaskPayload {
     chunk_size: number;
     total_chunks: number;
     uploaded_chunks_count: number;
+    upload_mode?: UploadMode;
+    s3_multipart?: {
+        upload_id: string;
+        key: string;
+        parts: Array<{ ETag: string; PartNumber: number }>;
+    };
     last_broadcast_progress?: number;
 }
 
@@ -147,6 +148,7 @@ export interface UploadQueueItem {
     file: File;
     connectionId: number;
     path: string;
+    uploadMode?: UploadMode;
     task?: CloudUploadTask;
     progress: number;
     status: UploadTaskStatus;

@@ -12,7 +12,7 @@ import type { ReactNode } from 'react';
 import { requestJson } from '@/lib/request-json';
 import connections from '@/routes/connections';
 import type { User } from '@/types';
-import type { CloudUploadTask, UploadQueueItem } from '@/types/cloud';
+import type { CloudUploadTask, UploadMode, UploadQueueItem } from '@/types/cloud';
 
 interface FileBrowserLocation {
     connectionId: number;
@@ -22,6 +22,7 @@ interface FileBrowserLocation {
 interface UploadTarget {
     connectionId: number;
     path: string;
+    uploadMode?: UploadMode;
 }
 
 interface UploadManagerContextValue {
@@ -42,7 +43,7 @@ const UploadManagerContext = createContext<UploadManagerContextValue | null>(
 );
 
 const getQueueKey = (file: File, target: UploadTarget) =>
-    `${target.connectionId}-${target.path}-${file.name}-${file.size}-${file.lastModified}`;
+    `${target.connectionId}-${target.path}-${file.name}-${file.size}-${file.lastModified}-${target.uploadMode ?? 'backend'}`;
 
 export function UploadManagerProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<UploadQueueItem[]>([]);
@@ -75,6 +76,155 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    const uploadDirectFile = useCallback(
+        async (
+            key: string,
+            file: File,
+            target: UploadTarget,
+            task: CloudUploadTask,
+        ) => {
+            const initialized = await requestJson<{
+                task: CloudUploadTask;
+                multipart: { upload_id: string; key: string; parts: Array<{ ETag: string; PartNumber: number }> };
+            }>(
+                `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/init`,
+                { method: 'POST' },
+            );
+
+            let latestTask = initialized.task;
+            updateItem(key, { task: latestTask, uploadMode: 'direct' });
+
+            const chunkSize = latestTask.payload.chunk_size;
+
+            for (let index = 0; index < latestTask.payload.total_chunks; index++) {
+                if (pausedUploads.current.has(key)) {
+                    updateItem(key, { status: 'paused' });
+
+                    return;
+                }
+
+                const partNumber = index + 1;
+                const part = await requestJson<{ url: string }>(
+                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/part`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ part_number: partNumber }),
+                    },
+                );
+
+                const response = await fetch(part.url, {
+                    method: 'PUT',
+                    body: file.slice(
+                        index * chunkSize,
+                        Math.min(file.size, (index + 1) * chunkSize),
+                    ),
+                });
+
+                if (!response.ok) {
+                    throw new Error('Direct upload failed.');
+                }
+
+                const etag = response.headers.get('etag');
+
+                if (!etag) {
+                    throw new Error('Direct upload did not return an ETag.');
+                }
+
+                latestTask = await requestJson<CloudUploadTask>(
+                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/parts/${partNumber}/done`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ etag }),
+                    },
+                );
+
+                updateItem(key, {
+                    task: latestTask,
+                    progress: Math.round(
+                        (latestTask.payload.uploaded_chunks_count /
+                            latestTask.payload.total_chunks) *
+                            100,
+                    ),
+                    status: 'uploading',
+                });
+            }
+
+            latestTask = await requestJson<CloudUploadTask>(
+                `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/complete`,
+                { method: 'POST' },
+            );
+
+            updateItem(key, {
+                task: latestTask,
+                progress: 100,
+                status: 'queued',
+            });
+        },
+        [updateItem],
+    );
+
+    const uploadBackendFile = useCallback(
+        async (
+            key: string,
+            file: File,
+            target: UploadTarget,
+            task: CloudUploadTask,
+        ) => {
+            const chunkSize = task.payload.chunk_size;
+            const uploadedChunks = new Set(task.uploaded_chunks || []);
+
+            for (let index = 0; index < task.payload.total_chunks; index++) {
+                if (pausedUploads.current.has(key)) {
+                    updateItem(key, { status: 'paused' });
+
+                    return;
+                }
+
+                if (uploadedChunks.has(index)) {
+                    continue;
+                }
+
+                const formData = new FormData();
+                formData.append(
+                    'chunk',
+                    file.slice(
+                        index * chunkSize,
+                        Math.min(file.size, (index + 1) * chunkSize),
+                    ),
+                    file.name,
+                );
+                formData.append('index', String(index));
+
+                const updatedTask = await requestJson<CloudUploadTask>(
+                    connections.uploadTasks.chunks.store({
+                        connection: target.connectionId,
+                        task: task.id,
+                    }).url,
+                    {
+                        method: 'POST',
+                        body: formData,
+                    },
+                );
+
+                updateItem(key, {
+                    task: updatedTask,
+                    progress: Math.round(
+                        (updatedTask.payload.uploaded_chunks_count /
+                            updatedTask.payload.total_chunks) *
+                            100,
+                    ),
+                    status:
+                        updatedTask.status_value >= 4 ? 'queued' : 'uploading',
+                });
+            }
+
+            updateItem(key, { status: 'queued', progress: 100 });
+        },
+        [updateItem],
+    );
+
     const uploadFile = useCallback(
         async (
             key: string,
@@ -89,6 +239,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                     error: undefined,
                 });
 
+                const uploadMode = target.uploadMode ?? existingTask?.payload.upload_mode ?? 'backend';
                 const task =
                     existingTask ||
                     (await requestJson<CloudUploadTask>(
@@ -107,67 +258,19 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                                     5 * 1024 * 1024,
                                     Math.max(1024, file.size),
                                 ),
+                                upload_mode: uploadMode,
                             }),
                         },
                     ));
 
-                updateItem(key, { task });
+                updateItem(key, { task, uploadMode });
 
-                const chunkSize = task.payload.chunk_size;
-                const uploadedChunks = new Set(task.uploaded_chunks || []);
-
-                for (
-                    let index = 0;
-                    index < task.payload.total_chunks;
-                    index++
-                ) {
-                    if (pausedUploads.current.has(key)) {
-                        updateItem(key, { status: 'paused' });
-
-                        return;
-                    }
-
-                    if (uploadedChunks.has(index)) {
-                        continue;
-                    }
-
-                    const formData = new FormData();
-                    formData.append(
-                        'chunk',
-                        file.slice(
-                            index * chunkSize,
-                            Math.min(file.size, (index + 1) * chunkSize),
-                        ),
-                        file.name,
-                    );
-                    formData.append('index', String(index));
-
-                    const updatedTask = await requestJson<CloudUploadTask>(
-                        connections.uploadTasks.chunks.store({
-                            connection: target.connectionId,
-                            task: task.id,
-                        }).url,
-                        {
-                            method: 'POST',
-                            body: formData,
-                        },
-                    );
-
-                    updateItem(key, {
-                        task: updatedTask,
-                        progress: Math.round(
-                            (updatedTask.payload.uploaded_chunks_count /
-                                updatedTask.payload.total_chunks) *
-                                100,
-                        ),
-                        status:
-                            updatedTask.status_value >= 4
-                                ? 'queued'
-                                : 'uploading',
-                    });
+                if (uploadMode === 'direct') {
+                    await uploadDirectFile(key, file, target, task);
+                } else {
+                    await uploadBackendFile(key, file, target, task);
                 }
 
-                updateItem(key, { status: 'queued', progress: 100 });
                 refreshFilesIfActive(task);
             } catch (error) {
                 updateItem(key, {
@@ -179,7 +282,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 });
             }
         },
-        [refreshFilesIfActive, updateItem],
+        [refreshFilesIfActive, updateItem, uploadBackendFile, uploadDirectFile],
     );
 
     const enqueue = useCallback(
@@ -189,6 +292,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 file,
                 connectionId: target.connectionId,
                 path: target.path,
+                uploadMode: target.uploadMode,
                 progress: 0,
                 status: 'pending' as const,
             }));
@@ -239,7 +343,11 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             void uploadFile(
                 item.key,
                 item.file,
-                { connectionId: item.connectionId, path: item.path },
+                {
+                    connectionId: item.connectionId,
+                    path: item.path,
+                    uploadMode: item.uploadMode,
+                },
                 task,
             );
         },
@@ -251,13 +359,20 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             pausedUploads.current.add(item.key);
 
             if (item.task) {
-                await requestJson<CloudUploadTask>(
-                    connections.uploadTasks.destroy({
-                        connection: item.connectionId,
-                        task: item.task.id,
-                    }).url,
-                    { method: 'DELETE' },
-                );
+                if (item.uploadMode === 'direct') {
+                    await requestJson<CloudUploadTask>(
+                        `/connections/${item.connectionId}/upload-tasks/${item.task.id}/direct/abort`,
+                        { method: 'DELETE' },
+                    );
+                } else {
+                    await requestJson<CloudUploadTask>(
+                        connections.uploadTasks.destroy({
+                            connection: item.connectionId,
+                            task: item.task.id,
+                        }).url,
+                        { method: 'DELETE' },
+                    );
+                }
             }
 
             updateItem(item.key, { status: 'cancelled' });
@@ -271,8 +386,12 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             void uploadFile(
                 item.key,
                 item.file,
-                { connectionId: item.connectionId, path: item.path },
-                item.task,
+                {
+                    connectionId: item.connectionId,
+                    path: item.path,
+                    uploadMode: item.uploadMode,
+                },
+                undefined,
             );
         },
         [uploadFile],
@@ -285,8 +404,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             setItems((currentItems) =>
                 currentItems.filter((i) => i.key !== item.key),
             );
-            
-            // If we remove the last item, close the panel
+
             setItems((currentItems) => {
                 if (currentItems.length === 0) {
                     setIsPanelVisible(false);
