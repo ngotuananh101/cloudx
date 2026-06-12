@@ -7,6 +7,7 @@ import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import FilePreviewModal from '@/components/files/FilePreviewModal';
 import MoveItemModal from '@/components/files/MoveItemModal';
 import ShareItemModal from '@/components/files/ShareItemModal';
+import { UploadModeDialog } from '@/components/files/UploadModeDialog';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,6 +38,8 @@ export default function FileBrowser({
     const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
     const [itemToMove, setItemToMove] = useState<CloudFile | null>(null);
     const [itemToShare, setItemToShare] = useState<CloudFile | null>(null);
+    const [pendingUploadFiles, setPendingUploadFiles] = useState<File[]>([]);
+    const [isUploadModeDialogOpen, setIsUploadModeDialogOpen] = useState(false);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -86,18 +89,6 @@ export default function FileBrowser({
         router.reload({ only: ['files', 'connection'] });
     };
 
-    const chooseUploadMode = (): UploadMode => {
-        if (connection.provider_value !== 4) {
-            return 'backend';
-        }
-
-        return window.confirm(
-            'Use direct upload to S3? Click OK for direct upload, Cancel for backend upload.',
-        )
-            ? 'direct'
-            : 'backend';
-    };
-
     const handleUploadFiles = (event: ChangeEvent<HTMLInputElement>) => {
         const selectedFiles = Array.from(event.target.files || []);
         event.target.value = '';
@@ -106,11 +97,28 @@ export default function FileBrowser({
             return;
         }
 
-        uploadManager.enqueue(selectedFiles, {
+        setPendingUploadFiles(selectedFiles);
+
+        if (connection.provider_value === 4) {
+            setIsUploadModeDialogOpen(true);
+        } else {
+            uploadManager.enqueue(selectedFiles, {
+                connectionId: connection.id,
+                path: decodedPath,
+                uploadMode: 'backend',
+            });
+            setPendingUploadFiles([]);
+        }
+    };
+
+    const handleUploadModeSelect = (mode: UploadMode) => {
+        uploadManager.enqueue(pendingUploadFiles, {
             connectionId: connection.id,
             path: decodedPath,
-            uploadMode: chooseUploadMode(),
+            uploadMode: mode,
         });
+        setPendingUploadFiles([]);
+        setIsUploadModeDialogOpen(false);
     };
 
     const createFolder = (event: { preventDefault: () => void }) => {
@@ -269,6 +277,15 @@ export default function FileBrowser({
                     </form>
                 </div>
             )}
+
+            <UploadModeDialog
+                isOpen={isUploadModeDialogOpen}
+                onClose={() => {
+                    setIsUploadModeDialogOpen(false);
+                    setPendingUploadFiles([]);
+                }}
+                onSelect={handleUploadModeSelect}
+            />
 
             <div className="grid grid-cols-1 gap-6">
                 <div className="min-w-0 space-y-4">
