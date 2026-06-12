@@ -99,7 +99,8 @@ export default function FileBrowser({
 
         setPendingUploadFiles(selectedFiles);
 
-        if (connection.provider_value === 4) {
+        // provider is the enum integer value (4 = AWS_S3)
+        if (connection.provider === 4) {
             setIsUploadModeDialogOpen(true);
         } else {
             uploadManager.enqueue(selectedFiles, {
