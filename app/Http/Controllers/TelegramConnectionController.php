@@ -127,7 +127,7 @@ class TelegramConnectionController extends Controller
         ]);
     }
 
-    public function sync(Request $request, CloudConnection $connection): JsonResponse
+    public function sync(Request $request, CloudConnection $connection): \Illuminate\Http\RedirectResponse
     {
         if ($connection->user_id !== $request->user()->id) {
             abort(403);
@@ -148,17 +148,17 @@ class TelegramConnectionController extends Controller
             $syncedCount = $client->sync();
         } catch (RuntimeException $e) {
             report($e);
-            return response()->json([
-                'success' => false,
-                'message' => 'Could not sync with Telegram service.',
-            ], 422);
+
+            return redirect()->back()->withErrors([
+                'telegram' => 'Could not sync with Telegram service.',
+            ]);
         }
 
         $connection->update(['last_synced_at' => now()]);
 
-        return response()->json([
-            'success' => true,
-            'synced' => $syncedCount,
-        ]);
+        return redirect()->back()->with(
+            'success',
+            "Synced {$syncedCount} item(s) from Telegram.",
+        );
     }
 }
