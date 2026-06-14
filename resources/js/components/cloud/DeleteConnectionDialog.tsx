@@ -48,7 +48,7 @@ export default function DeleteConnectionDialog({
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction
-                        className="bg-red-600 text-white hover:bg-red-700"
+                        className="bg-destructive text-white hover:bg-destructive/90"
                         onClick={deleteConnection}
                     >
                         Delete connection

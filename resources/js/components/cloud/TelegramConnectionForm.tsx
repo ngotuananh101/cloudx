@@ -90,14 +90,14 @@ export default function TelegramConnectionForm({
     if (step === 'done') {
         return (
             <div className="space-y-6 text-center py-8">
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                    <svg className="h-8 w-8 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                    <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
                 <div>
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-gray-100">Telegram Connected!</h4>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    <h4 className="text-lg font-bold text-foreground">Telegram Connected!</h4>
+                    <p className="mt-1 text-sm text-muted-foreground">
                         &quot;{name}&quot; is ready to use.
                         {syncedCount > 0 && (
                             <span className="mt-1 block">{syncedCount} files synced from Saved Messages.</span>
@@ -108,7 +108,7 @@ export default function TelegramConnectionForm({
                     <button
                         type="button"
                         onClick={onSuccess}
-                        className="rounded-md bg-blue-600 px-6 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700"
+                        className="rounded-md bg-primary px-6 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90"
                     >
                         Done
                     </button>
@@ -118,12 +118,12 @@ export default function TelegramConnectionForm({
     }
 
     const stepBar = (position: number, currentStep: number, highlight: boolean = false) => {
-        let color = 'bg-gray-200 dark:bg-gray-700';
+        let color = 'bg-muted';
 
         if (highlight) {
-            color = 'bg-amber-500';
+            color = 'bg-muted0';
         } else if (currentStep <= position) {
-            color = 'bg-blue-600';
+            color = 'bg-primary';
         }
 
         return <div className={`flex-1 h-1 rounded-full transition-colors ${color}`} />;
@@ -158,7 +158,7 @@ return [2, 3, 3];
 
             {/* Error message */}
             {error && (
-                <div className="rounded-xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-700 dark:text-red-400">
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                     {error}
                 </div>
             )}
@@ -167,8 +167,8 @@ return [2, 3, 3];
             {step === 'phone' && (
                 <form onSubmit={sendCode} className="space-y-4">
                     <div>
-                        <label htmlFor="tg-name" className="text-xs font-bold text-gray-600 dark:text-gray-400">
-                            Connection Name <span className="text-red-500">*</span>
+                        <label htmlFor="tg-name" className="text-xs font-bold text-foreground">
+                            Connection Name <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-name"
@@ -179,8 +179,8 @@ return [2, 3, 3];
                         />
                     </div>
                     <div>
-                        <label htmlFor="tg-phone" className="text-xs font-bold text-gray-600 dark:text-gray-400">
-                            Phone Number <span className="text-red-500">*</span>
+                        <label htmlFor="tg-phone" className="text-xs font-bold text-foreground">
+                            Phone Number <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-phone"
@@ -189,21 +189,21 @@ return [2, 3, 3];
                             className={inputClassName}
                             placeholder="+84 912 345 678"
                         />
-                        <p className="mt-1 text-[11px] text-gray-400 dark:text-gray-500">Use international format with country code</p>
+                        <p className="mt-1 text-[11px] text-muted-foreground">Use international format with country code</p>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <button
                             type="button"
                             onClick={onCancel}
                             disabled={loading}
-                            className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+                            className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={loading}
-                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                            className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
                         >
                             {loading ? 'Sending code...' : 'Send Code →'}
                         </button>
@@ -214,23 +214,23 @@ return [2, 3, 3];
             {/* Step 2: Code */}
             {step === 'code' && (
                 <form onSubmit={(e) => verify(e)} className="space-y-4">
-                    <div className="rounded-xl border border-blue-200 dark:border-blue-900/50 bg-blue-50 dark:bg-blue-900/20 px-4 py-3 text-sm text-blue-700 dark:text-blue-400">
+                    <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
                         💬 Code sent to your Telegram app. Enter it below.
                     </div>
                     <div>
-                        <label htmlFor="tg-phone-display" className="text-xs font-bold text-gray-600 dark:text-gray-400">
+                        <label htmlFor="tg-phone-display" className="text-xs font-bold text-foreground">
                             Phone Number
                         </label>
                         <div
                             id="tg-phone-display"
-                            className="h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-3 text-sm font-medium text-gray-500 dark:text-gray-400 flex items-center"
+                            className="h-10 w-full rounded-md border border-border bg-muted/50 px-3 text-sm font-medium text-muted-foreground flex items-center"
                         >
                             {phone}
                         </div>
                     </div>
                     <div>
-                        <label htmlFor="tg-code" className="text-xs font-bold text-gray-600 dark:text-gray-400">
-                            Verification Code <span className="text-red-500">*</span>
+                        <label htmlFor="tg-code" className="text-xs font-bold text-foreground">
+                            Verification Code <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-code"
@@ -247,14 +247,14 @@ return [2, 3, 3];
                             type="button"
                             onClick={() => setStep('phone')}
                             disabled={loading}
-                            className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+                            className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
                         >
                             ← Back
                         </button>
                         <button
                             type="submit"
                             disabled={loading || code.length < 3}
-                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                            className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
                         >
                             {loading ? 'Verifying...' : 'Verify'}
                         </button>
@@ -265,12 +265,12 @@ return [2, 3, 3];
             {/* Step 2b: Password (2FA) */}
             {step === 'password' && (
                 <form onSubmit={(e) => verify(e, true)} className="space-y-4">
-                    <div className="rounded-xl border border-amber-200 dark:border-amber-900/50 bg-amber-50 dark:bg-amber-900/20 px-4 py-3 text-sm text-amber-700 dark:text-amber-400">
+                    <div className="rounded-xl border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
                         🔒 Your Telegram account has two-factor authentication enabled. Enter your 2FA password.
                     </div>
                     <div>
-                        <label htmlFor="tg-password" className="text-xs font-bold text-gray-600 dark:text-gray-400">
-                            2FA Password <span className="text-red-500">*</span>
+                        <label htmlFor="tg-password" className="text-xs font-bold text-foreground">
+                            2FA Password <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-password"
@@ -286,14 +286,14 @@ return [2, 3, 3];
                             type="button"
                             onClick={() => setStep('code')}
                             disabled={loading}
-                            className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+                            className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
                         >
                             ← Back
                         </button>
                         <button
                             type="submit"
                             disabled={loading || !password}
-                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                            className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
                         >
                             {loading ? 'Verifying...' : 'Verify'}
                         </button>
@@ -305,4 +305,4 @@ return [2, 3, 3];
 }
 
 const inputClassName =
-    'h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50';
+    'h-10 w-full rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50';

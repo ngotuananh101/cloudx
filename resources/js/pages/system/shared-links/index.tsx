@@ -151,26 +151,26 @@ return;
 
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
                 <div>
-                    <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                    <h1 className="text-2xl font-extrabold tracking-tight text-foreground">
                         Shared Links
                     </h1>
-                    <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                    <p className="mt-1 text-sm text-muted-foreground">
                         Manage all the links you have shared across your cloud connections.
                     </p>
                 </div>
             </div>
 
-            <Card className="mb-6 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm gap-0">
-                <CardHeader className="border-b border-gray-100 dark:border-gray-800 pb-4">
-                    <CardTitle className="text-[10px] font-extrabold tracking-widest uppercase text-gray-400 dark:text-gray-500 flex items-center gap-2">
-                        <Filter className="h-4 w-4 text-gray-500" />
+            <Card className="mb-6 rounded-2xl border border-border bg-card shadow-sm gap-0">
+                <CardHeader className="border-b border-border pb-4">
+                    <CardTitle className="text-[10px] font-extrabold tracking-widest uppercase text-muted-foreground flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-muted-foreground" />
                         Filter Links
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 pb-0">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Connection</label>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Connection</label>
                             <Select value={filters.connection} onValueChange={(v) => setFilters({...filters, connection: v})}>
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue placeholder="All Connections" />
@@ -184,7 +184,7 @@ return;
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Access Type</label>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Access Type</label>
                             <Select value={filters.access_type} onValueChange={(v) => setFilters({...filters, access_type: v})}>
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue placeholder="All Types" />
@@ -197,7 +197,7 @@ return;
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Expires</label>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Expires</label>
                             <Select value={filters.expires} onValueChange={(v) => setFilters({...filters, expires: v})}>
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue placeholder="Any Time" />
@@ -210,38 +210,38 @@ return;
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">File/Folder Name</label>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">File/Folder Name</label>
                             <Input value={filters.name} onChange={(e) => setFilters({...filters, name: e.target.value})} placeholder="Search name..." className="h-9" />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">URL</label>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">URL</label>
                             <Input value={filters.url} onChange={(e) => setFilters({...filters, url: e.target.value})} placeholder="Search URL..." className="h-9" />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-gray-500 uppercase">Created Date</label>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Created Date</label>
                             <Input value={filters.created_date} onChange={(e) => setFilters({...filters, created_date: e.target.value})} type="date" className="h-9" />
                         </div>
                     </div>
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                        <Button onClick={clearFilters} variant="ghost" size="sm" className="h-9 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100">
+                        <Button onClick={clearFilters} variant="ghost" size="sm" className="h-9 text-muted-foreground hover:text-foreground">
                             Clear Filters
                         </Button>
-                        <Button onClick={applyFilters} size="sm" className="h-9 bg-brand text-white hover:bg-[#a0181e] dark:bg-brand dark:hover:bg-[#a0181e]">
+                        <Button onClick={applyFilters} size="sm" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90">
                             Apply Filters
                         </Button>
                     </div>
                 </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm pt-0 overflow-hidden">
+            <Card className="rounded-2xl border border-border bg-card shadow-sm pt-0 overflow-hidden">
                 <CardContent className="p-0">
                     {shares.data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="rounded-full bg-gray-50 dark:bg-gray-800 p-4 mb-4">
-                                <LinkIcon className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                            <div className="rounded-full bg-muted p-4 mb-4">
+                                <LinkIcon className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="text-lg font-extrabold text-gray-900 dark:text-gray-100">No shared links</h3>
-                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            <h3 className="text-lg font-extrabold text-foreground">No shared links</h3>
+                            <p className="mt-2 text-sm text-muted-foreground">
                                 You haven't shared any files or folders yet.
                             </p>
                         </div>
@@ -249,7 +249,7 @@ return;
                         <div className="overflow-x-auto">
                             <table className="w-full min-w-215 text-left text-sm">
                                 <thead>
-                                    <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 text-[11px] font-extrabold tracking-wider text-gray-400 dark:text-gray-500">
+                                    <tr className="border-b border-border bg-muted/50 text-[11px] font-extrabold tracking-wider text-muted-foreground">
                                         <th className="px-5 py-3">File/Folder</th>
                                         <th className="px-5 py-3">Connection</th>
                                         <th className="px-5 py-3">Access Type</th>
@@ -264,9 +264,9 @@ return;
                                         const fullConnection = (userConnections || []).find((c: CloudConnection) => c.id === share.cloud_connection.id);
 
                                         return (
-                                            <tr key={share.id} className="border-b border-gray-100 dark:border-gray-800 last:border-b-0 hover:bg-gray-50/70 dark:hover:bg-gray-800/70">
+                                            <tr key={share.id} className="border-b border-border last:border-b-0 hover:bg-muted/70">
                                                 <td className="max-w-60 px-5 py-4">
-                                                    <div className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                    <div className="truncate text-sm font-medium text-foreground">
                                                         {share.name}
                                                     </div>
                                                 </td>
@@ -279,9 +279,9 @@ return;
                                                                 alt={fullConnection.provider}
                                                             />
                                                         ) : (
-                                                            <HardDrive className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" />
+                                                            <HardDrive className="h-4 w-4 shrink-0 text-muted-foreground" />
                                                         )}
-                                                        <div className="truncate text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                        <div className="truncate text-xs font-medium text-muted-foreground">
                                                             {share.cloud_connection.name}
                                                         </div>
                                                     </div>
@@ -289,24 +289,24 @@ return;
                                                 <td className="px-5 py-4">
                                                     <div className="flex items-center gap-1.5">
                                                         {share.type === 'public' ? (
-                                                            <Globe className="h-3.5 w-3.5 text-blue-500" />
+                                                            <Globe className="h-3.5 w-3.5 text-primary" />
                                                         ) : (
-                                                            <Lock className="h-3.5 w-3.5 text-amber-500" />
+                                                            <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                                                         )}
-                                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${share.type === 'public' ? 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400' : 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400'}`}>
+                                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${share.type === 'public' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
                                                             {share.type}
                                                         </span>
                                                     </div>
                                                 </td>
                                                 <td className="max-w-60 px-5 py-4">
-                                                    <div className="truncate text-xs text-gray-500 dark:text-gray-400">
+                                                    <div className="truncate text-xs text-muted-foreground">
                                                         {window.location.origin}/s/{share.uuid}
                                                     </div>
                                                 </td>
-                                                <td className="px-5 py-4 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                <td className="px-5 py-4 text-xs font-medium text-muted-foreground">
                                                     {new Date(share.created_at).toLocaleDateString()}
                                                 </td>
-                                                <td className="px-5 py-4 text-xs font-medium text-gray-500 dark:text-gray-400">
+                                                <td className="px-5 py-4 text-xs font-medium text-muted-foreground">
                                                     {share.expires_at ? new Date(share.expires_at).toLocaleDateString() : 'Never'}
                                                 </td>
                                                 <td className="px-5 py-4 text-right">
@@ -314,12 +314,12 @@ return;
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
+                                                            className="h-8 w-8 text-muted-foreground hover:text-primary"
                                                             onClick={() => handleCopy(share.id, share.uuid)}
                                                             title="Copy Link"
                                                         >
                                                             {copiedId === share.id ? (
-                                                                <Check className="h-4 w-4 text-emerald-500" />
+                                                                <Check className="h-4 w-4 text-primary" />
                                                             ) : (
                                                                 <Copy className="h-4 w-4" />
                                                             )}
@@ -327,7 +327,7 @@ return;
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
-                                                            className="h-8 w-8 text-gray-500 hover:text-red-600 dark:hover:text-red-400"
+                                                            className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                                             onClick={() => setShareToDelete(share)}
                                                             title="Delete Shared Link"
                                                         >
@@ -345,13 +345,13 @@ return;
 
                     {/* Pagination */}
                     {shares.last_page > 1 && (
-                        <div className="border-t border-gray-100 dark:border-gray-800 p-4 flex items-center justify-center gap-1">
+                        <div className="border-t border-border p-4 flex items-center justify-center gap-1">
                             {shares.links.map((link, i) => (
                                 <Button
                                     key={i}
                                     variant={link.active ? "default" : "outline"}
                                     size="sm"
-                                    className={`h-8 ${link.active ? 'bg-brand text-white hover:bg-[#a0181e] border-transparent' : 'text-gray-500 dark:text-gray-400'}`}
+                                    className={`h-8 ${link.active ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent' : 'text-muted-foreground'}`}
                                     disabled={!link.url}
                                     asChild
                                 >
@@ -368,16 +368,16 @@ return;
             </Card>
 
             <AlertDialog open={!!shareToDelete} onOpenChange={(open) => !open && setShareToDelete(null)}>
-                <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-xl">
+                <AlertDialogContent className="bg-card border-border rounded-xl">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-gray-900 dark:text-gray-100">Delete Shared Link?</AlertDialogTitle>
-                        <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
-                            Are you sure you want to delete the shared link for <strong className="text-gray-700 dark:text-gray-300">"{shareToDelete?.name}"</strong>?
+                        <AlertDialogTitle className="text-foreground">Delete Shared Link?</AlertDialogTitle>
+                        <AlertDialogDescription className="text-muted-foreground">
+                            Are you sure you want to delete the shared link for <strong className="text-foreground">"{shareToDelete?.name}"</strong>?
                             Anyone with this link will immediately lose access. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                        <AlertDialogCancel disabled={isDeleting} className="border-border bg-card text-foreground hover:bg-muted">
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
@@ -385,7 +385,7 @@ return;
                                 e.preventDefault();
                                 confirmDeleteShare();
                             }}
-                            className="bg-red-600 hover:bg-red-700 text-white border-0"
+                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0"
                             disabled={isDeleting}
                         >
                             {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

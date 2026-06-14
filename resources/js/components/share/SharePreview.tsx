@@ -23,14 +23,14 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
     };
 
     const NoRendererFallback = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-6 text-center dark:bg-gray-950">
-            <div className="mb-4 rounded-full bg-gray-100 p-4 dark:bg-gray-800">
-                <File className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center ">
+            <div className="mb-4 rounded-full bg-muted p-4">
+                <File className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h4 className="text-lg font-medium text-foreground">
                 Preview not supported
             </h4>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-sm text-muted-foreground">
                 This file type cannot be previewed in the browser.
             </p>
             <Button className="mt-6" onClick={handleDownload}>
@@ -40,9 +40,9 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
     );
 
     const LoadingRenderer = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-gray-50 p-6 text-center dark:bg-gray-950">
-            <Loader2 className="mb-4 h-8 w-8 animate-spin text-blue-500" />
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center ">
+            <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm font-medium text-foreground">
                 Loading preview...
             </p>
         </div>
@@ -51,12 +51,12 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
     const previewContent = (
         <div className={`flex flex-col ${isFullscreen ? 'h-screen w-screen' : 'h-[500px]'}`}>
             {/* Header bar */}
-            <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-4 py-2.5 dark:border-gray-800">
+            <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2.5">
                 <div className="min-w-0 flex-1 pr-4">
-                    <h3 className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <h3 className="truncate text-sm font-semibold text-foreground">
                         {fileName}
                     </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    <p className="text-xs text-muted-foreground">
                         {formatBytes(fileSize)}
                     </p>
                 </div>
@@ -64,7 +64,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
                         onClick={handleDownload}
                         title="Download"
                     >
@@ -73,7 +73,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
                         onClick={() => setIsFullscreen(!isFullscreen)}
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                     >
@@ -83,7 +83,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
                             onClick={() => setIsFullscreen(false)}
                             title="Close"
                         >
@@ -94,7 +94,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
             </div>
 
             {/* DocViewer area */}
-            <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 dark:bg-gray-950">
+            <div className="flex-1 min-h-0 overflow-hidden bg-muted">
                 <DocViewer
                     documents={[{ uri: previewUrl, fileName }]}
                     pluginRenderers={DocViewerRenderers}
@@ -117,12 +117,12 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
         return (
             <>
                 {/* Keep the inline preview visible behind the overlay */}
-                <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800">
+                <div className="overflow-hidden rounded-xl border border-border">
                     {previewContent}
                 </div>
                 {/* Fullscreen overlay */}
                 <div
-                    className="fixed inset-0 z-50 bg-white dark:bg-gray-950"
+                    className="fixed inset-0 z-50 bg-card"
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') {
                             setIsFullscreen(false);
@@ -136,7 +136,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
     }
 
     return (
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800">
+        <div className="overflow-hidden rounded-xl border border-border">
             {previewContent}
         </div>
     );

@@ -64,14 +64,14 @@ return null;
     };
 
     const NoRendererFallback = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-950">
-            <div className="mb-4 rounded-full bg-gray-100 dark:bg-gray-800 p-4">
-                <File className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-muted">
+            <div className="mb-4 rounded-full bg-muted p-4">
+                <File className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+            <h4 className="text-lg font-medium text-foreground">
                 Preview not supported
             </h4>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+            <p className="mt-2 text-sm text-muted-foreground">
                 This file type cannot be previewed in the browser.
             </p>
             <Button className="mt-6" onClick={handleDownload}>
@@ -81,9 +81,9 @@ return null;
     );
 
     const LoadingRenderer = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-gray-50 dark:bg-gray-950">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-            <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-muted">
+            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+            <p className="text-sm font-medium text-foreground">
                 Loading preview...
             </p>
         </div>
@@ -93,21 +93,21 @@ return null;
     return (
         <Dialog open={item !== null} onOpenChange={(open) => !open && onClose()}>
             <DialogContent
-                className={`flex flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl transition-all p-0 [&>button]:hidden ${isFullscreen
+                className={`flex flex-col overflow-hidden bg-card shadow-2xl transition-all p-0 [&>button]:hidden ${isFullscreen
                     ? 'h-screen w-screen max-w-none sm:max-w-none rounded-none'
-                    : 'max-h-[85vh] min-h-100 w-full sm:max-w-4xl rounded-xl border border-gray-100 dark:border-gray-800'
+                    : 'max-h-[85vh] min-h-100 w-full sm:max-w-4xl rounded-xl border border-border'
                     }`}
             >
                 <DialogHeader className="hidden">
                     <DialogTitle>{item.name}</DialogTitle>
                     <DialogDescription>Previewing {item.name}</DialogDescription>
                 </DialogHeader>
-                <div className="flex shrink-0 items-center justify-between border-b border-gray-100 dark:border-gray-800 px-4 py-3">
+                <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
                     <div className="min-w-0 flex-1 pr-4">
-                        <h3 className="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
+                        <h3 className="truncate text-base font-semibold text-foreground">
                             {item.name}
                         </h3>
-                        <div className="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                        <div className="mt-0.5 text-xs text-muted-foreground">
                             {formatBytes(item.size)} • {item.extension?.toUpperCase() || 'FILE'}
                         </div>
                     </div>
@@ -116,7 +116,7 @@ return null;
                             variant="ghost"
                             size="icon"
                             onClick={handleDownload}
-                            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                            className="text-muted-foreground hover:text-foreground"
                             title="Download"
                         >
                             <Download className="h-4 w-4" />
@@ -125,7 +125,7 @@ return null;
                             variant="ghost"
                             size="icon"
                             onClick={() => setIsFullscreen(!isFullscreen)}
-                            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                            className="text-muted-foreground hover:text-foreground"
                             title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                         >
                             {isFullscreen ? (
@@ -138,7 +138,7 @@ return null;
                             variant="ghost"
                             size="icon"
                             onClick={onClose}
-                            className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                            className="text-muted-foreground hover:text-foreground"
                             title="Close"
                         >
                             <X className="h-5 w-5" />
@@ -146,16 +146,16 @@ return null;
                     </div>
                 </div>
 
-                <div className="flex-1 min-h-0 overflow-hidden bg-gray-50 dark:bg-gray-950 relative">
+                <div className="flex-1 min-h-0 overflow-hidden bg-muted relative">
                     {isTooLarge ? (
                         <div className="flex h-full flex-col items-center justify-center p-6 text-center">
-                            <div className="mb-4 rounded-full bg-gray-100 dark:bg-gray-800 p-4">
-                                <Download className="h-8 w-8 text-gray-400 dark:text-gray-500" />
+                            <div className="mb-4 rounded-full bg-muted p-4">
+                                <Download className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h4 className="text-lg font-medium text-gray-900 dark:text-gray-100">
+                            <h4 className="text-lg font-medium text-foreground">
                                 File is too large to preview
                             </h4>
-                            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                            <p className="mt-2 text-sm text-muted-foreground">
                                 The file size ({formatBytes(item.size)}) exceeds the preview limit of {formatBytes(maxSize)}.
                             </p>
                             <Button className="mt-6" onClick={handleDownload}>

@@ -8,7 +8,7 @@ const recentActivities = [
         target: 'Google Drive',
         time: '2 mins ago',
         icon: FolderArchive,
-        iconColor: 'text-blue-600 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-400',
+        iconColor: 'text-primary bg-primary/10',
     },
     {
         id: 2,
@@ -19,7 +19,7 @@ const recentActivities = [
         target: 'Dropbox',
         time: '1 hour ago',
         icon: FileCode,
-        iconColor: 'text-green-600 bg-green-50 dark:bg-green-900/30 dark:text-green-400',
+        iconColor: 'text-primary bg-primary/10',
     },
     {
         id: 3,
@@ -28,7 +28,7 @@ const recentActivities = [
         target: 'sarah.j@company.com',
         time: '3 hours ago',
         icon: FileText,
-        iconColor: 'text-purple-600 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-400',
+        iconColor: 'text-primary bg-primary/10',
     },
 ];
 
@@ -36,12 +36,12 @@ export default function RecentActivityList() {
     return (
         <div className="space-y-4 lg:col-span-2">
             <div className="flex items-center justify-between">
-                <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-bold tracking-tight text-foreground">
                     Recent Activity
                 </h3>
                 <a
                     href="#"
-                    className="flex items-center gap-0.5 text-xs font-bold text-brand hover:underline"
+                    className="flex items-center gap-0.5 text-xs font-bold text-primary hover:underline"
                 >
                     View History <ChevronRight className="h-3 w-3" />
                 </a>
@@ -51,7 +51,7 @@ export default function RecentActivityList() {
                 {recentActivities.map((activity) => (
                     <div
                         key={activity.id}
-                        className="group flex cursor-pointer items-center justify-between rounded-2xl border border-gray-100/50 dark:border-gray-800 bg-white dark:bg-gray-900 p-5 shadow-sm transition-all duration-300 hover:border-gray-200/50 dark:hover:border-gray-700 hover:shadow-md"
+                        className="group flex cursor-pointer items-center justify-between rounded-2xl border border-border bg-card p-5 shadow-sm transition-all duration-300 hover:shadow-md"
                     >
                         <div className="flex items-center gap-4">
                             <div
@@ -63,28 +63,28 @@ export default function RecentActivityList() {
                                 />
                             </div>
                             <div>
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-gray-100">
+                                <h4 className="text-sm font-bold text-foreground">
                                     {activity.fileName}
                                 </h4>
-                                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                <p className="mt-1 text-xs text-muted-foreground">
                                     {activity.action}
                                     {activity.source && (
-                                        <span className="font-bold text-gray-800 dark:text-gray-200">
+                                        <span className="font-bold text-foreground">
                                             {activity.source}
                                         </span>
                                     )}
                                     {activity.middle}
-                                    <span className="font-bold text-gray-800 dark:text-gray-200">
+                                    <span className="font-bold text-foreground">
                                         {activity.target}
                                     </span>
-                                    <span className="mx-1.5 text-gray-300 dark:text-gray-600">
+                                    <span className="mx-1.5 text-muted-foreground/50">
                                         •
                                     </span>
                                     <span>{activity.time}</span>
                                 </p>
                             </div>
                         </div>
-                        <ChevronRight className="h-5 w-5 text-gray-300 dark:text-gray-600 group-hover:text-gray-400 dark:group-hover:text-gray-500" />
+                        <ChevronRight className="h-5 w-5 text-muted-foreground/50 group-hover:text-muted-foreground" />
                     </div>
                 ))}
             </div>

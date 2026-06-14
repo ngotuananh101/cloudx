@@ -49,24 +49,24 @@ interface ShareViewProps {
 
 function getLargeIcon(type: string, isDirectory: boolean) {
     if (isDirectory) {
-        return { icon: Folder, bg: 'bg-amber-50 dark:bg-amber-950', color: 'text-amber-500' };
+        return { icon: Folder, bg: 'bg-muted', color: 'text-primary' };
     }
 
     switch (type) {
         case 'image':
-            return { icon: FileImage, bg: 'bg-emerald-50 dark:bg-emerald-950', color: 'text-emerald-500' };
+            return { icon: FileImage, bg: 'bg-muted', color: 'text-primary' };
         case 'video':
-            return { icon: FileVideo, bg: 'bg-purple-50 dark:bg-purple-950', color: 'text-purple-500' };
+            return { icon: FileVideo, bg: 'bg-muted', color: 'text-primary' };
         case 'audio':
-            return { icon: FileAudio, bg: 'bg-pink-50 dark:bg-pink-950', color: 'text-pink-500' };
+            return { icon: FileAudio, bg: 'bg-muted', color: 'text-primary' };
         case 'code':
-            return { icon: FileCode, bg: 'bg-blue-50 dark:bg-blue-950', color: 'text-blue-500' };
+            return { icon: FileCode, bg: 'bg-muted', color: 'text-primary' };
         case 'archive':
-            return { icon: FileArchive, bg: 'bg-red-50 dark:bg-red-950', color: 'text-red-500' };
+            return { icon: FileArchive, bg: 'bg-muted', color: 'text-primary' };
         case 'document':
-            return { icon: FileText, bg: 'bg-gray-100 dark:bg-gray-800', color: 'text-gray-500' };
+            return { icon: FileText, bg: 'bg-muted', color: 'text-muted-foreground' };
         default:
-            return { icon: File, bg: 'bg-gray-100 dark:bg-gray-800', color: 'text-gray-400' };
+            return { icon: File, bg: 'bg-muted', color: 'text-muted-foreground' };
     }
 }
 
@@ -123,13 +123,13 @@ export default function ShareView({
         <ShareLayout>
             <Head title={`${share.name} — Shared`} />
 
-            <div className="w-full max-w-2xl rounded-2xl bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:bg-gray-900">
+            <div className="w-full max-w-2xl rounded-2xl bg-card shadow-sm">
                 {/* Header with badge */}
-                <div className="flex items-center justify-between border-b border-gray-100 px-6 py-3 dark:border-gray-800">
-                    <span className="text-sm font-bold tracking-tight text-brand">
+                <div className="flex items-center justify-between border-b border-border px-6 py-3">
+                    <span className="text-sm font-bold tracking-tight text-primary">
                         CloudX
                     </span>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground">
                         {share.type === 'public' ? (
                             <>
                                 <Globe className="h-3 w-3" />
@@ -147,14 +147,14 @@ export default function ShareView({
                 {/* Body */}
                 <div className="px-6 py-8">
                     {/* Shared info */}
-                    <div className="mb-6 flex items-center justify-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <div className="mb-6 flex items-center justify-center gap-2 text-xs text-muted-foreground">
                         {share.user_name && (
                             <>
-                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-brand text-[10px] font-bold text-white">
+                                <div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                                     {share.user_name.charAt(0).toUpperCase()}
                                 </div>
                                 <span>
-                                    Shared by <strong className="text-gray-700 dark:text-gray-300">{share.user_name}</strong>
+                                    Shared by <strong className="text-foreground">{share.user_name}</strong>
                                 </span>
                                 <span>•</span>
                             </>
@@ -186,12 +186,12 @@ export default function ShareView({
                         <div className={`mx-auto mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-2xl ${iconConfig.bg}`}>
                             <IconComponent className={`h-8 w-8 ${iconConfig.color}`} />
                         </div>
-                        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                        <h1 className="text-lg font-bold text-foreground">
                             {isDirectory && !isAtRoot
                                 ? currentPath.split('/').pop()
                                 : share.name}
                         </h1>
-                        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        <p className="mt-1 text-sm text-muted-foreground">
                             {isDirectory
                                 ? `${files.length} items • ${formatBytes(totalSize)} total`
                                 : `${formatBytes(file?.size ?? 0)} • ${file?.type ?? 'file'}`}
@@ -203,7 +203,7 @@ export default function ShareView({
                         <div className="mb-6 flex justify-center gap-3">
                             <Button
                                 onClick={handleDownload}
-                                className="bg-blue-600 text-white hover:bg-blue-700"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90"
                             >
                                 <Download className="mr-2 h-4 w-4" />
                                 Download

@@ -10,23 +10,7 @@ interface StorageOverviewCardsProps {
 }
 
 function getProviderColorClass(providerValue?: number): string {
-    if (providerValue === 1) {
-        return 'bg-blue-500/10 text-blue-600';
-    }
-
-    if (providerValue === 2) {
-        return 'bg-indigo-500/10 text-indigo-600';
-    }
-
-    if (providerValue === 3) {
-        return 'bg-blue-500/10 text-blue-600';
-    }
-
-    if (providerValue === 4) {
-        return 'bg-orange-500/10 text-orange-600';
-    }
-
-    return 'bg-amber-500/10 text-amber-600';
+    return 'bg-primary/10 text-primary';
 }
 
 export default function StorageOverviewCards({
@@ -35,24 +19,24 @@ export default function StorageOverviewCards({
 }: StorageOverviewCardsProps) {
     if (connections.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center rounded-3xl border border-gray-200/60 dark:border-gray-800 bg-white dark:bg-gray-900 p-12 text-center shadow-sm">
-                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50 text-gray-400 dark:text-gray-500">
+            <div className="flex flex-col items-center justify-center rounded-3xl border border-border bg-card p-12 text-center shadow-sm">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-border bg-muted text-muted-foreground">
                     <CloudOff
-                        className="h-8 w-8 text-gray-400 dark:text-gray-500"
+                        className="h-8 w-8 text-muted-foreground"
                         strokeWidth={1.5}
                     />
                 </div>
-                <h3 className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                <h3 className="text-lg font-extrabold tracking-tight text-foreground">
                     No Connected Storages
                 </h3>
-                <p className="mt-2 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400">
+                <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
                     Connect your cloud storage providers to start centralizing
                     and managing your files safely within one unified dashboard.
                 </p>
                 <div className="mt-6">
                     <Button
                         onClick={onConnect}
-                        className="h-11 rounded-xl bg-[#0f172a] dark:bg-white px-6 text-xs font-bold tracking-wider text-white dark:text-[#0f172a] shadow-sm transition-all duration-300 hover:bg-[#1e293b] dark:hover:bg-gray-200"
+                        className="h-11 rounded-xl bg-foreground px-6 text-xs font-bold tracking-wider text-background shadow-sm transition-all duration-300 hover:bg-foreground/90"
                     >
                         Connect Your First Storage
                     </Button>
@@ -66,7 +50,7 @@ export default function StorageOverviewCards({
             {connections.map((connection) => (
                 <Card
                     key={connection.id}
-                    className="group relative overflow-hidden rounded-2xl border border-gray-100/50 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-sm ring-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                    className="group relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-sm ring-0 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
                 >
                     <CardContent className="p-0">
                         <div className="mb-4 flex items-center justify-between">
@@ -86,21 +70,21 @@ export default function StorageOverviewCards({
                                     />
                                 )}
                             </div>
-                            <span className="text-[10px] font-semibold tracking-widest text-gray-400 dark:text-gray-500">
+                            <span className="text-[10px] font-semibold tracking-widest text-muted-foreground">
                                 {connection.provider.toUpperCase()}
                             </span>
                         </div>
 
                         <div className="mb-3 flex items-baseline justify-between">
                             <div className="flex items-baseline gap-1">
-                                <span className="text-xl font-bold tracking-tight text-gray-900 dark:text-gray-100">
+                                <span className="text-xl font-bold tracking-tight text-foreground">
                                     {connection.used_formatted}
                                 </span>
-                                <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">
+                                <span className="text-xs font-semibold text-muted-foreground">
                                     /{connection.total_formatted}
                                 </span>
                             </div>
-                            <span className="rounded-full bg-red-50/50 dark:bg-red-950/30 px-2 py-0.5 text-[10px] font-extrabold text-brand">
+                            <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-extrabold text-primary">
                                 {connection.percent}% Used
                             </span>
                         </div>
@@ -108,11 +92,11 @@ export default function StorageOverviewCards({
                         <div className="relative pt-1">
                             <Progress
                                 value={connection.percent}
-                                className="h-2 bg-gray-100 dark:bg-gray-800 [&>div]:bg-brand"
+                                className="h-2 bg-muted [&>div]:bg-primary"
                             />
                         </div>
 
-                        <div className="mt-3 truncate text-[10px] font-bold text-gray-500 dark:text-gray-400">
+                        <div className="mt-3 truncate text-[10px] font-bold text-muted-foreground">
                             {connection.name}
                         </div>
                     </CardContent>

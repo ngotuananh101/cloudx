@@ -141,8 +141,8 @@ export default function SftpConnectionForm({
                 </Field>
             </div>
 
-            <div className="space-y-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 p-4">
-                <h4 className="text-sm font-bold text-gray-700 dark:text-gray-300">Key Authentication</h4>
+            <div className="space-y-4 rounded-2xl border border-border bg-muted/50 p-4">
+                <h4 className="text-sm font-bold text-foreground">Key Authentication</h4>
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="col-span-2">
                         <Field label="Private Key" error={form.errors.privateKey}>
@@ -152,7 +152,7 @@ export default function SftpConnectionForm({
                                 onChange={(event) =>
                                     form.setData('privateKey', event.target.value)
                                 }
-                                className="w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50 font-mono"
+                                className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50 font-mono"
                                 rows={4}
                                 placeholder="-----BEGIN RSA PRIVATE KEY-----..."
                             />
@@ -173,11 +173,11 @@ export default function SftpConnectionForm({
                 </div>
             </div>
 
-            <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+            <div className="rounded-2xl border border-border bg-muted/50">
                 <button
                     type="button"
                     onClick={() => setShowAdvanced((current) => !current)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300"
+                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-foreground"
                     aria-expanded={showAdvanced}
                     aria-controls="sftp-advanced-settings"
                 >
@@ -191,7 +191,7 @@ export default function SftpConnectionForm({
                 {showAdvanced && (
                     <div
                         id="sftp-advanced-settings"
-                        className="grid gap-4 border-t border-gray-100 dark:border-gray-800 p-4 sm:grid-cols-2"
+                        className="grid gap-4 border-t border-border p-4 sm:grid-cols-2"
                     >
                         <Field label="Host Fingerprint" error={form.errors.hostFingerprint}>
                             <input
@@ -243,14 +243,14 @@ export default function SftpConnectionForm({
                     type="button"
                     onClick={onCancel}
                     disabled={processing}
-                    className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+                    className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
                 >
                     Back
                 </button>
                 <button
                     type="submit"
                     disabled={processing}
-                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                    className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
                 >
                     {processing ? 'Testing connection...' : 'Connect SFTP'}
                 </button>
@@ -287,15 +287,15 @@ function Field({
 
     return (
         <div className="space-y-2">
-            <label htmlFor={id} className="text-xs font-bold text-gray-600 dark:text-gray-400">
+            <label htmlFor={id} className="text-xs font-bold text-foreground">
                 {label}
-                {required && <span className="text-red-500"> *</span>}
+                {required && <span className="text-destructive"> *</span>}
             </label>
             {children}
             {error && (
                 <p
                     id={id ? `${id}-error` : undefined}
-                    className="text-xs text-red-600 dark:text-red-400"
+                    className="text-xs text-destructive"
                 >
                     {error}
                 </p>
@@ -313,4 +313,4 @@ function getChildId(children: React.ReactNode): string | undefined {
 }
 
 const inputClassName =
-    'h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50';
+    'h-10 w-full rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50';

@@ -34,17 +34,17 @@ export default function ConnectStorageModal({
 
     return (
         <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className={`w-full overflow-hidden rounded-3xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 p-6 shadow-2xl transition-all [&>button]:right-6 [&>button]:top-6 [&>button]:z-10 ${isCredentialsSelected ? 'sm:max-w-2xl' : 'sm:max-w-md xl:max-w-2xl'}`}>
+            <DialogContent className={`w-full overflow-hidden rounded-3xl border border-border bg-card p-6 shadow-2xl transition-all [&>button]:right-6 [&>button]:top-6 [&>button]:z-10 ${isCredentialsSelected ? 'sm:max-w-2xl' : 'sm:max-w-md xl:max-w-2xl'}`}>
                 <div className="mb-6">
                     <DialogHeader className="text-left">
-                        <DialogTitle className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                        <DialogTitle className="text-xl font-extrabold tracking-tight text-foreground">
                             {isFtpSelected && 'Connect FTP'}
                             {isS3Selected && 'Connect S3'}
                             {isSftpSelected && 'Connect SFTP'}
                             {isTelegramSelected && 'Connect Telegram'}
                             {!isCredentialsSelected && 'Connect Storage'}
                         </DialogTitle>
-                        <DialogDescription className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+                        <DialogDescription className="mt-1 text-xs text-muted-foreground">
                             {isFtpSelected && 'Enter your FTP server credentials to test and link the connection'}
                             {isS3Selected && 'Enter your S3 or S3-compatible storage credentials to test and link the connection'}
                             {isSftpSelected && 'Enter your SFTP server credentials to test and link the connection'}

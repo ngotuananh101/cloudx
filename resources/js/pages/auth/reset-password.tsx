@@ -33,19 +33,19 @@ export default function ResetPassword({
             <Head title="Reset Password" />
 
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7] dark:bg-gray-800">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                     <div className="flex items-center justify-center">
                         <KeyRound
-                            className="h-8 w-8 text-brand"
+                            className="h-8 w-8 text-primary"
                             strokeWidth={2.5}
                         />
                     </div>
                 </div>
 
-                <h1 className="mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <h1 className="mb-3 text-2xl font-semibold text-foreground">
                     Set new password
                 </h1>
-                <p className="mx-auto max-w-xs text-sm text-gray-500 dark:text-gray-400">
+                <p className="mx-auto max-w-xs text-sm text-muted-foreground">
                     Your new password must be different from previously used
                     passwords.
                 </p>
@@ -55,25 +55,25 @@ export default function ResetPassword({
                 <div className="space-y-2">
                     <Label
                         htmlFor="email"
-                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                     >
                         Email Address
                     </Label>
                     <div className="relative">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <Mail className="h-5 w-5 text-gray-400" />
+                            <Mail className="h-5 w-5 text-muted-foreground" />
                         </div>
                         <Input
                             id="email"
                             type="email"
-                            className={`h-11 border-0 bg-[#f4f5f7] pr-4 pl-11 text-gray-500 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-muted pr-4 pl-11 text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring ${errors.email ? 'ring-1 ring-destructive' : ''}`}
                             value={data.email}
                             onChange={(e) => setData('email', e.target.value)}
                             readOnly
                         />
                     </div>
                     {errors.email && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-destructive">
                             {errors.email}
                         </p>
                     )}
@@ -82,7 +82,7 @@ export default function ResetPassword({
                 <div className="space-y-2">
                     <Label
                         htmlFor="password"
-                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                     >
                         New Password
                     </Label>
@@ -91,7 +91,7 @@ export default function ResetPassword({
                             id="password"
                             type="password"
                             placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-muted px-4 text-lg tracking-widest placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring ${errors.password ? 'ring-1 ring-destructive' : ''}`}
                             value={data.password}
                             onChange={(e) =>
                                 setData('password', e.target.value)
@@ -100,7 +100,7 @@ export default function ResetPassword({
                         />
                     </div>
                     {errors.password && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-destructive">
                             {errors.password}
                         </p>
                     )}
@@ -109,7 +109,7 @@ export default function ResetPassword({
                 <div className="space-y-2">
                     <Label
                         htmlFor="password_confirmation"
-                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                     >
                         Confirm Password
                     </Label>
@@ -118,7 +118,7 @@ export default function ResetPassword({
                             id="password_confirmation"
                             type="password"
                             placeholder="********"
-                            className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password_confirmation ? 'ring-1 ring-red-500' : ''}`}
+                            className={`h-11 border-0 bg-muted px-4 text-lg tracking-widest placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring ${errors.password_confirmation ? 'ring-1 ring-destructive' : ''}`}
                             value={data.password_confirmation}
                             onChange={(e) =>
                                 setData('password_confirmation', e.target.value)
@@ -127,14 +127,14 @@ export default function ResetPassword({
                         />
                     </div>
                     {errors.password_confirmation && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-destructive">
                             {errors.password_confirmation}
                         </p>
                     )}
                 </div>
 
                 <Button
-                    className="mt-2 h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
+                    className="mt-2 h-11 w-full rounded-lg bg-primary font-medium text-primary-foreground hover:bg-primary/90"
                     disabled={processing}
                 >
                     Reset Password <ArrowRight className="ml-2 h-4 w-4" />

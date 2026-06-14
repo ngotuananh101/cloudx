@@ -211,21 +211,21 @@ return;
     return (
         <>
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-xl bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
+            <DialogContent className="sm:max-w-xl bg-card border-border rounded-3xl p-6 shadow-2xl">
                 <DialogHeader className="mb-4">
-                    <DialogTitle className="text-gray-900 dark:text-gray-100">
+                    <DialogTitle className="text-foreground">
                         Share "{item?.name}"
                     </DialogTitle>
-                    <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    <DialogDescription className="text-muted-foreground">
                         Create a link to share this item with others.
                     </DialogDescription>
                 </DialogHeader>
 
                 <div className="space-y-6 min-w-0">
                     {/* Create Share Form */}
-                    <div className="space-y-4 rounded-xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 p-4">
+                    <div className="space-y-4 rounded-xl border border-border bg-muted/50 p-4">
                         <div className="space-y-3">
-                            <Label className="text-sm font-semibold text-gray-700 dark:text-gray-300">Access Type</Label>
+                            <Label className="text-sm font-semibold text-foreground">Access Type</Label>
                             <RadioGroup
                                 value={type}
                                 onValueChange={(val) => setType(val as 'public' | 'password')}
@@ -233,15 +233,15 @@ return;
                             >
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="public" id="r-public" />
-                                    <Label htmlFor="r-public" className="flex items-center gap-2 cursor-pointer font-medium text-gray-700 dark:text-gray-300">
-                                        <Globe className="h-4 w-4 text-blue-500" />
+                                    <Label htmlFor="r-public" className="flex items-center gap-2 cursor-pointer font-medium text-foreground">
+                                        <Globe className="h-4 w-4 text-primary" />
                                         Public (Anyone with link)
                                     </Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
                                     <RadioGroupItem value="password" id="r-password" />
-                                    <Label htmlFor="r-password" className="flex items-center gap-2 cursor-pointer font-medium text-gray-700 dark:text-gray-300">
-                                        <Lock className="h-4 w-4 text-amber-500" />
+                                    <Label htmlFor="r-password" className="flex items-center gap-2 cursor-pointer font-medium text-foreground">
+                                        <Lock className="h-4 w-4 text-muted-foreground" />
                                         Password Protected
                                     </Label>
                                 </div>
@@ -257,7 +257,7 @@ return;
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="Enter a secure password"
-                                    className="h-10 border-0 bg-white dark:bg-gray-900"
+                                    className="h-10 border-0 bg-card"
                                 />
                             </div>
                         )}
@@ -265,7 +265,7 @@ return;
                         <div className="space-y-2">
                             <Label>Expiration</Label>
                             <Select value={expiresInDays} onValueChange={setExpiresInDays}>
-                                <SelectTrigger className="h-10 border-0 bg-white dark:bg-gray-900">
+                                <SelectTrigger className="h-10 border-0 bg-card">
                                     <SelectValue placeholder="Select expiration" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -278,12 +278,12 @@ return;
                             </Select>
                         </div>
 
-                        {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
+                        {error && <p className="text-sm text-destructive font-medium">{error}</p>}
 
                         <Button
                             onClick={handleCreateShare}
                             disabled={isSubmitting || (type === 'password' && password.length < 4)}
-                            className="w-full bg-blue-600 text-white hover:bg-blue-700"
+                            className="w-full bg-primary text-white hover:bg-primary/90"
                         >
                             {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                             Create Share Link
@@ -293,27 +293,27 @@ return;
                     {/* Existing Shares List */}
                     {isLoadingShares ? (
                         <div className="flex justify-center p-4">
-                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                         </div>
                     ) : shares.length > 0 ? (
                         <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">Active Links</h4>
+                            <h4 className="text-sm font-semibold text-foreground">Active Links</h4>
                             <div className="space-y-2">
                                 {shares.map((share) => (
-                                    <div key={share.id} className="flex items-center justify-between rounded-lg border border-gray-100 dark:border-gray-800 p-3 bg-white dark:bg-gray-900">
+                                    <div key={share.id} className="flex items-center justify-between rounded-lg border border-border p-3 bg-card">
                                         <div className="flex flex-col min-w-0 pr-2">
                                             <div className="flex items-center gap-2 mb-1 min-w-0">
                                                 {share.type === 'public' ? (
-                                                    <Globe className="h-3 w-3 text-blue-500 shrink-0" />
+                                                    <Globe className="h-3 w-3 text-primary shrink-0" />
                                                 ) : (
-                                                    <Lock className="h-3 w-3 text-amber-500 shrink-0" />
+                                                    <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
                                                 )}
-                                                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                                                <span className="text-sm font-medium text-foreground truncate">
                                                     {window.location.origin}/s/{share.uuid}
                                                 </span>
                                             </div>
-                                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                <span className={`font-medium capitalize ${share.type === 'public' ? 'text-blue-600 dark:text-blue-400' : 'text-amber-600 dark:text-amber-400'}`}>
+                                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
+                                                <span className={`font-medium capitalize ${share.type === 'public' ? 'text-primary' : 'text-muted-foreground'}`}>
                                                     {share.type}
                                                 </span>
                                                 <span>•</span>
@@ -326,7 +326,7 @@ return;
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-gray-500 hover:text-blue-600 dark:hover:text-blue-400"
+                                                className="h-8 w-8 text-muted-foreground hover:text-primary"
                                                 onClick={() => handleCopy(share.id, share.uuid)}
                                                 title="Copy Link"
                                             >
@@ -339,7 +339,7 @@ return;
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
-                                                className="h-8 w-8 text-gray-500 hover:text-red-600 dark:hover:text-red-400"
+                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
                                                 onClick={() => setShareToDelete(share)}
                                                 title="Delete Link"
                                             >
@@ -356,15 +356,15 @@ return;
         </Dialog>
 
         <AlertDialog open={!!shareToDelete} onOpenChange={(open) => !open && setShareToDelete(null)}>
-            <AlertDialogContent className="bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800 rounded-2xl">
+            <AlertDialogContent className="bg-card border-border rounded-2xl">
                 <AlertDialogHeader>
-                    <AlertDialogTitle className="text-gray-900 dark:text-gray-100">Delete Share Link?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-gray-500 dark:text-gray-400">
+                    <AlertDialogTitle className="text-foreground">Delete Share Link?</AlertDialogTitle>
+                    <AlertDialogDescription className="text-muted-foreground">
                         Are you sure you want to delete this share link? Anyone with this link will no longer have access. This action cannot be undone.
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting} className="border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <AlertDialogCancel disabled={isDeleting} className="border-border bg-card text-foreground hover:bg-muted hover:bg-muted/70">
                         Cancel
                     </AlertDialogCancel>
                     <AlertDialogAction
@@ -372,7 +372,7 @@ return;
                             e.preventDefault();
                             confirmDeleteShare();
                         }}
-                        className="bg-red-600 hover:bg-red-700 text-white border-0"
+                        className="bg-destructive hover:bg-destructive/90 text-white border-0"
                         disabled={isDeleting}
                     >
                         {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}

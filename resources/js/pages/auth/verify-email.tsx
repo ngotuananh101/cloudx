@@ -19,19 +19,19 @@ export default function VerifyEmail({ status }: { status?: string }) {
             <Head title="Email Verification" />
 
             <div className="mb-8 text-center">
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-[#f4f5f7] dark:bg-gray-800">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
                     <div className="flex items-center justify-center">
                         <MailCheck
-                            className="h-8 w-8 text-brand"
+                            className="h-8 w-8 text-primary"
                             strokeWidth={2.5}
                         />
                     </div>
                 </div>
 
-                <h1 className="mb-3 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <h1 className="mb-3 text-2xl font-semibold text-foreground">
                     Verify your email
                 </h1>
-                <p className="mx-auto text-sm text-gray-500 dark:text-gray-400">
+                <p className="mx-auto text-sm text-muted-foreground">
                     Thanks for signing up! Before getting started, could you
                     verify your email address by clicking on the link we just
                     emailed to you? If you didn't receive the email, we will
@@ -40,7 +40,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
             </div>
 
             {status === 'verification-link-sent' && (
-                <div className="mb-6 rounded-md bg-green-50 dark:bg-green-900/30 p-4 text-sm text-green-600 dark:text-green-400">
+                <div className="mb-6 rounded-md bg-primary/10 p-4 text-sm text-primary">
                     A new verification link has been sent to the email address
                     you provided during registration.
                 </div>
@@ -48,7 +48,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
 
             <form onSubmit={submit} className="space-y-6">
                 <Button
-                    className="h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
+                    className="h-11 w-full rounded-lg bg-primary font-medium text-primary-foreground hover:bg-primary/90"
                     disabled={processing}
                 >
                     Resend Verification Email{' '}
@@ -61,7 +61,7 @@ export default function VerifyEmail({ status }: { status?: string }) {
                     href={destroy.url()}
                     method="post"
                     as="button"
-                    className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                    className="inline-flex items-center text-sm font-semibold text-muted-foreground hover:text-foreground"
                 >
                     <LogOut className="mr-2 h-4 w-4" />
                     Log Out

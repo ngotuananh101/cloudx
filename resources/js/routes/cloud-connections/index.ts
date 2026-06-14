@@ -6,7 +6,7 @@ import cache from './cache'
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-export const reconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const reconnect = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: reconnect.url(args, options),
     method: 'get',
 })
@@ -21,7 +21,7 @@ reconnect.definition = {
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-reconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+reconnect.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -54,7 +54,7 @@ reconnect.url = (args: { connection: string | number | { id: string | number } }
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-reconnect.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+reconnect.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: reconnect.url(args, options),
     method: 'get',
 })
@@ -63,7 +63,7 @@ reconnect.get = (args: { connection: string | number | { id: string | number } }
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-reconnect.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+reconnect.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: reconnect.url(args, options),
     method: 'head',
 })
@@ -73,7 +73,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-    const reconnectForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const reconnectForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: reconnect.url(args, options),
         method: 'get',
     })
@@ -83,7 +83,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-        reconnectForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        reconnectForm.get = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: reconnect.url(args, options),
             method: 'get',
         })
@@ -92,7 +92,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
  * @see app/Http/Controllers/CloudConnectionController.php:32
  * @route '/connections/{connection}/reconnect'
  */
-        reconnectForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        reconnectForm.head = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: reconnect.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -108,7 +108,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-export const destroy = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -123,7 +123,7 @@ destroy.definition = {
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-destroy.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { connection: args }
     }
@@ -156,7 +156,7 @@ destroy.url = (args: { connection: string | number | { id: string | number } } |
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-destroy.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -166,7 +166,7 @@ destroy.delete = (args: { connection: string | number | { id: string | number } 
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-    const destroyForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -181,7 +181,7 @@ destroy.delete = (args: { connection: string | number | { id: string | number } 
  * @see app/Http/Controllers/CloudConnectionController.php:134
  * @route '/connections/{connection}'
  */
-        destroyForm.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { connection: number | { id: number } } | [connection: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

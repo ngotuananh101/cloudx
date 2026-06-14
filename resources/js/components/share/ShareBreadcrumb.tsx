@@ -43,8 +43,8 @@ export function ShareBreadcrumb({
                 onClick={() => onNavigate(null)}
                 className={`flex items-center gap-1 transition-colors ${
                     isAtRoot
-                        ? 'font-semibold text-gray-900 dark:text-gray-100'
-                        : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
+                        ? 'font-semibold text-foreground'
+                        : 'text-muted-foreground hover:text-foreground'
                 }`}
             >
                 <Home className="h-4 w-4" />
@@ -56,16 +56,16 @@ export function ShareBreadcrumb({
 
                 return (
                     <div key={segment.path} className="flex items-center gap-1.5">
-                        <ChevronRight className="h-3.5 w-3.5 text-gray-300 dark:text-gray-600" />
+                        <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                         {isLast ? (
-                            <span className="truncate font-semibold text-gray-900 dark:text-gray-100">
+                            <span className="truncate font-semibold text-foreground">
                                 {segment.label}
                             </span>
                         ) : (
                             <button
                                 type="button"
                                 onClick={() => onNavigate(segment.path)}
-                                className="truncate text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-gray-100"
+                                className="truncate text-muted-foreground transition-colors hover:text-foreground"
                             >
                                 {segment.label}
                             </button>

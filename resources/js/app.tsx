@@ -15,7 +15,11 @@ const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 createInertiaApp({
     title: (title) => (title ? `${title} - ${appName}` : appName),
     progress: {
-        color: '#bd1e24',
+        // Inertia progress.color is resolved at JS init time before CSS
+        // variables are guaranteed to be readable, so we mirror the value of
+        // --primary (light theme) from resources/css/app.css here.
+        // To rebrand, change --primary in app.css and update this string.
+        color: 'oklch(0.514 0.222 16.935)',
     },
     setup: ({ el, App, props }) => {
         if (!el) {

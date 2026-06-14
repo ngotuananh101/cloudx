@@ -23,10 +23,10 @@ export default function ConnectionNavItem({
     return (
         <li>
             <div
-                className={`group relative flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-red-50/50 text-brand dark:bg-red-950/30' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-100'}`}
+                className={`group relative flex items-center justify-between gap-2 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${isActive ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
             >
                 {isActive && (
-                    <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-brand" />
+                    <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
                 )}
                 <Link
                     href={href}
@@ -40,11 +40,11 @@ export default function ConnectionNavItem({
                         />
                     ) : (
                         <Cloud
-                            className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-brand' : 'text-gray-400 group-hover:text-gray-600 dark:text-gray-500 dark:group-hover:text-gray-400'}`}
+                            className={`h-4.5 w-4.5 shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-foreground'}`}
                         />
                     )}
                     <span
-                        className={`truncate font-bold ${isActive ? 'text-brand' : 'text-gray-700 dark:text-gray-300'}`}
+                        className={`truncate font-bold ${isActive ? 'text-primary' : 'text-foreground'}`}
                         title={connection.name}
                     >
                         {connection.name}

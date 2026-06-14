@@ -48,7 +48,7 @@ export default function ConnectionActionsMenu({
                     type="button"
                     variant="ghost"
                     size="icon"
-                    className="h-7 w-7 shrink-0 rounded-lg text-gray-400 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-white/70 hover:text-gray-700 data-[state=open]:bg-white/70 data-[state=open]:opacity-100"
+                    className="h-7 w-7 shrink-0 rounded-lg text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:bg-card/70 hover:text-foreground data-[state=open]:bg-card/70 data-[state=open]:opacity-100"
                     aria-label={`Open actions for ${connection.name}`}
                     onClick={(event) => {
                         event.preventDefault();

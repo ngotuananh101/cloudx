@@ -49,13 +49,13 @@ export default function EditConnectionNameDialog({
 
     return (
         <Dialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-sm rounded-3xl p-6 shadow-2xl bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+            <DialogContent className="sm:max-w-sm rounded-3xl p-6 shadow-2xl bg-card border-border">
                 <form onSubmit={submit}>
                     <DialogHeader className="mb-5">
-                        <DialogTitle className="text-lg font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                        <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">
                             Edit connection name
                         </DialogTitle>
-                        <DialogDescription className="mt-1 text-xs text-gray-400">
+                        <DialogDescription className="mt-1 text-xs text-muted-foreground">
                             Update the display name shown in the sidebar.
                         </DialogDescription>
                     </DialogHeader>
@@ -72,7 +72,7 @@ export default function EditConnectionNameDialog({
                             autoFocus
                         />
                         {form.errors.name && (
-                            <p className="text-xs text-red-600 dark:text-red-400">
+                            <p className="text-xs text-destructive">
                                 {form.errors.name}
                             </p>
                         )}

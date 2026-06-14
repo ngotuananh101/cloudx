@@ -134,29 +134,29 @@ return false;
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border-gray-100 dark:border-gray-800">
+            <DialogContent className="sm:max-w-md bg-card border-border">
                 <DialogHeader>
-                    <DialogTitle className="text-gray-900 dark:text-gray-100">
+                    <DialogTitle className="text-foreground">
                         Move "{item?.name}"
                     </DialogTitle>
-                    <DialogDescription className="text-gray-500 dark:text-gray-400">
+                    <DialogDescription className="text-muted-foreground">
                         Select a destination folder.
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex flex-col h-64 border rounded-md border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50 p-2">
-                    <div className="flex items-center gap-2 mb-2 p-1 text-sm text-gray-500 dark:text-gray-400 font-medium break-all">
-                        <Folder className="h-4 w-4 shrink-0 text-blue-500" />
+                <div className="flex flex-col h-64 border rounded-md border-border bg-muted/50 p-2">
+                    <div className="flex items-center gap-2 mb-2 p-1 text-sm text-muted-foreground font-medium break-all">
+                        <Folder className="h-4 w-4 shrink-0 text-primary" />
                         /{destinationPath}
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-1">
                         {isLoading ? (
                             <div className="flex items-center justify-center h-full">
-                                <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+                                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             </div>
                         ) : error ? (
-                            <div className="text-sm text-red-500 p-2 text-center">
+                            <div className="text-sm text-destructive p-2 text-center">
                                 {error}
                             </div>
                         ) : (
@@ -165,15 +165,15 @@ return false;
                                     <button
                                         type="button"
                                         onClick={navigateUp}
-                                        className="flex w-full items-center gap-2 rounded-md p-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                        className="flex w-full items-center gap-2 rounded-md p-2 text-sm text-foreground hover:bg-muted transition-colors"
                                     >
-                                        <CornerLeftUp className="h-4 w-4 text-gray-400" />
+                                        <CornerLeftUp className="h-4 w-4 text-muted-foreground" />
                                         <span>...</span>
                                     </button>
                                 )}
 
                                 {folders.length === 0 ? (
-                                    <div className="text-center text-sm text-gray-400 p-4 italic">
+                                    <div className="text-center text-sm text-muted-foreground p-4 italic">
                                         Empty folder
                                     </div>
                                 ) : (
@@ -188,15 +188,15 @@ return false;
                                                 onClick={() => !isItself && fetchFolders(folder.path)}
                                                 disabled={isItself}
                                                 className={`flex w-full items-center justify-between rounded-md p-2 text-sm transition-colors ${isItself
-                                                        ? 'opacity-50 cursor-not-allowed text-gray-400'
-                                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                                                        ? 'opacity-50 cursor-not-allowed text-muted-foreground'
+                                                        : 'text-foreground hover:bg-muted'
                                                     }`}
                                             >
                                                 <div className="flex items-center gap-2">
-                                                    <Folder className="h-4 w-4 text-blue-500" />
+                                                    <Folder className="h-4 w-4 text-primary" />
                                                     <span className="truncate">{folder.name}</span>
                                                 </div>
-                                                <ChevronRight className="h-4 w-4 text-gray-400" />
+                                                <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                             </button>
                                         )
                                     })
@@ -219,7 +219,7 @@ return false;
                         type="button"
                         onClick={handleMove}
                         disabled={isLoading || isMoving || !isDestinationValid()}
-                        className="bg-blue-600 text-white hover:bg-blue-700"
+                        className="bg-primary text-white hover:bg-primary/90"
                     >
                         {isMoving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Move Here

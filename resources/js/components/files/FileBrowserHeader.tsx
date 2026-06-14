@@ -44,7 +44,7 @@ export function FileBrowserHeader({
     return (
         <div className="mb-3 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <div className="flex items-center text-[10px] font-extrabold tracking-widest text-gray-400 dark:text-gray-500">
+                <div className="flex items-center text-[10px] font-extrabold tracking-widest text-muted-foreground">
                     <span className="uppercase">
                         {connection?.name || 'WORKSPACE'}
                     </span>
@@ -57,7 +57,7 @@ export function FileBrowserHeader({
                             <button
                                 type="button"
                                 onClick={onNavigateHome}
-                                className="text-xl font-extrabold tracking-tight text-gray-400 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-gray-100"
+                                className="text-xl font-extrabold tracking-tight text-muted-foreground transition-colors hover:text-foreground"
                                 aria-label="Go to root folder"
                             >
                                 <Home className="h-5 w-5" />
@@ -65,14 +65,14 @@ export function FileBrowserHeader({
 
                             {hasHiddenSegments && (
                                 <>
-                                    <span className="text-base text-gray-300">
+                                    <span className="text-base text-muted-foreground/50">
                                         /
                                     </span>
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <button
                                                 type="button"
-                                                className="inline-flex h-7 items-center rounded-md px-1.5 text-gray-400 dark:text-gray-500 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100"
+                                                className="inline-flex h-7 items-center rounded-md px-1.5 text-muted-foreground transition-colors hover:bg-muted hover:bg-muted/70 hover:text-foreground"
                                                 aria-label="Show hidden breadcrumb folders"
                                             >
                                                 <MoreHorizontal className="h-5 w-5" />
@@ -110,11 +110,11 @@ export function FileBrowserHeader({
                                         key={segment.path}
                                         className="flex min-w-0 items-center gap-2"
                                     >
-                                        <span className="text-base text-gray-300 dark:text-gray-600">
+                                        <span className="text-base text-muted-foreground/50">
                                             /
                                         </span>
                                         {isLast ? (
-                                            <h2 className="max-w-[18rem] truncate text-base font-medium tracking-tight text-gray-900 dark:text-gray-100">
+                                            <h2 className="max-w-[18rem] truncate text-base font-medium tracking-tight text-foreground">
                                                 {segment.label}
                                             </h2>
                                         ) : (
@@ -123,7 +123,7 @@ export function FileBrowserHeader({
                                                 onClick={() =>
                                                     onNavigatePath(segment.path)
                                                 }
-                                                className="max-w-40 truncate text-base text-gray-500 dark:text-gray-400 transition-colors hover:text-gray-900 dark:hover:text-gray-100"
+                                                className="max-w-40 truncate text-base text-muted-foreground transition-colors hover:text-foreground"
                                             >
                                                 {segment.label}
                                             </button>
@@ -133,7 +133,7 @@ export function FileBrowserHeader({
                             })}
                         </div>
                     ) : (
-                        <h2 className="text-xl font-extrabold tracking-tight text-gray-900 dark:text-gray-100">
+                        <h2 className="text-xl font-extrabold tracking-tight text-foreground">
                             My Files
                         </h2>
                     )}

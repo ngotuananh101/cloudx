@@ -206,11 +206,11 @@ export default function FtpConnectionForm({
                 />
             </div>
 
-            <div className="rounded-2xl border border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
+            <div className="rounded-2xl border border-border bg-muted/50">
                 <button
                     type="button"
                     onClick={() => setShowAdvanced((current) => !current)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-gray-700 dark:text-gray-300"
+                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-foreground"
                     aria-expanded={showAdvanced}
                     aria-controls="ftp-advanced-settings"
                 >
@@ -224,7 +224,7 @@ export default function FtpConnectionForm({
                 {showAdvanced && (
                     <div
                         id="ftp-advanced-settings"
-                        className="grid gap-4 border-t border-gray-100 dark:border-gray-800 p-4 sm:grid-cols-2"
+                        className="grid gap-4 border-t border-border p-4 sm:grid-cols-2"
                     >
                         <Field label="Timeout" error={form.errors.timeout}>
                             <input
@@ -344,14 +344,14 @@ export default function FtpConnectionForm({
                     type="button"
                     onClick={onCancel}
                     disabled={processing}
-                    className="rounded-md border border-gray-200 dark:border-gray-700 px-4 py-2 text-sm font-bold text-gray-600 dark:text-gray-400 transition-colors hover:bg-gray-50 dark:hover:bg-gray-800 disabled:opacity-60"
+                    className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
                 >
                     Back
                 </button>
                 <button
                     type="submit"
                     disabled={processing}
-                    className="rounded-md bg-blue-600 px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
+                    className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
                 >
                     {processing ? 'Testing connection...' : 'Connect FTP'}
                 </button>
@@ -389,15 +389,15 @@ function Field({
 
     return (
         <div className="space-y-2">
-            <label htmlFor={id} className="text-xs font-bold text-gray-600 dark:text-gray-400">
+            <label htmlFor={id} className="text-xs font-bold text-foreground">
                 {label}
-                {required && <span className="text-red-500"> *</span>}
+                {required && <span className="text-destructive"> *</span>}
             </label>
             {children}
             {error && (
                 <p
                     id={id ? `${id}-error` : undefined}
-                    className="text-xs text-red-600 dark:text-red-400"
+                    className="text-xs text-destructive"
                 >
                     {error}
                 </p>
@@ -422,16 +422,16 @@ function CheckboxField({
     return (
         <div className="space-y-2">
             {alignWithFields && <div className="h-4" aria-hidden="true" />}
-            <label className="flex h-10 items-center gap-3 rounded-md border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 px-3 text-sm font-bold text-gray-700 dark:text-gray-300">
+            <label className="flex h-10 items-center gap-3 rounded-md border border-border bg-card px-3 text-sm font-bold text-foreground">
                 <input
                     type="checkbox"
                     checked={checked}
                     onChange={(event) => onChange(event.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 dark:border-gray-700 text-blue-600 focus:ring-blue-500"
+                    className="h-4 w-4 rounded border-input text-primary focus:ring-ring"
                 />
                 {label}
             </label>
-            {error && <p className="text-xs text-red-600 dark:text-red-400">{error}</p>}
+            {error && <p className="text-xs text-destructive">{error}</p>}
         </div>
     );
 }
@@ -445,4 +445,4 @@ function getChildId(children: React.ReactNode): string | undefined {
 }
 
 const inputClassName =
-    'h-10 w-full rounded-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 text-sm font-medium text-gray-900 dark:text-gray-100 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900/50';
+    'h-10 w-full rounded-md border border-border bg-card px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50';

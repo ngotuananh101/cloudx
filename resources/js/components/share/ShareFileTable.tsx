@@ -24,21 +24,21 @@ interface ShareFileTableProps {
 function getFileIcon(type: string) {
     switch (type) {
         case 'folder':
-            return <Folder className="h-4 w-4 fill-blue-500/20 text-blue-500 dark:fill-blue-500/30 dark:text-blue-400" />;
+            return <Folder className="h-4 w-4 fill-primary/20 text-primary" />;
         case 'document':
-            return <FileText className="h-4 w-4 text-gray-500 dark:text-gray-400" />;
+            return <FileText className="h-4 w-4 text-muted-foreground" />;
         case 'image':
-            return <FileImage className="h-4 w-4 text-emerald-500" />;
+            return <FileImage className="h-4 w-4 text-primary" />;
         case 'code':
-            return <FileCode className="h-4 w-4 text-amber-500" />;
+            return <FileCode className="h-4 w-4 text-muted-foreground" />;
         case 'archive':
-            return <FileArchive className="h-4 w-4 text-red-500" />;
+            return <FileArchive className="h-4 w-4 text-destructive" />;
         case 'video':
             return <FileVideo className="h-4 w-4 text-purple-500" />;
         case 'audio':
-            return <FileAudio className="h-4 w-4 text-pink-500" />;
+            return <FileAudio className="h-4 w-4 text-primary" />;
         default:
-            return <File className="h-4 w-4 text-gray-400 dark:text-gray-500" />;
+            return <File className="h-4 w-4 text-muted-foreground" />;
     }
 }
 
@@ -50,24 +50,24 @@ export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: Shar
 
     if (files.length === 0) {
         return (
-            <div className="py-12 text-center text-sm text-gray-400 dark:text-gray-500">
+            <div className="py-12 text-center text-sm text-muted-foreground">
                 This folder is empty.
             </div>
         );
     }
 
     return (
-        <div className="overflow-hidden rounded-xl border border-gray-100 dark:border-gray-800">
+        <div className="overflow-hidden rounded-xl border border-border">
             <table className="w-full">
                 <thead>
-                    <tr className="border-b border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-800/50">
-                        <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                    <tr className="border-b border-border bg-muted/50">
+                        <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                             Name
                         </th>
-                        <th className="w-28 px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th className="w-28 px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                             Size
                         </th>
-                        <th className="w-16 px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
+                        <th className="w-16 px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                         </th>
                     </tr>
                 </thead>
@@ -75,7 +75,7 @@ export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: Shar
                     {files.map((file) => (
                         <tr
                             key={file.id}
-                            className="group border-b border-gray-50 dark:border-gray-800 last:border-b-0 bg-white dark:bg-gray-900 transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-800/80"
+                            className="group border-b border-border last:border-b-0 bg-card transition-colors hover:bg-muted"
                         >
                             <td className="px-4 py-2.5">
                                 <div
@@ -90,19 +90,19 @@ export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: Shar
                                         }
                                     }}
                                 >
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800">
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                         {getFileIcon(file.type)}
                                     </div>
                                     <span className={`truncate text-sm font-medium ${
                                         file.isDirectory
-                                            ? 'text-blue-600 dark:text-blue-400 hover:underline'
-                                            : 'text-gray-900 dark:text-gray-100'
+                                            ? 'text-primary hover:underline'
+                                            : 'text-foreground'
                                     }`}>
                                         {file.name}
                                     </span>
                                 </div>
                             </td>
-                            <td className="px-4 py-2.5 text-right text-xs text-gray-500 dark:text-gray-400">
+                            <td className="px-4 py-2.5 text-right text-xs text-muted-foreground">
                                 {file.isDirectory ? '--' : formatBytes(file.size)}
                             </td>
                             <td className="px-4 py-2.5 text-center">
@@ -110,7 +110,7 @@ export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: Shar
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="h-7 w-7 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+                                        className="h-7 w-7 text-muted-foreground hover:text-primary"
                                         onClick={() => handleDownload(file)}
                                         aria-label={`Download ${file.name}`}
                                     >

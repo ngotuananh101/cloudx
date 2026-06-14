@@ -5,7 +5,7 @@ import localA91488 from './local'
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-export const index = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const index = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(args, options),
     method: 'get',
 })
@@ -20,7 +20,7 @@ index.definition = {
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-index.url = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions) => {
+index.url = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     connection: args[0],
@@ -52,7 +52,7 @@ index.url = (args: { connection: string | number | { id: string | number }, path
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-index.get = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+index.get = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(args, options),
     method: 'get',
 })
@@ -61,7 +61,7 @@ index.get = (args: { connection: string | number | { id: string | number }, path
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-index.head = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+index.head = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(args, options),
     method: 'head',
 })
@@ -71,7 +71,7 @@ index.head = (args: { connection: string | number | { id: string | number }, pat
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-    const indexForm = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const indexForm = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: index.url(args, options),
         method: 'get',
     })
@@ -81,7 +81,7 @@ index.head = (args: { connection: string | number | { id: string | number }, pat
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-        indexForm.get = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        indexForm.get = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(args, options),
             method: 'get',
         })
@@ -90,7 +90,7 @@ index.head = (args: { connection: string | number | { id: string | number }, pat
  * @see app/Http/Controllers/StorageBrowserController.php:23
  * @route '/storage/{connection}/{path?}'
  */
-        indexForm.head = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        indexForm.head = (args: { connection: number | { id: number }, path?: string | number } | [connection: number | { id: number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',

@@ -223,17 +223,17 @@ export default function FileBrowser({
             />
 
             {isCreateFolderOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/60 dark:bg-gray-950/80 px-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 px-4">
                     <form
                         onSubmit={createFolder}
-                        className="w-full max-w-md rounded-2xl bg-white dark:bg-gray-900 p-6 shadow-xl"
+                        className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl"
                     >
                         <div className="mb-5 flex items-start justify-between gap-4">
                             <div>
-                                <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+                                <h2 className="text-lg font-bold text-foreground">
                                     Create folder
                                 </h2>
-                                <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                                <p className="mt-1 text-sm text-muted-foreground">
                                     Add a new folder in the current cloud path.
                                 </p>
                             </div>
@@ -256,7 +256,7 @@ export default function FileBrowser({
                             className="h-11 rounded-xl"
                         />
                         {folderError && (
-                            <p className="mt-2 text-sm text-red-600">
+                            <p className="mt-2 text-sm text-destructive">
                                 {folderError}
                             </p>
                         )}
@@ -270,7 +270,7 @@ export default function FileBrowser({
                             </Button>
                             <Button
                                 type="submit"
-                                className="bg-brand text-white hover:bg-[#a0181e]"
+                                className="bg-primary text-primary-foreground hover:bg-primary/90"
                             >
                                 Create
                             </Button>

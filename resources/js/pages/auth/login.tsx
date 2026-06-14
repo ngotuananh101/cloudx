@@ -27,24 +27,24 @@ export default function Login() {
 
             {/* Logo */}
             <div className="mb-6 flex items-center justify-center gap-2">
-                <Cloud className="h-6 w-6 fill-brand text-brand" />
-                <span className="text-xl font-bold tracking-tight text-brand">
+                <Cloud className="h-6 w-6 fill-primary text-primary" />
+                <span className="text-xl font-bold tracking-tight text-primary">
                     {appName}
                 </span>
             </div>
 
             {/* Headers */}
             <div className="mb-8 text-center">
-                <h1 className="mb-2 text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                <h1 className="mb-2 text-2xl font-semibold text-foreground">
                     Welcome Back
                 </h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                     Enter your credentials to access your vault
                 </p>
             </div>
 
             {status && (
-                <div className="mb-4 rounded-md bg-green-50 dark:bg-green-900/30 p-4 text-sm text-green-600 dark:text-green-400">
+                <div className="mb-4 rounded-md bg-primary/10 p-4 text-sm text-primary">
                     {status}
                 </div>
             )}
@@ -54,7 +54,7 @@ export default function Login() {
                 <div className="space-y-2">
                     <Label
                         htmlFor="email"
-                        className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                        className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                     >
                         Email Address
                     </Label>
@@ -62,13 +62,13 @@ export default function Login() {
                         id="email"
                         type="email"
                         placeholder="name@company.com"
-                        className={`h-11 border-0 bg-[#f4f5f7] px-4 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.email ? 'ring-1 ring-red-500' : ''}`}
+                        className={`h-11 border-0 bg-muted px-4 placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring ${errors.email ? 'ring-1 ring-destructive' : ''}`}
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         autoComplete="username"
                     />
                     {errors.email && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-destructive">
                             {errors.email}
                         </p>
                     )}
@@ -78,13 +78,13 @@ export default function Login() {
                     <div className="flex items-center justify-between">
                         <Label
                             htmlFor="password"
-                            className="text-xs font-bold tracking-wider text-gray-500 uppercase"
+                            className="text-xs font-bold tracking-wider text-muted-foreground uppercase"
                         >
                             Password
                         </Label>
                         <Link
                             href="/forgot-password"
-                            className="text-xs font-bold text-brand hover:underline"
+                            className="text-xs font-bold text-primary hover:underline"
                         >
                             Forgot Password?
                         </Link>
@@ -93,20 +93,20 @@ export default function Login() {
                         id="password"
                         type="password"
                         placeholder="********"
-                        className={`h-11 border-0 bg-[#f4f5f7] px-4 text-lg tracking-widest placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-300 dark:bg-gray-800 dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus-visible:ring-gray-700 ${errors.password ? 'ring-1 ring-red-500' : ''}`}
+                        className={`h-11 border-0 bg-muted px-4 text-lg tracking-widest placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring ${errors.password ? 'ring-1 ring-destructive' : ''}`}
                         value={data.password}
                         onChange={(e) => setData('password', e.target.value)}
                         autoComplete="current-password"
                     />
                     {errors.password && (
-                        <p className="mt-1 text-xs text-red-500">
+                        <p className="mt-1 text-xs text-destructive">
                             {errors.password}
                         </p>
                     )}
                 </div>
 
                 <Button
-                    className="h-11 w-full rounded-lg bg-brand font-medium text-white hover:bg-[#a0181e]"
+                    className="h-11 w-full rounded-lg bg-primary font-medium text-primary-foreground hover:bg-primary/90"
                     disabled={processing}
                 >
                     Sign In
@@ -116,10 +116,10 @@ export default function Login() {
             {/* Divider */}
             <div className="relative my-8">
                 <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-gray-100 dark:border-gray-800" />
+                    <span className="w-full border-t border-border" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-white px-4 font-bold tracking-wider text-gray-400 dark:bg-gray-900 dark:text-gray-500">
+                    <span className="bg-card px-4 font-bold tracking-wider text-muted-foreground">
                         Or continue with
                     </span>
                 </div>
@@ -129,8 +129,9 @@ export default function Login() {
             <div className="grid grid-cols-2 gap-4">
                 <Button
                     variant="outline"
-                    className="h-11 rounded-lg border-0 bg-[#f4f5f7] font-medium text-gray-700 hover:bg-[#e9ebef] dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="h-11 rounded-lg border-0 bg-muted font-medium text-foreground hover:bg-muted/70"
                 >
+                    {/* Google brand colors - intentionally hardcoded as third-party identity */}
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                         <path
                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -153,8 +154,9 @@ export default function Login() {
                 </Button>
                 <Button
                     variant="outline"
-                    className="h-11 rounded-lg border-0 bg-[#f4f5f7] font-medium text-gray-700 hover:bg-[#e9ebef] dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                    className="h-11 rounded-lg border-0 bg-muted font-medium text-foreground hover:bg-muted/70"
                 >
+                    {/* Microsoft brand colors - intentionally hardcoded as third-party identity */}
                     <svg className="mr-2 h-4 w-4" viewBox="0 0 21 21">
                         <path fill="#f25022" d="M1 1h9v9H1z" />
                         <path fill="#00a4ef" d="M1 11h9v9H1z" />
@@ -167,8 +169,8 @@ export default function Login() {
 
             {/* Footer */}
             <div className="mt-8 text-center text-sm">
-                <span className="text-gray-500 dark:text-gray-400">Don't have an account? </span>
-                <Link href="#" className="font-bold text-brand hover:underline">
+                <span className="text-muted-foreground">Don't have an account? </span>
+                <Link href="#" className="font-bold text-primary hover:underline">
                     Create account
                 </Link>
             </div>

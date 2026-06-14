@@ -80,13 +80,13 @@ export default function UploadProgressPanel() {
             }`;
 
     return (
-        <div className="fixed right-6 bottom-6 z-50 w-95 overflow-hidden rounded-2xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-2xl">
-            <div className="flex items-start justify-between gap-3 border-b border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-900/50 px-4 py-3">
+        <div className="fixed right-6 bottom-6 z-50 w-95 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
+            <div className="flex items-start justify-between gap-3 border-b border-border bg-muted  px-4 py-3">
                 <div className="min-w-0">
-                    <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
+                    <div className="truncate text-sm font-bold text-foreground">
                         {headerTitle}
                     </div>
-                    <div className="mt-0.5 text-[11px] font-semibold text-gray-500 dark:text-gray-400">
+                    <div className="mt-0.5 text-[11px] font-semibold text-muted-foreground">
                         {completedCount} completed &middot; {activeCount} active
                         &middot; {failedCount} failed
                     </div>
@@ -98,7 +98,7 @@ export default function UploadProgressPanel() {
                         size="icon-sm"
                         onClick={() => setIsMinimized(!isMinimized)}
                         aria-label={isMinimized ? 'Expand upload panel' : 'Minimize upload panel'}
-                        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                        className="text-muted-foreground hover:text-foreground"
                     >
                         {isMinimized ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                     </Button>
@@ -108,7 +108,7 @@ export default function UploadProgressPanel() {
                         size="icon-sm"
                         onClick={closePanel}
                         aria-label="Close upload panel"
-                        className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100"
+                        className="text-muted-foreground hover:text-foreground"
                     >
                         <X className="h-4 w-4" />
                     </Button>
@@ -116,13 +116,13 @@ export default function UploadProgressPanel() {
             </div>
 
             <div className="px-4 py-3">
-                <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-gray-500 dark:text-gray-400">
+                <div className="mb-1 flex items-center justify-between text-[11px] font-bold text-muted-foreground">
                     <span>Total progress</span>
                     <span>{totalProgress}%</span>
                 </div>
                 <Progress
                     value={totalProgress}
-                    className="h-2 bg-gray-200 dark:bg-gray-800 [&>div]:bg-brand"
+                    className="h-2 bg-muted [&>div]:bg-primary"
                 />
             </div>
 
@@ -136,8 +136,8 @@ export default function UploadProgressPanel() {
                         <div
                             key={item.key}
                             className={`rounded-xl border p-3 ${isFailed
-                                ? 'border-orange-200 dark:border-orange-900/50 bg-orange-50 dark:bg-orange-950/30'
-                                : 'border-gray-100 dark:border-gray-800 bg-gray-50 dark:bg-gray-800/50'
+                                ? 'border-border bg-muted'
+                                : 'border-border bg-muted/50'
                                 }`}
                         >
                             <div className="flex items-start justify-between gap-3">
@@ -150,9 +150,9 @@ export default function UploadProgressPanel() {
                                                 alt={connection.provider}
                                             />
                                         ) : (
-                                            <HardDrive className="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500" />
+                                            <HardDrive className="h-4 w-4 shrink-0 text-muted-foreground" />
                                         )}
-                                        <div className="truncate text-sm font-bold text-gray-900 dark:text-gray-100">
+                                        <div className="truncate text-sm font-bold text-foreground">
                                             {item.file?.name ??
                                                 item.task?.name ??
                                                 'File'}
@@ -160,8 +160,8 @@ export default function UploadProgressPanel() {
                                     </div>
                                     <div
                                         className={`mt-1 truncate text-xs font-semibold ${isFailed
-                                            ? 'text-orange-600 dark:text-orange-400'
-                                            : 'text-gray-500 dark:text-gray-400'
+                                            ? 'text-muted-foreground'
+                                            : 'text-muted-foreground'
                                             }`}
                                     >
                                         {getStatusLabel(item)}
@@ -235,9 +235,9 @@ export default function UploadProgressPanel() {
                             </div>
                             <Progress
                                 value={item.progress}
-                                className={`mt-3 h-1.5 bg-gray-200 dark:bg-gray-800 ${isFailed
-                                    ? '[&>div]:bg-orange-500'
-                                    : '[&>div]:bg-brand'
+                                className={`mt-3 h-1.5 bg-muted ${isFailed
+                                    ? '[&>div]:bg-muted-foreground'
+                                    : '[&>div]:bg-primary'
                                     }`}
                             />
                         </div>
