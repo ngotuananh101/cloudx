@@ -2,7 +2,9 @@
 
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Models\CloudConnection;
 use App\Models\User;
+use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Session;
@@ -135,4 +137,34 @@ it('rejects request with expired session', function () {
 
     $response->assertStatus(422);
     $response->assertJson(['message' => 'Session expired. Please start over.']);
+});
+
+it('flushes connection cache after successful telegram sync', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'http://localhost:8000/sync' => Http::response([
+            'success' => true,
+            'added' => 5,
+        ]),
+    ]);
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => 'My Telegram',
+        'provider' => CloudProvider::TELEGRAM,
+        'credentials' => ['session_id' => 'sess123'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    $cache = Mockery::mock(CloudStorageCache::class);
+    $cache->shouldReceive('flushConnection')
+        ->once()
+        ->with(Mockery::on(fn (CloudConnection $c): bool => $c->id === $connection->id));
+    app()->instance(CloudStorageCache::class, $cache);
+
+    $response = $this->actingAs($user)->post("/connections/{$connection->id}/telegram/sync");
+
+    $response->assertRedirect();
+    $response->assertSessionHas('success', 'Synced 5 item(s) from Telegram.');
 });

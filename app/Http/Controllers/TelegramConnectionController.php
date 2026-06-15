@@ -7,8 +7,10 @@ namespace App\Http\Controllers;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
+use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -16,6 +18,8 @@ use RuntimeException;
 
 class TelegramConnectionController extends Controller
 {
+    public function __construct(private CloudStorageCache $cache) {}
+
     private function telegramClient(string $sessionId): TelegramClient
     {
         return new TelegramClient(
@@ -127,7 +131,7 @@ class TelegramConnectionController extends Controller
         ]);
     }
 
-    public function sync(Request $request, CloudConnection $connection): \Illuminate\Http\RedirectResponse
+    public function sync(Request $request, CloudConnection $connection): RedirectResponse
     {
         if ($connection->user_id !== $request->user()->id) {
             abort(403);
@@ -154,6 +158,7 @@ class TelegramConnectionController extends Controller
             ]);
         }
 
+        $this->cache->flushConnection($connection);
         $connection->update(['last_synced_at' => now()]);
 
         return redirect()->back()->with(
