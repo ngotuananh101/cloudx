@@ -74,6 +74,26 @@ export interface TelegramConnectionConfig {
     session_id?: string;
 }
 
+export type CloudFileType =
+    | 'folder'
+    | 'document'
+    | 'image'
+    | 'code'
+    | 'archive'
+    | 'video'
+    | 'audio'
+    | 'other';
+
+export interface CloudFile {
+    id: string;
+    path: string;
+    name: string;
+    type: CloudFileType;
+    size: number;
+    updatedAt: string;
+    isDirectory: boolean;
+}
+
 export interface CloudConnection {
     id: number;
     name: string;

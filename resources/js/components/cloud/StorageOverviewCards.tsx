@@ -61,7 +61,7 @@ export default function StorageOverviewCards({
                                     <img
                                         src={connection.provider_icon}
                                         className="h-6 w-6"
-                                        alt={connection.provider}
+                                        alt={connection.provider_label ?? 'Storage'}
                                     />
                                 ) : (
                                     <HardDrive
@@ -71,7 +71,7 @@ export default function StorageOverviewCards({
                                 )}
                             </div>
                             <span className="text-[10px] font-semibold tracking-widest text-muted-foreground">
-                                {connection.provider.toUpperCase()}
+                                {connection.provider_label?.toUpperCase() ?? ''}
                             </span>
                         </div>
 

@@ -108,7 +108,7 @@ return null;
                             {item.name}
                         </h3>
                         <div className="mt-0.5 text-xs text-muted-foreground">
-                            {formatBytes(item.size)} • {item.extension?.toUpperCase() || 'FILE'}
+                            {formatBytes(item.size)} • {item.name.split('.').pop()?.toUpperCase() || 'FILE'}
                         </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">

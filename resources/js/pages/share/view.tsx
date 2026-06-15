@@ -113,7 +113,7 @@ export default function ShareView({
         if (!file || !downloadUrl) {
             return;
         }
-        
+
         window.location.href = downloadUrl;
     };
 
@@ -183,7 +183,7 @@ export default function ShareView({
 
                     {/* File/Folder hero */}
                     <div className="mb-6 text-center">
-                        <div className={`mx-auto mb-4 flex h-[72px] w-[72px] items-center justify-center rounded-2xl ${iconConfig.bg}`}>
+                        <div className={`mx-auto mb-4 flex h-18 w-18 items-center justify-center rounded-2xl ${iconConfig.bg}`}>
                             <IconComponent className={`h-8 w-8 ${iconConfig.color}`} />
                         </div>
                         <h1 className="text-lg font-bold text-foreground">
