@@ -8,6 +8,7 @@ use App\Services\CloudStorage\CloudFileTypeDetector;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
+use App\Services\Telegram\TelegramAdapter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -129,7 +130,7 @@ class ShareViewController extends Controller
 
             abort_unless($disk->exists($decodedPath), 404, 'File not found.');
 
-            $name = basename($decodedPath);
+            $name = TelegramAdapter::filenameFor($disk, $decodedPath) ?? basename($decodedPath);
 
             try {
                 $mimeType = $disk->mimeType($decodedPath);
@@ -184,7 +185,7 @@ class ShareViewController extends Controller
             $disk = $connector->disk($share->cloudConnection);
             abort_unless($disk->exists($decodedPath), 404, 'File not found.');
 
-            $name = basename($decodedPath);
+            $name = TelegramAdapter::filenameFor($disk, $decodedPath) ?? basename($decodedPath);
 
             try {
                 $mimeType = $disk->mimeType($decodedPath);

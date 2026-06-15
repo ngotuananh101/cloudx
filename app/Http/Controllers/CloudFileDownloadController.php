@@ -6,6 +6,7 @@ use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
+use App\Services\Telegram\TelegramAdapter;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -54,22 +55,7 @@ class CloudFileDownloadController extends Controller
     {
         abort_unless($disk->exists($path), 404, 'File not found on storage.');
 
-        $name = basename($path);
-
-        if (method_exists($disk, 'getAdapter')) {
-            $adapter = $disk->getAdapter();
-            if ($adapter instanceof \App\Services\Telegram\TelegramAdapter) {
-                try {
-                    $attributes = $adapter->fileSize($path);
-                    $extra = $attributes->extraMetadata();
-                    if (isset($extra['file_name']) && is_string($extra['file_name'])) {
-                        $name = $extra['file_name'];
-                    }
-                } catch (Throwable $e) {
-                    // Ignore and fall back to basename
-                }
-            }
-        }
+        $name = TelegramAdapter::filenameFor($disk, $path) ?? basename($path);
 
         try {
             $mimeType = $disk->mimeType($path);

@@ -1,12 +1,21 @@
 <?php
 
+use App\Enums\CloudProvider;
+use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
 use App\Models\CloudShare;
 use App\Models\User;
 use App\Services\CloudStorage\CloudFileBrowser;
+use App\Services\CloudStorage\CloudStorageManager;
+use App\Services\CloudStorage\Connectors\TelegramConnector;
 use App\Services\CloudStorage\PathEncoder;
+use App\Services\Telegram\TelegramAdapter;
+use App\Services\Telegram\TelegramClient;
+use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia;
+use League\Flysystem\Filesystem;
 
 it('renders error page when share is not found', function () {
     $this->get(route('share.view', ['uuid' => 'nonexistent-uuid']))
@@ -176,4 +185,130 @@ it('renders folder subfolder when path query param is provided', function () {
             ->has('files', 1)
             ->where('currentPath', 'Projects/src')
         );
+});
+
+it('uses the original telegram file name for shared downloads instead of the message id', function () {
+    config(['services.telegram-storage.url' => 'http://localhost:8000']);
+    config(['services.telegram-storage.token' => 'test-token']);
+
+    Http::preventStrayRequests();
+    Http::fake([
+        'http://localhost:8000/metadata*' => Http::response([
+            'message_id' => 12345,
+            'original_name' => 'photo.png',
+            'size' => 11,
+            'mime_type' => 'image/png',
+        ]),
+        'http://localhost:8000/read*' => Http::response('file contents', 200, ['Content-Type' => 'image/png']),
+    ]);
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => 'My Telegram',
+        'provider' => CloudProvider::TELEGRAM,
+        'credentials' => ['session_id' => 'sess123'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    CloudShare::create([
+        'uuid' => 'tg-download-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => '12345',
+        'name' => 'photo.png',
+        'is_directory' => false,
+        'type' => 'public',
+    ]);
+
+    $connector = new class($connection) extends TelegramConnector
+    {
+        public function __construct(private CloudConnection $conn) {}
+
+        public function disk(CloudConnection $connection): Illuminate\Contracts\Filesystem\Filesystem
+        {
+            $client = new TelegramClient(
+                url: (string) config('services.telegram-storage.url'),
+                token: (string) config('services.telegram-storage.token'),
+                sessionId: (string) ($this->conn->credentials['session_id'] ?? ''),
+            );
+
+            return new FilesystemAdapter(
+                new Filesystem(new TelegramAdapter($client)),
+                new TelegramAdapter($client),
+                [],
+            );
+        }
+    };
+
+    $manager = Mockery::mock(CloudStorageManager::class);
+    $manager->shouldReceive('connector')->andReturn($connector);
+    $this->app->instance(CloudStorageManager::class, $manager);
+
+    $this->get(route('share.download', ['uuid' => 'tg-download-uuid', 'path' => PathEncoder::encode('12345')]))
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'attachment; filename=photo.png');
+});
+
+it('uses the original telegram file name for shared previews instead of the message id', function () {
+    config(['services.telegram-storage.url' => 'http://localhost:8000']);
+    config(['services.telegram-storage.token' => 'test-token']);
+
+    Http::preventStrayRequests();
+    Http::fake([
+        'http://localhost:8000/metadata*' => Http::response([
+            'message_id' => 12345,
+            'original_name' => 'photo.png',
+            'size' => 11,
+            'mime_type' => 'image/png',
+        ]),
+        'http://localhost:8000/read*' => Http::response('file contents', 200, ['Content-Type' => 'image/png']),
+    ]);
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => 'My Telegram',
+        'provider' => CloudProvider::TELEGRAM,
+        'credentials' => ['session_id' => 'sess123'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    CloudShare::create([
+        'uuid' => 'tg-preview-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => '12345',
+        'name' => 'photo.png',
+        'is_directory' => false,
+        'type' => 'public',
+    ]);
+
+    $connector = new class($connection) extends TelegramConnector
+    {
+        public function __construct(private CloudConnection $conn) {}
+
+        public function disk(CloudConnection $connection): Illuminate\Contracts\Filesystem\Filesystem
+        {
+            $client = new TelegramClient(
+                url: (string) config('services.telegram-storage.url'),
+                token: (string) config('services.telegram-storage.token'),
+                sessionId: (string) ($this->conn->credentials['session_id'] ?? ''),
+            );
+
+            return new FilesystemAdapter(
+                new Filesystem(new TelegramAdapter($client)),
+                new TelegramAdapter($client),
+                [],
+            );
+        }
+    };
+
+    $manager = Mockery::mock(CloudStorageManager::class);
+    $manager->shouldReceive('connector')->andReturn($connector);
+    $this->app->instance(CloudStorageManager::class, $manager);
+
+    $this->get(route('share.preview', ['uuid' => 'tg-preview-uuid', 'path' => PathEncoder::encode('12345')]))
+        ->assertOk()
+        ->assertHeader('Content-Disposition', 'inline; filename="photo.png"');
 });

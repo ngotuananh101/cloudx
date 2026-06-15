@@ -217,3 +217,51 @@ it('maps client failures to flysystem exceptions', function (string $method, arr
     ['readStream', ['12345'], 'downloadStream', [12345], UnableToReadFile::class],
     ['delete', ['12345'], 'delete', [12345], UnableToDeleteFile::class],
 ]);
+
+it('returns the original file_name via filenameFor when the disk wraps a TelegramAdapter', function () {
+    $client = Mockery::mock(TelegramClient::class);
+    $client->shouldReceive('metadata')->with(12345)->andReturn([
+        'message_id' => 12345,
+        'original_name' => 'photo.png',
+    ]);
+
+    $adapter = new TelegramAdapter($client);
+
+    $disk = Mockery::mock();
+    $disk->shouldReceive('getAdapter')->andReturn($adapter);
+
+    expect(TelegramAdapter::filenameFor($disk, '12345'))->toBe('photo.png');
+});
+
+it('returns null via filenameFor when the disk does not wrap a TelegramAdapter', function () {
+    $disk = Mockery::mock();
+    $disk->shouldReceive('getAdapter')->andReturn(new class {});
+
+    expect(TelegramAdapter::filenameFor($disk, 'whatever.txt'))->toBeNull();
+});
+
+it('returns null via filenameFor when the file_name extra metadata is missing', function () {
+    $client = Mockery::mock(TelegramClient::class);
+    $client->shouldReceive('metadata')->with(12345)->andReturn([
+        'message_id' => 12345,
+    ]);
+
+    $adapter = new TelegramAdapter($client);
+
+    $disk = Mockery::mock();
+    $disk->shouldReceive('getAdapter')->andReturn($adapter);
+
+    expect(TelegramAdapter::filenameFor($disk, '12345'))->toBeNull();
+});
+
+it('returns null via filenameFor when the adapter throws while resolving the file name', function () {
+    $client = Mockery::mock(TelegramClient::class);
+    $client->shouldReceive('metadata')->with(12345)->andThrow(new RuntimeException('boom'));
+
+    $adapter = new TelegramAdapter($client);
+
+    $disk = Mockery::mock();
+    $disk->shouldReceive('getAdapter')->andReturn($adapter);
+
+    expect(TelegramAdapter::filenameFor($disk, '12345'))->toBeNull();
+});

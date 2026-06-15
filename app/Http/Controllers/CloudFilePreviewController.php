@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\PathEncoder;
+use App\Services\Telegram\TelegramAdapter;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -43,22 +44,7 @@ class CloudFilePreviewController extends Controller
     {
         abort_unless($disk->exists($path), 404, 'File not found on storage.');
 
-        $name = basename($path);
-
-        if (method_exists($disk, 'getAdapter')) {
-            $adapter = $disk->getAdapter();
-            if ($adapter instanceof \App\Services\Telegram\TelegramAdapter) {
-                try {
-                    $attributes = $adapter->fileSize($path);
-                    $extra = $attributes->extraMetadata();
-                    if (isset($extra['file_name']) && is_string($extra['file_name'])) {
-                        $name = $extra['file_name'];
-                    }
-                } catch (Throwable $e) {
-                    // Ignore and fall back to basename
-                }
-            }
-        }
+        $name = TelegramAdapter::filenameFor($disk, $path) ?? basename($path);
 
         try {
             $mimeType = $disk->mimeType($path);
@@ -81,7 +67,7 @@ class CloudFilePreviewController extends Controller
         }, 200, array_filter([
             'Content-Type' => $mimeType,
             'Content-Length' => $fileSize,
-            'Content-Disposition' => 'inline; filename="' . addslashes($name) . '"',
+            'Content-Disposition' => 'inline; filename="'.addslashes($name).'"',
             'Cache-Control' => 'public, max-age=31536000, immutable',
         ]));
     }
