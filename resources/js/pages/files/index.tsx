@@ -1,7 +1,7 @@
 import { Head, router } from '@inertiajs/react';
-import { X } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { CreateFolderDialog } from '@/components/files/CreateFolderDialog';
 import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import FilePreviewModal from '@/components/files/FilePreviewModal';
@@ -9,8 +9,6 @@ import MoveItemModal from '@/components/files/MoveItemModal';
 import ShareItemModal from '@/components/files/ShareItemModal';
 import { UploadModeDialog } from '@/components/files/UploadModeDialog';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useUploadManager } from '@/contexts/UploadManagerContext';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
@@ -32,8 +30,6 @@ export default function FileBrowser({
 }: FileBrowserProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-    const [folderName, setFolderName] = useState('');
-    const [folderError, setFolderError] = useState<string | null>(null);
     const [itemToDelete, setItemToDelete] = useState<CloudFile | null>(null);
     const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
     const [itemToMove, setItemToMove] = useState<CloudFile | null>(null);
@@ -122,27 +118,27 @@ export default function FileBrowser({
         setIsUploadModeDialogOpen(false);
     };
 
-    const createFolder = (event: { preventDefault: () => void }) => {
-        event.preventDefault();
-        setFolderError(null);
-
-        router.post(
-            connections.folders.store({ connection: connection.id }).url,
-            {
-                path: decodedPath,
-                name: folderName,
-            },
-            {
-                preserveScroll: true,
-                onSuccess: () => {
-                    setFolderName('');
-                    setIsCreateFolderOpen(false);
-                    refreshFiles();
+    const handleCreateFolder = async (
+        name: string,
+    ): Promise<string | null> => {
+        return new Promise((resolve) => {
+            router.post(
+                connections.folders.store({ connection: connection.id }).url,
+                {
+                    path: decodedPath,
+                    name,
                 },
-                onError: (errors) =>
-                    setFolderError(errors.name || 'Could not create folder.'),
-            },
-        );
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        refreshFiles();
+                        resolve(null);
+                    },
+                    onError: (errors) =>
+                        resolve(errors.name || 'Could not create folder.'),
+                },
+            );
+        });
     };
 
     const handleClearCache = () => {
@@ -222,62 +218,11 @@ export default function FileBrowser({
                 connectionId={connection.id}
             />
 
-            {isCreateFolderOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 px-4">
-                    <form
-                        onSubmit={createFolder}
-                        className="w-full max-w-md rounded-2xl bg-card p-6 shadow-xl"
-                    >
-                        <div className="mb-5 flex items-start justify-between gap-4">
-                            <div>
-                                <h2 className="text-lg font-bold text-foreground">
-                                    Create folder
-                                </h2>
-                                <p className="mt-1 text-sm text-muted-foreground">
-                                    Add a new folder in the current cloud path.
-                                </p>
-                            </div>
-                            <Button
-                                type="button"
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setIsCreateFolderOpen(false)}
-                            >
-                                <X className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <Input
-                            autoFocus
-                            value={folderName}
-                            onChange={(event) =>
-                                setFolderName(event.target.value)
-                            }
-                            placeholder="Folder name"
-                            className="h-11 rounded-xl"
-                        />
-                        {folderError && (
-                            <p className="mt-2 text-sm text-destructive">
-                                {folderError}
-                            </p>
-                        )}
-                        <div className="mt-6 flex justify-end gap-2">
-                            <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() => setIsCreateFolderOpen(false)}
-                            >
-                                Cancel
-                            </Button>
-                            <Button
-                                type="submit"
-                                className="bg-primary text-primary-foreground hover:bg-primary/90"
-                            >
-                                Create
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            )}
+            <CreateFolderDialog
+                isOpen={isCreateFolderOpen}
+                onClose={() => setIsCreateFolderOpen(false)}
+                onCreate={handleCreateFolder}
+            />
 
             <UploadModeDialog
                 isOpen={isUploadModeDialogOpen}

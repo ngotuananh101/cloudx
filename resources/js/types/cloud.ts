@@ -77,7 +77,7 @@ export interface TelegramConnectionConfig {
 export interface CloudConnection {
     id: number;
     name: string;
-    provider: string;
+    provider: number;
     provider_label?: string;
     provider_value?: number;
     provider_icon?: string;
