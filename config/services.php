@@ -53,9 +53,9 @@ return [
         'redirect_uri' => env('DROPBOX_REDIRECT_URI'),
     ],
 
-    'telegram-storage' => [
-        'url' => env('TELEGRAM_STORAGE_URL', 'http://localhost:8000'),
-        'token' => env('TELEGRAM_STORAGE_TOKEN'),
+    'python-service' => [
+        'url' => env('PYTHON_SERVICE_URL', env('TELEGRAM_STORAGE_URL', 'http://localhost:8000')),
+        'token' => env('PYTHON_SERVICE_TOKEN', env('TELEGRAM_STORAGE_TOKEN')),
     ],
 
 ];
