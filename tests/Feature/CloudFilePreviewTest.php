@@ -98,8 +98,8 @@ it('returns 404 when the file does not exist on disk for preview', function () {
 });
 
 it('uses the original telegram file name when previewing instead of the message id', function () {
-    config(['services.telegram-storage.url' => 'http://localhost:8000']);
-    config(['services.telegram-storage.token' => 'test-token']);
+    config(['services.python-service.url' => 'http://localhost:8000']);
+    config(['services.python-service.token' => 'test-token']);
 
     Http::preventStrayRequests();
     Http::fake([
@@ -128,8 +128,8 @@ it('uses the original telegram file name when previewing instead of the message 
         public function disk(CloudConnection $connection): Illuminate\Contracts\Filesystem\Filesystem
         {
             $client = new TelegramClient(
-                url: (string) config('services.telegram-storage.url'),
-                token: (string) config('services.telegram-storage.token'),
+                url: (string) config('services.python-service.url'),
+                token: (string) config('services.python-service.token'),
                 sessionId: (string) ($this->conn->credentials['session_id'] ?? ''),
             );
 

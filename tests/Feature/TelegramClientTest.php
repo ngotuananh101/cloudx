@@ -189,7 +189,7 @@ it('throws on 403 responses', function () {
 
     $client = new TelegramClient('http://microservice:8000', 'token', 'sess1');
 
-    expect(fn () => $client->isAuthorized())->toThrow(RuntimeException::class, 'Telegram storage API authentication failed.');
+    expect(fn () => $client->isAuthorized())->toThrow(RuntimeException::class, 'Python service authentication failed.');
 });
 
 it('throws on unexpected errors', function () {

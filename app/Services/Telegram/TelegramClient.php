@@ -4,24 +4,28 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use App\Services\Python\PythonServiceClient;
 use Illuminate\Http\Client\PendingRequest;
-use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-class TelegramClient
+class TelegramClient extends PythonServiceClient
 {
     public function __construct(
-        private readonly string $url,
-        private readonly string $token,
+        string $url,
+        string $token,
         private readonly string $sessionId,
-    ) {}
+    ) {
+        parent::__construct($url, $token);
+    }
+
+    protected function request(): PendingRequest
+    {
+        return parent::request()->withHeaders(['X-Session-Id' => $this->sessionId]);
+    }
 
     public function isAuthorized(): bool
     {
-        $response = $this->request()->get($this->url.'/auth-status');
-
-        $this->assertAuthenticated($response);
+        $response = $this->get('/auth-status');
 
         return (bool) ($response->json('authorized') ?? false);
     }
@@ -33,9 +37,7 @@ class TelegramClient
     {
         $response = $this->request()
             ->attach('file', $contents, $filename)
-            ->post($this->url.'/write');
-
-        $this->assertSuccess($response);
+            ->post($this->url().'/write');
 
         return (int) $response->json('message_id');
     }
@@ -48,9 +50,7 @@ class TelegramClient
     {
         $response = $this->request()
             ->attach('file', $stream, $filename)
-            ->post($this->url.'/write');
-
-        $this->assertSuccess($response);
+            ->post($this->url().'/write');
 
         return (int) $response->json('message_id');
     }
@@ -59,9 +59,7 @@ class TelegramClient
     {
         $response = $this->request()
             ->withQueryParameters(['message_id' => $messageId])
-            ->get($this->url.'/read');
-
-        $this->assertAuthenticated($response);
+            ->get($this->url().'/read');
 
         if ($response->status() === 404) {
             throw new RuntimeException('Telegram file not found.');
@@ -97,9 +95,7 @@ class TelegramClient
     {
         $response = $this->request()
             ->withQueryParameters(['message_id' => $messageId])
-            ->delete($this->url.'/delete');
-
-        $this->assertAuthenticated($response);
+            ->delete($this->url().'/delete');
 
         if ($response->status() === 404) {
             throw new RuntimeException('Telegram file not found.');
@@ -115,9 +111,7 @@ class TelegramClient
     {
         $response = $this->request()
             ->withQueryParameters(['message_id' => $messageId])
-            ->get($this->url.'/metadata');
-
-        $this->assertAuthenticated($response);
+            ->get($this->url().'/metadata');
 
         if ($response->status() === 404) {
             return null;
@@ -135,24 +129,15 @@ class TelegramClient
      */
     public function listAll(int $limit = 100, int $offset = 0): array
     {
-        $response = $this->request()
+        return $this->request()
             ->withQueryParameters(['limit' => $limit, 'offset' => $offset])
-            ->get($this->url.'/list');
-
-        $this->assertAuthenticated($response);
-        $response->throw();
-
-        return $response->json();
+            ->get($this->url().'/list')
+            ->json();
     }
 
     public function sync(): int
     {
-        $response = $this->request()->post($this->url.'/sync');
-
-        $this->assertAuthenticated($response);
-        $response->throw();
-
-        return (int) ($response->json('added') ?? 0);
+        return (int) ($this->request()->post($this->url().'/sync')->json('added') ?? 0);
     }
 
     /**
@@ -160,17 +145,7 @@ class TelegramClient
      */
     public function sendCodeRequest(string $phone): string
     {
-        $response = $this->request()
-            ->asJson()
-            ->post($this->url.'/request-code', ['phone' => $phone]);
-
-        $this->assertAuthenticated($response);
-
-        if ($response->failed()) {
-            throw new RuntimeException('Telegram storage API error: '.$response->body());
-        }
-
-        $data = $response->json();
+        $data = $this->post('/request-code', ['phone' => $phone])->json();
 
         if (! is_array($data) || ! isset($data['phone_code_hash'])) {
             throw new RuntimeException('Microservice did not return a phone code hash.');
@@ -197,17 +172,7 @@ class TelegramClient
             $payload['password'] = $password;
         }
 
-        $response = $this->request()
-            ->asJson()
-            ->post($this->url.'/login', $payload);
-
-        $this->assertAuthenticated($response);
-
-        if ($response->failed()) {
-            throw new RuntimeException('Telegram storage API error: '.$response->body());
-        }
-
-        $data = $response->json();
+        $data = $this->post('/login', $payload)->json();
 
         if (! is_array($data)) {
             return [
@@ -224,31 +189,5 @@ class TelegramClient
             'message' => (string) ($data['message'] ?? ''),
             'synced' => (int) ($data['synced'] ?? 0),
         ];
-    }
-
-    private function request(): PendingRequest
-    {
-        return Http::connectTimeout(5)
-            ->timeout(30)
-            ->withHeaders([
-                'X-Session-Id' => $this->sessionId,
-                'X-Token' => $this->token,
-            ]);
-    }
-
-    private function assertAuthenticated(Response $response): void
-    {
-        if ($response->status() === 403) {
-            throw new RuntimeException('Telegram storage API authentication failed.');
-        }
-    }
-
-    private function assertSuccess(Response $response): void
-    {
-        $this->assertAuthenticated($response);
-
-        if ($response->failed()) {
-            throw new RuntimeException('Telegram storage API error: '.$response->body());
-        }
     }
 }
