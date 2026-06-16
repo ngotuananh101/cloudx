@@ -99,6 +99,53 @@ it('renders view page for public file share', function () {
         );
 });
 
+it('shows the real file size from extra_info for single file shares', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'sized-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'docs/report.pdf',
+        'name' => 'report.pdf',
+        'is_directory' => false,
+        'type' => 'public',
+        'extra_info' => ['size' => 12345],
+    ]);
+
+    $this->get(route('share.view', ['uuid' => 'sized-uuid']))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('share/view')
+            ->where('isDirectory', false)
+            ->where('file.size', 12345)
+        );
+});
+
+it('shows zero size for single file shares created before extra_info was added', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'legacy-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'docs/legacy.pdf',
+        'name' => 'legacy.pdf',
+        'is_directory' => false,
+        'type' => 'public',
+    ]);
+
+    $this->get(route('share.view', ['uuid' => 'legacy-uuid']))
+        ->assertOk()
+        ->assertInertia(fn (AssertableInertia $page) => $page
+            ->component('share/view')
+            ->where('isDirectory', false)
+            ->where('file.size', 0)
+        );
+});
+
 it('renders view page for public folder share with file listing', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->create(['user_id' => $user->id]);

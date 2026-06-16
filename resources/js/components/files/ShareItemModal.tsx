@@ -124,6 +124,7 @@ return;
             type: type,
             password: type === 'password' ? password : null,
             expires_in_days: expiresInDays === '0' ? null : parseInt(expiresInDays, 10),
+            size: item.isDirectory ? null : item.size,
         };
 
         router.post(

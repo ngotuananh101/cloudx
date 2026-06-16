@@ -40,9 +40,10 @@ class CloudShareController extends Controller
             'type' => 'required|string|in:public,password',
             'password' => 'required_if:type,password|nullable|string|min:4',
             'expires_in_days' => 'nullable|integer|min:1',
+            'size' => 'nullable|integer|min:0',
         ]);
 
-        $share = new CloudShare();
+        $share = new CloudShare;
         $share->uuid = Str::uuid()->toString();
         $share->user_id = $request->user()->id;
         $share->cloud_connection_id = $connection->id;
@@ -50,12 +51,16 @@ class CloudShareController extends Controller
         $share->name = $validated['name'];
         $share->is_directory = $validated['is_directory'];
         $share->type = $validated['type'];
-        
-        if ($validated['type'] === 'password' && !empty($validated['password'])) {
+
+        if (! $validated['is_directory'] && isset($validated['size'])) {
+            $share->extra_info = ['size' => (int) $validated['size']];
+        }
+
+        if ($validated['type'] === 'password' && ! empty($validated['password'])) {
             $share->password = Hash::make($validated['password']);
         }
 
-        if (!empty($validated['expires_in_days'])) {
+        if (! empty($validated['expires_in_days'])) {
             $share->expires_at = now()->addDays($validated['expires_in_days']);
         }
 

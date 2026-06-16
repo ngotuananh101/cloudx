@@ -12,6 +12,7 @@ class CloudShare extends Model
         'cloud_connection_id',
         'path',
         'name',
+        'extra_info',
         'is_directory',
         'type',
         'password',
@@ -21,6 +22,7 @@ class CloudShare extends Model
     protected $casts = [
         'is_directory' => 'boolean',
         'expires_at' => 'datetime',
+        'extra_info' => 'array',
     ];
 
     public function user()

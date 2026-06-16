@@ -92,7 +92,7 @@ class ShareViewController extends Controller
             'file' => [
                 'name' => $share->name,
                 'path' => $share->path,
-                'size' => 0,
+                'size' => is_array($share->extra_info) ? (int) ($share->extra_info['size'] ?? 0) : 0,
                 'type' => CloudFileTypeDetector::detect($share->name, false),
             ],
             'currentPath' => '',
