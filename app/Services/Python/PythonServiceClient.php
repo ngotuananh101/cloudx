@@ -54,7 +54,7 @@ class PythonServiceClient
     protected function assertAuthenticated(Response $response): void
     {
         if ($response->status() === 403) {
-            throw new RuntimeException('Telegram storage API authentication failed.');
+            throw new RuntimeException('Python service authentication failed.');
         }
     }
 
@@ -63,7 +63,7 @@ class PythonServiceClient
         $this->assertAuthenticated($response);
 
         if ($response->failed()) {
-            throw new RuntimeException('Telegram storage API error: '.$response->body());
+            throw new RuntimeException('Python service error: '.$response->body());
         }
     }
 }

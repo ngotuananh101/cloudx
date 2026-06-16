@@ -43,7 +43,7 @@ it('throws on 403 auth failure', function () {
         }
     };
 
-    expect(fn () => $client->probe())->toThrow(RuntimeException::class, 'Telegram storage API authentication failed.');
+    expect(fn () => $client->probe())->toThrow(RuntimeException::class, 'Python service authentication failed.');
 });
 
 it('throws on 5xx failure', function () {
