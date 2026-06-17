@@ -65,9 +65,7 @@ class TelegramClient extends PythonServiceClient
             throw new RuntimeException('Telegram file not found.');
         }
 
-        if ($response->failed()) {
-            throw new RuntimeException('Telegram storage API error: '.$response->body());
-        }
+        $this->assertSuccess($response);
 
         return $response->body();
     }
@@ -101,7 +99,7 @@ class TelegramClient extends PythonServiceClient
             throw new RuntimeException('Telegram file not found.');
         }
 
-        $response->throw();
+        $this->assertSuccess($response);
     }
 
     /**
@@ -117,7 +115,7 @@ class TelegramClient extends PythonServiceClient
             return null;
         }
 
-        $response->throw();
+        $this->assertSuccess($response);
 
         $data = $response->json();
 
@@ -129,15 +127,17 @@ class TelegramClient extends PythonServiceClient
      */
     public function listAll(int $limit = 100, int $offset = 0): array
     {
-        return $this->request()
-            ->withQueryParameters(['limit' => $limit, 'offset' => $offset])
-            ->get($this->url().'/list')
-            ->json();
+        $response = $this->get('/list', [
+            'limit' => $limit,
+            'offset' => $offset,
+        ]);
+
+        return $response->json();
     }
 
     public function sync(): int
     {
-        return (int) ($this->request()->post($this->url().'/sync')->json('added') ?? 0);
+        return (int) ($this->post('/sync', [])->json('added') ?? 0);
     }
 
     /**
