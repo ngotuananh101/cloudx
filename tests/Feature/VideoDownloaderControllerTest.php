@@ -104,7 +104,7 @@ it('returns 422 when the download url is missing', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get(route('video-downloader.download', ['format_id' => '18']))
+        ->getJson(route('video-downloader.download', ['format_id' => '18']))
         ->assertUnprocessable();
 });
 
@@ -116,7 +116,7 @@ it('returns 502 when the download request fails', function () {
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get(route('video-downloader.download', [
+        ->getJson(route('video-downloader.download', [
             'url' => 'https://example.com/watch?v=1',
             'format_id' => '18',
         ]))
