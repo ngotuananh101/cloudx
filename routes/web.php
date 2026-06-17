@@ -22,6 +22,7 @@ use App\Http\Controllers\StorageBrowserController;
 use App\Http\Controllers\System\CloudTaskController;
 use App\Http\Controllers\System\SharedLinkController;
 use App\Http\Controllers\TelegramConnectionController;
+use App\Http\Controllers\VideoDownloaderController;
 use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
@@ -95,4 +96,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/connections/{connection}/upload-tasks/{task}/direct/parts/{partNumber}/done', [CloudUploadDirectCompleteController::class, 'partDone'])->name('connections.upload-tasks.direct.parts.done');
     Route::post('/connections/{connection}/upload-tasks/{task}/direct/complete', [CloudUploadDirectCompleteController::class, 'complete'])->name('connections.upload-tasks.direct.complete');
     Route::delete('/connections/{connection}/upload-tasks/{task}/direct/abort', [CloudUploadDirectCompleteController::class, 'abort'])->name('connections.upload-tasks.direct.abort');
+
+    Route::get('/video-downloader', [VideoDownloaderController::class, 'index'])->name('video-downloader.index');
+    Route::post('/video-downloader/metadata', [VideoDownloaderController::class, 'metadata'])->name('video-downloader.metadata');
+    Route::get('/video-downloader/download', [VideoDownloaderController::class, 'download'])->name('video-downloader.download');
 });
