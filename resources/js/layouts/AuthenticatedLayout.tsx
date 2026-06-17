@@ -12,6 +12,7 @@ import {
     Link as LinkIcon,
     Eraser,
     RefreshCw,
+    Download,
 } from 'lucide-react';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
@@ -224,6 +225,20 @@ export default function AuthenticatedLayout({
                                         className={`h-4.5 w-4.5 ${url.startsWith('/system/shared-links') ? 'text-primary' : 'text-muted-foreground'}`}
                                     />
                                     SHARED LINKS
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/video-downloader"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/video-downloader') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {url.startsWith('/video-downloader') && (
+                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    )}
+                                    <Download
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/video-downloader') ? 'text-primary' : 'text-muted-foreground'}`}
+                                    />
+                                    VIDEO DOWNLOADER
                                 </Link>
                             </li>
                         </ul>
