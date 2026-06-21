@@ -43,11 +43,11 @@ class PythonServiceClient
     }
 
     /**
-     * @param string|resource $sink
+     * @return Response
      */
-    protected function postStream(string $path, array $body, $sink, int $timeout = 30): Response
+    protected function postStream(string $path, array $body, int $timeout = 30): Response
     {
-        $response = $this->request($timeout)->sink($sink)->asJson()->post($this->url.$path, $body);
+        $response = $this->request($timeout)->withOptions(['stream' => true])->asJson()->post($this->url.$path, $body);
 
         $this->assertSuccess($response);
 

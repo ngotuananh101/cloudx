@@ -39,19 +39,13 @@ class YtDlpClient extends PythonServiceClient
      */
     public function downloadStream(string $url, string $formatId, bool $audioOnly, ?string $cookies = null, ?string $poToken = null): array
     {
-        $stream = fopen('php://temp', 'r+');
-
-        if ($stream === false) {
-            throw new RuntimeException('Could not create download stream.');
-        }
-
         $response = $this->postStream('/yt-dlp/download', array_filter([
             'url' => $url,
             'format_id' => $formatId,
             'audio_only' => $audioOnly,
             'cookies' => $cookies,
             'po_token' => $poToken,
-        ], fn ($v) => $v !== null), $stream, 3600);
+        ], fn ($v) => $v !== null), 3600);
 
         $contentType = $response->header('Content-Type') ?? 'application/octet-stream';
         $filename = $this->parseFilename($response->header('Content-Disposition'));
@@ -59,7 +53,7 @@ class YtDlpClient extends PythonServiceClient
             ? (int) $response->header('Content-Length')
             : null;
 
-        rewind($stream);
+        $stream = $response->toPsrResponse()->getBody();
 
         return [
             'stream' => $stream,
