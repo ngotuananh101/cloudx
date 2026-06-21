@@ -18,9 +18,9 @@ class TelegramClient extends PythonServiceClient
         parent::__construct($url, $token);
     }
 
-    protected function request(): PendingRequest
+    protected function request(int $timeout = 30): PendingRequest
     {
-        return parent::request()->withHeaders(['X-Session-Id' => $this->sessionId]);
+        return parent::request($timeout)->withHeaders(['X-Session-Id' => $this->sessionId]);
     }
 
     public function isAuthorized(): bool
