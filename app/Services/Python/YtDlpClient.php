@@ -44,7 +44,7 @@ class YtDlpClient extends PythonServiceClient
             'format_id' => $formatId,
             'audio_only' => $audioOnly,
             'cookies' => $cookies,
-        ], fn ($v) => $v !== null));
+        ], fn ($v) => $v !== null), 3600);
 
         $contentType = $response->header('Content-Type') ?? 'application/octet-stream';
         $filename = $this->parseFilename($response->header('Content-Disposition'));

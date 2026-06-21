@@ -26,25 +26,25 @@ class PythonServiceClient
         return $this->token;
     }
 
-    protected function request(): PendingRequest
+    protected function request(int $timeout = 30): PendingRequest
     {
         return Http::connectTimeout(5)
-            ->timeout(30)
+            ->timeout($timeout)
             ->withHeaders(['X-Token' => $this->token]);
     }
 
-    protected function post(string $path, array $body): Response
+    protected function post(string $path, array $body, int $timeout = 30): Response
     {
-        $response = $this->request()->asJson()->post($this->url.$path, $body);
+        $response = $this->request($timeout)->asJson()->post($this->url.$path, $body);
 
         $this->assertSuccess($response);
 
         return $response;
     }
 
-    protected function get(string $path, array $query = []): Response
+    protected function get(string $path, array $query = [], int $timeout = 30): Response
     {
-        $response = $this->request()->get($this->url.$path, $query);
+        $response = $this->request($timeout)->get($this->url.$path, $query);
 
         $this->assertSuccess($response);
 
