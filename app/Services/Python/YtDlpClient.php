@@ -53,7 +53,7 @@ class YtDlpClient extends PythonServiceClient
             ? (int) $response->header('Content-Length')
             : null;
 
-        $stream = $response->toPsrResponse()->getBody();
+        $stream = $response->toPsrResponse()->getBody()->detach();
 
         return [
             'stream' => $stream,

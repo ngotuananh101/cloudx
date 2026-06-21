@@ -84,11 +84,8 @@ class VideoDownloaderController extends Controller
             set_time_limit(0);
             ignore_user_abort(true);
             $stream = $result['stream'];
-            while (!$stream->eof()) {
-                echo $stream->read(8192);
-                flush();
-            }
-            $stream->close();
+            fpassthru($stream);
+            fclose($stream);
         }, 200, $headers);
     }
 }
