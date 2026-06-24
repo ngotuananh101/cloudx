@@ -29,6 +29,7 @@ export default function ConnectionNavItem({
                     <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
                 )}
                 <Link
+                    prefetch
                     href={href}
                     className="flex min-w-0 flex-1 items-center gap-3 truncate"
                 >

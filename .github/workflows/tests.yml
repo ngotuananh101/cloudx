@@ -37,8 +37,11 @@ jobs:
         with:
           node-version: '22'
 
+      - name: Install pnpm
+        run: npm install -g pnpm
+
       - name: Install Node Dependencies
-        run: npm i
+        run: pnpm install --frozen-lockfile
 
       - name: Install Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -50,7 +53,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Build Assets
-        run: npm run build
+        run: pnpm run build
 
       - name: Tests
         run: ./vendor/bin/pest

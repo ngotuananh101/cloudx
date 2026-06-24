@@ -249,35 +249,7 @@ export default function FileBrowser({
                 </div>
             </div>
 
-            <style
-                dangerouslySetInnerHTML={{
-                    __html: `
-                .custom-scrollbar::-webkit-scrollbar {
-                    width: 14px;
-                }
-                .custom-scrollbar::-webkit-scrollbar-track {
-                    background: transparent;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb {
-                    background-color: #cbd5e1;
-                    border-radius: 20px;
-                    border: 4px solid transparent;
-                    background-clip: content-box;
-                }
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                    background-color: #94a3b8;
-                }
-                @media (prefers-color-scheme: dark) {
-                    .custom-scrollbar::-webkit-scrollbar-thumb {
-                        background-color: #475569;
-                    }
-                    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-                        background-color: #64748b;
-                    }
-                }
-            `,
-                }}
-            />
+
         </AuthenticatedLayout>
     );
 }
