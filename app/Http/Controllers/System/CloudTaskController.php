@@ -4,7 +4,6 @@ namespace App\Http\Controllers\System;
 
 use App\Http\Controllers\Controller;
 use App\Models\CloudTask;
-use BenSampo\Enum\Enum;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -44,11 +43,11 @@ class CloudTaskController extends Controller
     /**
      * @return array{value: int|string|null, key: string|null, label: string|null}
      */
-    private function enumData(?Enum $enum): array
+    private function enumData(?\BackedEnum $enum): array
     {
         return [
             'value' => $enum?->value,
-            'key' => $enum?->key,
+            'key' => $enum?->name,
             'label' => $enum?->getDescription(),
         ];
     }

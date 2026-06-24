@@ -137,7 +137,7 @@ class TelegramConnectionController extends Controller
             abort(403);
         }
 
-        if ($connection->provider?->value !== CloudProvider::TELEGRAM) {
+        if ($connection->provider !== CloudProvider::TELEGRAM) {
             abort(400, 'Not a Telegram connection');
         }
 
