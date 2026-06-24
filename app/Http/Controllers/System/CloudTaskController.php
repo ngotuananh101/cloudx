@@ -49,7 +49,7 @@ class CloudTaskController extends Controller
         return [
             'value' => $enum?->value,
             'key' => $enum?->key,
-            'label' => $enum?->description,
+            'label' => $enum?->getDescription(),
         ];
     }
 }

@@ -21,7 +21,7 @@ class TelegramConnector implements CloudProviderConnector
 {
     public function provider(): CloudProvider
     {
-        return CloudProvider::TELEGRAM();
+        return CloudProvider::TELEGRAM;
     }
 
     public function redirectUrl(): string

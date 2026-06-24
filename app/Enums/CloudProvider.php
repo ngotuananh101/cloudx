@@ -4,36 +4,19 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-use BenSampo\Enum\Enum;
-
-/**
- * @method static static GOOGLE_DRIVE()
- * @method static static ONEDRIVE()
- * @method static static DROPBOX()
- * @method static static AWS_S3()
- * @method static static FTP()
- * @method static static SFTP()
- * @method static static TELEGRAM()
- */
-final class CloudProvider extends Enum
+enum CloudProvider: int
 {
-    const GOOGLE_DRIVE = 1;
-
-    const ONEDRIVE = 2;
-
-    const DROPBOX = 3;
-
-    const AWS_S3 = 4;
-
-    const FTP = 5;
-
-    const SFTP = 6;
-
-    const TELEGRAM = 7;
+    case GOOGLE_DRIVE = 1;
+    case ONEDRIVE = 2;
+    case DROPBOX = 3;
+    case AWS_S3 = 4;
+    case FTP = 5;
+    case SFTP = 6;
+    case TELEGRAM = 7;
 
     public function slug(): string
     {
-        return match ($this->value) {
+        return match ($this) {
             self::GOOGLE_DRIVE => 'google-drive',
             self::ONEDRIVE => 'onedrive',
             self::DROPBOX => 'dropbox',
@@ -47,20 +30,20 @@ final class CloudProvider extends Enum
     public static function fromSlug(string $slug): ?self
     {
         return match ($slug) {
-            'google', 'google-drive' => self::GOOGLE_DRIVE(),
-            'onedrive' => self::ONEDRIVE(),
-            'dropbox' => self::DROPBOX(),
-            'aws-s3' => self::AWS_S3(),
-            'ftp' => self::FTP(),
-            'sftp' => self::SFTP(),
-            'telegram' => self::TELEGRAM(),
+            'google', 'google-drive' => self::GOOGLE_DRIVE,
+            'onedrive' => self::ONEDRIVE,
+            'dropbox' => self::DROPBOX,
+            'aws-s3' => self::AWS_S3,
+            'ftp' => self::FTP,
+            'sftp' => self::SFTP,
+            'telegram' => self::TELEGRAM,
             default => null,
         };
     }
 
-    public static function getDescription(mixed $value): string
+    public function getDescription(): string
     {
-        return match ($value) {
+        return match ($this) {
             self::GOOGLE_DRIVE => 'Google Drive',
             self::ONEDRIVE => 'OneDrive',
             self::DROPBOX => 'Dropbox',
@@ -68,20 +51,19 @@ final class CloudProvider extends Enum
             self::FTP => 'FTP Server',
             self::SFTP => 'SFTP Server',
             self::TELEGRAM => 'Telegram',
-            default => parent::getDescription($value),
         };
     }
 
     public static function getIcon(int $value): string
     {
         return match ($value) {
-            self::GOOGLE_DRIVE => '/assets/svg/GoogleDrive.svg',
-            self::ONEDRIVE => '/assets/svg/OneDrive.svg',
-            self::DROPBOX => '/assets/svg/Dropbox.svg',
-            self::AWS_S3 => '/assets/svg/S3.svg',
-            self::FTP => '/assets/svg/Ftp.svg',
-            self::SFTP => '/assets/svg/Sftp.svg',
-            self::TELEGRAM => '/assets/svg/Telegram.svg',
+            self::GOOGLE_DRIVE->value => '/assets/svg/GoogleDrive.svg',
+            self::ONEDRIVE->value => '/assets/svg/OneDrive.svg',
+            self::DROPBOX->value => '/assets/svg/Dropbox.svg',
+            self::AWS_S3->value => '/assets/svg/S3.svg',
+            self::FTP->value => '/assets/svg/Ftp.svg',
+            self::SFTP->value => '/assets/svg/Sftp.svg',
+            self::TELEGRAM->value => '/assets/svg/Telegram.svg',
             default => 'cloud',
         };
     }

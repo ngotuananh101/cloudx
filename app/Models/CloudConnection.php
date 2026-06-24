@@ -67,7 +67,7 @@ class CloudConnection extends Model
 
     public function canReconnect(): bool
     {
-        return in_array($this->provider->value, [
+        return in_array($this->provider, [
             CloudProvider::GOOGLE_DRIVE,
             CloudProvider::ONEDRIVE,
             CloudProvider::DROPBOX,
@@ -76,7 +76,7 @@ class CloudConnection extends Model
 
     public function canEditName(): bool
     {
-        return in_array($this->provider->value, [
+        return in_array($this->provider, [
             CloudProvider::GOOGLE_DRIVE,
             CloudProvider::ONEDRIVE,
             CloudProvider::DROPBOX,
@@ -88,7 +88,7 @@ class CloudConnection extends Model
 
     public function canEditConnection(): bool
     {
-        return in_array($this->provider->value, [
+        return in_array($this->provider, [
             CloudProvider::AWS_S3,
             CloudProvider::FTP,
             CloudProvider::SFTP,

@@ -23,10 +23,10 @@ class HomeController extends Controller
                 return [
                     'id' => $connection->id,
                     'name' => $connection->name,
-                    'provider' => $connection->provider->description,
+                    'provider' => $connection->provider->getDescription(),
                     'provider_value' => $connection->provider->value,
                     'provider_icon' => CloudProvider::getIcon($connection->provider->value),
-                    'status' => $connection->status->description,
+                    'status' => $connection->status->getDescription(),
                     'status_value' => $connection->status->value,
                     'used_space' => $connection->used_space,
                     'total_space' => $connection->total_space,
@@ -52,16 +52,16 @@ class HomeController extends Controller
         return collect($this->cloudStorageManager->connectors())
             ->map(function ($connector): array {
                 $provider = $connector->provider();
-                $authType = $provider->is(CloudProvider::FTP)
-                    || $provider->is(CloudProvider::AWS_S3)
-                    || $provider->is(CloudProvider::SFTP)
-                    || $provider->is(CloudProvider::TELEGRAM)
+                $authType = $provider === CloudProvider::FTP
+                    || $provider === CloudProvider::AWS_S3
+                    || $provider === CloudProvider::SFTP
+                    || $provider === CloudProvider::TELEGRAM
                     ? 'credentials'
                     : 'oauth';
 
                 return [
                     'key' => $provider->slug(),
-                    'label' => $provider->description,
+                    'label' => $provider->getDescription(),
                     'value' => $provider->value,
                     'icon' => CloudProvider::getIcon($provider->value),
                     'status' => 'active',

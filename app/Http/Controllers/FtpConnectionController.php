@@ -25,10 +25,10 @@ class FtpConnectionController extends Controller
 
         $request->user()->cloudConnections()->create([
             'name' => $validated['name'],
-            'provider' => CloudProvider::FTP(),
+            'provider' => CloudProvider::FTP,
             'provider_id' => $this->providerId($credentials),
             'credentials' => $credentials,
-            'status' => ConnectionStatus::CONNECTED(),
+            'status' => ConnectionStatus::CONNECTED,
             'total_space' => null,
             'used_space' => null,
             'error_message' => null,
@@ -40,7 +40,7 @@ class FtpConnectionController extends Controller
 
     public function update(UpdateFtpConnectionRequest $request, CloudConnection $connection): RedirectResponse
     {
-        if ($connection->user_id !== $request->user()->id || ! $connection->provider->is(CloudProvider::FTP)) {
+        if ($connection->user_id !== $request->user()->id || ! $connection->provider === CloudProvider::FTP) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -51,10 +51,10 @@ class FtpConnectionController extends Controller
 
         $connection->update([
             'name' => $validated['name'],
-            'provider' => CloudProvider::FTP(),
+            'provider' => CloudProvider::FTP,
             'provider_id' => $this->providerId($credentials),
             'credentials' => $credentials,
-            'status' => ConnectionStatus::CONNECTED(),
+            'status' => ConnectionStatus::CONNECTED,
             'total_space' => null,
             'used_space' => null,
             'error_message' => null,

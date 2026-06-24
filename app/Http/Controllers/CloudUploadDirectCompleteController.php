@@ -133,7 +133,7 @@ class CloudUploadDirectCompleteController extends Controller
 
     private function ensureS3Connection(CloudConnection $connection): void
     {
-        if (! $connection->provider->is(CloudProvider::AWS_S3)) {
+        if (! $connection->provider === CloudProvider::AWS_S3) {
             abort(422, 'Direct upload is only available for S3 connections.');
         }
     }

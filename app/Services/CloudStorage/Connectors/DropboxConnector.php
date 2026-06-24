@@ -31,7 +31,7 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
 
     public function provider(): CloudProvider
     {
-        return CloudProvider::DROPBOX();
+        return CloudProvider::DROPBOX;
     }
 
     public function redirectUrl(): string

@@ -52,21 +52,21 @@ class HandleInertiaRequests extends Middleware
                             $payload = [
                                 'id' => $connection->id,
                                 'name' => $connection->name,
-                                'provider' => $connection->provider->description,
+                                'provider' => $connection->provider->getDescription(),
                                 'provider_value' => $connection->provider->value,
                                 'provider_icon' => CloudProvider::getIcon($connection->provider->value),
-                                'status' => $connection->status->description,
+                                'status' => $connection->status->getDescription(),
                                 'status_value' => $connection->status->value,
                                 'actions' => $connection->actions(),
                             ];
 
-                            if ($connection->provider->is(CloudProvider::FTP)) {
+                            if ($connection->provider === CloudProvider::FTP) {
                                 $payload['ftp_config'] = collect($connection->credentials)
                                     ->except('password')
                                     ->all();
                             }
 
-                            if ($connection->provider->is(CloudProvider::AWS_S3)) {
+                            if ($connection->provider === CloudProvider::AWS_S3) {
                                 $payload['s3_config'] = collect($connection->credentials)
                                     ->except(['secret_access_key', 'session_token'])
                                     ->all();

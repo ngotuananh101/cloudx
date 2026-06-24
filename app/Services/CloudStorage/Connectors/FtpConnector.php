@@ -16,7 +16,7 @@ class FtpConnector implements CloudProviderConnector
 {
     public function provider(): CloudProvider
     {
-        return CloudProvider::FTP();
+        return CloudProvider::FTP;
     }
 
     public function redirectUrl(): string

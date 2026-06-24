@@ -25,10 +25,10 @@ class S3ConnectionController extends Controller
 
         $request->user()->cloudConnections()->create([
             'name' => $validated['name'],
-            'provider' => CloudProvider::AWS_S3(),
+            'provider' => CloudProvider::AWS_S3,
             'provider_id' => $this->providerId($credentials),
             'credentials' => $credentials,
-            'status' => ConnectionStatus::CONNECTED(),
+            'status' => ConnectionStatus::CONNECTED,
             'total_space' => null,
             'used_space' => null,
             'error_message' => null,
@@ -40,7 +40,7 @@ class S3ConnectionController extends Controller
 
     public function update(UpdateS3ConnectionRequest $request, CloudConnection $connection): RedirectResponse
     {
-        if ($connection->user_id !== $request->user()->id || ! $connection->provider->is(CloudProvider::AWS_S3)) {
+        if ($connection->user_id !== $request->user()->id || ! $connection->provider === CloudProvider::AWS_S3) {
             abort($connection->user_id !== $request->user()->id ? 403 : 404);
         }
 
@@ -51,10 +51,10 @@ class S3ConnectionController extends Controller
 
         $connection->update([
             'name' => $validated['name'],
-            'provider' => CloudProvider::AWS_S3(),
+            'provider' => CloudProvider::AWS_S3,
             'provider_id' => $this->providerId($credentials),
             'credentials' => $credentials,
-            'status' => ConnectionStatus::CONNECTED(),
+            'status' => ConnectionStatus::CONNECTED,
             'total_space' => null,
             'used_space' => null,
             'error_message' => null,

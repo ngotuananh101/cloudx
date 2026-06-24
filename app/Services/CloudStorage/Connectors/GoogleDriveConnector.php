@@ -18,7 +18,7 @@ class GoogleDriveConnector implements CloudProviderConnector
 {
     public function provider(): CloudProvider
     {
-        return CloudProvider::GOOGLE_DRIVE();
+        return CloudProvider::GOOGLE_DRIVE;
     }
 
     public function redirectUrl(): string

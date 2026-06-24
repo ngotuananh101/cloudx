@@ -46,7 +46,7 @@ class StorageBrowserController extends Controller
                 'id' => $connection->id,
                 'name' => $connection->name,
                 'provider' => $connection->provider->value,
-                'provider_label' => $connection->provider->description,
+                'provider_label' => $connection->provider->getDescription(),
                 'provider_icon' => CloudProvider::getIcon($connection->provider->value),
                 'capabilities' => $connector->capabilities()->toArray(),
                 'storageQuota' => $this->storageQuota->get($connection),

@@ -61,20 +61,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->where('path', '.*');
 
     // Cloud Connections OAuth Flow
-    Route::get('/oauth/{provider}/redirect', [CloudConnectionController::class, 'redirect'])->name('oauth.redirect');
-    Route::get('/oauth/{provider}/callback', [CloudConnectionController::class, 'callback'])->name('oauth.callback');
-    Route::get('/connections/{connection}/reconnect', [CloudConnectionController::class, 'reconnect'])->name('cloud-connections.reconnect');
-    Route::delete('/connections/{connection}', [CloudConnectionController::class, 'disconnect'])->name('cloud-connections.destroy');
-    Route::patch('/connections/{connection}/name', [CloudConnectionController::class, 'updateName'])->name('cloud-connections.name.update');
+    Route::controller(CloudConnectionController::class)->group(function () {
+        Route::get('/oauth/{provider}/redirect', 'redirect')->name('oauth.redirect');
+        Route::get('/oauth/{provider}/callback', 'callback')->name('oauth.callback');
+        Route::get('/connections/{connection}/reconnect', 'reconnect')->name('cloud-connections.reconnect');
+        Route::delete('/connections/{connection}', 'disconnect')->name('cloud-connections.destroy');
+        Route::patch('/connections/{connection}/name', 'updateName')->name('cloud-connections.name.update');
+    });
     Route::post('/connections/ftp', [FtpConnectionController::class, 'store'])->name('connections.ftp.store');
     Route::patch('/connections/{connection}/ftp', [FtpConnectionController::class, 'update'])->name('connections.ftp.update');
     Route::post('/connections/s3', [S3ConnectionController::class, 'store'])->name('connections.s3.store');
     Route::patch('/connections/{connection}/s3', [S3ConnectionController::class, 'update'])->name('connections.s3.update');
     Route::post('/connections/sftp', [SftpConnectionController::class, 'store'])->name('connections.sftp.store');
     Route::patch('/connections/{connection}/sftp', [SftpConnectionController::class, 'update'])->name('connections.sftp.update');
-    Route::post('/connections/telegram/request-code', [TelegramConnectionController::class, 'requestCode'])->name('connections.telegram.request-code');
-    Route::post('/connections/telegram', [TelegramConnectionController::class, 'store'])->name('connections.telegram.store');
-    Route::post('/connections/{connection}/telegram/sync', [TelegramConnectionController::class, 'sync'])->name('connections.telegram.sync');
+    Route::controller(TelegramConnectionController::class)->group(function () {
+        Route::post('/connections/telegram/request-code', 'requestCode')->name('connections.telegram.request-code');
+        Route::post('/connections/telegram', 'store')->name('connections.telegram.store');
+        Route::post('/connections/{connection}/telegram/sync', 'sync')->name('connections.telegram.sync');
+    });
     Route::delete('/connections/{connection}/cache', [CloudConnectionCacheController::class, 'destroy'])->name('cloud-connections.cache.destroy');
     Route::delete('/connections/{connection}/items', [CloudItemController::class, 'destroy'])->name('connections.items.destroy');
     Route::post('/connections/{connection}/folders', [CloudFolderController::class, 'store'])->name('connections.folders.store');
@@ -84,20 +88,26 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('/connections/{connection}/shares/{share}', [CloudShareController::class, 'destroy'])->name('connections.shares.destroy');
     Route::post('/connections/{connection}/move', CloudItemMoveController::class)->name('connections.items.move');
 
-    Route::get('/connections/{connection}/upload-tasks', [CloudUploadTaskController::class, 'index'])->name('connections.upload-tasks.index');
-    Route::post('/connections/{connection}/upload-tasks', [CloudUploadTaskController::class, 'store'])->name('connections.upload-tasks.store');
-    Route::get('/connections/{connection}/upload-tasks/{task}', [CloudUploadTaskController::class, 'show'])->name('connections.upload-tasks.show');
-    Route::patch('/connections/{connection}/upload-tasks/{task}/pause', [CloudUploadTaskController::class, 'pause'])->name('connections.upload-tasks.pause');
-    Route::patch('/connections/{connection}/upload-tasks/{task}/resume', [CloudUploadTaskController::class, 'resume'])->name('connections.upload-tasks.resume');
-    Route::delete('/connections/{connection}/upload-tasks/{task}', [CloudUploadTaskController::class, 'destroy'])->name('connections.upload-tasks.destroy');
+    Route::controller(CloudUploadTaskController::class)->group(function () {
+        Route::get('/connections/{connection}/upload-tasks', 'index')->name('connections.upload-tasks.index');
+        Route::post('/connections/{connection}/upload-tasks', 'store')->name('connections.upload-tasks.store');
+        Route::get('/connections/{connection}/upload-tasks/{task}', 'show')->name('connections.upload-tasks.show');
+        Route::patch('/connections/{connection}/upload-tasks/{task}/pause', 'pause')->name('connections.upload-tasks.pause');
+        Route::patch('/connections/{connection}/upload-tasks/{task}/resume', 'resume')->name('connections.upload-tasks.resume');
+        Route::delete('/connections/{connection}/upload-tasks/{task}', 'destroy')->name('connections.upload-tasks.destroy');
+    });
     Route::post('/connections/{connection}/upload-tasks/{task}/chunks', [CloudUploadTaskChunkController::class, 'store'])->name('connections.upload-tasks.chunks.store');
     Route::post('/connections/{connection}/upload-tasks/{task}/direct/init', [CloudUploadPresignController::class, 'init'])->name('connections.upload-tasks.direct.init');
     Route::post('/connections/{connection}/upload-tasks/{task}/direct/part', [CloudUploadPresignController::class, 'part'])->name('connections.upload-tasks.direct.part');
-    Route::post('/connections/{connection}/upload-tasks/{task}/direct/parts/{partNumber}/done', [CloudUploadDirectCompleteController::class, 'partDone'])->name('connections.upload-tasks.direct.parts.done');
-    Route::post('/connections/{connection}/upload-tasks/{task}/direct/complete', [CloudUploadDirectCompleteController::class, 'complete'])->name('connections.upload-tasks.direct.complete');
-    Route::delete('/connections/{connection}/upload-tasks/{task}/direct/abort', [CloudUploadDirectCompleteController::class, 'abort'])->name('connections.upload-tasks.direct.abort');
+    Route::controller(CloudUploadDirectCompleteController::class)->group(function () {
+        Route::post('/connections/{connection}/upload-tasks/{task}/direct/parts/{partNumber}/done', 'partDone')->name('connections.upload-tasks.direct.parts.done');
+        Route::post('/connections/{connection}/upload-tasks/{task}/direct/complete', 'complete')->name('connections.upload-tasks.direct.complete');
+        Route::delete('/connections/{connection}/upload-tasks/{task}/direct/abort', 'abort')->name('connections.upload-tasks.direct.abort');
+    });
 
-    Route::get('/video-downloader', [VideoDownloaderController::class, 'index'])->name('video-downloader.index');
-    Route::post('/video-downloader/metadata', [VideoDownloaderController::class, 'metadata'])->name('video-downloader.metadata');
-    Route::get('/video-downloader/download', [VideoDownloaderController::class, 'download'])->name('video-downloader.download');
+    Route::controller(VideoDownloaderController::class)->group(function () {
+        Route::get('/video-downloader', 'index')->name('video-downloader.index');
+        Route::post('/video-downloader/metadata', 'metadata')->name('video-downloader.metadata');
+        Route::get('/video-downloader/download', 'download')->name('video-downloader.download');
+    });
 });

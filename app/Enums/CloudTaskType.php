@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-use BenSampo\Enum\Enum;
-
-/**
- * @method static static Upload()
- */
-final class CloudTaskType extends Enum
+enum CloudTaskType: int
 {
-    const Upload = 1;
+    case Upload = 1;
 
-    public static function getDescription(mixed $value): string
+    public function getDescription(): string
     {
-        return match ($value) {
+        return match ($this) {
             self::Upload => 'Upload',
-            default => parent::getDescription($value),
         };
     }
 }

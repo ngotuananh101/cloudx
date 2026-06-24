@@ -16,7 +16,7 @@ class SftpConnector implements CloudProviderConnector
 {
     public function provider(): CloudProvider
     {
-        return CloudProvider::SFTP();
+        return CloudProvider::SFTP;
     }
 
     public function redirectUrl(): string

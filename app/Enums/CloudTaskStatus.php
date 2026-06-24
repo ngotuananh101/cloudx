@@ -4,39 +4,20 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-use BenSampo\Enum\Enum;
-
-/**
- * @method static static Pending()
- * @method static static Uploading()
- * @method static static Paused()
- * @method static static Queued()
- * @method static static Processing()
- * @method static static Completed()
- * @method static static Failed()
- * @method static static Cancelled()
- */
-final class CloudTaskStatus extends Enum
+enum CloudTaskStatus: int
 {
-    const Pending = 1;
+    case Pending = 1;
+    case Uploading = 2;
+    case Paused = 3;
+    case Queued = 4;
+    case Processing = 5;
+    case Completed = 6;
+    case Failed = 7;
+    case Cancelled = 8;
 
-    const Uploading = 2;
-
-    const Paused = 3;
-
-    const Queued = 4;
-
-    const Processing = 5;
-
-    const Completed = 6;
-
-    const Failed = 7;
-
-    const Cancelled = 8;
-
-    public static function getDescription(mixed $value): string
+    public function getDescription(): string
     {
-        return match ($value) {
+        return match ($this) {
             self::Pending => 'Pending',
             self::Uploading => 'Uploading',
             self::Paused => 'Paused',
@@ -45,7 +26,6 @@ final class CloudTaskStatus extends Enum
             self::Completed => 'Completed',
             self::Failed => 'Failed',
             self::Cancelled => 'Cancelled',
-            default => parent::getDescription($value),
         };
     }
 }

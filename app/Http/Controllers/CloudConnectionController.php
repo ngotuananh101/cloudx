@@ -73,7 +73,7 @@ class CloudConnectionController extends Controller
 
                 $connection->fill([
                     'credentials' => $account->credentials,
-                    'status' => ConnectionStatus::CONNECTED(),
+                    'status' => ConnectionStatus::CONNECTED,
                     'total_space' => $account->totalSpace,
                     'used_space' => $account->usedSpace,
                     'error_message' => null,
@@ -91,19 +91,19 @@ class CloudConnectionController extends Controller
             $connection->fill([
                 'name' => $account->name,
                 'credentials' => $account->credentials,
-                'status' => ConnectionStatus::CONNECTED(),
+                'status' => ConnectionStatus::CONNECTED,
                 'total_space' => $account->totalSpace,
                 'used_space' => $account->usedSpace,
                 'error_message' => null,
                 'last_synced_at' => now(),
             ])->save();
 
-            return redirect()->route('dashboard')->with('success', "Successfully connected to {$cloudProvider->description}!");
+            return redirect()->route('dashboard')->with('success', "Successfully connected to {$cloudProvider->getDescription()}!");
         } catch (Throwable $exception) {
             $request->session()->forget('cloud_connection_reconnect');
             report($exception);
 
-            return redirect()->route('dashboard')->with('error', "Could not connect to {$cloudProvider->description}.");
+            return redirect()->route('dashboard')->with('error', "Could not connect to {$cloudProvider->getDescription()}.");
         }
     }
 

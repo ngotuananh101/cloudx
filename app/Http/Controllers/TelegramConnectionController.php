@@ -110,10 +110,10 @@ class TelegramConnectionController extends Controller
 
         $connection = $request->user()->cloudConnections()->create([
             'name' => $connect['name'],
-            'provider' => CloudProvider::TELEGRAM(),
+            'provider' => CloudProvider::TELEGRAM,
             'provider_id' => $connect['session_id'],
             'credentials' => ['session_id' => $connect['session_id']],
-            'status' => ConnectionStatus::CONNECTED(),
+            'status' => ConnectionStatus::CONNECTED,
             'total_space' => null,
             'used_space' => null,
             'error_message' => null,

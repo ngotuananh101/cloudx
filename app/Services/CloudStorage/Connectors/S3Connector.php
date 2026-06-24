@@ -18,7 +18,7 @@ class S3Connector implements CloudProviderConnector, ProvidesDirectDownloadLink
 {
     public function provider(): CloudProvider
     {
-        return CloudProvider::AWS_S3();
+        return CloudProvider::AWS_S3;
     }
 
     public function redirectUrl(): string

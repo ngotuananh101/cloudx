@@ -59,7 +59,7 @@ class CloudUploadTaskController extends Controller
         $totalChunks = (int) ceil($size / $chunkSize);
         $uploadMode = (string) ($validated['upload_mode'] ?? 'backend');
 
-        if ($uploadMode === 'direct' && ! $connection->provider->is(CloudProvider::AWS_S3)) {
+        if ($uploadMode === 'direct' && ! $connection->provider === CloudProvider::AWS_S3) {
             throw ValidationException::withMessages([
                 'upload_mode' => 'Direct upload is only available for S3 connections.',
             ]);

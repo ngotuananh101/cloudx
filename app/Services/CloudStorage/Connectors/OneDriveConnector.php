@@ -27,7 +27,7 @@ class OneDriveConnector implements CloudProviderConnector, ProvidesDirectDownloa
 
     public function provider(): CloudProvider
     {
-        return CloudProvider::ONEDRIVE();
+        return CloudProvider::ONEDRIVE;
     }
 
     public function redirectUrl(): string

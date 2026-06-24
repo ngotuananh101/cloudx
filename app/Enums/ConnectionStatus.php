@@ -4,32 +4,20 @@ declare(strict_types=1);
 
 namespace App\Enums;
 
-use BenSampo\Enum\Enum;
-
-/**
- * @method static static CONNECTED()
- * @method static static DISCONNECTED()
- * @method static static EXPIRED()
- * @method static static ERROR()
- */
-final class ConnectionStatus extends Enum
+enum ConnectionStatus: int
 {
-    const CONNECTED = 1;
+    case CONNECTED = 1;
+    case DISCONNECTED = 2;
+    case EXPIRED = 3;
+    case ERROR = 4;
 
-    const DISCONNECTED = 2;
-
-    const EXPIRED = 3;
-
-    const ERROR = 4;
-
-    public static function getDescription(mixed $value): string
+    public function getDescription(): string
     {
-        return match ($value) {
+        return match ($this) {
             self::CONNECTED => 'Connected',
             self::DISCONNECTED => 'Disconnected',
             self::EXPIRED => 'Expired',
             self::ERROR => 'Connection Error',
-            default => parent::getDescription($value),
         };
     }
 }
