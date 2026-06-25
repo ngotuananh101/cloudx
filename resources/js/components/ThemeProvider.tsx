@@ -36,8 +36,9 @@ export function ThemeProvider({
         root.classList.remove('light', 'dark');
 
         if (theme === 'system') {
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)')
-                .matches
+            const systemTheme = window.matchMedia(
+                '(prefers-color-scheme: dark)',
+            ).matches
                 ? 'dark'
                 : 'light';
 
@@ -51,7 +52,7 @@ export function ThemeProvider({
 
     useEffect(() => {
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
+
         const handleChange = () => {
             if (theme === 'system') {
                 const root = window.document.documentElement;
@@ -84,8 +85,8 @@ export const useTheme = () => {
     const context = useContext(ThemeProviderContext);
 
     if (context === undefined) {
-throw new Error('useTheme must be used within a ThemeProvider');
-}
+        throw new Error('useTheme must be used within a ThemeProvider');
+    }
 
     return context;
 };

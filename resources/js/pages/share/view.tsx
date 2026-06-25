@@ -64,9 +64,17 @@ function getLargeIcon(type: string, isDirectory: boolean) {
         case 'archive':
             return { icon: FileArchive, bg: 'bg-muted', color: 'text-primary' };
         case 'document':
-            return { icon: FileText, bg: 'bg-muted', color: 'text-muted-foreground' };
+            return {
+                icon: FileText,
+                bg: 'bg-muted',
+                color: 'text-muted-foreground',
+            };
         default:
-            return { icon: File, bg: 'bg-muted', color: 'text-muted-foreground' };
+            return {
+                icon: File,
+                bg: 'bg-muted',
+                color: 'text-muted-foreground',
+            };
     }
 }
 
@@ -80,7 +88,9 @@ export default function ShareView({
     previewUrl,
     downloadUrl,
 }: ShareViewProps) {
-    const [previewingFile, setPreviewingFile] = useState<CloudFile | null>(null);
+    const [previewingFile, setPreviewingFile] = useState<CloudFile | null>(
+        null,
+    );
 
     const handleNavigateFolder = (folderFile: CloudFile) => {
         const encodedPath = encodeCloudPath(folderFile.path);
@@ -154,7 +164,10 @@ export default function ShareView({
                                     {share.user_name.charAt(0).toUpperCase()}
                                 </div>
                                 <span>
-                                    Shared by <strong className="text-foreground">{share.user_name}</strong>
+                                    Shared by{' '}
+                                    <strong className="text-foreground">
+                                        {share.user_name}
+                                    </strong>
                                 </span>
                                 <span>•</span>
                             </>
@@ -162,7 +175,10 @@ export default function ShareView({
                         {share.expires_at ? (
                             <span className="inline-flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
-                                Expires {new Date(share.expires_at).toLocaleDateString()}
+                                Expires{' '}
+                                {new Date(
+                                    share.expires_at,
+                                ).toLocaleDateString()}
                             </span>
                         ) : (
                             <span>No expiry</span>
@@ -183,8 +199,12 @@ export default function ShareView({
 
                     {/* File/Folder hero */}
                     <div className="mb-6 text-center">
-                        <div className={`mx-auto mb-4 flex h-18 w-18 items-center justify-center rounded-2xl ${iconConfig.bg}`}>
-                            <IconComponent className={`h-8 w-8 ${iconConfig.color}`} />
+                        <div
+                            className={`mx-auto mb-4 flex h-18 w-18 items-center justify-center rounded-2xl ${iconConfig.bg}`}
+                        >
+                            <IconComponent
+                                className={`h-8 w-8 ${iconConfig.color}`}
+                            />
                         </div>
                         <h1 className="text-lg font-bold text-foreground">
                             {isDirectory && !isAtRoot

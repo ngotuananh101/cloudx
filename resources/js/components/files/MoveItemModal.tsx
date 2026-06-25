@@ -41,9 +41,9 @@ export default function MoveItemModal({
         if (!isOpen) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setDestinationPath(currentParentPath);
-             
+
             setFolders([]);
-             
+
             setError(null);
 
             return;
@@ -59,7 +59,7 @@ export default function MoveItemModal({
 
         try {
             const response = await fetch(
-                `${connections.folders.index.url({ connection: connectionId })}?path=${encodeCloudPath(path)}`
+                `${connections.folders.index.url({ connection: connectionId })}?path=${encodeCloudPath(path)}`,
             );
 
             if (!response.ok) {
@@ -78,8 +78,8 @@ export default function MoveItemModal({
 
     const handleMove = () => {
         if (!item) {
-return;
-}
+            return;
+        }
 
         setIsMoving(true);
         router.post(
@@ -97,7 +97,7 @@ return;
                 onFinish: () => {
                     setIsMoving(false);
                 },
-            }
+            },
         );
     };
 
@@ -111,20 +111,23 @@ return;
     // Prevent moving a folder into itself
     const isDestinationValid = () => {
         if (!item) {
-return false;
-}
+            return false;
+        }
 
         // Cannot move to the exact same directory it's already in
         if (destinationPath === currentParentPath) {
-return false;
-}
+            return false;
+        }
 
         if (item.isDirectory) {
             // Cannot move into itself or a subfolder of itself
             const destWithSlash = destinationPath ? `${destinationPath}/` : '';
             const itemWithSlash = `${item.path}/`;
 
-            if (destinationPath === item.path || destWithSlash.startsWith(itemWithSlash)) {
+            if (
+                destinationPath === item.path ||
+                destWithSlash.startsWith(itemWithSlash)
+            ) {
                 return false;
             }
         }
@@ -134,7 +137,7 @@ return false;
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-md bg-card border-border">
+            <DialogContent className="border-border bg-card sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-foreground">
                         Move "{item?.name}"
@@ -144,19 +147,19 @@ return false;
                     </DialogDescription>
                 </DialogHeader>
 
-                <div className="flex flex-col h-64 border rounded-md border-border bg-muted/50 p-2">
-                    <div className="flex items-center gap-2 mb-2 p-1 text-sm text-muted-foreground font-medium break-all">
-                        <Folder className="h-4 w-4 shrink-0 text-primary" />
-                        /{destinationPath}
+                <div className="flex h-64 flex-col rounded-md border border-border bg-muted/50 p-2">
+                    <div className="mb-2 flex items-center gap-2 p-1 text-sm font-medium break-all text-muted-foreground">
+                        <Folder className="h-4 w-4 shrink-0 text-primary" />/
+                        {destinationPath}
                     </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-1">
+                    <div className="flex-1 space-y-1 overflow-y-auto">
                         {isLoading ? (
-                            <div className="flex items-center justify-center h-full">
+                            <div className="flex h-full items-center justify-center">
                                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             </div>
                         ) : error ? (
-                            <div className="text-sm text-destructive p-2 text-center">
+                            <div className="p-2 text-center text-sm text-destructive">
                                 {error}
                             </div>
                         ) : (
@@ -165,7 +168,7 @@ return false;
                                     <button
                                         type="button"
                                         onClick={navigateUp}
-                                        className="flex w-full items-center gap-2 rounded-md p-2 text-sm text-foreground hover:bg-muted transition-colors"
+                                        className="flex w-full items-center gap-2 rounded-md p-2 text-sm text-foreground transition-colors hover:bg-muted"
                                     >
                                         <CornerLeftUp className="h-4 w-4 text-muted-foreground" />
                                         <span>...</span>
@@ -173,32 +176,40 @@ return false;
                                 )}
 
                                 {folders.length === 0 ? (
-                                    <div className="text-center text-sm text-muted-foreground p-4 italic">
+                                    <div className="p-4 text-center text-sm text-muted-foreground italic">
                                         Empty folder
                                     </div>
                                 ) : (
                                     folders.map((folder) => {
                                         // Disable moving a folder into itself
-                                        const isItself = item?.isDirectory && folder.path === item.path;
+                                        const isItself =
+                                            item?.isDirectory &&
+                                            folder.path === item.path;
 
                                         return (
                                             <button
                                                 key={folder.path}
                                                 type="button"
-                                                onClick={() => !isItself && fetchFolders(folder.path)}
+                                                onClick={() =>
+                                                    !isItself &&
+                                                    fetchFolders(folder.path)
+                                                }
                                                 disabled={isItself}
-                                                className={`flex w-full items-center justify-between rounded-md p-2 text-sm transition-colors ${isItself
-                                                        ? 'opacity-50 cursor-not-allowed text-muted-foreground'
+                                                className={`flex w-full items-center justify-between rounded-md p-2 text-sm transition-colors ${
+                                                    isItself
+                                                        ? 'cursor-not-allowed text-muted-foreground opacity-50'
                                                         : 'text-foreground hover:bg-muted'
-                                                    }`}
+                                                }`}
                                             >
                                                 <div className="flex items-center gap-2">
                                                     <Folder className="h-4 w-4 text-primary" />
-                                                    <span className="truncate">{folder.name}</span>
+                                                    <span className="truncate">
+                                                        {folder.name}
+                                                    </span>
                                                 </div>
                                                 <ChevronRight className="h-4 w-4 text-muted-foreground" />
                                             </button>
-                                        )
+                                        );
                                     })
                                 )}
                             </>
@@ -218,10 +229,14 @@ return false;
                     <Button
                         type="button"
                         onClick={handleMove}
-                        disabled={isLoading || isMoving || !isDestinationValid()}
+                        disabled={
+                            isLoading || isMoving || !isDestinationValid()
+                        }
                         className="bg-primary text-white hover:bg-primary/90"
                     >
-                        {isMoving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isMoving && (
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
                         Move Here
                     </Button>
                 </DialogFooter>

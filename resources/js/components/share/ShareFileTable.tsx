@@ -42,7 +42,12 @@ function getFileIcon(type: string) {
     }
 }
 
-export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: ShareFileTableProps) {
+export function ShareFileTable({
+    files,
+    shareUuid,
+    onNavigate,
+    onPreview,
+}: ShareFileTableProps) {
     const handleDownload = (file: CloudFile) => {
         const encodedPath = encodeCloudPath(file.path);
         window.location.href = `/s/${shareUuid}/download/${encodedPath}`;
@@ -61,30 +66,38 @@ export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: Shar
             <table className="w-full">
                 <thead>
                     <tr className="border-b border-border bg-muted/50">
-                        <th className="px-4 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        <th className="px-4 py-2.5 text-left text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                             Name
                         </th>
-                        <th className="w-28 px-4 py-2.5 text-right text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                        <th className="w-28 px-4 py-2.5 text-right text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
                             Size
                         </th>
-                        <th className="w-16 px-4 py-2.5 text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                        </th>
+                        <th className="w-16 px-4 py-2.5 text-center text-[11px] font-semibold tracking-wider text-muted-foreground uppercase"></th>
                     </tr>
                 </thead>
                 <tbody>
                     {files.map((file) => (
                         <tr
                             key={file.id}
-                            className="group border-b border-border last:border-b-0 bg-card transition-colors hover:bg-muted"
+                            className="group border-b border-border bg-card transition-colors last:border-b-0 hover:bg-muted"
                         >
                             <td className="px-4 py-2.5">
                                 <div
                                     className={`flex min-w-0 items-center gap-3 ${file.isDirectory ? 'cursor-pointer' : ''}`}
-                                    onClick={() => file.isDirectory ? onNavigate(file) : onPreview(file)}
-                                    role={file.isDirectory ? 'button' : undefined}
+                                    onClick={() =>
+                                        file.isDirectory
+                                            ? onNavigate(file)
+                                            : onPreview(file)
+                                    }
+                                    role={
+                                        file.isDirectory ? 'button' : undefined
+                                    }
                                     tabIndex={file.isDirectory ? 0 : undefined}
                                     onKeyDown={(e) => {
-                                        if (file.isDirectory && (e.key === 'Enter' || e.key === ' ')) {
+                                        if (
+                                            file.isDirectory &&
+                                            (e.key === 'Enter' || e.key === ' ')
+                                        ) {
                                             e.preventDefault();
                                             onNavigate(file);
                                         }
@@ -93,17 +106,21 @@ export function ShareFileTable({ files, shareUuid, onNavigate, onPreview }: Shar
                                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                         {getFileIcon(file.type)}
                                     </div>
-                                    <span className={`truncate text-sm font-medium ${
-                                        file.isDirectory
-                                            ? 'text-primary hover:underline'
-                                            : 'text-foreground'
-                                    }`}>
+                                    <span
+                                        className={`truncate text-sm font-medium ${
+                                            file.isDirectory
+                                                ? 'text-primary hover:underline'
+                                                : 'text-foreground'
+                                        }`}
+                                    >
                                         {file.name}
                                     </span>
                                 </div>
                             </td>
                             <td className="px-4 py-2.5 text-right text-xs text-muted-foreground">
-                                {file.isDirectory ? '--' : formatBytes(file.size)}
+                                {file.isDirectory
+                                    ? '--'
+                                    : formatBytes(file.size)}
                             </td>
                             <td className="px-4 py-2.5 text-center">
                                 {!file.isDirectory && (

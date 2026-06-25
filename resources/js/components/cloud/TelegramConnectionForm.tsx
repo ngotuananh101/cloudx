@@ -1,5 +1,5 @@
-import { useState  } from 'react';
-import type {FormEvent} from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 
 interface TelegramConnectionFormProps {
     onCancel: () => void;
@@ -10,7 +10,9 @@ export default function TelegramConnectionForm({
     onCancel,
     onSuccess,
 }: TelegramConnectionFormProps) {
-    const [step, setStep] = useState<'phone' | 'code' | 'password' | 'done'>('phone');
+    const [step, setStep] = useState<'phone' | 'code' | 'password' | 'done'>(
+        'phone',
+    );
     const [name, setName] = useState('My Telegram');
     const [phone, setPhone] = useState('');
     const [code, setCode] = useState('');
@@ -20,7 +22,8 @@ export default function TelegramConnectionForm({
     const [syncedCount, setSyncedCount] = useState(0);
 
     const csrfToken = (): string =>
-        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+            ?.content ?? '';
 
     const sendCode = (event: FormEvent) => {
         event.preventDefault();
@@ -37,14 +40,23 @@ export default function TelegramConnectionForm({
             body: JSON.stringify({ name, phone }),
         })
             .then(async (res) => {
-                const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+                const data = (await res.json().catch(() => ({}))) as Record<
+                    string,
+                    unknown
+                >;
 
                 if (!res.ok) {
-                    throw new Error((data.message as string) ?? 'Failed to send code');
+                    throw new Error(
+                        (data.message as string) ?? 'Failed to send code',
+                    );
                 }
             })
             .then(() => setStep('code'))
-            .catch((err: unknown) => setError(err instanceof Error ? err.message : 'An error occurred'))
+            .catch((err: unknown) =>
+                setError(
+                    err instanceof Error ? err.message : 'An error occurred',
+                ),
+            )
             .finally(() => setLoading(false));
     };
 
@@ -69,10 +81,15 @@ export default function TelegramConnectionForm({
             body: JSON.stringify(payload),
         })
             .then(async (res) => {
-                const data = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+                const data = (await res.json().catch(() => ({}))) as Record<
+                    string,
+                    unknown
+                >;
 
                 if (!res.ok) {
-                    throw new Error((data.message as string) ?? 'Verification failed');
+                    throw new Error(
+                        (data.message as string) ?? 'Verification failed',
+                    );
                 }
 
                 return data;
@@ -83,24 +100,42 @@ export default function TelegramConnectionForm({
                     setStep('done');
                 }
             })
-            .catch((err: unknown) => setError(err instanceof Error ? err.message : 'An error occurred'))
+            .catch((err: unknown) =>
+                setError(
+                    err instanceof Error ? err.message : 'An error occurred',
+                ),
+            )
             .finally(() => setLoading(false));
     };
 
     if (step === 'done') {
         return (
-            <div className="space-y-6 text-center py-8">
+            <div className="space-y-6 py-8 text-center">
                 <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                    <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    <svg
+                        className="h-8 w-8 text-primary"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M5 13l4 4L19 7"
+                        />
                     </svg>
                 </div>
                 <div>
-                    <h4 className="text-lg font-bold text-foreground">Telegram Connected!</h4>
+                    <h4 className="text-lg font-bold text-foreground">
+                        Telegram Connected!
+                    </h4>
                     <p className="mt-1 text-sm text-muted-foreground">
                         &quot;{name}&quot; is ready to use.
                         {syncedCount > 0 && (
-                            <span className="mt-1 block">{syncedCount} files synced from Saved Messages.</span>
+                            <span className="mt-1 block">
+                                {syncedCount} files synced from Saved Messages.
+                            </span>
                         )}
                     </p>
                 </div>
@@ -117,7 +152,11 @@ export default function TelegramConnectionForm({
         );
     }
 
-    const stepBar = (position: number, currentStep: number, highlight: boolean = false) => {
+    const stepBar = (
+        position: number,
+        currentStep: number,
+        highlight: boolean = false,
+    ) => {
         let color = 'bg-muted';
 
         if (highlight) {
@@ -126,21 +165,25 @@ export default function TelegramConnectionForm({
             color = 'bg-primary';
         }
 
-        return <div className={`flex-1 h-1 rounded-full transition-colors ${color}`} />;
+        return (
+            <div
+                className={`h-1 flex-1 rounded-full transition-colors ${color}`}
+            />
+        );
     };
 
     const stepProgress = () => {
         if (step === 'phone') {
-return [1, 2, 3];
-}
+            return [1, 2, 3];
+        }
 
         if (step === 'code') {
-return [2, 2, 3];
-}
+            return [2, 2, 3];
+        }
 
         if (step === 'password') {
-return [2, 3, 3];
-}
+            return [2, 3, 3];
+        }
 
         return [3, 3, 3];
     };
@@ -167,8 +210,12 @@ return [2, 3, 3];
             {step === 'phone' && (
                 <form onSubmit={sendCode} className="space-y-4">
                     <div>
-                        <label htmlFor="tg-name" className="text-xs font-bold text-foreground">
-                            Connection Name <span className="text-destructive">*</span>
+                        <label
+                            htmlFor="tg-name"
+                            className="text-xs font-bold text-foreground"
+                        >
+                            Connection Name{' '}
+                            <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-name"
@@ -179,8 +226,12 @@ return [2, 3, 3];
                         />
                     </div>
                     <div>
-                        <label htmlFor="tg-phone" className="text-xs font-bold text-foreground">
-                            Phone Number <span className="text-destructive">*</span>
+                        <label
+                            htmlFor="tg-phone"
+                            className="text-xs font-bold text-foreground"
+                        >
+                            Phone Number{' '}
+                            <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-phone"
@@ -189,7 +240,9 @@ return [2, 3, 3];
                             className={inputClassName}
                             placeholder="+84 912 345 678"
                         />
-                        <p className="mt-1 text-[11px] text-muted-foreground">Use international format with country code</p>
+                        <p className="mt-1 text-[11px] text-muted-foreground">
+                            Use international format with country code
+                        </p>
                     </div>
                     <div className="flex justify-end gap-2 pt-2">
                         <button
@@ -218,24 +271,37 @@ return [2, 3, 3];
                         💬 Code sent to your Telegram app. Enter it below.
                     </div>
                     <div>
-                        <label htmlFor="tg-phone-display" className="text-xs font-bold text-foreground">
+                        <label
+                            htmlFor="tg-phone-display"
+                            className="text-xs font-bold text-foreground"
+                        >
                             Phone Number
                         </label>
                         <div
                             id="tg-phone-display"
-                            className="h-10 w-full rounded-md border border-border bg-muted/50 px-3 text-sm font-medium text-muted-foreground flex items-center"
+                            className="flex h-10 w-full items-center rounded-md border border-border bg-muted/50 px-3 text-sm font-medium text-muted-foreground"
                         >
                             {phone}
                         </div>
                     </div>
                     <div>
-                        <label htmlFor="tg-code" className="text-xs font-bold text-foreground">
-                            Verification Code <span className="text-destructive">*</span>
+                        <label
+                            htmlFor="tg-code"
+                            className="text-xs font-bold text-foreground"
+                        >
+                            Verification Code{' '}
+                            <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-code"
                             value={code}
-                            onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                            onChange={(e) =>
+                                setCode(
+                                    e.target.value
+                                        .replace(/\D/g, '')
+                                        .slice(0, 10),
+                                )
+                            }
                             className={`${inputClassName} font-mono text-lg tracking-widest`}
                             placeholder="12345"
                             autoFocus
@@ -266,11 +332,16 @@ return [2, 3, 3];
             {step === 'password' && (
                 <form onSubmit={(e) => verify(e, true)} className="space-y-4">
                     <div className="rounded-xl border border-border bg-muted px-4 py-3 text-sm text-muted-foreground">
-                        🔒 Your Telegram account has two-factor authentication enabled. Enter your 2FA password.
+                        🔒 Your Telegram account has two-factor authentication
+                        enabled. Enter your 2FA password.
                     </div>
                     <div>
-                        <label htmlFor="tg-password" className="text-xs font-bold text-foreground">
-                            2FA Password <span className="text-destructive">*</span>
+                        <label
+                            htmlFor="tg-password"
+                            className="text-xs font-bold text-foreground"
+                        >
+                            2FA Password{' '}
+                            <span className="text-destructive">*</span>
                         </label>
                         <input
                             id="tg-password"

@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/dialog';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
-import files from '@/routes/cloud/files';
 import type { CloudFile } from '@/types/cloud';
+import files from '@/routes/cloud/files';
 
 export default function FilePreviewModal({
     item,
@@ -30,7 +30,10 @@ export default function FilePreviewModal({
     const { max_preview_size } = usePage<any>().props;
     const { theme } = useTheme();
 
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDark =
+        theme === 'dark' ||
+        (theme === 'system' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // Default 50MB if not provided
     const maxSize = max_preview_size ?? 52428800;
@@ -43,8 +46,8 @@ export default function FilePreviewModal({
     }, [item]);
 
     if (!item) {
-return null;
-}
+        return null;
+    }
 
     const isTooLarge = item.size > maxSize;
 
@@ -64,7 +67,7 @@ return null;
     };
 
     const NoRendererFallback = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-muted">
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
             <div className="mb-4 rounded-full bg-muted p-4">
                 <File className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -81,26 +84,31 @@ return null;
     );
 
     const LoadingRenderer = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center bg-muted">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
+            <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary" />
             <p className="text-sm font-medium text-foreground">
                 Loading preview...
             </p>
         </div>
     );
 
-
     return (
-        <Dialog open={item !== null} onOpenChange={(open) => !open && onClose()}>
+        <Dialog
+            open={item !== null}
+            onOpenChange={(open) => !open && onClose()}
+        >
             <DialogContent
-                className={`flex flex-col overflow-hidden bg-card shadow-2xl transition-all p-0 [&>button]:hidden ${isFullscreen
-                    ? 'h-screen w-screen max-w-none sm:max-w-none rounded-none'
-                    : 'max-h-[85vh] min-h-100 w-full sm:max-w-4xl rounded-xl border border-border'
-                    }`}
+                className={`flex flex-col overflow-hidden bg-card p-0 shadow-2xl transition-all [&>button]:hidden ${
+                    isFullscreen
+                        ? 'h-screen w-screen max-w-none rounded-none sm:max-w-none'
+                        : 'max-h-[85vh] min-h-100 w-full rounded-xl border border-border sm:max-w-4xl'
+                }`}
             >
                 <DialogHeader className="hidden">
                     <DialogTitle>{item.name}</DialogTitle>
-                    <DialogDescription>Previewing {item.name}</DialogDescription>
+                    <DialogDescription>
+                        Previewing {item.name}
+                    </DialogDescription>
                 </DialogHeader>
                 <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-3">
                     <div className="min-w-0 flex-1 pr-4">
@@ -108,7 +116,9 @@ return null;
                             {item.name}
                         </h3>
                         <div className="mt-0.5 text-xs text-muted-foreground">
-                            {formatBytes(item.size)} • {item.name.split('.').pop()?.toUpperCase() || 'FILE'}
+                            {formatBytes(item.size)} •{' '}
+                            {item.name.split('.').pop()?.toUpperCase() ||
+                                'FILE'}
                         </div>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
@@ -126,7 +136,9 @@ return null;
                             size="icon"
                             onClick={() => setIsFullscreen(!isFullscreen)}
                             className="text-muted-foreground hover:text-foreground"
-                            title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+                            title={
+                                isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'
+                            }
                         >
                             {isFullscreen ? (
                                 <Minimize2 className="h-4 w-4" />
@@ -146,7 +158,7 @@ return null;
                     </div>
                 </div>
 
-                <div className="flex-1 min-h-0 overflow-hidden bg-muted relative">
+                <div className="relative min-h-0 flex-1 overflow-hidden bg-muted">
                     {isTooLarge ? (
                         <div className="flex h-full flex-col items-center justify-center p-6 text-center">
                             <div className="mb-4 rounded-full bg-muted p-4">
@@ -156,7 +168,8 @@ return null;
                                 File is too large to preview
                             </h4>
                             <p className="mt-2 text-sm text-muted-foreground">
-                                The file size ({formatBytes(item.size)}) exceeds the preview limit of {formatBytes(maxSize)}.
+                                The file size ({formatBytes(item.size)}) exceeds
+                                the preview limit of {formatBytes(maxSize)}.
                             </p>
                             <Button className="mt-6" onClick={handleDownload}>
                                 Download File
@@ -168,7 +181,7 @@ return null;
                                 { uri: previewUrl, fileName: item.name },
                             ]}
                             pluginRenderers={DocViewerRenderers}
-                            className='my-preview'
+                            className="my-preview"
                             config={{
                                 themeMode: isDark ? 'dark' : 'light',
                                 header: {

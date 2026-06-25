@@ -118,9 +118,7 @@ export default function FileBrowser({
         setIsUploadModeDialogOpen(false);
     };
 
-    const handleCreateFolder = async (
-        name: string,
-    ): Promise<string | null> => {
+    const handleCreateFolder = async (name: string): Promise<string | null> => {
         return new Promise((resolve) => {
             router.post(
                 connections.folders.store({ connection: connection.id }).url,
@@ -149,10 +147,14 @@ export default function FileBrowser({
     };
 
     const handleSync = () => {
-        router.post(connections.telegram.sync({ connection: connection.id }).url, {}, {
-            preserveScroll: true,
-            onSuccess: () => refreshFiles(),
-        });
+        router.post(
+            connections.telegram.sync({ connection: connection.id }).url,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => refreshFiles(),
+            },
+        );
     };
 
     return (
@@ -196,10 +198,10 @@ export default function FileBrowser({
                 onDeleted={refreshFiles}
             />
 
-            <FilePreviewModal 
-                item={previewItem} 
+            <FilePreviewModal
+                item={previewItem}
                 connectionId={connection.id}
-                onClose={() => setPreviewItem(null)} 
+                onClose={() => setPreviewItem(null)}
             />
 
             <MoveItemModal
@@ -248,8 +250,6 @@ export default function FileBrowser({
                     />
                 </div>
             </div>
-
-
         </AuthenticatedLayout>
     );
 }

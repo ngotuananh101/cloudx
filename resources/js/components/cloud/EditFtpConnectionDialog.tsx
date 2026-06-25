@@ -1,7 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
-import {  useEffect, useState } from 'react';
-import type {FormEvent} from 'react';
+import { useEffect, useState } from 'react';
+import type { FormEvent } from 'react';
 import {
     Dialog,
     DialogContent,
@@ -96,277 +96,289 @@ export default function EditFtpConnectionDialog({
     };
 
     return (
-        <Dialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-y-auto rounded-3xl p-0 shadow-2xl bg-card border-border [&>button]:right-6 [&>button]:top-6 [&>button]:z-10">
+        <Dialog
+            open={connection !== null}
+            onOpenChange={(open) => !open && onClose()}
+        >
+            <DialogContent className="max-h-[90vh] overflow-y-auto rounded-3xl border-border bg-card p-0 shadow-2xl sm:max-w-2xl [&>button]:top-6 [&>button]:right-6 [&>button]:z-10">
                 <form onSubmit={submit} className="p-6">
                     <DialogHeader className="mb-5 text-left">
                         <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">
                             Edit FTP connection
                         </DialogTitle>
                         <DialogDescription className="mt-1 text-xs text-muted-foreground">
-                            Update server settings. Leave password blank to keep the
-                            current password.
+                            Update server settings. Leave password blank to keep
+                            the current password.
                         </DialogDescription>
                     </DialogHeader>
 
-                <div className="grid gap-4 sm:grid-cols-2">
-                    <Field label="Name" error={form.errors.name} required>
-                        <input
-                            id="edit-ftp-name"
-                            value={form.data.name}
-                            onChange={(event) =>
-                                form.setData('name', event.target.value)
-                            }
-                            className={inputClassName}
-                            aria-invalid={Boolean(form.errors.name)}
-                            autoFocus
-                        />
-                    </Field>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                        <Field label="Name" error={form.errors.name} required>
+                            <input
+                                id="edit-ftp-name"
+                                value={form.data.name}
+                                onChange={(event) =>
+                                    form.setData('name', event.target.value)
+                                }
+                                className={inputClassName}
+                                aria-invalid={Boolean(form.errors.name)}
+                                autoFocus
+                            />
+                        </Field>
 
-                    <Field label="Host" error={form.errors.host} required>
-                        <input
-                            id="edit-ftp-host"
-                            value={form.data.host}
-                            onChange={(event) =>
-                                form.setData('host', event.target.value)
-                            }
-                            className={inputClassName}
-                            aria-invalid={Boolean(form.errors.host)}
-                            placeholder="ftp.example.com"
-                        />
-                    </Field>
+                        <Field label="Host" error={form.errors.host} required>
+                            <input
+                                id="edit-ftp-host"
+                                value={form.data.host}
+                                onChange={(event) =>
+                                    form.setData('host', event.target.value)
+                                }
+                                className={inputClassName}
+                                aria-invalid={Boolean(form.errors.host)}
+                                placeholder="ftp.example.com"
+                            />
+                        </Field>
 
-                    <Field label="Port" error={form.errors.port} required>
-                        <input
-                            id="edit-ftp-port"
-                            type="number"
-                            min="1"
-                            max="65535"
-                            value={form.data.port}
-                            onChange={(event) =>
-                                form.setData('port', event.target.value)
-                            }
-                            className={inputClassName}
-                            aria-invalid={Boolean(form.errors.port)}
-                        />
-                    </Field>
+                        <Field label="Port" error={form.errors.port} required>
+                            <input
+                                id="edit-ftp-port"
+                                type="number"
+                                min="1"
+                                max="65535"
+                                value={form.data.port}
+                                onChange={(event) =>
+                                    form.setData('port', event.target.value)
+                                }
+                                className={inputClassName}
+                                aria-invalid={Boolean(form.errors.port)}
+                            />
+                        </Field>
 
-                    <Field
-                        label="Username"
-                        error={form.errors.username}
-                        required
-                    >
-                        <input
-                            id="edit-ftp-username"
-                            value={form.data.username}
-                            onChange={(event) =>
-                                form.setData('username', event.target.value)
-                            }
-                            className={inputClassName}
-                            aria-invalid={Boolean(form.errors.username)}
-                        />
-                    </Field>
-
-                    <Field label="Password" error={form.errors.password}>
-                        <input
-                            id="edit-ftp-password"
-                            type="password"
-                            value={form.data.password}
-                            onChange={(event) =>
-                                form.setData('password', event.target.value)
-                            }
-                            className={inputClassName}
-                            aria-invalid={Boolean(form.errors.password)}
-                            placeholder="Leave blank to keep current password"
-                        />
-                    </Field>
-
-                    <Field label="Root" error={form.errors.root}>
-                        <input
-                            id="edit-ftp-root"
-                            value={form.data.root}
-                            onChange={(event) =>
-                                form.setData('root', event.target.value)
-                            }
-                            className={inputClassName}
-                            aria-invalid={Boolean(form.errors.root)}
-                            placeholder="/"
-                        />
-                    </Field>
-                </div>
-
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                    <CheckboxField
-                        label="Use SSL"
-                        checked={form.data.ssl}
-                        onChange={(checked) => form.setData('ssl', checked)}
-                        error={form.errors.ssl}
-                    />
-                    <CheckboxField
-                        label="Passive mode"
-                        checked={form.data.passive}
-                        onChange={(checked) => form.setData('passive', checked)}
-                        error={form.errors.passive}
-                    />
-                </div>
-
-                <div className="mt-5 rounded-2xl border border-border bg-muted/50">
-                    <button
-                        type="button"
-                        onClick={() => setShowAdvanced((current) => !current)}
-                        className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-foreground"
-                        aria-expanded={showAdvanced}
-                        aria-controls="edit-ftp-advanced-settings"
-                    >
-                        Advanced settings
-                        <ChevronDown
-                            className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
-                            aria-hidden="true"
-                        />
-                    </button>
-
-                    {showAdvanced && (
-                        <div
-                            id="edit-ftp-advanced-settings"
-                            className="grid gap-4 border-t border-border p-4 sm:grid-cols-2"
+                        <Field
+                            label="Username"
+                            error={form.errors.username}
+                            required
                         >
-                            <Field label="Timeout" error={form.errors.timeout}>
-                                <input
-                                    id="edit-ftp-timeout"
-                                    type="number"
-                                    min="1"
-                                    max="300"
-                                    value={form.data.timeout}
-                                    onChange={(event) =>
-                                        form.setData(
-                                            'timeout',
-                                            event.target.value,
-                                        )
+                            <input
+                                id="edit-ftp-username"
+                                value={form.data.username}
+                                onChange={(event) =>
+                                    form.setData('username', event.target.value)
+                                }
+                                className={inputClassName}
+                                aria-invalid={Boolean(form.errors.username)}
+                            />
+                        </Field>
+
+                        <Field label="Password" error={form.errors.password}>
+                            <input
+                                id="edit-ftp-password"
+                                type="password"
+                                value={form.data.password}
+                                onChange={(event) =>
+                                    form.setData('password', event.target.value)
+                                }
+                                className={inputClassName}
+                                aria-invalid={Boolean(form.errors.password)}
+                                placeholder="Leave blank to keep current password"
+                            />
+                        </Field>
+
+                        <Field label="Root" error={form.errors.root}>
+                            <input
+                                id="edit-ftp-root"
+                                value={form.data.root}
+                                onChange={(event) =>
+                                    form.setData('root', event.target.value)
+                                }
+                                className={inputClassName}
+                                aria-invalid={Boolean(form.errors.root)}
+                                placeholder="/"
+                            />
+                        </Field>
+                    </div>
+
+                    <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                        <CheckboxField
+                            label="Use SSL"
+                            checked={form.data.ssl}
+                            onChange={(checked) => form.setData('ssl', checked)}
+                            error={form.errors.ssl}
+                        />
+                        <CheckboxField
+                            label="Passive mode"
+                            checked={form.data.passive}
+                            onChange={(checked) =>
+                                form.setData('passive', checked)
+                            }
+                            error={form.errors.passive}
+                        />
+                    </div>
+
+                    <div className="mt-5 rounded-2xl border border-border bg-muted/50">
+                        <button
+                            type="button"
+                            onClick={() =>
+                                setShowAdvanced((current) => !current)
+                            }
+                            className="flex w-full items-center justify-between px-4 py-3 text-left text-sm font-bold text-foreground"
+                            aria-expanded={showAdvanced}
+                            aria-controls="edit-ftp-advanced-settings"
+                        >
+                            Advanced settings
+                            <ChevronDown
+                                className={`h-4 w-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`}
+                                aria-hidden="true"
+                            />
+                        </button>
+
+                        {showAdvanced && (
+                            <div
+                                id="edit-ftp-advanced-settings"
+                                className="grid gap-4 border-t border-border p-4 sm:grid-cols-2"
+                            >
+                                <Field
+                                    label="Timeout"
+                                    error={form.errors.timeout}
+                                >
+                                    <input
+                                        id="edit-ftp-timeout"
+                                        type="number"
+                                        min="1"
+                                        max="300"
+                                        value={form.data.timeout}
+                                        onChange={(event) =>
+                                            form.setData(
+                                                'timeout',
+                                                event.target.value,
+                                            )
+                                        }
+                                        className={inputClassName}
+                                        placeholder="30"
+                                    />
+                                </Field>
+
+                                <Field
+                                    label="Ignore passive address"
+                                    error={form.errors.ignorePassiveAddress}
+                                >
+                                    <Select
+                                        value={form.data.ignorePassiveAddress}
+                                        onValueChange={(value) =>
+                                            form.setData(
+                                                'ignorePassiveAddress',
+                                                value as IgnorePassiveAddress,
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="edit-ftp-ignore-passive-address"
+                                            className="w-full"
+                                        >
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {booleanOptions.map((option) => (
+                                                <SelectItem
+                                                    key={option.label}
+                                                    value={option.value}
+                                                >
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+
+                                <Field
+                                    label="System type"
+                                    error={form.errors.systemType}
+                                >
+                                    <Select
+                                        value={form.data.systemType}
+                                        onValueChange={(value) =>
+                                            form.setData(
+                                                'systemType',
+                                                value as SystemType,
+                                            )
+                                        }
+                                    >
+                                        <SelectTrigger
+                                            id="edit-ftp-system-type"
+                                            className="w-full"
+                                        >
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {systemTypeOptions.map((option) => (
+                                                <SelectItem
+                                                    key={option.value}
+                                                    value={option.value}
+                                                >
+                                                    {option.label}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </Field>
+
+                                <CheckboxField
+                                    label="UTF-8"
+                                    checked={form.data.utf8}
+                                    onChange={(checked) =>
+                                        form.setData('utf8', checked)
                                     }
-                                    className={inputClassName}
-                                    placeholder="30"
+                                    error={form.errors.utf8}
+                                    alignWithFields
                                 />
-                            </Field>
-
-                            <Field
-                                label="Ignore passive address"
-                                error={form.errors.ignorePassiveAddress}
-                            >
-                                <Select
-                                    value={form.data.ignorePassiveAddress}
-                                    onValueChange={(value) =>
+                                <CheckboxField
+                                    label="Recurse manually"
+                                    checked={form.data.recurseManually}
+                                    onChange={(checked) =>
+                                        form.setData('recurseManually', checked)
+                                    }
+                                    error={form.errors.recurseManually}
+                                    alignWithFields
+                                />
+                                <CheckboxField
+                                    label="Unix listing timestamps"
+                                    checked={
+                                        form.data
+                                            .timestampsOnUnixListingsEnabled
+                                    }
+                                    onChange={(checked) =>
                                         form.setData(
-                                            'ignorePassiveAddress',
-                                            value as IgnorePassiveAddress,
+                                            'timestampsOnUnixListingsEnabled',
+                                            checked,
                                         )
                                     }
-                                >
-                                    <SelectTrigger
-                                        id="edit-ftp-ignore-passive-address"
-                                        className="w-full"
-                                    >
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {booleanOptions.map((option) => (
-                                            <SelectItem
-                                                key={option.label}
-                                                value={option.value}
-                                            >
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </Field>
-
-                            <Field
-                                label="System type"
-                                error={form.errors.systemType}
-                            >
-                                <Select
-                                    value={form.data.systemType}
-                                    onValueChange={(value) =>
-                                        form.setData(
-                                            'systemType',
-                                            value as SystemType,
-                                        )
+                                    error={
+                                        form.errors
+                                            .timestampsOnUnixListingsEnabled
                                     }
-                                >
-                                    <SelectTrigger
-                                        id="edit-ftp-system-type"
-                                        className="w-full"
-                                    >
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {systemTypeOptions.map((option) => (
-                                            <SelectItem
-                                                key={option.value}
-                                                value={option.value}
-                                            >
-                                                {option.label}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </Field>
+                                    alignWithFields
+                                />
+                            </div>
+                        )}
+                    </div>
 
-                            <CheckboxField
-                                label="UTF-8"
-                                checked={form.data.utf8}
-                                onChange={(checked) =>
-                                    form.setData('utf8', checked)
-                                }
-                                error={form.errors.utf8}
-                                alignWithFields
-                            />
-                            <CheckboxField
-                                label="Recurse manually"
-                                checked={form.data.recurseManually}
-                                onChange={(checked) =>
-                                    form.setData('recurseManually', checked)
-                                }
-                                error={form.errors.recurseManually}
-                                alignWithFields
-                            />
-                            <CheckboxField
-                                label="Unix listing timestamps"
-                                checked={
-                                    form.data.timestampsOnUnixListingsEnabled
-                                }
-                                onChange={(checked) =>
-                                    form.setData(
-                                        'timestampsOnUnixListingsEnabled',
-                                        checked,
-                                    )
-                                }
-                                error={
-                                    form.errors.timestampsOnUnixListingsEnabled
-                                }
-                                alignWithFields
-                            />
-                        </div>
-                    )}
-                </div>
-
-                <div className="mt-6 flex justify-end gap-2">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        disabled={processing}
-                        className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        type="submit"
-                        disabled={processing}
-                        className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
-                    >
-                        {processing ? 'Testing connection...' : 'Save'}
-                    </button>
-                </div>
+                    <div className="mt-6 flex justify-end gap-2">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            disabled={processing}
+                            className="rounded-md border border-border px-4 py-2 text-sm font-bold text-foreground transition-colors hover:bg-muted hover:bg-muted/70 disabled:opacity-60"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={processing}
+                            className="rounded-md bg-primary px-4 py-2 text-sm font-bold text-white transition-colors hover:bg-primary/90 disabled:opacity-60"
+                        >
+                            {processing ? 'Testing connection...' : 'Save'}
+                        </button>
+                    </div>
                 </form>
             </DialogContent>
         </Dialog>

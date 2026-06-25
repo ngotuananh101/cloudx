@@ -30,25 +30,25 @@ class CloudItemMoveController extends Controller
             ]);
         }
 
-        if ($sourcePath === $destinationFolder || str_starts_with($destinationFolder . '/', $sourcePath . '/')) {
+        if ($sourcePath === $destinationFolder || str_starts_with($destinationFolder.'/', $sourcePath.'/')) {
             throw ValidationException::withMessages([
                 'destination_folder' => 'Cannot move a folder into itself or its subfolders.',
             ]);
         }
 
         $itemName = basename($sourcePath);
-        $destinationPath = $destinationFolder === '' ? $itemName : $destinationFolder . '/' . $itemName;
-        
+        $destinationPath = $destinationFolder === '' ? $itemName : $destinationFolder.'/'.$itemName;
+
         if ($sourcePath === $destinationPath) {
-             return back()->with('success', 'Item moved.');
+            return back()->with('success', 'Item moved.');
         }
 
         $disk = $connection->getDisk();
-        
+
         try {
             $disk->move($sourcePath, $destinationPath);
         } catch (\Throwable $e) {
-            return back()->with('error', 'Failed to move item: ' . $e->getMessage());
+            return back()->with('error', 'Failed to move item: '.$e->getMessage());
         }
 
         // Flush cache for source parent folder
@@ -58,7 +58,7 @@ class CloudItemMoveController extends Controller
             $sourceParentPath = substr($sourcePath, 0, $lastSlashPos);
         }
         $this->cache->flushFolder($connection, $sourceParentPath);
-        
+
         // Flush cache for destination folder
         $this->cache->flushFolder($connection, $destinationFolder);
 

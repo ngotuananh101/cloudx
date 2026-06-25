@@ -13,17 +13,25 @@ interface SharePreviewProps {
     downloadUrl: string;
 }
 
-export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: SharePreviewProps) {
+export function SharePreview({
+    previewUrl,
+    fileName,
+    fileSize,
+    downloadUrl,
+}: SharePreviewProps) {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const { theme } = useTheme();
-    const isDark = theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDark =
+        theme === 'dark' ||
+        (theme === 'system' &&
+            window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     const handleDownload = () => {
         window.location.href = downloadUrl;
     };
 
     const NoRendererFallback = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center ">
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
             <div className="mb-4 rounded-full bg-muted p-4">
                 <File className="h-8 w-8 text-muted-foreground" />
             </div>
@@ -40,7 +48,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
     );
 
     const LoadingRenderer = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center ">
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
             <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary" />
             <p className="text-sm font-medium text-foreground">
                 Loading preview...
@@ -49,7 +57,9 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
     );
 
     const previewContent = (
-        <div className={`flex flex-col ${isFullscreen ? 'h-screen w-screen' : 'h-[500px]'}`}>
+        <div
+            className={`flex flex-col ${isFullscreen ? 'h-screen w-screen' : 'h-[500px]'}`}
+        >
             {/* Header bar */}
             <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2.5">
                 <div className="min-w-0 flex-1 pr-4">
@@ -64,7 +74,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground"
                         onClick={handleDownload}
                         title="Download"
                     >
@@ -73,17 +83,21 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground"
                         onClick={() => setIsFullscreen(!isFullscreen)}
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                     >
-                        {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+                        {isFullscreen ? (
+                            <Minimize2 className="h-4 w-4" />
+                        ) : (
+                            <Maximize2 className="h-4 w-4" />
+                        )}
                     </Button>
                     {isFullscreen && (
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground hover:text-foreground"
+                            className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground"
                             onClick={() => setIsFullscreen(false)}
                             title="Close"
                         >
@@ -94,7 +108,7 @@ export function SharePreview({ previewUrl, fileName, fileSize, downloadUrl }: Sh
             </div>
 
             {/* DocViewer area */}
-            <div className="flex-1 min-h-0 overflow-hidden bg-muted">
+            <div className="min-h-0 flex-1 overflow-hidden bg-muted">
                 <DocViewer
                     documents={[{ uri: previewUrl, fileName }]}
                     pluginRenderers={DocViewerRenderers}

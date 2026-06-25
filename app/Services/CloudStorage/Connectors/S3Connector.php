@@ -8,6 +8,7 @@ use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
+use Aws\S3\S3Client;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -88,7 +89,7 @@ class S3Connector implements CloudProviderConnector, ProvidesDirectDownloadLink
     public function directDownloadLink(CloudConnection $connection, string $path): ?string
     {
         try {
-            $client = new \Aws\S3\S3Client($this->s3ClientConfig($connection->credentials));
+            $client = new S3Client($this->s3ClientConfig($connection->credentials));
             $cmd = $client->getCommand('GetObject', [
                 'Bucket' => $connection->credentials['bucket'],
                 'Key' => ltrim($path, '/'),
@@ -99,6 +100,7 @@ class S3Connector implements CloudProviderConnector, ProvidesDirectDownloadLink
             return (string) $request->getUri();
         } catch (Throwable $e) {
             report($e);
+
             return null;
         }
     }

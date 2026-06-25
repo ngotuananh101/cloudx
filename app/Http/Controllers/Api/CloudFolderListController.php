@@ -17,14 +17,13 @@ class CloudFolderListController extends Controller
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
 
         $path = $request->query('path', '');
-        
+
         try {
             $folders = $this->fileBrowser->listDirectories($connection, (string) $path);
-            
+
             return response()->json($folders);
         } catch (\Throwable $exception) {
             return response()->json(['error' => 'Could not retrieve folders', 'message' => $exception->getMessage()], 500);
         }
     }
 }
-

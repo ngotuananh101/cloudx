@@ -23,7 +23,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import connections from '@/routes/connections';
 import type { CloudFile } from '@/types/cloud';
 
@@ -69,13 +75,13 @@ export default function ShareItemModal({
         if (!isOpen || !item) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
             setShares([]);
-             
+
             setError(null);
-             
+
             setType('public');
-             
+
             setPassword('');
-             
+
             setExpiresInDays('0');
 
             return;
@@ -87,8 +93,8 @@ export default function ShareItemModal({
 
     async function fetchShares() {
         if (!item) {
-return;
-}
+            return;
+        }
 
         setIsLoadingShares(true);
 
@@ -97,8 +103,8 @@ return;
             const response = await fetch(url);
 
             if (!response.ok) {
-throw new Error('Failed to fetch shares');
-}
+                throw new Error('Failed to fetch shares');
+            }
 
             const data = await response.json();
             setShares(data);
@@ -111,8 +117,8 @@ throw new Error('Failed to fetch shares');
 
     const handleCreateShare = () => {
         if (!item) {
-return;
-}
+            return;
+        }
 
         setError(null);
         setIsSubmitting(true);
@@ -123,7 +129,8 @@ return;
             is_directory: item.isDirectory,
             type: type,
             password: type === 'password' ? password : null,
-            expires_in_days: expiresInDays === '0' ? null : parseInt(expiresInDays, 10),
+            expires_in_days:
+                expiresInDays === '0' ? null : parseInt(expiresInDays, 10),
             size: item.isDirectory ? null : item.size,
         };
 
@@ -143,54 +150,61 @@ return;
                     setError(firstError || 'Failed to create share.');
                 },
                 onFinish: () => setIsSubmitting(false),
-            }
+            },
         );
     };
 
     const confirmDeleteShare = () => {
         if (!shareToDelete) {
-return;
-}
+            return;
+        }
 
         setIsDeleting(true);
         router.delete(
-            connections.shares.destroy.url({ connection: connectionId, share: shareToDelete.id }),
+            connections.shares.destroy.url({
+                connection: connectionId,
+                share: shareToDelete.id,
+            }),
             {
                 preserveScroll: true,
                 onSuccess: () => {
-                    setShares(shares.filter(s => s.id !== shareToDelete.id));
+                    setShares(shares.filter((s) => s.id !== shareToDelete.id));
                     setShareToDelete(null);
                 },
                 onFinish: () => setIsDeleting(false),
-            }
+            },
         );
     };
 
     const handleCopy = (id: number, uuid: string) => {
         const url = `${window.location.origin}/s/${uuid}`;
-        
+
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(url).then(() => {
-                setCopiedId(id);
-                toast.success('Link copied to clipboard');
-                setTimeout(() => setCopiedId(null), 2000);
-            }).catch(() => {
-                toast.error('Failed to copy link');
-            });
+            navigator.clipboard
+                .writeText(url)
+                .then(() => {
+                    setCopiedId(id);
+                    toast.success('Link copied to clipboard');
+                    setTimeout(() => setCopiedId(null), 2000);
+                })
+                .catch(() => {
+                    toast.error('Failed to copy link');
+                });
         } else {
             // Fallback for non-secure contexts (e.g., http:// custom local domains)
-            const textArea = document.createElement("textarea");
+            const textArea = document.createElement('textarea');
             textArea.value = url;
-            textArea.style.position = "fixed";
-            textArea.style.opacity = "0";
-            
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+
             // Append to dialog to prevent Radix focus trap from blocking selection
-            const container = document.querySelector('[role="dialog"]') || document.body;
+            const container =
+                document.querySelector('[role="dialog"]') || document.body;
             container.appendChild(textArea);
-            
+
             textArea.focus();
             textArea.select();
-            
+
             try {
                 const successful = document.execCommand('copy');
 
@@ -211,177 +225,251 @@ return;
 
     return (
         <>
-        <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-xl bg-card border-border rounded-3xl p-6 shadow-2xl">
-                <DialogHeader className="mb-4">
-                    <DialogTitle className="text-foreground">
-                        Share "{item?.name}"
-                    </DialogTitle>
-                    <DialogDescription className="text-muted-foreground">
-                        Create a link to share this item with others.
-                    </DialogDescription>
-                </DialogHeader>
+            <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+                <DialogContent className="rounded-3xl border-border bg-card p-6 shadow-2xl sm:max-w-xl">
+                    <DialogHeader className="mb-4">
+                        <DialogTitle className="text-foreground">
+                            Share "{item?.name}"
+                        </DialogTitle>
+                        <DialogDescription className="text-muted-foreground">
+                            Create a link to share this item with others.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                <div className="space-y-6 min-w-0">
-                    {/* Create Share Form */}
-                    <div className="space-y-4 rounded-xl border border-border bg-muted/50 p-4">
-                        <div className="space-y-3">
-                            <Label className="text-sm font-semibold text-foreground">Access Type</Label>
-                            <RadioGroup
-                                value={type}
-                                onValueChange={(val) => setType(val as 'public' | 'password')}
-                                className="flex flex-col space-y-1"
-                            >
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="public" id="r-public" />
-                                    <Label htmlFor="r-public" className="flex items-center gap-2 cursor-pointer font-medium text-foreground">
-                                        <Globe className="h-4 w-4 text-primary" />
-                                        Public (Anyone with link)
-                                    </Label>
-                                </div>
-                                <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="password" id="r-password" />
-                                    <Label htmlFor="r-password" className="flex items-center gap-2 cursor-pointer font-medium text-foreground">
-                                        <Lock className="h-4 w-4 text-muted-foreground" />
-                                        Password Protected
-                                    </Label>
-                                </div>
-                            </RadioGroup>
-                        </div>
-
-                        {type === 'password' && (
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <Input
-                                    id="password"
-                                    type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Enter a secure password"
-                                    className="h-10 border-0 bg-card"
-                                />
-                            </div>
-                        )}
-
-                        <div className="space-y-2">
-                            <Label>Expiration</Label>
-                            <Select value={expiresInDays} onValueChange={setExpiresInDays}>
-                                <SelectTrigger className="h-10 border-0 bg-card">
-                                    <SelectValue placeholder="Select expiration" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="0">Never expires</SelectItem>
-                                    <SelectItem value="1">1 Day</SelectItem>
-                                    <SelectItem value="7">7 Days</SelectItem>
-                                    <SelectItem value="30">30 Days</SelectItem>
-                                    <SelectItem value="90">90 Days</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-
-                        {error && <p className="text-sm text-destructive font-medium">{error}</p>}
-
-                        <Button
-                            onClick={handleCreateShare}
-                            disabled={isSubmitting || (type === 'password' && password.length < 4)}
-                            className="w-full bg-primary text-white hover:bg-primary/90"
-                        >
-                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Create Share Link
-                        </Button>
-                    </div>
-
-                    {/* Existing Shares List */}
-                    {isLoadingShares ? (
-                        <div className="flex justify-center p-4">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                        </div>
-                    ) : shares.length > 0 ? (
-                        <div className="space-y-3">
-                            <h4 className="text-sm font-semibold text-foreground">Active Links</h4>
-                            <div className="space-y-2">
-                                {shares.map((share) => (
-                                    <div key={share.id} className="flex items-center justify-between rounded-lg border border-border p-3 bg-card">
-                                        <div className="flex flex-col min-w-0 pr-2">
-                                            <div className="flex items-center gap-2 mb-1 min-w-0">
-                                                {share.type === 'public' ? (
-                                                    <Globe className="h-3 w-3 text-primary shrink-0" />
-                                                ) : (
-                                                    <Lock className="h-3 w-3 text-muted-foreground shrink-0" />
-                                                )}
-                                                <span className="text-sm font-medium text-foreground truncate">
-                                                    {window.location.origin}/s/{share.uuid}
-                                                </span>
-                                            </div>
-                                            <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                                                <span className={`font-medium capitalize ${share.type === 'public' ? 'text-primary' : 'text-muted-foreground'}`}>
-                                                    {share.type}
-                                                </span>
-                                                <span>•</span>
-                                                <span>Created {new Date(share.created_at).toLocaleDateString()}</span>
-                                                <span>•</span>
-                                                <span>{share.expires_at ? `Expires ${new Date(share.expires_at).toLocaleDateString()}` : 'Never expires'}</span>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-1 shrink-0">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-primary"
-                                                onClick={() => handleCopy(share.id, share.uuid)}
-                                                title="Copy Link"
-                                            >
-                                                {copiedId === share.id ? (
-                                                    <Check className="h-4 w-4 text-green-500" />
-                                                ) : (
-                                                    <Copy className="h-4 w-4" />
-                                                )}
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                onClick={() => setShareToDelete(share)}
-                                                title="Delete Link"
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </div>
+                    <div className="min-w-0 space-y-6">
+                        {/* Create Share Form */}
+                        <div className="space-y-4 rounded-xl border border-border bg-muted/50 p-4">
+                            <div className="space-y-3">
+                                <Label className="text-sm font-semibold text-foreground">
+                                    Access Type
+                                </Label>
+                                <RadioGroup
+                                    value={type}
+                                    onValueChange={(val) =>
+                                        setType(val as 'public' | 'password')
+                                    }
+                                    className="flex flex-col space-y-1"
+                                >
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem
+                                            value="public"
+                                            id="r-public"
+                                        />
+                                        <Label
+                                            htmlFor="r-public"
+                                            className="flex cursor-pointer items-center gap-2 font-medium text-foreground"
+                                        >
+                                            <Globe className="h-4 w-4 text-primary" />
+                                            Public (Anyone with link)
+                                        </Label>
                                     </div>
-                                ))}
+                                    <div className="flex items-center space-x-2">
+                                        <RadioGroupItem
+                                            value="password"
+                                            id="r-password"
+                                        />
+                                        <Label
+                                            htmlFor="r-password"
+                                            className="flex cursor-pointer items-center gap-2 font-medium text-foreground"
+                                        >
+                                            <Lock className="h-4 w-4 text-muted-foreground" />
+                                            Password Protected
+                                        </Label>
+                                    </div>
+                                </RadioGroup>
                             </div>
-                        </div>
-                    ) : null}
-                </div>
-            </DialogContent>
-        </Dialog>
 
-        <AlertDialog open={!!shareToDelete} onOpenChange={(open) => !open && setShareToDelete(null)}>
-            <AlertDialogContent className="bg-card border-border rounded-2xl">
-                <AlertDialogHeader>
-                    <AlertDialogTitle className="text-foreground">Delete Share Link?</AlertDialogTitle>
-                    <AlertDialogDescription className="text-muted-foreground">
-                        Are you sure you want to delete this share link? Anyone with this link will no longer have access. This action cannot be undone.
-                    </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                    <AlertDialogCancel disabled={isDeleting} className="border-border bg-card text-foreground hover:bg-muted hover:bg-muted/70">
-                        Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                        onClick={(e) => {
-                            e.preventDefault();
-                            confirmDeleteShare();
-                        }}
-                        className="bg-destructive hover:bg-destructive/90 text-white border-0"
-                        disabled={isDeleting}
-                    >
-                        {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                        Delete
-                    </AlertDialogAction>
-                </AlertDialogFooter>
-            </AlertDialogContent>
-        </AlertDialog>
+                            {type === 'password' && (
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        value={password}
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
+                                        placeholder="Enter a secure password"
+                                        className="h-10 border-0 bg-card"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="space-y-2">
+                                <Label>Expiration</Label>
+                                <Select
+                                    value={expiresInDays}
+                                    onValueChange={setExpiresInDays}
+                                >
+                                    <SelectTrigger className="h-10 border-0 bg-card">
+                                        <SelectValue placeholder="Select expiration" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="0">
+                                            Never expires
+                                        </SelectItem>
+                                        <SelectItem value="1">1 Day</SelectItem>
+                                        <SelectItem value="7">
+                                            7 Days
+                                        </SelectItem>
+                                        <SelectItem value="30">
+                                            30 Days
+                                        </SelectItem>
+                                        <SelectItem value="90">
+                                            90 Days
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            {error && (
+                                <p className="text-sm font-medium text-destructive">
+                                    {error}
+                                </p>
+                            )}
+
+                            <Button
+                                onClick={handleCreateShare}
+                                disabled={
+                                    isSubmitting ||
+                                    (type === 'password' && password.length < 4)
+                                }
+                                className="w-full bg-primary text-white hover:bg-primary/90"
+                            >
+                                {isSubmitting ? (
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                ) : null}
+                                Create Share Link
+                            </Button>
+                        </div>
+
+                        {/* Existing Shares List */}
+                        {isLoadingShares ? (
+                            <div className="flex justify-center p-4">
+                                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                            </div>
+                        ) : shares.length > 0 ? (
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-foreground">
+                                    Active Links
+                                </h4>
+                                <div className="space-y-2">
+                                    {shares.map((share) => (
+                                        <div
+                                            key={share.id}
+                                            className="flex items-center justify-between rounded-lg border border-border bg-card p-3"
+                                        >
+                                            <div className="flex min-w-0 flex-col pr-2">
+                                                <div className="mb-1 flex min-w-0 items-center gap-2">
+                                                    {share.type === 'public' ? (
+                                                        <Globe className="h-3 w-3 shrink-0 text-primary" />
+                                                    ) : (
+                                                        <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
+                                                    )}
+                                                    <span className="truncate text-sm font-medium text-foreground">
+                                                        {window.location.origin}
+                                                        /s/{share.uuid}
+                                                    </span>
+                                                </div>
+                                                <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span
+                                                        className={`font-medium capitalize ${share.type === 'public' ? 'text-primary' : 'text-muted-foreground'}`}
+                                                    >
+                                                        {share.type}
+                                                    </span>
+                                                    <span>•</span>
+                                                    <span>
+                                                        Created{' '}
+                                                        {new Date(
+                                                            share.created_at,
+                                                        ).toLocaleDateString()}
+                                                    </span>
+                                                    <span>•</span>
+                                                    <span>
+                                                        {share.expires_at
+                                                            ? `Expires ${new Date(share.expires_at).toLocaleDateString()}`
+                                                            : 'Never expires'}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div className="flex shrink-0 items-center gap-1">
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                                                    onClick={() =>
+                                                        handleCopy(
+                                                            share.id,
+                                                            share.uuid,
+                                                        )
+                                                    }
+                                                    title="Copy Link"
+                                                >
+                                                    {copiedId === share.id ? (
+                                                        <Check className="h-4 w-4 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="h-4 w-4" />
+                                                    )}
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                    onClick={() =>
+                                                        setShareToDelete(share)
+                                                    }
+                                                    title="Delete Link"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : null}
+                    </div>
+                </DialogContent>
+            </Dialog>
+
+            <AlertDialog
+                open={!!shareToDelete}
+                onOpenChange={(open) => !open && setShareToDelete(null)}
+            >
+                <AlertDialogContent className="rounded-2xl border-border bg-card">
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="text-foreground">
+                            Delete Share Link?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription className="text-muted-foreground">
+                            Are you sure you want to delete this share link?
+                            Anyone with this link will no longer have access.
+                            This action cannot be undone.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel
+                            disabled={isDeleting}
+                            className="border-border bg-card text-foreground hover:bg-muted hover:bg-muted/70"
+                        >
+                            Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={(e) => {
+                                e.preventDefault();
+                                confirmDeleteShare();
+                            }}
+                            className="border-0 bg-destructive text-white hover:bg-destructive/90"
+                            disabled={isDeleting}
+                        >
+                            {isDeleting ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : null}
+                            Delete
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     );
 }

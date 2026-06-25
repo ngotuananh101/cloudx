@@ -35,7 +35,7 @@ class CloudStorageCache
     public function rememberDirectoryListing(CloudConnection $connection, string $path, Closure $callback): mixed
     {
         return $this->repository($this->folderTags($connection, $path))->remember(
-            $this->folderKey($connection, $path) . ':dirs',
+            $this->folderKey($connection, $path).':dirs',
             $this->ttl(),
             $callback,
         );

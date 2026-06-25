@@ -8,13 +8,15 @@ const errorConfig = {
         icon: Search,
         iconBg: 'bg-muted',
         title: 'Link Not Found',
-        description: 'This shared link doesn\'t exist or has been removed. Please check the URL or contact the sender.',
+        description:
+            "This shared link doesn't exist or has been removed. Please check the URL or contact the sender.",
     },
     expired: {
         icon: Clock,
         iconBg: 'bg-muted',
         title: 'Link Expired',
-        description: 'This shared link has expired and is no longer available. Please contact the sender for a new link.',
+        description:
+            'This shared link has expired and is no longer available. Please contact the sender for a new link.',
     },
     wrong_password: {
         icon: ShieldAlert,
@@ -24,7 +26,11 @@ const errorConfig = {
     },
 } as const;
 
-export default function ShareError({ reason }: { reason: keyof typeof errorConfig }) {
+export default function ShareError({
+    reason,
+}: {
+    reason: keyof typeof errorConfig;
+}) {
     const config = errorConfig[reason] ?? errorConfig.not_found;
     const Icon = config.icon;
 
@@ -32,7 +38,9 @@ export default function ShareError({ reason }: { reason: keyof typeof errorConfi
         <ShareLayout>
             <Head title={`Error — ${config.title}`} />
             <div className="w-full max-w-md rounded-2xl bg-card p-8 text-center shadow-sm">
-                <div className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ${config.iconBg}`}>
+                <div
+                    className={`mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full ${config.iconBg}`}
+                >
                     <Icon className="h-7 w-7 text-muted-foreground" />
                 </div>
                 <h1 className="text-lg font-bold text-foreground">
@@ -44,7 +52,7 @@ export default function ShareError({ reason }: { reason: keyof typeof errorConfi
                 <Button
                     variant="outline"
                     className="mt-6"
-                    onClick={() => window.location.href = '/'}
+                    onClick={() => (window.location.href = '/')}
                 >
                     ← Back to CloudX
                 </Button>
