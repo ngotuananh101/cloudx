@@ -15,9 +15,9 @@ import {
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
-import files from '@/routes/cloud/files';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { Button } from './ui/button';
+import files from '@/routes/cloud/files';
 
 interface FileTableRowProps {
     item: CloudFile;
@@ -49,11 +49,15 @@ export function FileTableRow({
                     <Folder className="h-4.5 w-4.5 fill-primary/20 text-primary" />
                 );
             case 'document':
-                return <FileText className="h-4.5 w-4.5 text-muted-foreground" />;
+                return (
+                    <FileText className="h-4.5 w-4.5 text-muted-foreground" />
+                );
             case 'image':
                 return <FileImage className="h-4.5 w-4.5 text-primary" />;
             case 'code':
-                return <FileCode className="h-4.5 w-4.5 text-muted-foreground" />;
+                return (
+                    <FileCode className="h-4.5 w-4.5 text-muted-foreground" />
+                );
             case 'archive':
                 return <FileArchive className="h-4.5 w-4.5 text-destructive" />;
             case 'video':
@@ -103,13 +107,15 @@ export function FileTableRow({
         >
             {/* Name Column */}
             <div
-                className={`flex min-w-0 flex-1 items-center gap-3 pr-4 cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
-                onClick={() => item.isDirectory ? onNavigate?.(item) : onPreview?.(item)}
+                className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 pr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}
+                onClick={() =>
+                    item.isDirectory ? onNavigate?.(item) : onPreview?.(item)
+                }
                 onKeyDown={handleFolderKeyDown}
                 role="button"
                 tabIndex={0}
             >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-card group-hover:bg-card">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted group-hover:bg-card">
                     {getIcon()}
                 </div>
                 <span className="truncate text-sm font-medium text-foreground transition-colors group-hover:text-primary">

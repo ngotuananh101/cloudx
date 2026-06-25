@@ -2,7 +2,13 @@ import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import { store } from '@/routes/connections/s3';
 
 interface S3ConnectionFormProps {
@@ -47,7 +53,10 @@ const providerPresets = [
     { label: 'Custom', value: 'custom' },
 ] as const;
 
-export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFormProps) {
+export default function S3ConnectionForm({
+    onCancel,
+    onSuccess,
+}: S3ConnectionFormProps) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<S3ConnectionFormData>({
@@ -86,24 +95,41 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                     <input
                         id="s3-name"
                         value={form.data.name}
-                        onChange={(event) => form.setData('name', event.target.value)}
+                        onChange={(event) =>
+                            form.setData('name', event.target.value)
+                        }
                         className={inputClassName}
                         aria-invalid={Boolean(form.errors.name)}
                         autoFocus
                     />
                 </Field>
 
-                <Field label="Provider preset" error={form.errors.provider_preset} required>
+                <Field
+                    label="Provider preset"
+                    error={form.errors.provider_preset}
+                    required
+                >
                     <Select
                         value={form.data.provider_preset}
-                        onValueChange={(value) => form.setData('provider_preset', value as S3ProviderPreset)}
+                        onValueChange={(value) =>
+                            form.setData(
+                                'provider_preset',
+                                value as S3ProviderPreset,
+                            )
+                        }
                     >
-                        <SelectTrigger id="s3-provider-preset" className="w-full">
+                        <SelectTrigger
+                            id="s3-provider-preset"
+                            className="w-full"
+                        >
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             {providerPresets.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
+                                <SelectItem
+                                    key={option.value}
+                                    value={option.value}
+                                >
                                     {option.label}
                                 </SelectItem>
                             ))}
@@ -115,7 +141,9 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                     <input
                         id="s3-bucket"
                         value={form.data.bucket}
-                        onChange={(event) => form.setData('bucket', event.target.value)}
+                        onChange={(event) =>
+                            form.setData('bucket', event.target.value)
+                        }
                         className={inputClassName}
                         aria-invalid={Boolean(form.errors.bucket)}
                         placeholder="my-bucket"
@@ -126,29 +154,46 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                     <input
                         id="s3-region"
                         value={form.data.region}
-                        onChange={(event) => form.setData('region', event.target.value)}
+                        onChange={(event) =>
+                            form.setData('region', event.target.value)
+                        }
                         className={inputClassName}
                         aria-invalid={Boolean(form.errors.region)}
                         placeholder="us-east-1"
                     />
                 </Field>
 
-                <Field label="Access key ID" error={form.errors.access_key_id} required>
+                <Field
+                    label="Access key ID"
+                    error={form.errors.access_key_id}
+                    required
+                >
                     <input
                         id="s3-access-key-id"
                         value={form.data.access_key_id}
-                        onChange={(event) => form.setData('access_key_id', event.target.value)}
+                        onChange={(event) =>
+                            form.setData('access_key_id', event.target.value)
+                        }
                         className={inputClassName}
                         aria-invalid={Boolean(form.errors.access_key_id)}
                     />
                 </Field>
 
-                <Field label="Secret access key" error={form.errors.secret_access_key} required>
+                <Field
+                    label="Secret access key"
+                    error={form.errors.secret_access_key}
+                    required
+                >
                     <input
                         id="s3-secret-access-key"
                         type="password"
                         value={form.data.secret_access_key}
-                        onChange={(event) => form.setData('secret_access_key', event.target.value)}
+                        onChange={(event) =>
+                            form.setData(
+                                'secret_access_key',
+                                event.target.value,
+                            )
+                        }
                         className={inputClassName}
                         aria-invalid={Boolean(form.errors.secret_access_key)}
                     />
@@ -171,12 +216,17 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                 </button>
 
                 {showAdvanced && (
-                    <div id="s3-advanced-settings" className="grid gap-4 border-t border-border p-4 sm:grid-cols-2">
+                    <div
+                        id="s3-advanced-settings"
+                        className="grid gap-4 border-t border-border p-4 sm:grid-cols-2"
+                    >
                         <Field label="Endpoint" error={form.errors.endpoint}>
                             <input
                                 id="s3-endpoint"
                                 value={form.data.endpoint}
-                                onChange={(event) => form.setData('endpoint', event.target.value)}
+                                onChange={(event) =>
+                                    form.setData('endpoint', event.target.value)
+                                }
                                 className={inputClassName}
                                 aria-invalid={Boolean(form.errors.endpoint)}
                                 placeholder="https://nyc3.digitaloceanspaces.com"
@@ -187,20 +237,32 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                             <input
                                 id="s3-root"
                                 value={form.data.root}
-                                onChange={(event) => form.setData('root', event.target.value)}
+                                onChange={(event) =>
+                                    form.setData('root', event.target.value)
+                                }
                                 className={inputClassName}
                                 aria-invalid={Boolean(form.errors.root)}
                                 placeholder="uploads"
                             />
                         </Field>
 
-                        <Field label="Session token" error={form.errors.session_token}>
+                        <Field
+                            label="Session token"
+                            error={form.errors.session_token}
+                        >
                             <input
                                 id="s3-session-token"
                                 value={form.data.session_token}
-                                onChange={(event) => form.setData('session_token', event.target.value)}
+                                onChange={(event) =>
+                                    form.setData(
+                                        'session_token',
+                                        event.target.value,
+                                    )
+                                }
                                 className={inputClassName}
-                                aria-invalid={Boolean(form.errors.session_token)}
+                                aria-invalid={Boolean(
+                                    form.errors.session_token,
+                                )}
                             />
                         </Field>
 
@@ -208,7 +270,9 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                             <input
                                 id="s3-cdn-url"
                                 value={form.data.cdn_url}
-                                onChange={(event) => form.setData('cdn_url', event.target.value)}
+                                onChange={(event) =>
+                                    form.setData('cdn_url', event.target.value)
+                                }
                                 className={inputClassName}
                                 aria-invalid={Boolean(form.errors.cdn_url)}
                                 placeholder="https://cdn.example.com"
@@ -218,7 +282,9 @@ export default function S3ConnectionForm({ onCancel, onSuccess }: S3ConnectionFo
                         <CheckboxField
                             label="Use path-style endpoint"
                             checked={form.data.use_path_style_endpoint}
-                            onChange={(checked) => form.setData('use_path_style_endpoint', checked)}
+                            onChange={(checked) =>
+                                form.setData('use_path_style_endpoint', checked)
+                            }
                             error={form.errors.use_path_style_endpoint}
                             alignWithFields
                         />
@@ -278,7 +344,10 @@ function Field({
             </label>
             {children}
             {error && (
-                <p id={id ? `${id}-error` : undefined} className="text-xs text-destructive">
+                <p
+                    id={id ? `${id}-error` : undefined}
+                    className="text-xs text-destructive"
+                >
                     {error}
                 </p>
             )}

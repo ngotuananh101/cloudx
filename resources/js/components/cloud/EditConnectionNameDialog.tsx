@@ -1,6 +1,6 @@
 import { useForm } from '@inertiajs/react';
-import {  useEffect } from 'react';
-import type {FormEvent} from 'react';
+import { useEffect } from 'react';
+import type { FormEvent } from 'react';
 import { updateName } from '@/actions/App/Http/Controllers/CloudConnectionController';
 import { Button } from '@/components/ui/button';
 import {
@@ -48,8 +48,11 @@ export default function EditConnectionNameDialog({
     };
 
     return (
-        <Dialog open={connection !== null} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="sm:max-w-sm rounded-3xl p-6 shadow-2xl bg-card border-border">
+        <Dialog
+            open={connection !== null}
+            onOpenChange={(open) => !open && onClose()}
+        >
+            <DialogContent className="rounded-3xl border-border bg-card p-6 shadow-2xl sm:max-w-sm">
                 <form onSubmit={submit}>
                     <DialogHeader className="mb-5">
                         <DialogTitle className="text-lg font-extrabold tracking-tight text-foreground">

@@ -34,8 +34,8 @@ export default function SharePassword({ uuid, share }: SharePasswordProps) {
                         Password Protected
                     </h1>
                     <p className="mt-2 text-sm text-muted-foreground">
-                        <strong>{share.name}</strong> is protected with a password.
-                        Enter the password to access it.
+                        <strong>{share.name}</strong> is protected with a
+                        password. Enter the password to access it.
                     </p>
                 </div>
 
@@ -46,13 +46,17 @@ export default function SharePassword({ uuid, share }: SharePasswordProps) {
                             id="password"
                             type="password"
                             value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
+                            onChange={(e) =>
+                                setData('password', e.target.value)
+                            }
                             placeholder="Enter password..."
                             autoFocus
                             className="h-11"
                         />
                         {errors.password && (
-                            <p className="text-sm text-destructive">{errors.password}</p>
+                            <p className="text-sm text-destructive">
+                                {errors.password}
+                            </p>
                         )}
                     </div>
                     <Button

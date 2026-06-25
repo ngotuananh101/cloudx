@@ -46,7 +46,7 @@ export default function StorageOverviewCards({
     }
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2  lg:grid-cols-3 xl:grid-cols-4  2xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
             {connections.map((connection) => (
                 <Card
                     key={connection.id}
@@ -61,7 +61,10 @@ export default function StorageOverviewCards({
                                     <img
                                         src={connection.provider_icon}
                                         className="h-6 w-6"
-                                        alt={connection.provider_label ?? 'Storage'}
+                                        alt={
+                                            connection.provider_label ??
+                                            'Storage'
+                                        }
                                     />
                                 ) : (
                                     <HardDrive

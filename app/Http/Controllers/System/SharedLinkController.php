@@ -31,7 +31,7 @@ class SharedLinkController extends Controller
             if ($request->expires === 'active') {
                 $query->where(function ($q) {
                     $q->whereNull('expires_at')
-                      ->orWhere('expires_at', '>', now());
+                        ->orWhere('expires_at', '>', now());
                 });
             } else {
                 $query->whereNotNull('expires_at')->where('expires_at', '<=', now());
@@ -39,11 +39,11 @@ class SharedLinkController extends Controller
         }
 
         if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request->name . '%');
+            $query->where('name', 'like', '%'.$request->name.'%');
         }
 
         if ($request->filled('url')) {
-            $query->where('uuid', 'like', '%' . $request->url . '%');
+            $query->where('uuid', 'like', '%'.$request->url.'%');
         }
 
         if ($request->filled('created_date')) {

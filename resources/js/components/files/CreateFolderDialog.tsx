@@ -88,7 +88,9 @@ export function CreateFolderDialog({
                         className="h-11 rounded-xl"
                     />
                     {folderError && (
-                        <p className="text-sm text-destructive">{folderError}</p>
+                        <p className="text-sm text-destructive">
+                            {folderError}
+                        </p>
                     )}
                 </form>
 

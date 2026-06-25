@@ -4,7 +4,9 @@ namespace App\Support;
 
 use App\Events\CloudUploadTaskUpdated;
 use App\Models\CloudTask;
+use Illuminate\Broadcasting\BroadcastException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CloudUploadTaskBroadcaster
 {
@@ -12,9 +14,9 @@ class CloudUploadTaskBroadcaster
     {
         try {
             CloudUploadTaskUpdated::dispatch($task->refresh());
-        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
+        } catch (BroadcastException $e) {
             // Ignore broadcast exceptions to prevent upload failures
-            \Illuminate\Support\Facades\Log::warning('Broadcast failed for task ' . $task->id . ': ' . $e->getMessage());
+            Log::warning('Broadcast failed for task '.$task->id.': '.$e->getMessage());
         }
     }
 
@@ -51,8 +53,8 @@ class CloudUploadTaskBroadcaster
 
         try {
             CloudUploadTaskUpdated::dispatch($task->refresh());
-        } catch (\Illuminate\Broadcasting\BroadcastException $e) {
-            \Illuminate\Support\Facades\Log::warning('Broadcast progress failed for task ' . $task->id . ': ' . $e->getMessage());
+        } catch (BroadcastException $e) {
+            Log::warning('Broadcast progress failed for task '.$task->id.': '.$e->getMessage());
         }
     }
 }

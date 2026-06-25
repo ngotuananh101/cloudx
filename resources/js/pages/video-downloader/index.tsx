@@ -42,10 +42,13 @@ export default function VideoDownloaderIndex() {
     const [loading, setLoading] = useState(false);
     const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [selectedFormatId, setSelectedFormatId] = useState<string | null>(null);
+    const [selectedFormatId, setSelectedFormatId] = useState<string | null>(
+        null,
+    );
 
     const csrfToken = (): string =>
-        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content ?? '';
+        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
+            ?.content ?? '';
 
     const fetchInfo = async (event: FormEvent) => {
         event.preventDefault();
@@ -68,10 +71,15 @@ export default function VideoDownloaderIndex() {
                 }),
             });
 
-            const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+            const data = (await response.json().catch(() => ({}))) as Record<
+                string,
+                unknown
+            >;
 
             if (!response.ok) {
-                throw new Error((data.message as string) ?? 'Failed to fetch video info.');
+                throw new Error(
+                    (data.message as string) ?? 'Failed to fetch video info.',
+                );
             }
 
             setMetadata(data as unknown as VideoMetadata);
@@ -97,7 +105,9 @@ export default function VideoDownloaderIndex() {
     };
 
     const selectedFormat: VideoFormat | null =
-        metadata?.formats.find((format) => format.format_id === selectedFormatId) ?? null;
+        metadata?.formats.find(
+            (format) => format.format_id === selectedFormatId,
+        ) ?? null;
 
     return (
         <AuthenticatedLayout title="Video Downloader">
@@ -107,13 +117,20 @@ export default function VideoDownloaderIndex() {
                         Video Downloader
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Paste a video URL to fetch available formats and download the file.
+                        Paste a video URL to fetch available formats and
+                        download the file.
                     </p>
                 </div>
 
-                <form onSubmit={fetchInfo} className="space-y-3 rounded-2xl border border-border bg-card p-6 shadow-sm">
+                <form
+                    onSubmit={fetchInfo}
+                    className="space-y-3 rounded-2xl border border-border bg-card p-6 shadow-sm"
+                >
                     <div>
-                        <label htmlFor="vd-url" className="text-xs font-bold text-foreground">
+                        <label
+                            htmlFor="vd-url"
+                            className="text-xs font-bold text-foreground"
+                        >
                             Video URL
                         </label>
                         <input
@@ -123,7 +140,7 @@ export default function VideoDownloaderIndex() {
                             value={url}
                             onChange={(event) => setUrl(event.target.value)}
                             placeholder="https://www.youtube.com/watch?v=..."
-                            className="mt-1 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50"
+                            className="mt-1 h-11 w-full rounded-xl border border-border bg-background px-3 text-sm font-medium text-foreground transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
                         />
                     </div>
 
@@ -132,20 +149,27 @@ export default function VideoDownloaderIndex() {
                         onClick={() => setShowCookies((current) => !current)}
                         className="text-xs font-semibold text-muted-foreground hover:text-foreground"
                     >
-                        {showCookies ? 'Hide cookies' : 'Use cookies (advanced)'}
+                        {showCookies
+                            ? 'Hide cookies'
+                            : 'Use cookies (advanced)'}
                     </button>
 
                     {showCookies && (
                         <div>
-                            <label htmlFor="vd-cookies" className="text-xs font-bold text-foreground">
+                            <label
+                                htmlFor="vd-cookies"
+                                className="text-xs font-bold text-foreground"
+                            >
                                 Cookies (Netscape format)
                             </label>
                             <textarea
                                 id="vd-cookies"
                                 value={cookies}
-                                onChange={(event) => setCookies(event.target.value)}
+                                onChange={(event) =>
+                                    setCookies(event.target.value)
+                                }
                                 rows={4}
-                                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50"
+                                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs text-foreground transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
                             />
                         </div>
                     )}
@@ -190,7 +214,8 @@ export default function VideoDownloaderIndex() {
                                     {metadata.uploader}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
-                                    {formatDuration(metadata.duration)} - {formatCount(metadata.view_count)} views
+                                    {formatDuration(metadata.duration)} -{' '}
+                                    {formatCount(metadata.view_count)} views
                                 </p>
                                 {metadata.description && (
                                     <p className="line-clamp-3 text-xs text-muted-foreground">
@@ -206,13 +231,18 @@ export default function VideoDownloaderIndex() {
                             </h3>
                             <ul className="divide-y divide-border rounded-xl border border-border">
                                 {metadata.formats.map((format) => {
-                                    const isSelected = format.format_id === selectedFormatId;
+                                    const isSelected =
+                                        format.format_id === selectedFormatId;
 
                                     return (
                                         <li key={format.format_id}>
                                             <button
                                                 type="button"
-                                                onClick={() => setSelectedFormatId(format.format_id)}
+                                                onClick={() =>
+                                                    setSelectedFormatId(
+                                                        format.format_id,
+                                                    )
+                                                }
                                                 className={`flex w-full items-center justify-between gap-3 px-4 py-3 text-left text-sm transition ${
                                                     isSelected
                                                         ? 'bg-primary/10 font-semibold text-foreground'
@@ -221,14 +251,21 @@ export default function VideoDownloaderIndex() {
                                             >
                                                 <span className="flex flex-col">
                                                     <span className="font-semibold text-foreground">
-                                                        {format.format_note ?? format.resolution ?? format.format_id}
+                                                        {format.format_note ??
+                                                            format.resolution ??
+                                                            format.format_id}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground">
-                                                        {format.ext} - {format.resolution}
+                                                        {format.ext} -{' '}
+                                                        {format.resolution}
                                                     </span>
                                                 </span>
                                                 <span className="text-xs text-muted-foreground">
-                                                    {format.filesize ? formatBytes(format.filesize) : 'unknown size'}
+                                                    {format.filesize
+                                                        ? formatBytes(
+                                                              format.filesize,
+                                                          )
+                                                        : 'unknown size'}
                                                 </span>
                                             </button>
                                         </li>
@@ -244,7 +281,10 @@ export default function VideoDownloaderIndex() {
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
                         >
                             <Download className="h-4 w-4" />
-                            Download {selectedFormat ? `${selectedFormat.format_note ?? selectedFormat.format_id}.${selectedFormat.ext}` : ''}
+                            Download{' '}
+                            {selectedFormat
+                                ? `${selectedFormat.format_note ?? selectedFormat.format_id}.${selectedFormat.ext}`
+                                : ''}
                         </button>
                     </div>
                 )}

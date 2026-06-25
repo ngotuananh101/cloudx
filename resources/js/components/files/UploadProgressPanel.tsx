@@ -1,5 +1,14 @@
 import { usePage } from '@inertiajs/react';
-import { Pause, Play, RotateCcw, X, ChevronDown, ChevronUp, Trash2, HardDrive } from 'lucide-react';
+import {
+    Pause,
+    Play,
+    RotateCcw,
+    X,
+    ChevronDown,
+    ChevronUp,
+    Trash2,
+    HardDrive,
+} from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -47,8 +56,16 @@ function getStatusLabel(item: UploadQueueItem): string {
 }
 
 export default function UploadProgressPanel() {
-    const { items, isPanelVisible, pause, resume, cancel, retry, closePanel, remove } =
-        useUploadManager();
+    const {
+        items,
+        isPanelVisible,
+        pause,
+        resume,
+        cancel,
+        retry,
+        closePanel,
+        remove,
+    } = useUploadManager();
     const [isMinimized, setIsMinimized] = useState(false);
     const { props } = usePage() as any;
     const connections = props.auth?.user?.connections || [];
@@ -68,20 +85,21 @@ export default function UploadProgressPanel() {
     const totalProgress =
         items.length > 0
             ? Math.round(
-                items.reduce((sum, item) => sum + item.progress, 0) /
-                items.length,
-            )
+                  items.reduce((sum, item) => sum + item.progress, 0) /
+                      items.length,
+              )
             : 0;
 
     const headerTitle =
         activeCount > 0
             ? `Uploading ${activeCount} file${activeCount === 1 ? '' : 's'}`
-            : `Uploaded ${completedCount} file${completedCount === 1 ? '' : 's'
-            }`;
+            : `Uploaded ${completedCount} file${
+                  completedCount === 1 ? '' : 's'
+              }`;
 
     return (
         <div className="fixed right-6 bottom-6 z-50 w-95 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
-            <div className="flex items-start justify-between gap-3 border-b border-border bg-muted  px-4 py-3">
+            <div className="flex items-start justify-between gap-3 border-b border-border bg-muted px-4 py-3">
                 <div className="min-w-0">
                     <div className="truncate text-sm font-bold text-foreground">
                         {headerTitle}
@@ -97,10 +115,18 @@ export default function UploadProgressPanel() {
                         variant="ghost"
                         size="icon-sm"
                         onClick={() => setIsMinimized(!isMinimized)}
-                        aria-label={isMinimized ? 'Expand upload panel' : 'Minimize upload panel'}
+                        aria-label={
+                            isMinimized
+                                ? 'Expand upload panel'
+                                : 'Minimize upload panel'
+                        }
                         className="text-muted-foreground hover:text-foreground"
                     >
-                        {isMinimized ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        {isMinimized ? (
+                            <ChevronUp className="h-4 w-4" />
+                        ) : (
+                            <ChevronDown className="h-4 w-4" />
+                        )}
                     </Button>
                     <Button
                         type="button"
@@ -128,99 +154,111 @@ export default function UploadProgressPanel() {
 
             {!isMinimized && (
                 <div className="custom-scrollbar max-h-80 space-y-2 overflow-y-auto p-4 pt-0">
-                {items.map((item) => {
-                    const isFailed = item.status === 'failed';
-                    const connection = connections.find((c: CloudConnection) => c.id === item.connectionId);
+                    {items.map((item) => {
+                        const isFailed = item.status === 'failed';
+                        const connection = connections.find(
+                            (c: CloudConnection) => c.id === item.connectionId,
+                        );
 
-                    return (
-                        <div
-                            key={item.key}
-                            className={`rounded-xl border p-3 ${isFailed
-                                ? 'border-border bg-muted'
-                                : 'border-border bg-muted/50'
+                        return (
+                            <div
+                                key={item.key}
+                                className={`rounded-xl border p-3 ${
+                                    isFailed
+                                        ? 'border-border bg-muted'
+                                        : 'border-border bg-muted/50'
                                 }`}
-                        >
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="min-w-0 flex-1">
-                                    <div className="flex items-center gap-2">
-                                        {connection?.provider_icon?.endsWith('.svg') ? (
-                                            <img
-                                                src={connection.provider_icon}
-                                                className="h-4 w-4 shrink-0"
-                                                alt={connection.provider}
-                                            />
-                                        ) : (
-                                            <HardDrive className="h-4 w-4 shrink-0 text-muted-foreground" />
-                                        )}
-                                        <div className="truncate text-sm font-bold text-foreground">
-                                            {item.file?.name ??
-                                                item.task?.name ??
-                                                'File'}
+                            >
+                                <div className="flex items-start justify-between gap-3">
+                                    <div className="min-w-0 flex-1">
+                                        <div className="flex items-center gap-2">
+                                            {connection?.provider_icon?.endsWith(
+                                                '.svg',
+                                            ) ? (
+                                                <img
+                                                    src={
+                                                        connection.provider_icon
+                                                    }
+                                                    className="h-4 w-4 shrink-0"
+                                                    alt={connection.provider}
+                                                />
+                                            ) : (
+                                                <HardDrive className="h-4 w-4 shrink-0 text-muted-foreground" />
+                                            )}
+                                            <div className="truncate text-sm font-bold text-foreground">
+                                                {item.file?.name ??
+                                                    item.task?.name ??
+                                                    'File'}
+                                            </div>
+                                        </div>
+                                        <div
+                                            className={`mt-1 truncate text-xs font-semibold ${
+                                                isFailed
+                                                    ? 'text-muted-foreground'
+                                                    : 'text-muted-foreground'
+                                            }`}
+                                        >
+                                            {getStatusLabel(item)}
                                         </div>
                                     </div>
-                                    <div
-                                        className={`mt-1 truncate text-xs font-semibold ${isFailed
-                                            ? 'text-muted-foreground'
-                                            : 'text-muted-foreground'
-                                            }`}
-                                    >
-                                        {getStatusLabel(item)}
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-1">
-                                    {item.status === 'uploading' && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            onClick={() => void pause(item)}
-                                            aria-label="Pause upload"
-                                        >
-                                            <Pause className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                    {item.status === 'paused' && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            onClick={() => void resume(item)}
-                                            aria-label="Resume upload"
-                                        >
-                                            <Play className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                    {isFailed && (
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon-sm"
-                                            onClick={() => retry(item)}
-                                            aria-label="Retry upload"
-                                        >
-                                            <RotateCcw className="h-4 w-4" />
-                                        </Button>
-                                    )}
-                                    {![
-                                        'completed',
-                                        'cancelled',
-                                        'failed',
-                                    ].includes(item.status) && (
+                                    <div className="flex items-center gap-1">
+                                        {item.status === 'uploading' && (
                                             <Button
                                                 type="button"
                                                 variant="ghost"
                                                 size="icon-sm"
-                                                onClick={() => void cancel(item)}
+                                                onClick={() => void pause(item)}
+                                                aria-label="Pause upload"
+                                            >
+                                                <Pause className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {item.status === 'paused' && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() =>
+                                                    void resume(item)
+                                                }
+                                                aria-label="Resume upload"
+                                            >
+                                                <Play className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {isFailed && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() => retry(item)}
+                                                aria-label="Retry upload"
+                                            >
+                                                <RotateCcw className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {![
+                                            'completed',
+                                            'cancelled',
+                                            'failed',
+                                        ].includes(item.status) && (
+                                            <Button
+                                                type="button"
+                                                variant="ghost"
+                                                size="icon-sm"
+                                                onClick={() =>
+                                                    void cancel(item)
+                                                }
                                                 aria-label="Cancel upload"
                                             >
                                                 <X className="h-4 w-4" />
                                             </Button>
                                         )}
-                                    {[
-                                        'completed',
-                                        'cancelled',
-                                        'failed',
-                                    ].includes(item.status) && (
+                                        {[
+                                            'completed',
+                                            'cancelled',
+                                            'failed',
+                                        ].includes(item.status) && (
                                             <Button
                                                 type="button"
                                                 variant="ghost"
@@ -231,18 +269,19 @@ export default function UploadProgressPanel() {
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>
                                         )}
+                                    </div>
                                 </div>
-                            </div>
-                            <Progress
-                                value={item.progress}
-                                className={`mt-3 h-1.5 bg-muted ${isFailed
-                                    ? '[&>div]:bg-muted-foreground'
-                                    : '[&>div]:bg-primary'
+                                <Progress
+                                    value={item.progress}
+                                    className={`mt-3 h-1.5 bg-muted ${
+                                        isFailed
+                                            ? '[&>div]:bg-muted-foreground'
+                                            : '[&>div]:bg-primary'
                                     }`}
-                            />
-                        </div>
-                    );
-                })}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
             )}
         </div>

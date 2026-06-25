@@ -55,7 +55,10 @@ export function ShareBreadcrumb({
                 const isLast = index === segments.length - 1;
 
                 return (
-                    <div key={segment.path} className="flex items-center gap-1.5">
+                    <div
+                        key={segment.path}
+                        className="flex items-center gap-1.5"
+                    >
                         <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                         {isLast ? (
                             <span className="truncate font-semibold text-foreground">

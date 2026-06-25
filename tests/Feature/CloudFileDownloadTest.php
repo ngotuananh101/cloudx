@@ -1,5 +1,7 @@
 <?php
 
+use App\Data\ConnectedAccountData;
+use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
@@ -10,6 +12,7 @@ use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
@@ -36,7 +39,7 @@ it('redirects to the direct download link when the connector provides one', func
             return 'https://example.com';
         }
 
-        public function handleCallback(\Illuminate\Http\Request $request): \App\Data\ConnectedAccountData
+        public function handleCallback(Request $request): ConnectedAccountData
         {
             throw new RuntimeException('Not used.');
         }
@@ -46,9 +49,9 @@ it('redirects to the direct download link when the connector provides one', func
             throw new RuntimeException('Disk should not be called when direct link is available.');
         }
 
-        public function capabilities(): \App\Data\ProviderCapabilities
+        public function capabilities(): ProviderCapabilities
         {
-            return new \App\Data\ProviderCapabilities(true, true, true, true, true, false);
+            return new ProviderCapabilities(true, true, true, true, true, false);
         }
 
         public function directDownloadLink(CloudConnection $connection, string $path): ?string
@@ -130,7 +133,7 @@ it('falls back to streaming when ProvidesDirectDownloadLink returns null', funct
             return '';
         }
 
-        public function handleCallback(\Illuminate\Http\Request $request): \App\Data\ConnectedAccountData
+        public function handleCallback(Request $request): ConnectedAccountData
         {
             throw new RuntimeException('Not used.');
         }
@@ -140,9 +143,9 @@ it('falls back to streaming when ProvidesDirectDownloadLink returns null', funct
             return Storage::disk('dropbox-test');
         }
 
-        public function capabilities(): \App\Data\ProviderCapabilities
+        public function capabilities(): ProviderCapabilities
         {
-            return new \App\Data\ProviderCapabilities(true, true, true, true, true, false);
+            return new ProviderCapabilities(true, true, true, true, true, false);
         }
 
         public function directDownloadLink(CloudConnection $connection, string $path): ?string

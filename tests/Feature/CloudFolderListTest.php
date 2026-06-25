@@ -1,9 +1,9 @@
 <?php
 
+use App\Data\CloudFileData;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudFileBrowser;
-use App\Data\CloudFileData;
 
 it('returns only directories', function () {
     $user = User::factory()->create();
@@ -27,7 +27,7 @@ it('returns only directories', function () {
 
     $response->assertStatus(200);
     $data = $response->json();
-    
+
     expect($data)->toHaveCount(2);
     expect($data[0]['name'])->toBe('folder1');
     expect($data[1]['name'])->toBe('folder2');

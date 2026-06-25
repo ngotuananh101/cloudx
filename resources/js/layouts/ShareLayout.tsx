@@ -11,7 +11,9 @@ export default function ShareLayout({ children }: PropsWithChildren) {
                 {children}
             </div>
             <footer className="pb-6 text-center text-xs text-muted-foreground">
-                Powered by <span className="font-semibold text-foreground">CloudX</span> — Your Digital Curator
+                Powered by{' '}
+                <span className="font-semibold text-foreground">CloudX</span> —
+                Your Digital Curator
             </footer>
         </div>
     );

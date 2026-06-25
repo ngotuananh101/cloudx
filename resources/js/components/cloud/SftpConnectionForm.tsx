@@ -1,7 +1,7 @@
 import { router, useForm } from '@inertiajs/react';
 import { ChevronDown } from 'lucide-react';
-import {  useState } from 'react';
-import type {FormEvent} from 'react';
+import { useState } from 'react';
+import type { FormEvent } from 'react';
 import { store } from '@/routes/connections/sftp';
 
 interface SftpConnectionFormProps {
@@ -142,17 +142,25 @@ export default function SftpConnectionForm({
             </div>
 
             <div className="space-y-4 rounded-2xl border border-border bg-muted/50 p-4">
-                <h4 className="text-sm font-bold text-foreground">Key Authentication</h4>
+                <h4 className="text-sm font-bold text-foreground">
+                    Key Authentication
+                </h4>
                 <div className="grid gap-4 sm:grid-cols-2">
                     <div className="col-span-2">
-                        <Field label="Private Key" error={form.errors.privateKey}>
+                        <Field
+                            label="Private Key"
+                            error={form.errors.privateKey}
+                        >
                             <textarea
                                 id="sftp-private-key"
                                 value={form.data.privateKey}
                                 onChange={(event) =>
-                                    form.setData('privateKey', event.target.value)
+                                    form.setData(
+                                        'privateKey',
+                                        event.target.value,
+                                    )
                                 }
-                                className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm font-medium text-foreground outline-none transition focus:border-ring focus:ring-2 focus:ring-ring/50 font-mono"
+                                className="w-full rounded-md border border-border bg-card px-3 py-2 font-mono text-sm font-medium text-foreground transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
                                 rows={4}
                                 placeholder="-----BEGIN RSA PRIVATE KEY-----..."
                             />
@@ -193,15 +201,23 @@ export default function SftpConnectionForm({
                         id="sftp-advanced-settings"
                         className="grid gap-4 border-t border-border p-4 sm:grid-cols-2"
                     >
-                        <Field label="Host Fingerprint" error={form.errors.hostFingerprint}>
+                        <Field
+                            label="Host Fingerprint"
+                            error={form.errors.hostFingerprint}
+                        >
                             <input
                                 id="sftp-host-fingerprint"
                                 value={form.data.hostFingerprint}
                                 onChange={(event) =>
-                                    form.setData('hostFingerprint', event.target.value)
+                                    form.setData(
+                                        'hostFingerprint',
+                                        event.target.value,
+                                    )
                                 }
                                 className={inputClassName}
-                                aria-invalid={Boolean(form.errors.hostFingerprint)}
+                                aria-invalid={Boolean(
+                                    form.errors.hostFingerprint,
+                                )}
                             />
                         </Field>
 

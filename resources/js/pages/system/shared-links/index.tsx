@@ -1,5 +1,15 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Trash2, Copy, Globe, Lock, HardDrive, Check, Link as LinkIcon, Loader2, Filter } from 'lucide-react';
+import {
+    Trash2,
+    Copy,
+    Globe,
+    Lock,
+    HardDrive,
+    Check,
+    Link as LinkIcon,
+    Loader2,
+    Filter,
+} from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import {
@@ -15,7 +25,13 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { index as sharedLinksIndex } from '@/routes/system/shared-links';
 
@@ -62,7 +78,10 @@ interface SharedLinksPageProps {
     };
 }
 
-export default function SharedLinksPage({ shares, filters: initialFilters = {} }: SharedLinksPageProps) {
+export default function SharedLinksPage({
+    shares,
+    filters: initialFilters = {},
+}: SharedLinksPageProps) {
     const { props } = usePage() as any;
     const userConnections = props.auth?.user?.connections || [];
 
@@ -87,7 +106,14 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
     };
 
     const clearFilters = () => {
-        const defaultFilters = { connection: 'all', access_type: 'all', expires: 'all', name: '', url: '', created_date: '' };
+        const defaultFilters = {
+            connection: 'all',
+            access_type: 'all',
+            expires: 'all',
+            name: '',
+            url: '',
+            created_date: '',
+        };
         setFilters(defaultFilters);
         router.get(sharedLinksIndex.url(), defaultFilters as any, {
             preserveState: true,
@@ -99,16 +125,19 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
         const url = `${window.location.origin}/s/${uuid}`;
 
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(url).then(() => {
-                setCopiedId(id);
-                toast.success('Link copied to clipboard');
-                setTimeout(() => setCopiedId(null), 2000);
-            }).catch(() => toast.error('Failed to copy link'));
+            navigator.clipboard
+                .writeText(url)
+                .then(() => {
+                    setCopiedId(id);
+                    toast.success('Link copied to clipboard');
+                    setTimeout(() => setCopiedId(null), 2000);
+                })
+                .catch(() => toast.error('Failed to copy link'));
         } else {
-            const textArea = document.createElement("textarea");
+            const textArea = document.createElement('textarea');
             textArea.value = url;
-            textArea.style.position = "fixed";
-            textArea.style.opacity = "0";
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
             document.body.appendChild(textArea);
             textArea.focus();
             textArea.select();
@@ -131,8 +160,8 @@ export default function SharedLinksPage({ shares, filters: initialFilters = {} }
 
     const confirmDeleteShare = () => {
         if (!shareToDelete) {
-return;
-}
+            return;
+        }
 
         setIsDeleting(true);
         router.delete(`/system/shared-links/${shareToDelete.id}`, {
@@ -155,14 +184,15 @@ return;
                         Shared Links
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Manage all the links you have shared across your cloud connections.
+                        Manage all the links you have shared across your cloud
+                        connections.
                     </p>
                 </div>
             </div>
 
-            <Card className="mb-6 rounded-2xl border border-border bg-card shadow-sm gap-0">
+            <Card className="mb-6 gap-0 rounded-2xl border border-border bg-card shadow-sm">
                 <CardHeader className="border-b border-border pb-4">
-                    <CardTitle className="text-[10px] font-extrabold tracking-widest uppercase text-muted-foreground flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-[10px] font-extrabold tracking-widest text-muted-foreground uppercase">
                         <Filter className="h-4 w-4 text-muted-foreground" />
                         Filter Links
                     </CardTitle>
@@ -170,77 +200,166 @@ return;
                 <CardContent className="p-4 pb-0">
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Connection</label>
-                            <Select value={filters.connection} onValueChange={(v) => setFilters({...filters, connection: v})}>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                                Connection
+                            </label>
+                            <Select
+                                value={filters.connection}
+                                onValueChange={(v) =>
+                                    setFilters({ ...filters, connection: v })
+                                }
+                            >
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue placeholder="All Connections" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Connections</SelectItem>
-                                    {userConnections.map((c: CloudConnection) => (
-                                        <SelectItem key={c.id} value={c.id.toString()}>{c.name}</SelectItem>
-                                    ))}
+                                    <SelectItem value="all">
+                                        All Connections
+                                    </SelectItem>
+                                    {userConnections.map(
+                                        (c: CloudConnection) => (
+                                            <SelectItem
+                                                key={c.id}
+                                                value={c.id.toString()}
+                                            >
+                                                {c.name}
+                                            </SelectItem>
+                                        ),
+                                    )}
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Access Type</label>
-                            <Select value={filters.access_type} onValueChange={(v) => setFilters({...filters, access_type: v})}>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                                Access Type
+                            </label>
+                            <Select
+                                value={filters.access_type}
+                                onValueChange={(v) =>
+                                    setFilters({ ...filters, access_type: v })
+                                }
+                            >
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue placeholder="All Types" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">All Types</SelectItem>
-                                    <SelectItem value="public">Public</SelectItem>
-                                    <SelectItem value="password">Password Protected</SelectItem>
+                                    <SelectItem value="all">
+                                        All Types
+                                    </SelectItem>
+                                    <SelectItem value="public">
+                                        Public
+                                    </SelectItem>
+                                    <SelectItem value="password">
+                                        Password Protected
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Expires</label>
-                            <Select value={filters.expires} onValueChange={(v) => setFilters({...filters, expires: v})}>
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                                Expires
+                            </label>
+                            <Select
+                                value={filters.expires}
+                                onValueChange={(v) =>
+                                    setFilters({ ...filters, expires: v })
+                                }
+                            >
                                 <SelectTrigger className="h-9 w-full">
                                     <SelectValue placeholder="Any Time" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="all">Any Time</SelectItem>
-                                    <SelectItem value="active">Active</SelectItem>
-                                    <SelectItem value="expired">Expired</SelectItem>
+                                    <SelectItem value="all">
+                                        Any Time
+                                    </SelectItem>
+                                    <SelectItem value="active">
+                                        Active
+                                    </SelectItem>
+                                    <SelectItem value="expired">
+                                        Expired
+                                    </SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">File/Folder Name</label>
-                            <Input value={filters.name} onChange={(e) => setFilters({...filters, name: e.target.value})} placeholder="Search name..." className="h-9" />
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                                File/Folder Name
+                            </label>
+                            <Input
+                                value={filters.name}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        name: e.target.value,
+                                    })
+                                }
+                                placeholder="Search name..."
+                                className="h-9"
+                            />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">URL</label>
-                            <Input value={filters.url} onChange={(e) => setFilters({...filters, url: e.target.value})} placeholder="Search URL..." className="h-9" />
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                                URL
+                            </label>
+                            <Input
+                                value={filters.url}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        url: e.target.value,
+                                    })
+                                }
+                                placeholder="Search URL..."
+                                className="h-9"
+                            />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">Created Date</label>
-                            <Input value={filters.created_date} onChange={(e) => setFilters({...filters, created_date: e.target.value})} type="date" className="h-9" />
+                            <label className="text-[10px] font-bold tracking-widest text-muted-foreground uppercase">
+                                Created Date
+                            </label>
+                            <Input
+                                value={filters.created_date}
+                                onChange={(e) =>
+                                    setFilters({
+                                        ...filters,
+                                        created_date: e.target.value,
+                                    })
+                                }
+                                type="date"
+                                className="h-9"
+                            />
                         </div>
                     </div>
                     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
-                        <Button onClick={clearFilters} variant="ghost" size="sm" className="h-9 text-muted-foreground hover:text-foreground">
+                        <Button
+                            onClick={clearFilters}
+                            variant="ghost"
+                            size="sm"
+                            className="h-9 text-muted-foreground hover:text-foreground"
+                        >
                             Clear Filters
                         </Button>
-                        <Button onClick={applyFilters} size="sm" className="h-9 bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Button
+                            onClick={applyFilters}
+                            size="sm"
+                            className="h-9 bg-primary text-primary-foreground hover:bg-primary/90"
+                        >
                             Apply Filters
                         </Button>
                     </div>
                 </CardContent>
             </Card>
 
-            <Card className="rounded-2xl border border-border bg-card shadow-sm pt-0 overflow-hidden">
+            <Card className="overflow-hidden rounded-2xl border border-border bg-card pt-0 shadow-sm">
                 <CardContent className="p-0">
                     {shares.data.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="rounded-full bg-muted p-4 mb-4">
+                            <div className="mb-4 rounded-full bg-muted p-4">
                                 <LinkIcon className="h-8 w-8 text-muted-foreground" />
                             </div>
-                            <h3 className="text-lg font-extrabold text-foreground">No shared links</h3>
+                            <h3 className="text-lg font-extrabold text-foreground">
+                                No shared links
+                            </h3>
                             <p className="mt-2 text-sm text-muted-foreground">
                                 You haven't shared any files or folders yet.
                             </p>
@@ -250,21 +369,38 @@ return;
                             <table className="w-full min-w-215 text-left text-sm">
                                 <thead>
                                     <tr className="border-b border-border bg-muted/50 text-[11px] font-extrabold tracking-wider text-muted-foreground">
-                                        <th className="px-5 py-3">File/Folder</th>
-                                        <th className="px-5 py-3">Connection</th>
-                                        <th className="px-5 py-3">Access Type</th>
+                                        <th className="px-5 py-3">
+                                            File/Folder
+                                        </th>
+                                        <th className="px-5 py-3">
+                                            Connection
+                                        </th>
+                                        <th className="px-5 py-3">
+                                            Access Type
+                                        </th>
                                         <th className="px-5 py-3">URL</th>
                                         <th className="px-5 py-3">Created</th>
                                         <th className="px-5 py-3">Expires</th>
-                                        <th className="px-5 py-3 text-right">Action</th>
+                                        <th className="px-5 py-3 text-right">
+                                            Action
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {shares.data.map((share) => {
-                                        const fullConnection = (userConnections || []).find((c: CloudConnection) => c.id === share.cloud_connection.id);
+                                        const fullConnection = (
+                                            userConnections || []
+                                        ).find(
+                                            (c: CloudConnection) =>
+                                                c.id ===
+                                                share.cloud_connection.id,
+                                        );
 
                                         return (
-                                            <tr key={share.id} className="border-b border-border last:border-b-0 hover:bg-muted/70">
+                                            <tr
+                                                key={share.id}
+                                                className="border-b border-border last:border-b-0 hover:bg-muted/70"
+                                            >
                                                 <td className="max-w-60 px-5 py-4">
                                                     <div className="truncate text-sm font-medium text-foreground">
                                                         {share.name}
@@ -272,53 +408,79 @@ return;
                                                 </td>
                                                 <td className="max-w-56 px-5 py-4">
                                                     <div className="flex items-center gap-2">
-                                                        {fullConnection?.provider_icon?.endsWith('.svg') ? (
+                                                        {fullConnection?.provider_icon?.endsWith(
+                                                            '.svg',
+                                                        ) ? (
                                                             <img
-                                                                src={fullConnection.provider_icon}
+                                                                src={
+                                                                    fullConnection.provider_icon
+                                                                }
                                                                 className="h-4 w-4 shrink-0"
-                                                                alt={fullConnection.provider}
+                                                                alt={
+                                                                    fullConnection.provider
+                                                                }
                                                             />
                                                         ) : (
                                                             <HardDrive className="h-4 w-4 shrink-0 text-muted-foreground" />
                                                         )}
                                                         <div className="truncate text-xs font-medium text-muted-foreground">
-                                                            {share.cloud_connection.name}
+                                                            {
+                                                                share
+                                                                    .cloud_connection
+                                                                    .name
+                                                            }
                                                         </div>
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-4">
                                                     <div className="flex items-center gap-1.5">
-                                                        {share.type === 'public' ? (
+                                                        {share.type ===
+                                                        'public' ? (
                                                             <Globe className="h-3.5 w-3.5 text-primary" />
                                                         ) : (
                                                             <Lock className="h-3.5 w-3.5 text-muted-foreground" />
                                                         )}
-                                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${share.type === 'public' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}>
+                                                        <span
+                                                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${share.type === 'public' ? 'bg-primary/10 text-primary' : 'bg-muted text-muted-foreground'}`}
+                                                        >
                                                             {share.type}
                                                         </span>
                                                     </div>
                                                 </td>
                                                 <td className="max-w-60 px-5 py-4">
                                                     <div className="truncate text-xs text-muted-foreground">
-                                                        {window.location.origin}/s/{share.uuid}
+                                                        {window.location.origin}
+                                                        /s/{share.uuid}
                                                     </div>
                                                 </td>
                                                 <td className="px-5 py-4 text-xs font-medium text-muted-foreground">
-                                                    {new Date(share.created_at).toLocaleDateString()}
+                                                    {new Date(
+                                                        share.created_at,
+                                                    ).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-5 py-4 text-xs font-medium text-muted-foreground">
-                                                    {share.expires_at ? new Date(share.expires_at).toLocaleDateString() : 'Never'}
+                                                    {share.expires_at
+                                                        ? new Date(
+                                                              share.expires_at,
+                                                          ).toLocaleDateString()
+                                                        : 'Never'}
                                                 </td>
                                                 <td className="px-5 py-4 text-right">
-                                                    <div className="flex items-center justify-end gap-1 shrink-0">
+                                                    <div className="flex shrink-0 items-center justify-end gap-1">
                                                         <Button
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-muted-foreground hover:text-primary"
-                                                            onClick={() => handleCopy(share.id, share.uuid)}
+                                                            onClick={() =>
+                                                                handleCopy(
+                                                                    share.id,
+                                                                    share.uuid,
+                                                                )
+                                                            }
                                                             title="Copy Link"
                                                         >
-                                                            {copiedId === share.id ? (
+                                                            {copiedId ===
+                                                            share.id ? (
                                                                 <Check className="h-4 w-4 text-primary" />
                                                             ) : (
                                                                 <Copy className="h-4 w-4" />
@@ -328,7 +490,11 @@ return;
                                                             variant="ghost"
                                                             size="icon"
                                                             className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                                                            onClick={() => setShareToDelete(share)}
+                                                            onClick={() =>
+                                                                setShareToDelete(
+                                                                    share,
+                                                                )
+                                                            }
                                                             title="Delete Shared Link"
                                                         >
                                                             <Trash2 className="h-4 w-4" />
@@ -336,7 +502,7 @@ return;
                                                     </div>
                                                 </td>
                                             </tr>
-                                        )
+                                        );
                                     })}
                                 </tbody>
                             </table>
@@ -345,20 +511,31 @@ return;
 
                     {/* Pagination */}
                     {shares.last_page > 1 && (
-                        <div className="border-t border-border p-4 flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1 border-t border-border p-4">
                             {shares.links.map((link, i) => (
                                 <Button
                                     key={i}
-                                    variant={link.active ? "default" : "outline"}
+                                    variant={
+                                        link.active ? 'default' : 'outline'
+                                    }
                                     size="sm"
-                                    className={`h-8 ${link.active ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-transparent' : 'text-muted-foreground'}`}
+                                    className={`h-8 ${link.active ? 'border-transparent bg-primary text-primary-foreground hover:bg-primary/90' : 'text-muted-foreground'}`}
                                     disabled={!link.url}
                                     asChild
                                 >
                                     {link.url ? (
-                                        <Link href={link.url} dangerouslySetInnerHTML={{ __html: link.label }} />
+                                        <Link
+                                            href={link.url}
+                                            dangerouslySetInnerHTML={{
+                                                __html: link.label,
+                                            }}
+                                        />
                                     ) : (
-                                        <span dangerouslySetInnerHTML={{ __html: link.label }} />
+                                        <span
+                                            dangerouslySetInnerHTML={{
+                                                __html: link.label,
+                                            }}
+                                        />
                                     )}
                                 </Button>
                             ))}
@@ -367,17 +544,29 @@ return;
                 </CardContent>
             </Card>
 
-            <AlertDialog open={!!shareToDelete} onOpenChange={(open) => !open && setShareToDelete(null)}>
-                <AlertDialogContent className="bg-card border-border rounded-xl">
+            <AlertDialog
+                open={!!shareToDelete}
+                onOpenChange={(open) => !open && setShareToDelete(null)}
+            >
+                <AlertDialogContent className="rounded-xl border-border bg-card">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-foreground">Delete Shared Link?</AlertDialogTitle>
+                        <AlertDialogTitle className="text-foreground">
+                            Delete Shared Link?
+                        </AlertDialogTitle>
                         <AlertDialogDescription className="text-muted-foreground">
-                            Are you sure you want to delete the shared link for <strong className="text-foreground">"{shareToDelete?.name}"</strong>?
-                            Anyone with this link will immediately lose access. This action cannot be undone.
+                            Are you sure you want to delete the shared link for{' '}
+                            <strong className="text-foreground">
+                                "{shareToDelete?.name}"
+                            </strong>
+                            ? Anyone with this link will immediately lose
+                            access. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel disabled={isDeleting} className="border-border bg-card text-foreground hover:bg-muted">
+                        <AlertDialogCancel
+                            disabled={isDeleting}
+                            className="border-border bg-card text-foreground hover:bg-muted"
+                        >
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
@@ -385,10 +574,12 @@ return;
                                 e.preventDefault();
                                 confirmDeleteShare();
                             }}
-                            className="bg-destructive hover:bg-destructive/90 text-destructive-foreground border-0"
+                            className="text-destructive-foreground border-0 bg-destructive hover:bg-destructive/90"
                             disabled={isDeleting}
                         >
-                            {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                            {isDeleting ? (
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : null}
                             Delete Link
                         </AlertDialogAction>
                     </AlertDialogFooter>

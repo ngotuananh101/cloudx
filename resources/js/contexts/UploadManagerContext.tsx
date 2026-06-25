@@ -12,7 +12,11 @@ import type { ReactNode } from 'react';
 import { requestJson } from '@/lib/request-json';
 import connections from '@/routes/connections';
 import type { User } from '@/types';
-import type { CloudUploadTask, UploadMode, UploadQueueItem } from '@/types/cloud';
+import type {
+    CloudUploadTask,
+    UploadMode,
+    UploadQueueItem,
+} from '@/types/cloud';
 
 interface FileBrowserLocation {
     connectionId: number;
@@ -85,7 +89,11 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
         ) => {
             const initialized = await requestJson<{
                 task: CloudUploadTask;
-                multipart: { upload_id: string; key: string; parts: Array<{ ETag: string; PartNumber: number }> };
+                multipart: {
+                    upload_id: string;
+                    key: string;
+                    parts: Array<{ ETag: string; PartNumber: number }>;
+                };
             }>(
                 `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/init`,
                 { method: 'POST' },
@@ -96,7 +104,11 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 
             const chunkSize = latestTask.payload.chunk_size;
 
-            for (let index = 0; index < latestTask.payload.total_chunks; index++) {
+            for (
+                let index = 0;
+                index < latestTask.payload.total_chunks;
+                index++
+            ) {
                 if (pausedUploads.current.has(key)) {
                     updateItem(key, { status: 'paused' });
 
@@ -239,7 +251,10 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                     error: undefined,
                 });
 
-                const uploadMode = target.uploadMode ?? existingTask?.payload.upload_mode ?? 'backend';
+                const uploadMode =
+                    target.uploadMode ??
+                    existingTask?.payload.upload_mode ??
+                    'backend';
                 const task =
                     existingTask ||
                     (await requestJson<CloudUploadTask>(
@@ -399,22 +414,19 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 
     const closePanel = useCallback(() => setIsPanelVisible(false), []);
 
-    const remove = useCallback(
-        (item: UploadQueueItem) => {
-            setItems((currentItems) =>
-                currentItems.filter((i) => i.key !== item.key),
-            );
+    const remove = useCallback((item: UploadQueueItem) => {
+        setItems((currentItems) =>
+            currentItems.filter((i) => i.key !== item.key),
+        );
 
-            setItems((currentItems) => {
-                if (currentItems.length === 0) {
-                    setIsPanelVisible(false);
-                }
+        setItems((currentItems) => {
+            if (currentItems.length === 0) {
+                setIsPanelVisible(false);
+            }
 
-                return currentItems;
-            });
-        },
-        [],
-    );
+            return currentItems;
+        });
+    }, []);
 
     const registerFileBrowserLocation = useCallback(
         (location: FileBrowserLocation | null) => {

@@ -37,7 +37,7 @@ createInertiaApp({
                     )}
                 />
                 <Toaster position="top-right" />
-            </ThemeProvider>
+            </ThemeProvider>,
         );
     },
 });

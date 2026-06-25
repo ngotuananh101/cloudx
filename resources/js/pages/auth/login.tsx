@@ -8,7 +8,10 @@ import { Label } from '@/components/ui/label';
 import GuestLayout from '@/layouts/GuestLayout';
 
 export default function Login() {
-    const { status, name: appName } = usePage().props as { status?: string, name?: string };
+    const { status, name: appName } = usePage().props as {
+        status?: string;
+        name?: string;
+    };
 
     const { data, setData, post, processing, errors } = useForm({
         email: '',
@@ -169,8 +172,13 @@ export default function Login() {
 
             {/* Footer */}
             <div className="mt-8 text-center text-sm">
-                <span className="text-muted-foreground">Don't have an account? </span>
-                <Link href="#" className="font-bold text-primary hover:underline">
+                <span className="text-muted-foreground">
+                    Don't have an account?{' '}
+                </span>
+                <Link
+                    href="#"
+                    className="font-bold text-primary hover:underline"
+                >
                     Create account
                 </Link>
             </div>

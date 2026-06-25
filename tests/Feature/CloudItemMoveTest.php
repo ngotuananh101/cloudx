@@ -1,24 +1,25 @@
 <?php
 
+use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Models\User;
+use App\Services\CloudStorage\CloudStorageManager;
 use Illuminate\Support\Facades\Storage;
-use App\Enums\CloudProvider;
 
 it('moves a file to a new folder', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->create(['user_id' => $user->id, 'provider' => CloudProvider::FTP]);
-    
+
     Storage::fake('ftp');
     Storage::disk('ftp')->put('source.txt', 'content');
     Storage::disk('ftp')->makeDirectory('dest_folder');
 
     // Mock CloudStorageManager to return the fake disk
-    $mockManager = Mockery::mock(\App\Services\CloudStorage\CloudStorageManager::class);
+    $mockManager = Mockery::mock(CloudStorageManager::class);
     $mockManager->shouldReceive('disk')
         ->with(Mockery::type(CloudConnection::class))
         ->andReturn(Storage::disk('ftp'));
-    $this->instance(\App\Services\CloudStorage\CloudStorageManager::class, $mockManager);
+    $this->instance(CloudStorageManager::class, $mockManager);
 
     $response = $this->actingAs($user)->post(route('connections.items.move', $connection), [
         'source_path' => 'source.txt',

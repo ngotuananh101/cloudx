@@ -9,8 +9,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { destroy } from '@/routes/connections/items';
 import type { CloudFile } from '@/types/cloud';
+import { destroy } from '@/routes/connections/items';
 
 interface DeleteItemDialogProps {
     item: CloudFile | null;
@@ -50,10 +50,12 @@ export function DeleteItemDialog({
         >
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete {item?.isDirectory ? 'folder' : 'file'}?</AlertDialogTitle>
+                    <AlertDialogTitle>
+                        Delete {item?.isDirectory ? 'folder' : 'file'}?
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                         This will permanently remove{' '}
-                        <span className="font-semibold text-foreground break-all">
+                        <span className="font-semibold break-all text-foreground">
                             "{item?.name}"
                         </span>{' '}
                         from your cloud storage. This action cannot be undone.

@@ -42,9 +42,9 @@ export function Sidebar({ cloudActions }: SidebarProps) {
     const activeConnection = pageConnection?.storageQuota
         ? pageConnection
         : connections.find((connection: CloudConnection) =>
-            url.startsWith(storageIndex.url({ connection: connection.id })),
-        );
-        
+              url.startsWith(storageIndex.url({ connection: connection.id })),
+          );
+
     const [connectionBeingRenamed, setConnectionBeingRenamed] =
         useState<CloudConnection | null>(null);
     const [connectionBeingEdited, setConnectionBeingEdited] =
@@ -101,33 +101,26 @@ export function Sidebar({ cloudActions }: SidebarProps) {
                     </div>
                     {connections && connections.length > 0 ? (
                         <ul className="space-y-1">
-                            {connections.map(
-                                (connection: CloudConnection) => {
-                                    const storageUrl = storageIndex.url({
-                                        connection: connection.id,
-                                    });
-                                    const isActive =
-                                        url.startsWith(storageUrl);
+                            {connections.map((connection: CloudConnection) => {
+                                const storageUrl = storageIndex.url({
+                                    connection: connection.id,
+                                });
+                                const isActive = url.startsWith(storageUrl);
 
-                                    return (
-                                        <ConnectionNavItem
-                                            key={connection.id}
-                                            connection={connection}
-                                            href={storageUrl}
-                                            isActive={isActive}
-                                            onEditName={
-                                                setConnectionBeingRenamed
-                                            }
-                                            onEditConnection={
-                                                setConnectionBeingEdited
-                                            }
-                                            onDelete={
-                                                setConnectionBeingDeleted
-                                            }
-                                        />
-                                    );
-                                },
-                            )}
+                                return (
+                                    <ConnectionNavItem
+                                        key={connection.id}
+                                        connection={connection}
+                                        href={storageUrl}
+                                        isActive={isActive}
+                                        onEditName={setConnectionBeingRenamed}
+                                        onEditConnection={
+                                            setConnectionBeingEdited
+                                        }
+                                        onDelete={setConnectionBeingDeleted}
+                                    />
+                                );
+                            })}
                         </ul>
                     ) : (
                         <div className="px-3 py-1.5 text-[11px] font-medium text-muted-foreground italic">
@@ -148,9 +141,7 @@ export function Sidebar({ cloudActions }: SidebarProps) {
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={
-                                            cloudActions.onCreateFolder
-                                        }
+                                        onClick={cloudActions.onCreateFolder}
                                         className="h-10 w-full justify-center rounded-xl text-xs font-bold tracking-wide text-foreground"
                                     >
                                         <FolderPlus className="h-4 w-4" />
@@ -235,16 +226,15 @@ export function Sidebar({ cloudActions }: SidebarProps) {
                                 STORAGE
                             </span>
                             <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-extrabold text-primary">
-                                {activeConnection.storageQuota
-                                    .usedPercent ?? 0}
+                                {activeConnection.storageQuota.usedPercent ?? 0}
                                 %
                             </span>
                         </div>
                         <div className="mt-3">
                             <Progress
                                 value={
-                                    activeConnection.storageQuota
-                                        .usedPercent ?? 0
+                                    activeConnection.storageQuota.usedPercent ??
+                                    0
                                 }
                                 className="h-2 bg-muted [&>div]:bg-primary"
                             />
@@ -252,15 +242,15 @@ export function Sidebar({ cloudActions }: SidebarProps) {
                         <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground">
                             <span>
                                 {formatBytes(
-                                    activeConnection.storageQuota
-                                        .usedBytes || 0,
+                                    activeConnection.storageQuota.usedBytes ||
+                                        0,
                                 )}{' '}
                                 used
                             </span>
                             <span>
                                 {formatBytes(
-                                    activeConnection.storageQuota
-                                        .totalBytes || 0,
+                                    activeConnection.storageQuota.totalBytes ||
+                                        0,
                                 )}
                             </span>
                         </div>
@@ -276,21 +266,33 @@ export function Sidebar({ cloudActions }: SidebarProps) {
                     LOGOUT
                 </Link>
             </div>
-            
+
             <EditConnectionNameDialog
                 connection={connectionBeingRenamed}
                 onClose={() => setConnectionBeingRenamed(null)}
             />
             <EditFtpConnectionDialog
-                connection={connectionBeingEdited?.provider_value === 5 ? connectionBeingEdited : null}
+                connection={
+                    connectionBeingEdited?.provider_value === 5
+                        ? connectionBeingEdited
+                        : null
+                }
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <EditS3ConnectionDialog
-                connection={connectionBeingEdited?.provider_value === 4 ? connectionBeingEdited : null}
+                connection={
+                    connectionBeingEdited?.provider_value === 4
+                        ? connectionBeingEdited
+                        : null
+                }
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <EditSftpConnectionDialog
-                connection={connectionBeingEdited?.provider_value === 6 ? connectionBeingEdited : null}
+                connection={
+                    connectionBeingEdited?.provider_value === 6
+                        ? connectionBeingEdited
+                        : null
+                }
                 onClose={() => setConnectionBeingEdited(null)}
             />
             <DeleteConnectionDialog

@@ -42,9 +42,6 @@ class PythonServiceClient
         return $response;
     }
 
-    /**
-     * @return Response
-     */
     protected function postStream(string $path, array $body, int $timeout = 30): Response
     {
         $response = $this->request($timeout)->withOptions(['stream' => true])->asJson()->post($this->url.$path, $body);

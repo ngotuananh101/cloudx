@@ -208,7 +208,7 @@ function DetailItem({
             <div className="text-[10px] font-extrabold tracking-widest text-muted-foreground">
                 {label}
             </div>
-            <div className="mt-1 wrap-break-word text-sm font-medium text-foreground">
+            <div className="mt-1 text-sm font-medium wrap-break-word text-foreground">
                 {children}
             </div>
         </div>
@@ -230,8 +230,8 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                         Tasks
                     </h2>
                     <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                        Review your cloud task history, including upload progress,
-                        completion status, and failures.
+                        Review your cloud task history, including upload
+                        progress, completion status, and failures.
                     </p>
                 </div>
             </div>
@@ -244,8 +244,8 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                             No tasks yet
                         </h3>
                         <p className="mt-2 max-w-md text-sm text-muted-foreground">
-                            Cloud tasks will appear here after you start uploads or
-                            other background file operations.
+                            Cloud tasks will appear here after you start uploads
+                            or other background file operations.
                         </p>
                     </CardContent>
                 </Card>
@@ -263,11 +263,15 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                                         <tr className="border-b border-border bg-muted/50 text-[11px] font-extrabold tracking-wider text-muted-foreground">
                                             <th className="px-5 py-3">Task</th>
                                             <th className="px-5 py-3">Type</th>
-                                            <th className="px-5 py-3">Status</th>
+                                            <th className="px-5 py-3">
+                                                Status
+                                            </th>
                                             <th className="px-5 py-3">
                                                 Connection
                                             </th>
-                                            <th className="px-5 py-3">Created</th>
+                                            <th className="px-5 py-3">
+                                                Created
+                                            </th>
                                             <th className="px-5 py-3 text-right">
                                                 Action
                                             </th>
@@ -275,7 +279,12 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                                     </thead>
                                     <tbody id="cloud-tasks-table-body">
                                         {tasks.data.map((task) => {
-                                            const fullConnection = userConnections.find((c: CloudConnection) => c.id === task.connection?.id);
+                                            const fullConnection =
+                                                userConnections.find(
+                                                    (c: CloudConnection) =>
+                                                        c.id ===
+                                                        task.connection?.id,
+                                                );
 
                                             return (
                                                 <tr
@@ -287,7 +296,8 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                                                             {task.name}
                                                         </div>
                                                         <div className="mt-1 truncate text-xs font-medium text-muted-foreground">
-                                                            {task.target_path || '/'}
+                                                            {task.target_path ||
+                                                                '/'}
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-4 text-xs font-medium text-muted-foreground">
@@ -295,27 +305,38 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                                                             'Unknown'}
                                                     </td>
                                                     <td className="px-5 py-4">
-                                                        <TaskStatusBadge task={task} />
+                                                        <TaskStatusBadge
+                                                            task={task}
+                                                        />
                                                     </td>
                                                     <td className="max-w-56 px-5 py-4">
                                                         <div className="flex items-center gap-2">
-                                                            {fullConnection?.provider_icon?.endsWith('.svg') ? (
+                                                            {fullConnection?.provider_icon?.endsWith(
+                                                                '.svg',
+                                                            ) ? (
                                                                 <img
-                                                                    src={fullConnection.provider_icon}
+                                                                    src={
+                                                                        fullConnection.provider_icon
+                                                                    }
                                                                     className="h-4 w-4 shrink-0"
-                                                                    alt={fullConnection.provider}
+                                                                    alt={
+                                                                        fullConnection.provider
+                                                                    }
                                                                 />
                                                             ) : (
                                                                 <HardDrive className="h-4 w-4 shrink-0 text-muted-foreground" />
                                                             )}
                                                             <div className="truncate text-xs font-medium text-muted-foreground">
-                                                                {task.connection?.name ??
+                                                                {task.connection
+                                                                    ?.name ??
                                                                     'Unavailable'}
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td className="px-5 py-4 text-xs font-medium whitespace-nowrap text-muted-foreground">
-                                                        {formatDate(task.created_at)}
+                                                        {formatDate(
+                                                            task.created_at,
+                                                        )}
                                                     </td>
                                                     <td className="px-5 py-4 text-right">
                                                         <Button
@@ -323,7 +344,9 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                                                             variant="outline"
                                                             size="sm"
                                                             onClick={() =>
-                                                                setSelectedTask(task)
+                                                                setSelectedTask(
+                                                                    task,
+                                                                )
                                                             }
                                                             className="h-8 rounded-lg text-xs font-medium text-muted-foreground hover:text-foreground"
                                                         >

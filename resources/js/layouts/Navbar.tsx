@@ -27,8 +27,8 @@ export function Navbar({ cloudSearch, cloudActions }: NavbarProps) {
     const activeConnection = pageConnection?.storageQuota
         ? pageConnection
         : connections.find((connection: CloudConnection) =>
-            url.startsWith(storageIndex.url({ connection: connection.id })),
-        );
+              url.startsWith(storageIndex.url({ connection: connection.id })),
+          );
 
     return (
         <header className="flex h-18 w-full shrink-0 items-center justify-between border-b border-border bg-card px-8">
@@ -91,10 +91,10 @@ export function Navbar({ cloudSearch, cloudActions }: NavbarProps) {
                     <AvatarFallback className="bg-accent text-sm font-bold text-primary">
                         {user?.name
                             ? user.name
-                                .split(' ')
-                                .map((n: string) => n[0])
-                                .join('')
-                                .toUpperCase()
+                                  .split(' ')
+                                  .map((n: string) => n[0])
+                                  .join('')
+                                  .toUpperCase()
                             : 'U'}
                     </AvatarFallback>
                 </Avatar>
