@@ -37,15 +37,16 @@ class CloudUploadTaskChunkController extends Controller
             ]);
         }
 
+        // Convert exact chunk size to KB for validation, fallback to global config if unknown
+        $chunkSize = (int) config('cloud-storage.uploads.chunk_size', 5242880);
+        $maxKb = (int) ceil($chunkSize / 1024);
+
         $validated = $request->validate([
-            'chunk' => ['required', 'file'],
+            'chunk' => ['required', 'file', "max:{$maxKb}"],
             'index' => ['required', 'integer', 'min:0'],
             'checksum' => ['nullable', 'string', 'max:128'],
         ]);
 
-        $payload = $task->payload;
-        $chunkSize = (int) ($payload['chunk_size'] ?? 0);
-        $totalChunks = (int) ($payload['total_chunks'] ?? 0);
         $index = (int) $validated['index'];
         $chunk = $request->file('chunk');
 
