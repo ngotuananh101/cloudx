@@ -134,11 +134,11 @@ function TaskDetailModal({
             open={task !== null}
             onOpenChange={(open) => !open && onClose()}
         >
-            <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-hidden rounded-xl border border-border bg-card p-0 shadow-2xl [&>button]:right-6 [&>button]:top-5 [&>button]:z-10">
+            <DialogContent className="max-h-[90vh] overflow-hidden rounded-xl border border-border bg-card p-0 shadow-2xl sm:max-w-2xl [&>button]:top-5 [&>button]:right-6 [&>button]:z-10">
                 {task && (
                     <>
                         <DialogHeader className="border-b border-border px-6 py-5 text-left">
-                            <DialogDescription className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                            <DialogDescription className="text-[10px] font-extrabold tracking-widest text-muted-foreground uppercase">
                                 Task Details
                             </DialogDescription>
                             <DialogTitle className="mt-1 truncate text-base font-semibold tracking-tight text-foreground">

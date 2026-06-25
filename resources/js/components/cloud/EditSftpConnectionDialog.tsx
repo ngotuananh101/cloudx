@@ -9,8 +9,8 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
-import { update } from '@/routes/connections/sftp';
 import type { CloudConnection } from '@/types/cloud';
+import { update } from '@/routes/connections/sftp';
 
 interface EditSftpConnectionDialogProps {
     connection: CloudConnection | null;

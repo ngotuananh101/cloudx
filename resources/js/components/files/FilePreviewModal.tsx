@@ -14,8 +14,8 @@ import {
 } from '@/components/ui/dialog';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
-import files from '@/routes/cloud/files';
 import type { CloudFile } from '@/types/cloud';
+import files from '@/routes/cloud/files';
 
 export default function FilePreviewModal({
     item,
