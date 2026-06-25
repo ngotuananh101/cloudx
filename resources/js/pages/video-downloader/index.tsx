@@ -9,9 +9,11 @@ function formatDuration(seconds: number): string {
     if (!Number.isFinite(seconds) || seconds < 0) {
         return '--';
     }
+
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
     const s = Math.floor(seconds % 60);
+
     return h > 0
         ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
         : `${m}:${String(s).padStart(2, '0')}`;
@@ -21,12 +23,15 @@ function formatCount(value: number): string {
     if (!Number.isFinite(value)) {
         return '0';
     }
+
     if (value >= 1_000_000) {
         return `${(value / 1_000_000).toFixed(1)}M`;
     }
+
     if (value >= 1_000) {
         return `${(value / 1_000).toFixed(1)}K`;
     }
+
     return String(value);
 }
 
@@ -202,6 +207,7 @@ export default function VideoDownloaderIndex() {
                             <ul className="divide-y divide-border rounded-xl border border-border">
                                 {metadata.formats.map((format) => {
                                     const isSelected = format.format_id === selectedFormatId;
+
                                     return (
                                         <li key={format.format_id}>
                                             <button

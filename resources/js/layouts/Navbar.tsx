@@ -4,8 +4,8 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { index as storageIndex } from '@/routes/storage';
-import type { CloudConnection } from '@/types/cloud';
 import type { PageProps } from '@/types';
+import type { CloudConnection } from '@/types/cloud';
 
 interface NavbarProps {
     cloudSearch?: {

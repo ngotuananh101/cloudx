@@ -9,7 +9,7 @@ interface StorageOverviewCardsProps {
     onConnect: () => void;
 }
 
-function getProviderColorClass(providerValue?: number): string {
+function getProviderColorClass(): string {
     return 'bg-primary/10 text-primary';
 }
 
@@ -55,7 +55,7 @@ export default function StorageOverviewCards({
                     <CardContent className="p-0">
                         <div className="mb-4 flex items-center justify-between">
                             <div
-                                className={`flex h-11 w-11 items-center justify-center rounded-xl ${getProviderColorClass(connection.provider_value)}`}
+                                className={`flex h-11 w-11 items-center justify-center rounded-xl ${getProviderColorClass()}`}
                             >
                                 {connection.provider_icon?.endsWith('.svg') ? (
                                     <img

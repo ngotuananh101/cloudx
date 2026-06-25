@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { update } from '@/routes/connections/s3';
-import type { CloudConnection, S3ConnectionConfig } from '@/types/cloud';
+import type { CloudConnection } from '@/types/cloud';
 
 interface EditS3ConnectionDialogProps {
     connection: CloudConnection | null;
@@ -72,6 +72,7 @@ export default function EditS3ConnectionDialog({
     useEffect(() => {
         form.setData(initialData(connection));
         form.clearErrors();
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setShowAdvanced(false);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connection?.id]);

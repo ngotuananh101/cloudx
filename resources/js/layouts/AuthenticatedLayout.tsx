@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import UploadProgressPanel from '@/components/files/UploadProgressPanel';
-import { Sidebar } from './Sidebar';
 import { Navbar } from './Navbar';
+import { Sidebar } from './Sidebar';
 
 interface AuthenticatedLayoutProps {
     children: ReactNode;
