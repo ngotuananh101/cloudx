@@ -13,6 +13,13 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import type { CloudConnection } from '@/types/cloud';
 
@@ -111,88 +118,83 @@ function TaskDetailModal({
     task: CloudTask | null;
     onClose: () => void;
 }) {
-    if (!task) {
-        return null;
-    }
-
-    const timeline = [
-        ['Created', task.created_at],
-        ['Updated', task.updated_at],
-        ['Queued', task.queued_at],
-        ['Processing', task.processing_at],
-        ['Completed', task.completed_at],
-        ['Failed', task.failed_at],
-        ['Cancelled', task.cancelled_at],
-    ];
+    const timeline = task
+        ? [
+              ['Created', task.created_at],
+              ['Updated', task.updated_at],
+              ['Queued', task.queued_at],
+              ['Processing', task.processing_at],
+              ['Completed', task.completed_at],
+              ['Failed', task.failed_at],
+              ['Cancelled', task.cancelled_at],
+          ]
+        : [];
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-foreground/60 px-4">
-            <div className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-2xl">
-                <div className="flex items-start justify-between gap-4 border-b border-border px-6 py-5">
-                    <div className="min-w-0">
-                        <span className="text-[10px] font-extrabold tracking-widest text-muted-foreground">
-                            TASK DETAILS
-                        </span>
-                        <h3 className="mt-1 truncate text-base font-semibold tracking-tight text-foreground">
-                            {task.name}
-                        </h3>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                        aria-label="Close task details"
-                    >
-                        <X className="h-5 w-5" />
-                    </button>
-                </div>
+        <Dialog
+            open={task !== null}
+            onOpenChange={(open) => !open && onClose()}
+        >
+            <DialogContent className="max-h-[90vh] sm:max-w-2xl overflow-hidden rounded-xl border border-border bg-card p-0 shadow-2xl [&>button]:right-6 [&>button]:top-5 [&>button]:z-10">
+                {task && (
+                    <>
+                        <DialogHeader className="border-b border-border px-6 py-5 text-left">
+                            <DialogDescription className="text-[10px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                                Task Details
+                            </DialogDescription>
+                            <DialogTitle className="mt-1 truncate text-base font-semibold tracking-tight text-foreground">
+                                {task.name}
+                            </DialogTitle>
+                        </DialogHeader>
 
-                <div className="max-h-[calc(90vh-82px)] overflow-y-auto px-6 py-5">
-                    <div className="mb-5 flex flex-wrap items-center gap-2">
-                        <TaskStatusBadge task={task} />
-                        <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                            {task.type.label ?? 'Unknown'}
-                        </span>
-                    </div>
+                        <div className="max-h-[calc(90vh-82px)] overflow-y-auto px-6 py-5">
+                            <div className="mb-5 flex flex-wrap items-center gap-2">
+                                <TaskStatusBadge task={task} />
+                                <span className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
+                                    {task.type.label ?? 'Unknown'}
+                                </span>
+                            </div>
 
-                    <div className="grid gap-4 sm:grid-cols-2">
-                        <DetailItem label="Connection">
-                            {task.connection?.name ?? 'Unavailable'}
-                        </DetailItem>
-                        <DetailItem label="Target path">
-                            {task.target_path || '/'}
-                        </DetailItem>
-                    </div>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                <DetailItem label="Connection">
+                                    {task.connection?.name ?? 'Unavailable'}
+                                </DetailItem>
+                                <DetailItem label="Target path">
+                                    {task.target_path || '/'}
+                                </DetailItem>
+                            </div>
 
-                    {task.error_message && (
-                        <div className="mt-5 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
-                            {task.error_message}
-                        </div>
-                    )}
-
-                    <div className="mt-6">
-                        <h4 className="text-xs font-extrabold tracking-widest text-muted-foreground">
-                            TIMELINE
-                        </h4>
-                        <div className="mt-3 overflow-hidden rounded-xl border border-border">
-                            {timeline.map(([label, value]) => (
-                                <div
-                                    key={label}
-                                    className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 text-xs last:border-b-0"
-                                >
-                                    <span className="font-medium text-muted-foreground">
-                                        {label}
-                                    </span>
-                                    <span className="text-right font-medium text-foreground">
-                                        {formatDate(value)}
-                                    </span>
+                            {task.error_message && (
+                                <div className="mt-5 rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm font-medium text-destructive">
+                                    {task.error_message}
                                 </div>
-                            ))}
+                            )}
+
+                            <div className="mt-6">
+                                <h4 className="text-xs font-extrabold tracking-widest text-muted-foreground">
+                                    TIMELINE
+                                </h4>
+                                <div className="mt-3 overflow-hidden rounded-xl border border-border">
+                                    {timeline.map(([label, value]) => (
+                                        <div
+                                            key={label}
+                                            className="flex items-center justify-between gap-4 border-b border-border px-4 py-3 text-xs last:border-b-0"
+                                        >
+                                            <span className="font-medium text-muted-foreground">
+                                                {label}
+                                            </span>
+                                            <span className="text-right font-medium text-foreground">
+                                                {formatDate(value)}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+                    </>
+                )}
+            </DialogContent>
+        </Dialog>
     );
 }
 
