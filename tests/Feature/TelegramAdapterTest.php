@@ -2,6 +2,7 @@
 
 use App\Services\Telegram\TelegramAdapter;
 use App\Services\Telegram\TelegramClient;
+use App\Services\Telegram\TelegramHelper;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\UnableToCopyFile;
@@ -230,14 +231,14 @@ it('returns the original file_name via filenameFor when the disk wraps a Telegra
     $disk = Mockery::mock();
     $disk->shouldReceive('getAdapter')->andReturn($adapter);
 
-    expect(TelegramAdapter::filenameFor($disk, '12345'))->toBe('photo.png');
+    expect(TelegramHelper::filenameFor($disk, '12345'))->toBe('photo.png');
 });
 
 it('returns null via filenameFor when the disk does not wrap a TelegramAdapter', function () {
     $disk = Mockery::mock();
     $disk->shouldReceive('getAdapter')->andReturn(new class {});
 
-    expect(TelegramAdapter::filenameFor($disk, 'whatever.txt'))->toBeNull();
+    expect(TelegramHelper::filenameFor($disk, 'whatever.txt'))->toBeNull();
 });
 
 it('returns null via filenameFor when the file_name extra metadata is missing', function () {
@@ -251,7 +252,7 @@ it('returns null via filenameFor when the file_name extra metadata is missing', 
     $disk = Mockery::mock();
     $disk->shouldReceive('getAdapter')->andReturn($adapter);
 
-    expect(TelegramAdapter::filenameFor($disk, '12345'))->toBeNull();
+    expect(TelegramHelper::filenameFor($disk, '12345'))->toBeNull();
 });
 
 it('returns null via filenameFor when the adapter throws while resolving the file name', function () {
@@ -263,5 +264,5 @@ it('returns null via filenameFor when the adapter throws while resolving the fil
     $disk = Mockery::mock();
     $disk->shouldReceive('getAdapter')->andReturn($adapter);
 
-    expect(TelegramAdapter::filenameFor($disk, '12345'))->toBeNull();
+    expect(TelegramHelper::filenameFor($disk, '12345'))->toBeNull();
 });

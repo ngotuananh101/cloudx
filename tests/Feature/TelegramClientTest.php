@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\PythonServiceException;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Support\Facades\Http;
 
@@ -189,7 +190,7 @@ it('throws on 403 responses', function () {
 
     $client = new TelegramClient('http://microservice:8000', 'token', 'sess1');
 
-    expect(fn () => $client->isAuthorized())->toThrow(RuntimeException::class, 'Python service authentication failed.');
+    expect(fn () => $client->isAuthorized())->toThrow(PythonServiceException::class, 'Python service authentication failed.');
 });
 
 it('throws on unexpected errors', function () {
@@ -200,5 +201,5 @@ it('throws on unexpected errors', function () {
 
     $client = new TelegramClient('http://microservice:8000', 'token', 'sess1');
 
-    expect(fn () => $client->download(12345))->toThrow(RuntimeException::class);
+    expect(fn () => $client->download(12345))->toThrow(PythonServiceException::class);
 });
