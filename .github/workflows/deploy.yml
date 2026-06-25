@@ -4,15 +4,27 @@ on:
   push:
     branches:
       - main
+      - master
+      - develop
+      - workos
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+      - workos
   workflow_dispatch:
 
 concurrency:
   group: deploy-production
   cancel-in-progress: true
 
+permissions:
+  contents: write
+
 jobs:
-  # ─── Run tests first ────────────────────────────────────────────────────────
-  tests:
+  # ─── 1. Run Tests ────────────────────────────────────────────────────────
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -48,15 +60,63 @@ jobs:
       - name: Run tests
         run: ./vendor/bin/pest
 
-  # ─── Build and Deploy ───────────────────────────────────────────────────────
+  # ─── 2. Run Lint ────────────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ github.head_ref || github.ref }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+
+      - name: Setup Node & pnpm
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install Dependencies
+        run: |
+          composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+          pnpm install --frozen-lockfile
+
+      - name: Run Pint
+        run: composer lint
+
+      - name: Format Frontend
+        run: pnpm run format
+
+      - name: Lint Frontend
+        run: pnpm run lint
+
+      - name: Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: fix code style"
+          commit_options: '--no-verify'
+
+  # ─── 3. Build and Deploy ────────────────────────────────────────────────
   deploy:
     runs-on: ubuntu-latest
-    needs: tests
+    needs: lint
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
     environment: production
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          # Pull the latest commit in case the linter pushed changes
+          ref: ${{ github.ref }}
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
