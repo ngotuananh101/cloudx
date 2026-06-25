@@ -146,41 +146,6 @@ class TelegramAdapter implements FilesystemAdapter
     }
 
     /**
-     * Resolve the original Telegram filename for a given disk path.
-     *
-     * Telegram paths are message IDs, not filenames, so download/preview
-     * responses built from `basename($path)` expose the message ID to users.
-     * This helper extracts the real `original_name` from the adapter's
-     * extra metadata so callers can substitute it into the
-     * `Content-Disposition` header. Returns `null` for non-Telegram disks
-     * or when the name cannot be resolved; callers should fall back to
-     * `basename($path)` in that case.
-     */
-    public static function filenameFor(object $disk, string $path): ?string
-    {
-        try {
-            $adapter = $disk->getAdapter();
-        } catch (Throwable) {
-            return null;
-        }
-
-        if (! $adapter instanceof self) {
-            return null;
-        }
-
-        try {
-            $attributes = $adapter->fileSize($path);
-            $extra = $attributes->extraMetadata();
-        } catch (Throwable) {
-            return null;
-        }
-
-        $name = $extra['file_name'] ?? null;
-
-        return is_string($name) && $name !== '' ? $name : null;
-    }
-
-    /**
      * @param  array<string, mixed>  $meta
      */
     private function metadata(string $path): FileAttributes

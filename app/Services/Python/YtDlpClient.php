@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Python;
 
-use RuntimeException;
+use App\Exceptions\PythonServiceException;
 
 class YtDlpClient extends PythonServiceClient
 {
@@ -22,13 +22,13 @@ class YtDlpClient extends PythonServiceClient
 
         if (! is_array($body) || ! ($body['success'] ?? false)) {
             $message = is_array($body) ? (string) ($body['message'] ?? 'Unknown error.') : 'Unknown error.';
-            throw new RuntimeException($message);
+            throw new PythonServiceException($message);
         }
 
         $data = $body['data'] ?? null;
 
         if (! is_array($data)) {
-            throw new RuntimeException('Microservice did not return metadata.');
+            throw new PythonServiceException('Microservice did not return metadata.');
         }
 
         return $data;

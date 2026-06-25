@@ -17,6 +17,9 @@ use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia;
 use League\Flysystem\Filesystem;
 
+const MIME_PNG = 'image/png';
+const TG_FILE_ID = '12345';
+
 it('renders error page when share is not found', function () {
     $this->get(route('share.view', ['uuid' => 'nonexistent-uuid']))
         ->assertOk()
@@ -244,9 +247,9 @@ it('uses the original telegram file name for shared downloads instead of the mes
             'message_id' => 12345,
             'original_name' => 'photo.png',
             'size' => 11,
-            'mime_type' => 'image/png',
+            'mime_type' => MIME_PNG,
         ]),
-        'http://localhost:8000/read*' => Http::response('file contents', 200, ['Content-Type' => 'image/png']),
+        'http://localhost:8000/read*' => Http::response('file contents', 200, ['Content-Type' => MIME_PNG]),
     ]);
 
     $user = User::factory()->create();
@@ -262,7 +265,7 @@ it('uses the original telegram file name for shared downloads instead of the mes
         'uuid' => 'tg-download-uuid',
         'user_id' => $user->id,
         'cloud_connection_id' => $connection->id,
-        'path' => '12345',
+        'path' => TG_FILE_ID,
         'name' => 'photo.png',
         'is_directory' => false,
         'type' => 'public',
@@ -292,7 +295,7 @@ it('uses the original telegram file name for shared downloads instead of the mes
     $manager->shouldReceive('connector')->andReturn($connector);
     $this->app->instance(CloudStorageManager::class, $manager);
 
-    $this->get(route('share.download', ['uuid' => 'tg-download-uuid', 'path' => PathEncoder::encode('12345')]))
+    $this->get(route('share.download', ['uuid' => 'tg-download-uuid', 'path' => PathEncoder::encode(TG_FILE_ID)]))
         ->assertOk()
         ->assertHeader('Content-Disposition', 'attachment; filename=photo.png');
 });
@@ -307,9 +310,9 @@ it('uses the original telegram file name for shared previews instead of the mess
             'message_id' => 12345,
             'original_name' => 'photo.png',
             'size' => 11,
-            'mime_type' => 'image/png',
+            'mime_type' => MIME_PNG,
         ]),
-        'http://localhost:8000/read*' => Http::response('file contents', 200, ['Content-Type' => 'image/png']),
+        'http://localhost:8000/read*' => Http::response('file contents', 200, ['Content-Type' => MIME_PNG]),
     ]);
 
     $user = User::factory()->create();
@@ -325,7 +328,7 @@ it('uses the original telegram file name for shared previews instead of the mess
         'uuid' => 'tg-preview-uuid',
         'user_id' => $user->id,
         'cloud_connection_id' => $connection->id,
-        'path' => '12345',
+        'path' => TG_FILE_ID,
         'name' => 'photo.png',
         'is_directory' => false,
         'type' => 'public',
@@ -355,7 +358,7 @@ it('uses the original telegram file name for shared previews instead of the mess
     $manager->shouldReceive('connector')->andReturn($connector);
     $this->app->instance(CloudStorageManager::class, $manager);
 
-    $this->get(route('share.preview', ['uuid' => 'tg-preview-uuid', 'path' => PathEncoder::encode('12345')]))
+    $this->get(route('share.preview', ['uuid' => 'tg-preview-uuid', 'path' => PathEncoder::encode(TG_FILE_ID)]))
         ->assertOk()
         ->assertHeader('Content-Disposition', 'inline; filename="photo.png"');
 });

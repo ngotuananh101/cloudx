@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
+use App\Exceptions\MultipartUploadException;
 use App\Models\CloudTask;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\S3\S3Presigner;
@@ -67,7 +68,7 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
             $multipart = $payload['s3_multipart'] ?? null;
 
             if (! is_array($multipart) || empty($multipart['upload_id']) || empty($multipart['key'])) {
-                throw new \RuntimeException('Multipart upload payload is invalid.');
+                throw new MultipartUploadException('Multipart upload payload is invalid.');
             }
 
             $presigner->completeMultipartUpload(

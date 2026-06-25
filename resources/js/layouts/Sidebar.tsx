@@ -33,6 +33,59 @@ interface SidebarProps {
     };
 }
 
+function SidebarModals({
+    connectionBeingRenamed,
+    setConnectionBeingRenamed,
+    connectionBeingEdited,
+    setConnectionBeingEdited,
+    connectionBeingDeleted,
+    setConnectionBeingDeleted,
+}: {
+    connectionBeingRenamed: CloudConnection | null;
+    setConnectionBeingRenamed: (c: CloudConnection | null) => void;
+    connectionBeingEdited: CloudConnection | null;
+    setConnectionBeingEdited: (c: CloudConnection | null) => void;
+    connectionBeingDeleted: CloudConnection | null;
+    setConnectionBeingDeleted: (c: CloudConnection | null) => void;
+}) {
+    return (
+        <>
+            <EditConnectionNameDialog
+                connection={connectionBeingRenamed}
+                onClose={() => setConnectionBeingRenamed(null)}
+            />
+            <EditFtpConnectionDialog
+                connection={
+                    connectionBeingEdited?.provider_value === 5
+                        ? connectionBeingEdited
+                        : null
+                }
+                onClose={() => setConnectionBeingEdited(null)}
+            />
+            <EditS3ConnectionDialog
+                connection={
+                    connectionBeingEdited?.provider_value === 4
+                        ? connectionBeingEdited
+                        : null
+                }
+                onClose={() => setConnectionBeingEdited(null)}
+            />
+            <EditSftpConnectionDialog
+                connection={
+                    connectionBeingEdited?.provider_value === 6
+                        ? connectionBeingEdited
+                        : null
+                }
+                onClose={() => setConnectionBeingEdited(null)}
+            />
+            <DeleteConnectionDialog
+                connection={connectionBeingDeleted}
+                onClose={() => setConnectionBeingDeleted(null)}
+            />
+        </>
+    );
+}
+
 export function Sidebar({ cloudActions }: SidebarProps) {
     const { url, props } = usePage<PageProps>();
     const auth = props.auth;
@@ -267,37 +320,13 @@ export function Sidebar({ cloudActions }: SidebarProps) {
                 </Link>
             </div>
 
-            <EditConnectionNameDialog
-                connection={connectionBeingRenamed}
-                onClose={() => setConnectionBeingRenamed(null)}
-            />
-            <EditFtpConnectionDialog
-                connection={
-                    connectionBeingEdited?.provider_value === 5
-                        ? connectionBeingEdited
-                        : null
-                }
-                onClose={() => setConnectionBeingEdited(null)}
-            />
-            <EditS3ConnectionDialog
-                connection={
-                    connectionBeingEdited?.provider_value === 4
-                        ? connectionBeingEdited
-                        : null
-                }
-                onClose={() => setConnectionBeingEdited(null)}
-            />
-            <EditSftpConnectionDialog
-                connection={
-                    connectionBeingEdited?.provider_value === 6
-                        ? connectionBeingEdited
-                        : null
-                }
-                onClose={() => setConnectionBeingEdited(null)}
-            />
-            <DeleteConnectionDialog
-                connection={connectionBeingDeleted}
-                onClose={() => setConnectionBeingDeleted(null)}
+            <SidebarModals
+                connectionBeingRenamed={connectionBeingRenamed}
+                setConnectionBeingRenamed={setConnectionBeingRenamed}
+                connectionBeingEdited={connectionBeingEdited}
+                setConnectionBeingEdited={setConnectionBeingEdited}
+                connectionBeingDeleted={connectionBeingDeleted}
+                setConnectionBeingDeleted={setConnectionBeingDeleted}
             />
         </aside>
     );

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\PathEncoder;
-use App\Services\Telegram\TelegramAdapter;
+use App\Services\Telegram\TelegramHelper;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -44,7 +44,7 @@ class CloudFilePreviewController extends Controller
     {
         abort_unless($disk->exists($path), 404, 'File not found on storage.');
 
-        $name = TelegramAdapter::filenameFor($disk, $path) ?? basename($path);
+        $name = TelegramHelper::filenameFor($disk, $path) ?? basename($path);
 
         try {
             $mimeType = $disk->mimeType($path);

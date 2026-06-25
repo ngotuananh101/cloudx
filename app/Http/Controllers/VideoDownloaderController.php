@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\PythonServiceException;
 use App\Services\Python\YtDlpClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Inertia\Response;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class VideoDownloaderController extends Controller
@@ -34,7 +34,7 @@ class VideoDownloaderController extends Controller
                 $validated['url'],
                 $validated['cookies'] ?? null,
             );
-        } catch (RuntimeException $exception) {
+        } catch (PythonServiceException $exception) {
             Log::warning('yt-dlp metadata request failed.', [
                 'exception' => $exception,
                 'url' => $validated['url'],
@@ -64,7 +64,7 @@ class VideoDownloaderController extends Controller
                 (bool) ($validated['audio_only'] ?? false),
                 $validated['cookies'] ?? null,
             );
-        } catch (RuntimeException $exception) {
+        } catch (PythonServiceException $exception) {
             Log::warning('yt-dlp download request failed.', [
                 'exception' => $exception,
                 'url' => $validated['url'],

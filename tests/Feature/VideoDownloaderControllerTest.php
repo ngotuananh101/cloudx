@@ -7,6 +7,8 @@ use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
 
+const VD_TEST_URL = 'https://example.com/watch?v=1';
+
 beforeEach(function () {
     config(['services.python-service.url' => 'http://localhost:8000']);
     config(['services.python-service.token' => 'test-token']);
@@ -38,7 +40,7 @@ it('returns the unwrapped metadata when the microservice succeeds', function () 
                 'uploader' => 'Uploader',
                 'view_count' => 100,
                 'description' => 'desc',
-                'webpage_url' => 'https://example.com/watch?v=1',
+                'webpage_url' => VD_TEST_URL,
                 'formats' => [
                     ['format_id' => '18', 'ext' => 'mp4', 'resolution' => '640x360', 'filesize' => 1000, 'vcodec' => 'avc1', 'acodec' => 'mp4a', 'tbr' => 200.0, 'format_note' => '360p'],
                 ],
@@ -50,7 +52,7 @@ it('returns the unwrapped metadata when the microservice succeeds', function () 
 
     $this->actingAs($user)
         ->postJson(route('video-downloader.metadata'), [
-            'url' => 'https://example.com/watch?v=1',
+            'url' => VD_TEST_URL,
         ])
         ->assertOk()
         ->assertJson(['title' => 'Sample']);
@@ -74,7 +76,7 @@ it('returns 502 when the microservice fails', function () {
 
     $this->actingAs($user)
         ->postJson(route('video-downloader.metadata'), [
-            'url' => 'https://example.com/watch?v=1',
+            'url' => VD_TEST_URL,
         ])
         ->assertStatus(502)
         ->assertJson(['message' => 'Could not fetch video metadata.']);
@@ -92,7 +94,7 @@ it('streams the downloaded file with the original Content-Disposition filename',
 
     $this->actingAs($user)
         ->get(route('video-downloader.download', [
-            'url' => 'https://example.com/watch?v=1',
+            'url' => VD_TEST_URL,
             'format_id' => '18',
         ]))
         ->assertOk()
@@ -117,7 +119,7 @@ it('returns 502 when the download request fails', function () {
 
     $this->actingAs($user)
         ->getJson(route('video-downloader.download', [
-            'url' => 'https://example.com/watch?v=1',
+            'url' => VD_TEST_URL,
             'format_id' => '18',
         ]))
         ->assertStatus(502);

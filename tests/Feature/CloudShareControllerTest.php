@@ -9,11 +9,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
+const DRIVE_NAME = 'My Drive';
+
 it('stores file size in extra_info when sharing a single file', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'My Drive',
+        'name' => DRIVE_NAME,
         'provider' => CloudProvider::ONEDRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
@@ -38,7 +40,7 @@ it('does not store extra_info when sharing a directory', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'My Drive',
+        'name' => DRIVE_NAME,
         'provider' => CloudProvider::ONEDRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
@@ -63,7 +65,7 @@ it('accepts missing size for backwards compatibility with shares created before 
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'My Drive',
+        'name' => DRIVE_NAME,
         'provider' => CloudProvider::ONEDRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,

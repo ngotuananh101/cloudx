@@ -207,7 +207,9 @@ export default function UploadProgressPanel() {
                                                 type="button"
                                                 variant="ghost"
                                                 size="icon-sm"
-                                                onClick={() => void pause(item)}
+                                                onClick={() => {
+                                                    pause(item);
+                                                }}
                                                 aria-label="Pause upload"
                                             >
                                                 <Pause className="h-4 w-4" />
@@ -218,9 +220,9 @@ export default function UploadProgressPanel() {
                                                 type="button"
                                                 variant="ghost"
                                                 size="icon-sm"
-                                                onClick={() =>
-                                                    void resume(item)
-                                                }
+                                                onClick={() => {
+                                                    resume(item);
+                                                }}
                                                 aria-label="Resume upload"
                                             >
                                                 <Play className="h-4 w-4" />
@@ -246,9 +248,9 @@ export default function UploadProgressPanel() {
                                                 type="button"
                                                 variant="ghost"
                                                 size="icon-sm"
-                                                onClick={() =>
-                                                    void cancel(item)
-                                                }
+                                                onClick={() => {
+                                                    cancel(item);
+                                                }}
                                                 aria-label="Cancel upload"
                                             >
                                                 <X className="h-4 w-4" />

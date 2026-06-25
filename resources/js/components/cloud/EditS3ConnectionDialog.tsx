@@ -16,8 +16,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { CloudConnection } from '@/types/cloud';
 import { update } from '@/routes/connections/s3';
+import type { CloudConnection } from '@/types/cloud';
 
 interface EditS3ConnectionDialogProps {
     connection: CloudConnection | null;

@@ -1,12 +1,16 @@
 <?php
 
+use App\Exceptions\PythonServiceException;
 use App\Services\Python\PythonServiceClient;
 use Illuminate\Support\Facades\Http;
-use RuntimeException;
+
+const PY_BASE_URL = 'http://localhost:8000';
+const PROBE_URI = '/probe';
+const PY_TEST_TOKEN = 'test-token';
 
 beforeEach(function () {
-    config(['services.python-service.url' => 'http://localhost:8000']);
-    config(['services.python-service.token' => 'test-token']);
+    config(['services.python-service.url' => PY_BASE_URL]);
+    config(['services.python-service.token' => PY_TEST_TOKEN]);
 });
 
 it('sends the X-Token header on every request', function () {
@@ -14,11 +18,11 @@ it('sends the X-Token header on every request', function () {
         'http://localhost:8000/probe' => Http::response(['ok' => true]),
     ]);
 
-    $client = new class('http://localhost:8000', 'test-token') extends PythonServiceClient
+    $client = new class(PY_BASE_URL, PY_TEST_TOKEN) extends PythonServiceClient
     {
         public function probe(): array
         {
-            return $this->post('/probe', [])->json();
+            return $this->post(PROBE_URI, [])->json();
         }
     };
 
@@ -26,7 +30,7 @@ it('sends the X-Token header on every request', function () {
 
     Http::assertSent(function ($request) {
         return $request->url() === 'http://localhost:8000/probe'
-            && $request->hasHeader('X-Token', 'test-token');
+            && $request->hasHeader('X-Token', PY_TEST_TOKEN);
     });
 });
 
@@ -35,15 +39,15 @@ it('throws on 403 auth failure', function () {
         'http://localhost:8000/probe' => Http::response(['error' => 'forbidden'], 403),
     ]);
 
-    $client = new class('http://localhost:8000', 'test-token') extends PythonServiceClient
+    $client = new class(PY_BASE_URL, PY_TEST_TOKEN) extends PythonServiceClient
     {
         public function probe(): void
         {
-            $this->post('/probe', []);
+            $this->post(PROBE_URI, []);
         }
     };
 
-    expect(fn () => $client->probe())->toThrow(RuntimeException::class, 'Python service authentication failed.');
+    expect(fn () => $client->probe())->toThrow(PythonServiceException::class, 'Python service authentication failed.');
 });
 
 it('throws on 5xx failure', function () {
@@ -51,20 +55,20 @@ it('throws on 5xx failure', function () {
         'http://localhost:8000/probe' => Http::response(['error' => 'boom'], 500),
     ]);
 
-    $client = new class('http://localhost:8000', 'test-token') extends PythonServiceClient
+    $client = new class(PY_BASE_URL, PY_TEST_TOKEN) extends PythonServiceClient
     {
         public function probe(): void
         {
-            $this->post('/probe', []);
+            $this->post(PROBE_URI, []);
         }
     };
 
-    expect(fn () => $client->probe())->toThrow(RuntimeException::class);
+    expect(fn () => $client->probe())->toThrow(PythonServiceException::class);
 });
 
 it('exposes url and token', function () {
-    $client = new PythonServiceClient('http://localhost:8000', 'abc');
+    $client = new PythonServiceClient(PY_BASE_URL, 'abc');
 
-    expect($client->url())->toBe('http://localhost:8000')
+    expect($client->url())->toBe(PY_BASE_URL)
         ->and($client->token())->toBe('abc');
 });
