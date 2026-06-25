@@ -12,12 +12,12 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
 it('defines Dropbox provider metadata', function () {
-    $provider = CloudProvider::DROPBOX();
+    $provider = CloudProvider::DROPBOX;
 
     expect($provider->slug())->toBe('dropbox')
-        ->and($provider->description)->toBe('Dropbox')
-        ->and(CloudProvider::fromSlug('dropbox')->is(CloudProvider::DROPBOX()))->toBeTrue()
-        ->and(CloudProvider::getIcon(CloudProvider::DROPBOX))->toBe('/assets/svg/Dropbox.svg')
+        ->and($provider->getDescription())->toBe('Dropbox')
+        ->and(CloudProvider::fromSlug('dropbox') === CloudProvider::DROPBOX)->toBeTrue()
+        ->and(CloudProvider::getIcon(CloudProvider::DROPBOX->value))->toBe('/assets/svg/Dropbox.svg')
         ->and(file_exists(public_path('assets/svg/Dropbox.svg')))->toBeTrue();
 });
 
@@ -162,7 +162,7 @@ it('refreshes an expired Dropbox token before building a disk', function () {
     ]);
 
     $connection = CloudConnection::factory()->create([
-        'provider' => CloudProvider::DROPBOX(),
+        'provider' => CloudProvider::DROPBOX,
         'credentials' => [
             'access_token' => 'expired-dropbox-token',
             'refresh_token' => 'dropbox-refresh-token',
@@ -207,13 +207,13 @@ it('exposes Dropbox provider capabilities', function () {
 });
 
 it('resolves the Dropbox connector from the cloud storage manager', function () {
-    expect(app(CloudStorageManager::class)->connector(CloudProvider::DROPBOX())->provider()->value)
+    expect(app(CloudStorageManager::class)->connector(CloudProvider::DROPBOX)->provider())
         ->toBe(CloudProvider::DROPBOX);
 });
 
 it('allows Dropbox OAuth connections to reconnect and edit their display name', function () {
     $connection = CloudConnection::factory()->create([
-        'provider' => CloudProvider::DROPBOX(),
+        'provider' => CloudProvider::DROPBOX,
     ]);
 
     expect($connection->canReconnect())->toBeTrue()

@@ -11,32 +11,32 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 
 it('resolves registered connectors by cloud provider', function () {
-    $google = new FakeCloudProviderConnector(CloudProvider::GOOGLE_DRIVE());
-    $oneDrive = new FakeCloudProviderConnector(CloudProvider::ONEDRIVE());
+    $google = new FakeCloudProviderConnector(CloudProvider::GOOGLE_DRIVE);
+    $oneDrive = new FakeCloudProviderConnector(CloudProvider::ONEDRIVE);
 
     $registry = new CloudProviderRegistry([$google, $oneDrive]);
 
-    expect($registry->for(CloudProvider::GOOGLE_DRIVE()))->toBe($google)
-        ->and($registry->for(CloudProvider::ONEDRIVE()))->toBe($oneDrive)
+    expect($registry->for(CloudProvider::GOOGLE_DRIVE))->toBe($google)
+        ->and($registry->for(CloudProvider::ONEDRIVE))->toBe($oneDrive)
         ->and($registry->all())->toHaveCount(2);
 });
 
 it('throws when resolving an unsupported cloud provider', function () {
     $registry = new CloudProviderRegistry([
-        new FakeCloudProviderConnector(CloudProvider::GOOGLE_DRIVE()),
+        new FakeCloudProviderConnector(CloudProvider::GOOGLE_DRIVE),
     ]);
 
-    $registry->for(CloudProvider::ONEDRIVE());
+    $registry->for(CloudProvider::ONEDRIVE);
 })->throws(InvalidArgumentException::class);
 
 it('delegates connector resolution through the cloud storage manager', function () {
-    $google = new FakeCloudProviderConnector(CloudProvider::GOOGLE_DRIVE());
-    $oneDrive = new FakeCloudProviderConnector(CloudProvider::ONEDRIVE());
+    $google = new FakeCloudProviderConnector(CloudProvider::GOOGLE_DRIVE);
+    $oneDrive = new FakeCloudProviderConnector(CloudProvider::ONEDRIVE);
     $registry = new CloudProviderRegistry([$google, $oneDrive]);
 
     $manager = new CloudStorageManager($registry);
 
-    expect($manager->connector(CloudProvider::ONEDRIVE()))->toBe($oneDrive)
+    expect($manager->connector(CloudProvider::ONEDRIVE))->toBe($oneDrive)
         ->and($manager->connectors())->toHaveCount(2);
 });
 

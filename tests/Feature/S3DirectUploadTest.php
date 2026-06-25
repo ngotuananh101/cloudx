@@ -138,6 +138,6 @@ it('queues multipart completion when all direct parts are uploaded', function ()
         ->postJson(route('connections.upload-tasks.direct.complete', [$connection, $task]));
 
     $response->assertOk();
-    expect($task->refresh()->status->is(CloudTaskStatus::Queued()))->toBeTrue();
+    expect($task->refresh()->status === CloudTaskStatus::Queued)->toBeTrue();
     Queue::assertPushed(CompleteS3MultipartUploadJob::class);
 });

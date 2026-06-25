@@ -18,18 +18,18 @@ function telegramConnection(array $credentials = []): CloudConnection
     $user = User::factory()->create();
 
     return $user->cloudConnections()->create([
-        'provider' => CloudProvider::TELEGRAM(),
+        'provider' => CloudProvider::TELEGRAM,
         'provider_id' => 'telegram-sess1',
         'name' => 'Telegram Storage',
         'credentials' => array_merge(['session_id' => 'sess1'], $credentials),
-        'status' => ConnectionStatus::CONNECTED(),
+        'status' => ConnectionStatus::CONNECTED,
     ]);
 }
 
 it('returns TELEGRAM provider', function () {
     $connector = new TelegramConnector;
 
-    expect($connector->provider()->is(CloudProvider::TELEGRAM()))->toBeTrue();
+    expect($connector->provider() === CloudProvider::TELEGRAM)->toBeTrue();
 });
 
 it('returns correct capabilities', function () {
@@ -63,12 +63,12 @@ it('returns empty redirect url', function () {
 
 it('is registered in the provider registry', function () {
     $registry = app(CloudProviderRegistry::class);
-    $connector = $registry->for(CloudProvider::TELEGRAM());
+    $connector = $registry->for(CloudProvider::TELEGRAM);
 
     expect($connector)->toBeInstanceOf(TelegramConnector::class);
 });
 
 it('uses enum constants consistently for telegram connections', function () {
-    expect(CloudProvider::TELEGRAM)->toBe(7)
-        ->and(telegramConnection()->provider->is(CloudProvider::TELEGRAM()))->toBeTrue();
+    expect(CloudProvider::TELEGRAM->value)->toBe(7)
+        ->and(telegramConnection()->provider === CloudProvider::TELEGRAM)->toBeTrue();
 });

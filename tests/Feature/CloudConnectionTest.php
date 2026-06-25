@@ -36,8 +36,8 @@ it('creates a cloud connection and casts attributes correctly', function () {
     expect($connection->user->id)->toBe($user->id);
 
     // Check enums
-    expect($connection->provider->value)->toBe(CloudProvider::GOOGLE_DRIVE)
-        ->and($connection->status->value)->toBe(ConnectionStatus::CONNECTED);
+    expect($connection->provider)->toBe(CloudProvider::GOOGLE_DRIVE)
+        ->and($connection->status)->toBe(ConnectionStatus::CONNECTED);
 
     // Check credentials casting (it should return array in PHP)
     expect($connection->credentials)->toBeArray()
@@ -58,7 +58,7 @@ it('redirects to Google OAuth URL', function () {
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::GOOGLE_DRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::GOOGLE_DRIVE
     ))->andReturn($connector);
 
     $this->app->instance(CloudStorageManager::class, $manager);
@@ -105,7 +105,7 @@ it('handles Google OAuth callback successfully', function () {
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::GOOGLE_DRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::GOOGLE_DRIVE
     ))->andReturn($connector);
 
     $this->app->instance(CloudStorageManager::class, $manager);
@@ -120,10 +120,10 @@ it('handles Google OAuth callback successfully', function () {
 
     $connection = $user->cloudConnections()->first();
     expect($connection)->not->toBeNull()
-        ->and($connection->provider->value)->toBe(CloudProvider::GOOGLE_DRIVE)
+        ->and($connection->provider)->toBe(CloudProvider::GOOGLE_DRIVE)
         ->and($connection->provider_id)->toBe('test@gmail.com')
         ->and($connection->name)->toBe('Google Drive (test@gmail.com)')
-        ->and($connection->status->value)->toBe(ConnectionStatus::CONNECTED)
+        ->and($connection->status)->toBe(ConnectionStatus::CONNECTED)
         ->and($connection->credentials['access_token'])->toBe('mock_access_token')
         ->and($connection->credentials['refresh_token'])->toBe('mock_refresh_token')
         ->and($connection->total_space)->toBe(15000000000)
@@ -327,7 +327,7 @@ it('starts reconnect for the users existing oauth connection', function () {
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::GOOGLE_DRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::GOOGLE_DRIVE
     ))->andReturn($connector);
 
     $this->app->instance(CloudStorageManager::class, $manager);
@@ -336,7 +336,7 @@ it('starts reconnect for the users existing oauth connection', function () {
 
     $response->assertRedirect('https://accounts.google.com/o/oauth2/auth?reconnect=1');
     $response->assertSessionHas('cloud_connection_reconnect.connection_id', $connection->id);
-    $response->assertSessionHas('cloud_connection_reconnect.provider', CloudProvider::GOOGLE_DRIVE);
+    $response->assertSessionHas('cloud_connection_reconnect.provider', CloudProvider::GOOGLE_DRIVE->value);
     $response->assertSessionHas('cloud_connection_reconnect.provider_id', 'test@gmail.com');
 });
 
@@ -373,7 +373,7 @@ it('updates the existing connection when reconnect returns the same account', fu
     session([
         'cloud_connection_reconnect' => [
             'connection_id' => $connection->id,
-            'provider' => CloudProvider::GOOGLE_DRIVE,
+            'provider' => CloudProvider::GOOGLE_DRIVE->value,
             'provider_id' => 'test@gmail.com',
         ],
     ]);
@@ -389,7 +389,7 @@ it('updates the existing connection when reconnect returns the same account', fu
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::GOOGLE_DRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::GOOGLE_DRIVE
     ))->andReturn($connector);
 
     $this->app->instance(CloudStorageManager::class, $manager);
@@ -431,7 +431,7 @@ it('rejects reconnect when oauth returns a different account', function () {
     session([
         'cloud_connection_reconnect' => [
             'connection_id' => $connection->id,
-            'provider' => CloudProvider::GOOGLE_DRIVE,
+            'provider' => CloudProvider::GOOGLE_DRIVE->value,
             'provider_id' => 'original@gmail.com',
         ],
     ]);
@@ -447,7 +447,7 @@ it('rejects reconnect when oauth returns a different account', function () {
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::GOOGLE_DRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::GOOGLE_DRIVE
     ))->andReturn($connector);
 
     $this->app->instance(CloudStorageManager::class, $manager);

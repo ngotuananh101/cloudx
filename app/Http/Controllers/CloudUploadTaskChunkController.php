@@ -23,7 +23,7 @@ class CloudUploadTaskChunkController extends Controller
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
         abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
-        abort_if(! $task->type->is(CloudTaskType::Upload()), 404);
+        abort_if($task->type !== CloudTaskType::Upload, 404);
 
         if (($task->payload['upload_mode'] ?? 'backend') === 'direct') {
             throw ValidationException::withMessages([
@@ -31,7 +31,7 @@ class CloudUploadTaskChunkController extends Controller
             ]);
         }
 
-        if (! $task->status->in([CloudTaskStatus::Pending(), CloudTaskStatus::Uploading(), CloudTaskStatus::Paused()])) {
+        if (! in_array($task->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading, CloudTaskStatus::Paused], true)) {
             throw ValidationException::withMessages([
                 'chunk' => 'This upload task can no longer receive chunks.',
             ]);
@@ -73,7 +73,7 @@ class CloudUploadTaskChunkController extends Controller
         DB::transaction(function () use ($task, $index, $chunk, $validated): void {
             $lockedTask = CloudTask::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
 
-            if (! $lockedTask->status->in([CloudTaskStatus::Pending(), CloudTaskStatus::Uploading(), CloudTaskStatus::Paused()])) {
+            if (! in_array($lockedTask->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading, CloudTaskStatus::Paused], true)) {
                 throw ValidationException::withMessages([
                     'chunk' => 'This upload task can no longer receive chunks.',
                 ]);
@@ -92,9 +92,9 @@ class CloudUploadTaskChunkController extends Controller
             $totalChunks = (int) ($payload['total_chunks'] ?? 0);
 
             if ($uploadedChunksCount >= $totalChunks && $totalChunks > 0) {
-                if (! $lockedTask->status->in([CloudTaskStatus::Queued(), CloudTaskStatus::Processing(), CloudTaskStatus::Completed()])) {
+                if (! in_array($lockedTask->status, [CloudTaskStatus::Queued, CloudTaskStatus::Processing, CloudTaskStatus::Completed], true)) {
                     $lockedTask->forceFill([
-                        'status' => CloudTaskStatus::Queued(),
+                        'status' => CloudTaskStatus::Queued,
                         'payload' => $payload,
                         'queued_at' => now(),
                     ])->save();
@@ -105,9 +105,9 @@ class CloudUploadTaskChunkController extends Controller
                 return;
             }
 
-            if (! $lockedTask->status->is(CloudTaskStatus::Paused())) {
+            if ($lockedTask->status !== CloudTaskStatus::Paused) {
                 $lockedTask->forceFill([
-                    'status' => CloudTaskStatus::Uploading(),
+                    'status' => CloudTaskStatus::Uploading,
                     'payload' => $payload,
                     'started_at' => $lockedTask->started_at ?? now(),
                 ])->save();
@@ -118,7 +118,7 @@ class CloudUploadTaskChunkController extends Controller
 
         $task->refresh()->load('chunks');
 
-        if ($task->status->is(CloudTaskStatus::Queued())) {
+        if ($task->status === CloudTaskStatus::Queued) {
             $this->broadcaster->broadcastStatus($task);
         } else {
             $this->broadcaster->broadcastProgressIfNeeded($task);

@@ -11,14 +11,14 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 it('resolves the S3 connector from the registry', function () {
-    $connector = app(CloudProviderRegistry::class)->for(CloudProvider::AWS_S3());
+    $connector = app(CloudProviderRegistry::class)->for(CloudProvider::AWS_S3);
 
     expect($connector)->toBeInstanceOf(S3Connector::class);
 });
 
 it('reports the expected S3 provider capabilities', function () {
     $capabilities = app(CloudProviderRegistry::class)
-        ->for(CloudProvider::AWS_S3())
+        ->for(CloudProvider::AWS_S3)
         ->capabilities();
 
     expect($capabilities)->toEqual(new ProviderCapabilities(
@@ -80,7 +80,7 @@ it('builds an S3 disk from encrypted connection credentials', function () {
     Storage::shouldReceive('build')->once()->andReturn($disk);
 
     $builtDisk = app(CloudProviderRegistry::class)
-        ->for(CloudProvider::AWS_S3())
+        ->for(CloudProvider::AWS_S3)
         ->disk($connection);
 
     expect($builtDisk)->toBe($disk);
@@ -112,8 +112,8 @@ it('creates S3 connection after testing credentials', function () {
 
     $connection = CloudConnection::query()->sole();
 
-    expect($connection->provider->is(CloudProvider::AWS_S3))->toBeTrue()
-        ->and($connection->status->is(ConnectionStatus::CONNECTED))->toBeTrue()
+    expect($connection->provider === CloudProvider::AWS_S3)->toBeTrue()
+        ->and($connection->status === ConnectionStatus::CONNECTED)->toBeTrue()
         ->and($connection->credentials)->toMatchArray(s3Credentials());
 });
 

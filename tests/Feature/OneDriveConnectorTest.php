@@ -125,6 +125,6 @@ it('returns a usable one drive filesystem disk', function () {
 });
 
 it('resolves the OneDrive connector from the cloud storage manager', function () {
-    expect(app(CloudStorageManager::class)->connector(CloudProvider::ONEDRIVE())->provider()->value)
+    expect(app(CloudStorageManager::class)->connector(CloudProvider::ONEDRIVE)->provider())
         ->toBe(CloudProvider::ONEDRIVE);
 });

@@ -57,7 +57,7 @@ class CloudUploadDirectCompleteController extends Controller
         ];
 
         $task->forceFill([
-            'status' => CloudTaskStatus::Uploading(),
+            'status' => CloudTaskStatus::Uploading,
             'payload' => $payload,
             'started_at' => $task->started_at ?? now(),
         ])->save();
@@ -91,7 +91,7 @@ class CloudUploadDirectCompleteController extends Controller
         }
 
         $task->forceFill([
-            'status' => CloudTaskStatus::Queued(),
+            'status' => CloudTaskStatus::Queued,
             'queued_at' => now(),
         ])->save();
 
@@ -117,7 +117,7 @@ class CloudUploadDirectCompleteController extends Controller
         }
 
         $task->forceFill([
-            'status' => CloudTaskStatus::Cancelled(),
+            'status' => CloudTaskStatus::Cancelled,
             'cancelled_at' => now(),
         ])->save();
         $this->broadcaster->broadcastStatus($task);

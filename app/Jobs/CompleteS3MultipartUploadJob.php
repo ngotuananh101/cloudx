@@ -42,12 +42,12 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (! $task->type->is(CloudTaskType::Upload()) || ! $task->status->is(CloudTaskStatus::Queued())) {
+            if (! $task->type === CloudTaskType::Upload || ! $task->status === CloudTaskStatus::Queued) {
                 return null;
             }
 
             $task->forceFill([
-                'status' => CloudTaskStatus::Processing(),
+                'status' => CloudTaskStatus::Processing,
                 'processing_at' => now(),
                 'error_message' => null,
             ])->save();
@@ -78,7 +78,7 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
             );
 
             $task->forceFill([
-                'status' => CloudTaskStatus::Completed(),
+                'status' => CloudTaskStatus::Completed,
                 'result' => ['path' => $multipart['key']],
                 'completed_at' => now(),
             ])->save();
@@ -88,7 +88,7 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
             $cache->flushQuota($task->connection);
         } catch (Throwable $exception) {
             $task->forceFill([
-                'status' => CloudTaskStatus::Failed(),
+                'status' => CloudTaskStatus::Failed,
                 'error_message' => $exception->getMessage(),
                 'failed_at' => now(),
             ])->save();

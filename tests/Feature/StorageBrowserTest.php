@@ -70,7 +70,7 @@ it('lists files via a direct browsing connector with normalized metadata and sor
     {
         public function provider(): CloudProvider
         {
-            return CloudProvider::ONEDRIVE();
+            return CloudProvider::ONEDRIVE;
         }
 
         public function redirectUrl(): string
@@ -111,7 +111,7 @@ it('lists files via a direct browsing connector with normalized metadata and sor
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::ONEDRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::ONEDRIVE
     ))->andReturn($connector);
     $manager->shouldNotReceive('disk');
 
@@ -148,7 +148,7 @@ it('lists one drive files through the flysystem disk path', function () {
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
-        fn (CloudProvider $provider): bool => $provider->is(CloudProvider::ONEDRIVE())
+        fn (CloudProvider $provider): bool => $provider === CloudProvider::ONEDRIVE
     ))->andReturn($connector);
     $manager->shouldReceive('disk')->once()->with($connection)->andReturn(Storage::disk('onedrive-test'));
 

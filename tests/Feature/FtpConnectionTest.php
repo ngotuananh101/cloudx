@@ -11,14 +11,14 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
 it('resolves the FTP connector from the registry', function () {
-    $connector = app(CloudProviderRegistry::class)->for(CloudProvider::FTP());
+    $connector = app(CloudProviderRegistry::class)->for(CloudProvider::FTP);
 
     expect($connector)->toBeInstanceOf(FtpConnector::class);
 });
 
 it('reports the expected FTP provider capabilities', function () {
     $capabilities = app(CloudProviderRegistry::class)
-        ->for(CloudProvider::FTP())
+        ->for(CloudProvider::FTP)
         ->capabilities();
 
     expect($capabilities)->toEqual(new ProviderCapabilities(
@@ -55,7 +55,7 @@ it('builds an FTP disk from encrypted connection credentials', function () {
     Storage::shouldReceive('build')->once()->andReturn($disk);
 
     $builtDisk = app(CloudProviderRegistry::class)
-        ->for(CloudProvider::FTP())
+        ->for(CloudProvider::FTP)
         ->disk($connection);
 
     expect($builtDisk)->toBe($disk);
@@ -87,8 +87,8 @@ it('creates FTP connection after testing credentials', function () {
 
     $connection = CloudConnection::query()->sole();
 
-    expect($connection->provider->is(CloudProvider::FTP))->toBeTrue()
-        ->and($connection->status->is(ConnectionStatus::CONNECTED))->toBeTrue()
+    expect($connection->provider === CloudProvider::FTP)->toBeTrue()
+        ->and($connection->status === ConnectionStatus::CONNECTED)->toBeTrue()
         ->and($connection->provider_id)->toBe('ftp-user@ftp.example.test:2121/uploads')
         ->and($connection->total_space)->toBeNull()
         ->and($connection->used_space)->toBeNull()

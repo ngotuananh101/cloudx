@@ -194,7 +194,7 @@ it('broadcasts every explicit upload task status update', function () {
 
 it('does not start processing after a queued upload task is cancelled', function () {
     $task = CloudTask::factory()->upload()->create([
-        'status' => CloudTaskStatus::Cancelled(),
+        'status' => CloudTaskStatus::Cancelled,
         'cancelled_at' => now(),
     ]);
 
@@ -206,7 +206,7 @@ it('does not start processing after a queued upload task is cancelled', function
 
     (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster);
 
-    expect($task->refresh()->status->is(CloudTaskStatus::Cancelled()))->toBeTrue()
+    expect($task->refresh()->status === CloudTaskStatus::Cancelled)->toBeTrue()
         ->and($task->processing_at)->toBeNull();
 
     Event::assertNotDispatched(CloudUploadTaskUpdated::class);
@@ -219,7 +219,7 @@ it('marks an upload task as failed when provider upload fails', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->for($user)->create();
     $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
-        'status' => CloudTaskStatus::Queued(),
+        'status' => CloudTaskStatus::Queued,
         'target_path' => 'documents',
         'name' => 'proposal.pdf',
         'payload' => [
@@ -258,13 +258,13 @@ it('marks an upload task as failed when provider upload fails', function () {
 
     $task->refresh();
 
-    expect($task->status->is(CloudTaskStatus::Failed()))->toBeTrue()
+    expect($task->status === CloudTaskStatus::Failed)->toBeTrue()
         ->and($task->error_message)->toBe('cURL error 60: SSL certificate problem')
         ->and($task->failed_at)->not->toBeNull();
 
     Event::assertDispatched(CloudUploadTaskUpdated::class, function (CloudUploadTaskUpdated $event) use ($task): bool {
         return $event->task->is($task)
-            && $event->task->status->is(CloudTaskStatus::Failed());
+            && $event->task->status === CloudTaskStatus::Failed;
     });
 
     Storage::disk('local')->deleteDirectory('testing-cloud-task-uploads');
@@ -274,7 +274,7 @@ it('does not cancel an upload task after processing starts', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->for($user)->create();
     $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
-        'status' => CloudTaskStatus::Processing(),
+        'status' => CloudTaskStatus::Processing,
         'processing_at' => now(),
     ]);
 
@@ -285,7 +285,7 @@ it('does not cancel an upload task after processing starts', function () {
         ->assertOk()
         ->assertJsonPath('status', 'processing');
 
-    expect($task->refresh()->status->is(CloudTaskStatus::Processing()))->toBeTrue()
+    expect($task->refresh()->status === CloudTaskStatus::Processing)->toBeTrue()
         ->and($task->cancelled_at)->toBeNull();
 
     Event::assertNotDispatched(CloudUploadTaskUpdated::class);

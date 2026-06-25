@@ -28,7 +28,7 @@ it('redirects to the direct download link when the connector provides one', func
     {
         public function provider(): CloudProvider
         {
-            return CloudProvider::ONEDRIVE();
+            return CloudProvider::ONEDRIVE;
         }
 
         public function redirectUrl(): string
@@ -122,7 +122,7 @@ it('falls back to streaming when ProvidesDirectDownloadLink returns null', funct
     {
         public function provider(): CloudProvider
         {
-            return CloudProvider::DROPBOX();
+            return CloudProvider::DROPBOX;
         }
 
         public function redirectUrl(): string

@@ -9,7 +9,7 @@ use App\Services\CloudStorage\Connectors\SftpConnector;
 use Illuminate\Contracts\Filesystem\Filesystem;
 
 it('registers the sftp provider connector', function () {
-    $connector = app(CloudProviderRegistry::class)->for(CloudProvider::SFTP());
+    $connector = app(CloudProviderRegistry::class)->for(CloudProvider::SFTP);
 
     expect($connector)->toBeInstanceOf(SftpConnector::class);
 });
@@ -56,7 +56,7 @@ it('builds an sftp disk config from connection credentials', function () {
 
 it('builds an sftp disk from encrypted connection credentials', function () {
     $connection = CloudConnection::factory()->for(User::factory())->create([
-        'provider' => CloudProvider::SFTP(),
+        'provider' => CloudProvider::SFTP,
         'credentials' => [
             'host' => 'sftp.example.com',
             'port' => 22,
@@ -73,10 +73,10 @@ it('builds an sftp disk from encrypted connection credentials', function () {
 });
 
 it('resolves sftp enum slug and description', function () {
-    $provider = CloudProvider::SFTP();
+    $provider = CloudProvider::SFTP;
 
     expect($provider->slug())->toBe('sftp')
-        ->and($provider->description)->toBe('SFTP Server')
+        ->and($provider->getDescription())->toBe('SFTP Server')
         ->and(CloudProvider::fromSlug('sftp'))->not->toBeNull()
-        ->and(CloudProvider::getIcon(CloudProvider::SFTP))->toBe('/assets/svg/Sftp.svg');
+        ->and(CloudProvider::getIcon(CloudProvider::SFTP->value))->toBe('/assets/svg/Sftp.svg');
 });

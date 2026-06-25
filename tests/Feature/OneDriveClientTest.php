@@ -15,7 +15,7 @@ function oneDriveConnection(array $credentials = []): CloudConnection
     $user = User::factory()->create();
 
     return $user->cloudConnections()->create([
-        'provider' => CloudProvider::ONEDRIVE(),
+        'provider' => CloudProvider::ONEDRIVE,
         'provider_id' => 'onedrive-user',
         'name' => 'OneDrive',
         'credentials' => array_merge([
@@ -23,7 +23,7 @@ function oneDriveConnection(array $credentials = []): CloudConnection
             'refresh_token' => 'refresh-token',
             'expires_at' => now()->addHour()->timestamp,
         ], $credentials),
-        'status' => ConnectionStatus::CONNECTED(),
+        'status' => ConnectionStatus::CONNECTED,
     ]);
 }
 
@@ -291,6 +291,6 @@ it('rejects copy destinations whose parent is missing or not a folder', function
 ]);
 
 it('uses enum constants consistently for onedrive connections', function () {
-    expect(CloudProvider::ONEDRIVE)->toBe(2)
-        ->and(oneDriveConnection()->provider->is(CloudProvider::ONEDRIVE()))->toBeTrue();
+    expect(CloudProvider::ONEDRIVE->value)->toBe(2)
+        ->and(oneDriveConnection()->provider === CloudProvider::ONEDRIVE)->toBeTrue();
 });

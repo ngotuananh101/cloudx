@@ -68,8 +68,8 @@ class CloudUploadTaskController extends Controller
         $task = CloudTask::query()->create([
             'user_id' => $request->user()->id,
             'cloud_connection_id' => $connection->id,
-            'type' => CloudTaskType::Upload(),
-            'status' => CloudTaskStatus::Pending(),
+            'type' => CloudTaskType::Upload,
+            'status' => CloudTaskStatus::Pending,
             'target_path' => trim((string) ($validated['path'] ?? ''), '/'),
             'name' => $filename,
             'payload' => [
@@ -99,8 +99,8 @@ class CloudUploadTaskController extends Controller
     {
         $this->authorizeTask($request, $connection, $task);
 
-        if ($task->status->in([CloudTaskStatus::Pending(), CloudTaskStatus::Uploading()])) {
-            $task->forceFill(['status' => CloudTaskStatus::Paused()])->save();
+        if (in_array($task->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading], true)) {
+            $task->forceFill(['status' => CloudTaskStatus::Paused])->save();
             $this->broadcaster->broadcastStatus($task);
         }
 
@@ -111,8 +111,8 @@ class CloudUploadTaskController extends Controller
     {
         $this->authorizeTask($request, $connection, $task);
 
-        if ($task->status->is(CloudTaskStatus::Paused())) {
-            $task->forceFill(['status' => CloudTaskStatus::Uploading()])->save();
+        if ($task->status === CloudTaskStatus::Paused) {
+            $task->forceFill(['status' => CloudTaskStatus::Uploading])->save();
             $this->broadcaster->broadcastStatus($task);
         }
 
@@ -129,17 +129,17 @@ class CloudUploadTaskController extends Controller
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (! $lockedTask->status->in([
-                CloudTaskStatus::Pending(),
-                CloudTaskStatus::Uploading(),
-                CloudTaskStatus::Paused(),
-                CloudTaskStatus::Queued(),
-            ])) {
+            if (! in_array($lockedTask->status, [
+                CloudTaskStatus::Pending,
+                CloudTaskStatus::Uploading,
+                CloudTaskStatus::Paused,
+                CloudTaskStatus::Queued,
+            ], true)) {
                 return [$lockedTask->load('chunks'), false];
             }
 
             $lockedTask->forceFill([
-                'status' => CloudTaskStatus::Cancelled(),
+                'status' => CloudTaskStatus::Cancelled,
                 'cancelled_at' => now(),
             ])->save();
 
@@ -157,6 +157,6 @@ class CloudUploadTaskController extends Controller
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
         abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
-        abort_if(! $task->type->is(CloudTaskType::Upload()), 404);
+        abort_if(! $task->type === CloudTaskType::Upload, 404);
     }
 }

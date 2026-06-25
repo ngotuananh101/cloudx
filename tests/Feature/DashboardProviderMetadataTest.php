@@ -18,7 +18,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
     ]);
 
     $googleConnector = Mockery::mock(CloudProviderConnector::class);
-    $googleConnector->shouldReceive('provider')->andReturn(CloudProvider::GOOGLE_DRIVE());
+    $googleConnector->shouldReceive('provider')->andReturn(CloudProvider::GOOGLE_DRIVE);
     $googleConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
         browse: true,
         upload: true,
@@ -30,7 +30,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
     ));
 
     $oneDriveConnector = Mockery::mock(CloudProviderConnector::class);
-    $oneDriveConnector->shouldReceive('provider')->andReturn(CloudProvider::ONEDRIVE());
+    $oneDriveConnector->shouldReceive('provider')->andReturn(CloudProvider::ONEDRIVE);
     $oneDriveConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
         browse: true,
         upload: true,
@@ -42,7 +42,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
     ));
 
     $dropboxConnector = Mockery::mock(CloudProviderConnector::class);
-    $dropboxConnector->shouldReceive('provider')->andReturn(CloudProvider::DROPBOX());
+    $dropboxConnector->shouldReceive('provider')->andReturn(CloudProvider::DROPBOX);
     $dropboxConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
         browse: true,
         upload: true,
@@ -54,7 +54,7 @@ it('provides available cloud provider metadata to the dashboard', function () {
     ));
 
     $ftpConnector = Mockery::mock(CloudProviderConnector::class);
-    $ftpConnector->shouldReceive('provider')->andReturn(CloudProvider::FTP());
+    $ftpConnector->shouldReceive('provider')->andReturn(CloudProvider::FTP);
     $ftpConnector->shouldReceive('capabilities')->andReturn(new ProviderCapabilities(
         browse: true,
         upload: true,
