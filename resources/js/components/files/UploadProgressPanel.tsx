@@ -90,12 +90,12 @@ export default function UploadProgressPanel() {
               )
             : 0;
 
+    const activeSuffix = activeCount === 1 ? '' : 's';
+    const completedSuffix = completedCount === 1 ? '' : 's';
     const headerTitle =
         activeCount > 0
-            ? `Uploading ${activeCount} file${activeCount === 1 ? '' : 's'}`
-            : `Uploaded ${completedCount} file${
-                  completedCount === 1 ? '' : 's'
-              }`;
+            ? `Uploading ${activeCount} file${activeSuffix}`
+            : `Uploaded ${completedCount} file${completedSuffix}`;
 
     return (
         <div className="fixed right-6 bottom-6 z-50 w-95 overflow-hidden rounded-2xl border border-border bg-card shadow-2xl">
@@ -191,13 +191,7 @@ export default function UploadProgressPanel() {
                                                     'File'}
                                             </div>
                                         </div>
-                                        <div
-                                            className={`mt-1 truncate text-xs font-semibold ${
-                                                isFailed
-                                                    ? 'text-muted-foreground'
-                                                    : 'text-muted-foreground'
-                                            }`}
-                                        >
+                                        <div className="mt-1 truncate text-xs font-semibold text-muted-foreground">
                                             {getStatusLabel(item)}
                                         </div>
                                     </div>

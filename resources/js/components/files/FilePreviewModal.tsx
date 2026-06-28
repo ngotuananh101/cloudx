@@ -33,7 +33,7 @@ export default function FilePreviewModal({
     const isDark =
         theme === 'dark' ||
         (theme === 'system' &&
-            window.matchMedia('(prefers-color-scheme: dark)').matches);
+            globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
 
     // Default 50MB if not provided
     const maxSize = max_preview_size ?? 52428800;
@@ -63,7 +63,7 @@ export default function FilePreviewModal({
     });
 
     const handleDownload = () => {
-        window.location.href = downloadUrl;
+        globalThis.location.href = downloadUrl;
     };
 
     const NoRendererFallback = () => (

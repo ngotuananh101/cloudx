@@ -101,7 +101,7 @@ export default function VideoDownloaderIndex() {
             cookies: cookies || '',
         });
 
-        window.location.href = `/video-downloader/download?${params.toString()}`;
+        globalThis.location.href = `/video-downloader/download?${params.toString()}`;
     };
 
     const selectedFormat: VideoFormat | null =

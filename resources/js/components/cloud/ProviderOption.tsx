@@ -69,7 +69,7 @@ export default function ProviderOption({
                 }
 
                 if (provider.redirectUrl) {
-                    window.location.href = provider.redirectUrl;
+                    globalThis.location.href = provider.redirectUrl;
                 }
             }}
             className="group flex w-full items-center justify-between rounded-2xl border border-border bg-card p-4 text-left shadow-sm transition-all duration-300 hover:border-primary/50 hover:bg-primary/5"

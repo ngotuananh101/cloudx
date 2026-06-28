@@ -124,7 +124,7 @@ export default function ShareView({
             return;
         }
 
-        window.location.href = downloadUrl;
+        globalThis.location.href = downloadUrl;
     };
 
     const isAtRoot = currentPath === shareBasePath || currentPath === '';

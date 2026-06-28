@@ -56,6 +56,8 @@ class CloudUploadTaskChunkController extends Controller
             ]);
         }
 
+        $totalChunks = (int) ($task->payload['total_chunks'] ?? 0);
+
         if ($totalChunks < 1 || $index >= $totalChunks) {
             throw ValidationException::withMessages([
                 'index' => 'Chunk index is invalid.',

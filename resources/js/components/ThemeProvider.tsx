@@ -31,12 +31,12 @@ export function ThemeProvider({
     );
 
     useEffect(() => {
-        const root = window.document.documentElement;
+        const root = globalThis.document.documentElement;
 
         root.classList.remove('light', 'dark');
 
         if (theme === 'system') {
-            const systemTheme = window.matchMedia(
+            const systemTheme = globalThis.matchMedia(
                 '(prefers-color-scheme: dark)',
             ).matches
                 ? 'dark'
@@ -51,11 +51,11 @@ export function ThemeProvider({
     }, [theme]);
 
     useEffect(() => {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
 
         const handleChange = () => {
             if (theme === 'system') {
-                const root = window.document.documentElement;
+                const root = globalThis.document.documentElement;
                 root.classList.remove('light', 'dark');
                 root.classList.add(mediaQuery.matches ? 'dark' : 'light');
             }

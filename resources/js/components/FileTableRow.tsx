@@ -97,7 +97,7 @@ export function FileTableRow({
             path: encodeCloudPath(item.path),
         });
 
-        window.location.href = url;
+        globalThis.location.href = url;
     };
 
     return (

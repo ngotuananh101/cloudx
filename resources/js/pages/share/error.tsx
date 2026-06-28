@@ -52,7 +52,7 @@ export default function ShareError({
                 <Button
                     variant="outline"
                     className="mt-6"
-                    onClick={() => (window.location.href = '/')}
+                    onClick={() => (globalThis.location.href = '/')}
                 >
                     ← Back to CloudX
                 </Button>

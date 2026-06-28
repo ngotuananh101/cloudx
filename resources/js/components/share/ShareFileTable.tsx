@@ -50,7 +50,7 @@ export function ShareFileTable({
 }: ShareFileTableProps) {
     const handleDownload = (file: CloudFile) => {
         const encodedPath = encodeCloudPath(file.path);
-        window.location.href = `/s/${shareUuid}/download/${encodedPath}`;
+        globalThis.location.href = `/s/${shareUuid}/download/${encodedPath}`;
     };
 
     if (files.length === 0) {
@@ -82,26 +82,14 @@ export function ShareFileTable({
                             className="group border-b border-border bg-card transition-colors last:border-b-0 hover:bg-muted"
                         >
                             <td className="px-4 py-2.5">
-                                <div
-                                    className={`flex min-w-0 items-center gap-3 ${file.isDirectory ? 'cursor-pointer' : ''}`}
+                                <button
+                                    type="button"
+                                    className="flex w-full text-left min-w-0 items-center gap-3 cursor-pointer"
                                     onClick={() =>
                                         file.isDirectory
                                             ? onNavigate(file)
                                             : onPreview(file)
                                     }
-                                    role={
-                                        file.isDirectory ? 'button' : undefined
-                                    }
-                                    tabIndex={file.isDirectory ? 0 : undefined}
-                                    onKeyDown={(e) => {
-                                        if (
-                                            file.isDirectory &&
-                                            (e.key === 'Enter' || e.key === ' ')
-                                        ) {
-                                            e.preventDefault();
-                                            onNavigate(file);
-                                        }
-                                    }}
                                 >
                                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted">
                                         {getFileIcon(file.type)}
@@ -115,7 +103,7 @@ export function ShareFileTable({
                                     >
                                         {file.name}
                                     </span>
-                                </div>
+                                </button>
                             </td>
                             <td className="px-4 py-2.5 text-right text-xs text-muted-foreground">
                                 {file.isDirectory

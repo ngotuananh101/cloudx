@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Services\CloudStorage\S3\S3Presigner;
 use Illuminate\Support\Facades\Queue;
 
+const MIME_PDF = 'application/pdf';
+
 it('stores direct upload mode on created upload task', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->create([
@@ -26,7 +28,7 @@ it('stores direct upload mode on created upload task', function () {
     $response = $this->actingAs($user)->postJson(route('connections.upload-tasks.store', $connection), [
         'path' => 'documents',
         'filename' => 'proposal.pdf',
-        'mime_type' => 'application/pdf',
+        'mime_type' => MIME_PDF,
         'size' => 1024,
         'chunk_size' => 1024,
         'upload_mode' => 'direct',
@@ -45,7 +47,7 @@ it('initializes direct multipart upload metadata', function () {
     $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
         'payload' => [
             'filename' => 'proposal.pdf',
-            'mime_type' => 'application/pdf',
+            'mime_type' => MIME_PDF,
             'size' => 1024,
             'chunk_size' => 1024,
             'total_chunks' => 1,
@@ -80,7 +82,7 @@ it('stores etag for completed direct upload part', function () {
     $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
         'payload' => [
             'filename' => 'proposal.pdf',
-            'mime_type' => 'application/pdf',
+            'mime_type' => MIME_PDF,
             'size' => 2048,
             'chunk_size' => 1024,
             'total_chunks' => 2,
@@ -117,7 +119,7 @@ it('queues multipart completion when all direct parts are uploaded', function ()
     $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
         'payload' => [
             'filename' => 'proposal.pdf',
-            'mime_type' => 'application/pdf',
+            'mime_type' => MIME_PDF,
             'size' => 2048,
             'chunk_size' => 1024,
             'total_chunks' => 2,

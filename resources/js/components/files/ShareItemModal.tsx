@@ -177,9 +177,9 @@ export default function ShareItemModal({
     };
 
     const handleCopy = (id: number, uuid: string) => {
-        const url = `${window.location.origin}/s/${uuid}`;
+        const url = `${globalThis.location.origin}/s/${uuid}`;
 
-        if (navigator.clipboard && window.isSecureContext) {
+        if (navigator.clipboard && globalThis.isSecureContext) {
             navigator.clipboard
                 .writeText(url)
                 .then(() => {
@@ -367,7 +367,7 @@ export default function ShareItemModal({
                                                         <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
                                                     )}
                                                     <span className="truncate text-sm font-medium text-foreground">
-                                                        {window.location.origin}
+                                                        {globalThis.location.origin}
                                                         /s/{share.uuid}
                                                     </span>
                                                 </div>

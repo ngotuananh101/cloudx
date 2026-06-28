@@ -19,6 +19,8 @@ use League\Flysystem\Filesystem;
 
 const MIME_PNG = 'image/png';
 const TG_FILE_ID = '12345';
+const COMPONENT_SHARE_VIEW = 'share/view';
+const PROJECT_SRC_PATH = 'Projects/src';
 
 it('renders error page when share is not found', function () {
     $this->get(route('share.view', ['uuid' => 'nonexistent-uuid']))
@@ -93,7 +95,7 @@ it('renders view page for public file share', function () {
     $this->get(route('share.view', ['uuid' => 'public-uuid']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('share/view')
+            ->component(COMPONENT_SHARE_VIEW)
             ->where('share.uuid', 'public-uuid')
             ->where('share.name', 'report.pdf')
             ->where('isDirectory', false)
@@ -120,7 +122,7 @@ it('shows the real file size from extra_info for single file shares', function (
     $this->get(route('share.view', ['uuid' => 'sized-uuid']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('share/view')
+            ->component(COMPONENT_SHARE_VIEW)
             ->where('isDirectory', false)
             ->where('file.size', 12345)
         );
@@ -143,7 +145,7 @@ it('shows zero size for single file shares created before extra_info was added',
     $this->get(route('share.view', ['uuid' => 'legacy-uuid']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('share/view')
+            ->component(COMPONENT_SHARE_VIEW)
             ->where('isDirectory', false)
             ->where('file.size', 0)
         );
@@ -175,8 +177,8 @@ it('renders view page for public folder share with file listing', function () {
             'isDirectory' => false,
         ],
         [
-            'id' => 'Projects/src',
-            'path' => 'Projects/src',
+            'id' => PROJECT_SRC_PATH,
+            'path' => PROJECT_SRC_PATH,
             'name' => 'src',
             'type' => 'folder',
             'size' => 0,
@@ -189,7 +191,7 @@ it('renders view page for public folder share with file listing', function () {
     $this->get(route('share.view', ['uuid' => 'folder-uuid']))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('share/view')
+            ->component(COMPONENT_SHARE_VIEW)
             ->where('share.uuid', 'folder-uuid')
             ->where('isDirectory', true)
             ->has('files', 2)
@@ -214,8 +216,8 @@ it('renders folder subfolder when path query param is provided', function () {
     $browser = Mockery::mock(CloudFileBrowser::class);
     $browser->shouldReceive('list')->andReturn([
         [
-            'id' => 'Projects/src/index.ts',
-            'path' => 'Projects/src/index.ts',
+            'id' => PROJECT_SRC_PATH.'/index.ts',
+            'path' => PROJECT_SRC_PATH.'/index.ts',
             'name' => 'index.ts',
             'type' => 'code',
             'size' => 256,
@@ -225,15 +227,15 @@ it('renders folder subfolder when path query param is provided', function () {
     ]);
     $this->app->instance(CloudFileBrowser::class, $browser);
 
-    $encodedPath = PathEncoder::encode('Projects/src');
+    $encodedPath = PathEncoder::encode(PROJECT_SRC_PATH);
 
     $this->get(route('share.view', ['uuid' => 'folder-uuid', 'path' => $encodedPath]))
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
-            ->component('share/view')
+            ->component(COMPONENT_SHARE_VIEW)
             ->where('isDirectory', true)
             ->has('files', 1)
-            ->where('currentPath', 'Projects/src')
+            ->where('currentPath', PROJECT_SRC_PATH)
         );
 });
 

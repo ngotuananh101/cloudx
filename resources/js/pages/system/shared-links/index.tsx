@@ -122,9 +122,9 @@ export default function SharedLinksPage({
     };
 
     const handleCopy = (id: number, uuid: string) => {
-        const url = `${window.location.origin}/s/${uuid}`;
+        const url = `${globalThis.location.origin}/s/${uuid}`;
 
-        if (navigator.clipboard && window.isSecureContext) {
+        if (navigator.clipboard && globalThis.isSecureContext) {
             navigator.clipboard
                 .writeText(url)
                 .then(() => {
@@ -479,7 +479,7 @@ export default function SharedLinksPage({
                                                 </td>
                                                 <td className="max-w-60 px-5 py-4">
                                                     <div className="truncate text-xs text-muted-foreground">
-                                                        {window.location.origin}
+                                                        {globalThis.location.origin}
                                                         /s/{share.uuid}
                                                     </div>
                                                 </td>

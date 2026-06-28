@@ -25,11 +25,11 @@ import type { PageProps } from '@/types';
 import type { CloudConnection } from '@/types/cloud';
 
 interface SidebarProps {
-    cloudActions?: {
-        canCreateFolder?: boolean;
-        canUpload?: boolean;
-        onCreateFolder?: () => void;
-        onUpload?: () => void;
+    readonly cloudActions?: {
+        readonly canCreateFolder?: boolean;
+        readonly canUpload?: boolean;
+        readonly onCreateFolder?: () => void;
+        readonly onUpload?: () => void;
     };
 }
 
@@ -40,14 +40,14 @@ function SidebarModals({
     setConnectionBeingEdited,
     connectionBeingDeleted,
     setConnectionBeingDeleted,
-}: {
+}: Readonly<{
     connectionBeingRenamed: CloudConnection | null;
     setConnectionBeingRenamed: (c: CloudConnection | null) => void;
     connectionBeingEdited: CloudConnection | null;
     setConnectionBeingEdited: (c: CloudConnection | null) => void;
     connectionBeingDeleted: CloudConnection | null;
     setConnectionBeingDeleted: (c: CloudConnection | null) => void;
-}) {
+}>) {
     return (
         <>
             <EditConnectionNameDialog
@@ -86,7 +86,7 @@ function SidebarModals({
     );
 }
 
-export function Sidebar({ cloudActions }: SidebarProps) {
+export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
     const { url, props } = usePage<PageProps>();
     const auth = props.auth;
     const user = auth?.user;

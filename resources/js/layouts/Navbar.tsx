@@ -8,18 +8,18 @@ import type { PageProps } from '@/types';
 import type { CloudConnection } from '@/types/cloud';
 
 interface NavbarProps {
-    cloudSearch?: {
-        value: string;
-        onChange: (value: string) => void;
-        placeholder: string;
+    readonly cloudSearch?: {
+        readonly value: string;
+        readonly onChange: (value: string) => void;
+        readonly placeholder: string;
     };
-    cloudActions?: {
-        onClearCache?: () => void;
-        onSync?: () => void;
+    readonly cloudActions?: {
+        readonly onClearCache?: () => void;
+        readonly onSync?: () => void;
     };
 }
 
-export function Navbar({ cloudSearch, cloudActions }: NavbarProps) {
+export function Navbar({ cloudSearch, cloudActions }: Readonly<NavbarProps>) {
     const { url, props } = usePage<PageProps>();
     const user = props.auth?.user;
     const connections = user?.connections || [];
