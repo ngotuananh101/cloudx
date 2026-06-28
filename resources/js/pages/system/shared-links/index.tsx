@@ -479,7 +479,10 @@ export default function SharedLinksPage({
                                                 </td>
                                                 <td className="max-w-60 px-5 py-4">
                                                     <div className="truncate text-xs text-muted-foreground">
-                                                        {globalThis.location.origin}
+                                                        {
+                                                            globalThis.location
+                                                                .origin
+                                                        }
                                                         /s/{share.uuid}
                                                     </div>
                                                 </td>

@@ -51,7 +51,9 @@ export function ThemeProvider({
     }, [theme]);
 
     useEffect(() => {
-        const mediaQuery = globalThis.matchMedia('(prefers-color-scheme: dark)');
+        const mediaQuery = globalThis.matchMedia(
+            '(prefers-color-scheme: dark)',
+        );
 
         const handleChange = () => {
             if (theme === 'system') {

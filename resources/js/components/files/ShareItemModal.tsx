@@ -367,7 +367,10 @@ export default function ShareItemModal({
                                                         <Lock className="h-3 w-3 shrink-0 text-muted-foreground" />
                                                     )}
                                                     <span className="truncate text-sm font-medium text-foreground">
-                                                        {globalThis.location.origin}
+                                                        {
+                                                            globalThis.location
+                                                                .origin
+                                                        }
                                                         /s/{share.uuid}
                                                     </span>
                                                 </div>

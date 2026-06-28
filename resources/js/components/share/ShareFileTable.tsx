@@ -84,7 +84,7 @@ export function ShareFileTable({
                             <td className="px-4 py-2.5">
                                 <button
                                     type="button"
-                                    className="flex w-full text-left min-w-0 items-center gap-3 cursor-pointer"
+                                    className="flex w-full min-w-0 cursor-pointer items-center gap-3 text-left"
                                     onClick={() =>
                                         file.isDirectory
                                             ? onNavigate(file)
