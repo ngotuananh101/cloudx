@@ -16,6 +16,7 @@ interface AuthenticatedLayoutProps {
         canUpload?: boolean;
         onCreateFolder?: () => void;
         onUpload?: () => void;
+        onRemoteUpload?: () => void;
         onClearCache?: () => void;
         onSync?: () => void;
     };

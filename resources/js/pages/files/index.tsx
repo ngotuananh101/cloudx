@@ -6,6 +6,7 @@ import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
 import FilePreviewModal from '@/components/files/FilePreviewModal';
 import MoveItemModal from '@/components/files/MoveItemModal';
+import { RemoteUploadDialog } from '@/components/files/RemoteUploadDialog';
 import ShareItemModal from '@/components/files/ShareItemModal';
 import { UploadModeDialog } from '@/components/files/UploadModeDialog';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
@@ -15,7 +16,12 @@ import { encodeCloudPath } from '@/lib/cloud-path';
 import { destroy as clearCache } from '@/routes/cloud-connections/cache';
 import connections from '@/routes/connections';
 import { index as storageIndex } from '@/routes/storage';
-import type { CloudConnection, CloudFile, UploadMode } from '@/types/cloud';
+import type {
+    CloudConnection,
+    CloudFile,
+    RemoteUploadRequest,
+    UploadMode,
+} from '@/types/cloud';
 
 interface FileBrowserProps {
     connection: CloudConnection;
@@ -36,6 +42,8 @@ export default function FileBrowser({
     const [itemToShare, setItemToShare] = useState<CloudFile | null>(null);
     const [pendingUploadFiles, setPendingUploadFiles] = useState<File[]>([]);
     const [isUploadModeDialogOpen, setIsUploadModeDialogOpen] = useState(false);
+    const [isRemoteUploadDialogOpen, setIsRemoteUploadDialogOpen] =
+        useState(false);
     const uploadManager = useUploadManager();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -118,6 +126,14 @@ export default function FileBrowser({
         setIsUploadModeDialogOpen(false);
     };
 
+    const handleRemoteUpload = (remoteUpload: RemoteUploadRequest) => {
+        uploadManager.enqueueRemote(remoteUpload, {
+            connectionId: connection.id,
+            path: decodedPath,
+            uploadMode: 'remote',
+        });
+    };
+
     const handleCreateFolder = async (name: string): Promise<string | null> => {
         return new Promise((resolve) => {
             router.post(
@@ -170,6 +186,7 @@ export default function FileBrowser({
                 canUpload: connection.capabilities?.upload,
                 onCreateFolder: () => setIsCreateFolderOpen(true),
                 onUpload: () => fileInputRef.current?.click(),
+                onRemoteUpload: () => setIsRemoteUploadDialogOpen(true),
                 onClearCache: handleClearCache,
                 onSync: handleSync,
             }}
@@ -233,6 +250,12 @@ export default function FileBrowser({
                     setPendingUploadFiles([]);
                 }}
                 onSelect={handleUploadModeSelect}
+            />
+
+            <RemoteUploadDialog
+                isOpen={isRemoteUploadDialogOpen}
+                onClose={() => setIsRemoteUploadDialogOpen(false)}
+                onSubmit={handleRemoteUpload}
             />
 
             <div className="grid grid-cols-1 gap-6">

@@ -41,8 +41,16 @@ function getStatusLabel(item: UploadQueueItem): string {
         case 'paused':
             return 'Paused';
         case 'queued':
+            if (item.source === 'remote') {
+                return 'Downloading remotely...';
+            }
+
             return 'Finalizing...';
         case 'processing':
+            if (item.source === 'remote') {
+                return 'Importing remote file...';
+            }
+
             return 'Processing...';
         case 'completed':
             return 'Completed';
@@ -188,6 +196,8 @@ export default function UploadProgressPanel() {
                                             <div className="truncate text-sm font-bold text-foreground">
                                                 {item.file?.name ??
                                                     item.task?.name ??
+                                                    item.remote?.filename ??
+                                                    item.remote?.url ??
                                                     'File'}
                                             </div>
                                         </div>

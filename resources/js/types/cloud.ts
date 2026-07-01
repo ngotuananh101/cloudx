@@ -117,7 +117,18 @@ export interface CloudConnection {
     telegram_config?: TelegramConnectionConfig;
 }
 
-export type UploadMode = 'backend' | 'direct';
+export type UploadMode = 'backend' | 'direct' | 'remote';
+
+export interface RemoteUploadHeader {
+    name: string;
+    value: string;
+}
+
+export interface RemoteUploadRequest {
+    url: string;
+    filename?: string;
+    headers: RemoteUploadHeader[];
+}
 
 export type UploadTaskStatus =
     | 'pending'
@@ -137,6 +148,8 @@ export interface CloudUploadTaskPayload {
     total_chunks: number;
     uploaded_chunks_count: number;
     upload_mode?: UploadMode;
+    remote_url?: string;
+    remote_headers_count?: number;
     s3_multipart?: {
         upload_id: string;
         key: string;
@@ -165,7 +178,9 @@ export interface CloudUploadTask {
 
 export interface UploadQueueItem {
     key: string;
-    file: File;
+    file?: File;
+    source?: 'local' | 'remote';
+    remote?: RemoteUploadRequest;
     connectionId: number;
     path: string;
     uploadMode?: UploadMode;

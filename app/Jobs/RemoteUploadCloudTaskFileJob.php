@@ -1,0 +1,233 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Enums\CloudTaskStatus;
+use App\Enums\CloudTaskType;
+use App\Models\CloudTask;
+use App\Services\CloudStorage\CloudStorageCache;
+use App\Services\CloudStorage\RemoteUploadUrlGuard;
+use App\Support\CloudUploadTaskBroadcaster;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
+
+class RemoteUploadCloudTaskFileJob implements ShouldQueue
+{
+    use Queueable;
+
+    public int $tries = 3;
+
+    public int $timeout = 1500;
+
+    public function __construct(public int $taskId) {}
+
+    /**
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [10, 60, 300];
+    }
+
+    public function handle(
+        CloudStorageCache $cache,
+        CloudUploadTaskBroadcaster $broadcaster,
+        RemoteUploadUrlGuard $urlGuard,
+    ): void {
+        $task = DB::transaction(function (): ?CloudTask {
+            $task = CloudTask::query()
+                ->whereKey($this->taskId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($task->type !== CloudTaskType::Upload || $task->status !== CloudTaskStatus::Queued) {
+                return null;
+            }
+
+            $task->forceFill([
+                'status' => CloudTaskStatus::Processing,
+                'processing_at' => now(),
+                'error_message' => null,
+            ])->save();
+
+            return $task;
+        });
+
+        if ($task === null) {
+            return;
+        }
+
+        $task->load('connection');
+        $broadcaster->broadcastStatus($task);
+
+        try {
+            $payload = $task->payload;
+            $url = (string) ($task->secret_payload['url'] ?? $payload['remote_url'] ?? '');
+            $filename = (string) ($payload['filename'] ?? $task->name);
+            $headers = $task->secret_payload['headers'] ?? [];
+
+            if ($url === '' || $filename === '' || ! is_array($headers)) {
+                throw new RuntimeException('Remote upload task payload is invalid.');
+            }
+
+            $urlGuard->validate($url);
+
+            $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
+            $tempPath = $this->tempPath($task);
+            $absoluteTempPath = $this->absoluteTempPath($tempPath);
+
+            $this->ensureRemoteFileIsAllowed($url, $headers, $urlGuard);
+            $this->downloadRemoteFile($url, $headers, $absoluteTempPath, $urlGuard);
+
+            $downloadedSize = filesize($absoluteTempPath);
+
+            if ($downloadedSize === false || $downloadedSize < 1) {
+                throw new RuntimeException('Remote file is empty or could not be read.');
+            }
+
+            if ($downloadedSize > $this->maxFileSize()) {
+                throw new RuntimeException('Remote file exceeds the allowed size.');
+            }
+
+            $uploadStream = fopen($absoluteTempPath, 'rb');
+
+            if ($uploadStream === false) {
+                throw new RuntimeException('Could not open downloaded remote file.');
+            }
+
+            $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
+            if (is_resource($uploadStream)) {
+                fclose($uploadStream);
+            }
+
+            $payload['size'] = $downloadedSize;
+            $payload['uploaded_chunks_count'] = 1;
+            $payload['total_chunks'] = 1;
+
+            $task->forceFill([
+                'status' => CloudTaskStatus::Completed,
+                'payload' => $payload,
+                'result' => ['path' => $targetPath],
+                'completed_at' => now(),
+            ])->save();
+            $broadcaster->broadcastStatus($task);
+
+            Storage::disk($this->tempDiskName())->delete($tempPath);
+            $cache->flushFolder($task->connection, $task->target_path);
+            $cache->flushQuota($task->connection);
+        } catch (Throwable $exception) {
+            $task->forceFill([
+                'status' => CloudTaskStatus::Failed,
+                'error_message' => $exception->getMessage(),
+                'failed_at' => now(),
+            ])->save();
+            $broadcaster->broadcastStatus($task);
+
+            Storage::disk($this->tempDiskName())->delete($this->tempPath($task));
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     */
+    private function ensureRemoteFileIsAllowed(string $url, array $headers, RemoteUploadUrlGuard $urlGuard): void
+    {
+        $response = $this->request($headers, $urlGuard)
+            ->head($url);
+
+        if ($response->failed() && ! in_array($response->status(), [405, 501], true)) {
+            $response->throw();
+        }
+
+        $contentLength = (int) $response->header('Content-Length');
+
+        if ($contentLength > $this->maxFileSize()) {
+            throw new RuntimeException('Remote file exceeds the allowed size.');
+        }
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     */
+    private function downloadRemoteFile(
+        string $url,
+        array $headers,
+        string $absoluteTempPath,
+        RemoteUploadUrlGuard $urlGuard,
+    ): void {
+        $response = $this->request($headers, $urlGuard)
+            ->sink($absoluteTempPath)
+            ->get($url)
+            ->throw();
+
+        $contentLength = (int) $response->header('Content-Length');
+
+        if ($contentLength > $this->maxFileSize()) {
+            throw new RuntimeException('Remote file exceeds the allowed size.');
+        }
+    }
+
+    /**
+     * @param  array<string, string>  $headers
+     */
+    private function request(array $headers, RemoteUploadUrlGuard $urlGuard): PendingRequest
+    {
+        return Http::withHeaders($headers)
+            ->connectTimeout((int) config('cloud-storage.remote_upload.connect_timeout', 10))
+            ->timeout((int) config('cloud-storage.remote_upload.timeout', 1200))
+            ->retry([1000, 5000, 10000], 0, fn (Throwable $exception): bool => $exception instanceof ConnectionException
+                || ($exception instanceof RequestException && $exception->response->serverError()))
+            ->withOptions([
+                'allow_redirects' => [
+                    'max' => (int) config('cloud-storage.remote_upload.max_redirects', 3),
+                    'on_redirect' => function ($request) use ($urlGuard): void {
+                        $urlGuard->validate((string) $request->getUri());
+                    },
+                ],
+            ]);
+    }
+
+    private function tempPath(CloudTask $task): string
+    {
+        return trim((string) config('cloud-storage.uploads.temp_path', 'cloud-task-uploads'), '/').'/remote-'.$task->id.'.download';
+    }
+
+    private function absoluteTempPath(string $tempPath): string
+    {
+        $disk = Storage::disk($this->tempDiskName());
+        $directory = dirname($tempPath);
+
+        if (! $disk->exists($directory)) {
+            $disk->makeDirectory($directory);
+        }
+
+        $absolutePath = $disk->path($tempPath);
+        $absoluteDirectory = dirname($absolutePath);
+
+        if (! is_dir($absoluteDirectory)) {
+            mkdir($absoluteDirectory, 0755, true);
+        }
+
+        return $absolutePath;
+    }
+
+    private function maxFileSize(): int
+    {
+        return (int) config('cloud-storage.remote_upload.max_file_size', config('cloud-storage.uploads.max_file_size'));
+    }
+
+    private function tempDiskName(): string
+    {
+        return (string) config('cloud-storage.uploads.temp_disk', 'local');
+    }
+}

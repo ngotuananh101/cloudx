@@ -30,6 +30,7 @@ interface SidebarProps {
         readonly canUpload?: boolean;
         readonly onCreateFolder?: () => void;
         readonly onUpload?: () => void;
+        readonly onRemoteUpload?: () => void;
     };
 }
 
@@ -202,14 +203,27 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
                                     </Button>
                                 )}
                                 {cloudActions?.canUpload && (
-                                    <Button
-                                        type="button"
-                                        onClick={cloudActions.onUpload}
-                                        className="h-10 w-full justify-center rounded-xl bg-primary text-xs font-bold tracking-wide text-primary-foreground shadow-sm hover:bg-primary/90"
-                                    >
-                                        <Upload className="h-4 w-4" />
-                                        Upload
-                                    </Button>
+                                    <>
+                                        <Button
+                                            type="button"
+                                            onClick={cloudActions.onUpload}
+                                            className="h-10 w-full justify-center rounded-xl bg-primary text-xs font-bold tracking-wide text-primary-foreground shadow-sm hover:bg-primary/90"
+                                        >
+                                            <Upload className="h-4 w-4" />
+                                            Upload
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={
+                                                cloudActions.onRemoteUpload
+                                            }
+                                            className="h-10 w-full justify-center rounded-xl text-xs font-bold tracking-wide text-foreground"
+                                        >
+                                            <Download className="h-4 w-4" />
+                                            Remote upload
+                                        </Button>
+                                    </>
                                 )}
                             </div>
                         </div>

@@ -14,6 +14,7 @@ import connections from '@/routes/connections';
 import type { User } from '@/types';
 import type {
     CloudUploadTask,
+    RemoteUploadRequest,
     UploadMode,
     UploadQueueItem,
 } from '@/types/cloud';
@@ -33,6 +34,7 @@ interface UploadManagerContextValue {
     items: UploadQueueItem[];
     isPanelVisible: boolean;
     enqueue: (files: File[], target: UploadTarget) => void;
+    enqueueRemote: (remote: RemoteUploadRequest, target: UploadTarget) => void;
     pause: (item: UploadQueueItem) => Promise<void>;
     resume: (item: UploadQueueItem) => Promise<void>;
     cancel: (item: UploadQueueItem) => Promise<void>;
@@ -48,6 +50,9 @@ const UploadManagerContext = createContext<UploadManagerContextValue | null>(
 
 const getQueueKey = (file: File, target: UploadTarget) =>
     `${target.connectionId}-${target.path}-${file.name}-${file.size}-${file.lastModified}-${target.uploadMode ?? 'backend'}`;
+
+const getRemoteQueueKey = (remote: RemoteUploadRequest, target: UploadTarget) =>
+    `${target.connectionId}-${target.path}-${remote.url}-${remote.filename ?? ''}-${Date.now()}`;
 
 export function UploadManagerProvider({ children }: { children: ReactNode }) {
     const [items, setItems] = useState<UploadQueueItem[]>([]);
@@ -300,11 +305,61 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
         [refreshFilesIfActive, updateItem, uploadBackendFile, uploadDirectFile],
     );
 
+    const uploadRemoteFile = useCallback(
+        async (
+            key: string,
+            remote: RemoteUploadRequest,
+            target: UploadTarget,
+        ) => {
+            try {
+                updateItem(key, {
+                    status: 'queued',
+                    progress: 0,
+                    error: undefined,
+                });
+
+                const task = await requestJson<CloudUploadTask>(
+                    connections.uploadTasks.store({
+                        connection: target.connectionId,
+                    }).url,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            path: target.path,
+                            filename: remote.filename || null,
+                            url: remote.url,
+                            headers: remote.headers,
+                            upload_mode: 'remote',
+                        }),
+                    },
+                );
+
+                updateItem(key, {
+                    task,
+                    uploadMode: 'remote',
+                    status: task.status,
+                    progress: task.progress,
+                });
+            } catch (error) {
+                updateItem(key, {
+                    status: 'failed',
+                    error:
+                        error instanceof Error
+                            ? error.message
+                            : 'Remote upload failed.',
+                });
+            }
+        },
+        [updateItem],
+    );
+
     const enqueue = useCallback(
         (files: File[], target: UploadTarget) => {
             const queueItems = files.map((file) => ({
                 key: getQueueKey(file, target),
                 file,
+                source: 'local' as const,
                 connectionId: target.connectionId,
                 path: target.path,
                 uploadMode: target.uploadMode,
@@ -319,6 +374,26 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             );
         },
         [uploadFile],
+    );
+
+    const enqueueRemote = useCallback(
+        (remote: RemoteUploadRequest, target: UploadTarget) => {
+            const item = {
+                key: getRemoteQueueKey(remote, target),
+                source: 'remote' as const,
+                remote,
+                connectionId: target.connectionId,
+                path: target.path,
+                uploadMode: 'remote' as const,
+                progress: 0,
+                status: 'pending' as const,
+            };
+
+            setItems((currentItems) => [item, ...currentItems]);
+            setIsPanelVisible(true);
+            void uploadRemoteFile(item.key, remote, target);
+        },
+        [uploadRemoteFile],
     );
 
     const pause = useCallback(
@@ -355,6 +430,21 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 { method: 'PATCH' },
             );
             updateItem(item.key, { task, status: 'uploading' });
+
+            if (item.source === 'remote' && item.remote) {
+                void uploadRemoteFile(item.key, item.remote, {
+                    connectionId: item.connectionId,
+                    path: item.path,
+                    uploadMode: 'remote',
+                });
+
+                return;
+            }
+
+            if (!item.file) {
+                return;
+            }
+
             void uploadFile(
                 item.key,
                 item.file,
@@ -366,7 +456,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 task,
             );
         },
-        [updateItem, uploadFile],
+        [updateItem, uploadFile, uploadRemoteFile],
     );
 
     const cancel = useCallback(
@@ -398,6 +488,21 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
     const retry = useCallback(
         (item: UploadQueueItem) => {
             pausedUploads.current.delete(item.key);
+
+            if (item.source === 'remote' && item.remote) {
+                void uploadRemoteFile(item.key, item.remote, {
+                    connectionId: item.connectionId,
+                    path: item.path,
+                    uploadMode: 'remote',
+                });
+
+                return;
+            }
+
+            if (!item.file) {
+                return;
+            }
+
             void uploadFile(
                 item.key,
                 item.file,
@@ -409,7 +514,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 undefined,
             );
         },
-        [uploadFile],
+        [uploadFile, uploadRemoteFile],
     );
 
     const closePanel = useCallback(() => setIsPanelVisible(false), []);
@@ -463,6 +568,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             items,
             isPanelVisible,
             enqueue,
+            enqueueRemote,
             pause,
             resume,
             cancel,
@@ -475,6 +581,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             items,
             isPanelVisible,
             enqueue,
+            enqueueRemote,
             pause,
             resume,
             cancel,

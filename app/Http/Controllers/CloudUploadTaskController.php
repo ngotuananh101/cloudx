@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Enums\CloudProvider;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
+use App\Jobs\RemoteUploadCloudTaskFileJob;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
+use App\Services\CloudStorage\RemoteUploadHeaders;
+use App\Services\CloudStorage\RemoteUploadUrlGuard;
 use App\Support\CloudUploadTaskBroadcaster;
 use App\Support\CloudUploadTaskData;
 use Illuminate\Http\JsonResponse;
@@ -16,7 +19,11 @@ use Illuminate\Validation\ValidationException;
 
 class CloudUploadTaskController extends Controller
 {
-    public function __construct(private readonly CloudUploadTaskBroadcaster $broadcaster) {}
+    public function __construct(
+        private readonly CloudUploadTaskBroadcaster $broadcaster,
+        private readonly RemoteUploadHeaders $remoteUploadHeaders,
+        private readonly RemoteUploadUrlGuard $remoteUploadUrlGuard,
+    ) {}
 
     public function index(Request $request, CloudConnection $connection): JsonResponse
     {
@@ -39,27 +46,31 @@ class CloudUploadTaskController extends Controller
 
         $validated = $request->validate([
             'path' => ['nullable', 'string', 'max:2048'],
-            'filename' => ['required', 'string', 'max:255'],
+            'filename' => ['required_unless:upload_mode,remote', 'nullable', 'string', 'max:255'],
             'mime_type' => ['nullable', 'string', 'max:255'],
-            'size' => ['required', 'integer', 'min:1', 'max:'.config('cloud-storage.uploads.max_file_size')],
-            'chunk_size' => ['required', 'integer', 'min:1024', 'max:'.config('cloud-storage.uploads.chunk_size')],
-            'upload_mode' => ['nullable', 'string', 'in:backend,direct'],
+            'size' => ['required_unless:upload_mode,remote', 'nullable', 'integer', 'min:1', 'max:'.config('cloud-storage.uploads.max_file_size')],
+            'chunk_size' => ['required_unless:upload_mode,remote', 'nullable', 'integer', 'min:1024', 'max:'.config('cloud-storage.uploads.chunk_size')],
+            'upload_mode' => ['nullable', 'string', 'in:backend,direct,remote'],
+            'url' => ['required_if:upload_mode,remote', 'nullable', 'url', 'max:4096'],
+            'headers' => ['nullable', 'array'],
+            'headers.*.name' => ['nullable', 'string'],
+            'headers.*.value' => ['nullable', 'string'],
         ]);
 
-        $filename = trim((string) $validated['filename']);
+        $uploadMode = (string) ($validated['upload_mode'] ?? 'backend');
+        $filename = trim((string) ($validated['filename'] ?? ''));
 
-        if ($filename === '' || str_contains($filename, '/') || str_contains($filename, '\\') || str_contains($filename, '..')) {
-            throw ValidationException::withMessages([
-                'filename' => 'Filename is invalid.',
-            ]);
+        if ($uploadMode === 'remote') {
+            return $this->storeRemoteUploadTask($request, $connection, $validated, $filename);
         }
+
+        $this->ensureValidFilename($filename);
 
         $size = (int) $validated['size'];
         $chunkSize = (int) $validated['chunk_size'];
         $totalChunks = (int) ceil($size / $chunkSize);
-        $uploadMode = (string) ($validated['upload_mode'] ?? 'backend');
 
-        if ($uploadMode === 'direct' && ! $connection->provider === CloudProvider::AWS_S3) {
+        if ($uploadMode === 'direct' && $connection->provider !== CloudProvider::AWS_S3) {
             throw ValidationException::withMessages([
                 'upload_mode' => 'Direct upload is only available for S3 connections.',
             ]);
@@ -157,6 +168,74 @@ class CloudUploadTaskController extends Controller
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
         abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
-        abort_if(! $task->type === CloudTaskType::Upload, 404);
+        abort_if($task->type !== CloudTaskType::Upload, 404);
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     */
+    private function storeRemoteUploadTask(Request $request, CloudConnection $connection, array $validated, string $filename): JsonResponse
+    {
+        $url = (string) $validated['url'];
+        $headers = $this->remoteUploadHeaders->normalize($validated['headers'] ?? null);
+
+        $this->remoteUploadUrlGuard->validate($url);
+
+        if ($filename === '') {
+            $filename = $this->filenameFromUrl($url);
+        }
+
+        $this->ensureValidFilename($filename);
+
+        $task = CloudTask::query()->create([
+            'user_id' => $request->user()->id,
+            'cloud_connection_id' => $connection->id,
+            'type' => CloudTaskType::Upload,
+            'status' => CloudTaskStatus::Queued,
+            'target_path' => trim((string) ($validated['path'] ?? ''), '/'),
+            'name' => $filename,
+            'payload' => [
+                'filename' => $filename,
+                'mime_type' => $validated['mime_type'] ?? null,
+                'size' => 0,
+                'chunk_size' => 1,
+                'total_chunks' => 1,
+                'uploaded_chunks_count' => 0,
+                'upload_mode' => 'remote',
+                'remote_host' => parse_url($url, PHP_URL_HOST),
+                'remote_headers_count' => count($headers),
+            ],
+            'secret_payload' => [
+                'url' => $url,
+                'headers' => $headers,
+            ],
+            'queued_at' => now(),
+        ]);
+
+        RemoteUploadCloudTaskFileJob::dispatch($task->id)->afterCommit();
+        $this->broadcaster->broadcastStatus($task);
+
+        return response()->json(CloudUploadTaskData::fromTask($task));
+    }
+
+    private function ensureValidFilename(string $filename): void
+    {
+        if ($filename === '' || str_contains($filename, '/') || str_contains($filename, '\\') || str_contains($filename, '..')) {
+            throw ValidationException::withMessages([
+                'filename' => 'Filename is invalid.',
+            ]);
+        }
+    }
+
+    private function filenameFromUrl(string $url): string
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        $basename = is_string($path) ? basename(rawurldecode($path)) : '';
+
+        if ($basename === '' || $basename === '.' || $basename === '/') {
+            return 'remote-upload';
+        }
+
+        return mb_substr($basename, 0, 255);
     }
 }
