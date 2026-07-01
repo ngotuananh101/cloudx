@@ -39,8 +39,8 @@ class TelegramConnector implements CloudProviderConnector
         $credentials = $connection->credentials;
 
         $client = new TelegramClient(
-            url: (string) config('services.telegram-storage.url'),
-            token: (string) config('services.telegram-storage.token'),
+            url: (string) config('services.python-service.url'),
+            token: (string) config('services.python-service.token'),
             sessionId: (string) ($credentials['session_id'] ?? ''),
         );
 

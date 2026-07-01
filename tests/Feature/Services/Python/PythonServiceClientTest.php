@@ -72,3 +72,18 @@ it('exposes url and token', function () {
     expect($client->url())->toBe(PY_BASE_URL)
         ->and($client->token())->toBe('abc');
 });
+
+it('normalizes trailing slashes from the base url', function () {
+    $client = new PythonServiceClient('http://localhost:8000/', 'abc');
+
+    expect($client->url())->toBe(PY_BASE_URL);
+});
+
+it('rejects missing or schemeless base urls before sending requests', function (?string $url) {
+    expect(fn () => new PythonServiceClient((string) $url, 'abc'))
+        ->toThrow(PythonServiceException::class, 'Python service URL must include http:// or https://.');
+})->with([
+    'empty string' => '',
+    'schemeless host' => 'localhost:8000',
+    'relative path' => '/sync',
+]);

@@ -23,8 +23,8 @@ class TelegramConnectionController extends Controller
     private function telegramClient(string $sessionId): TelegramClient
     {
         return new TelegramClient(
-            url: (string) config('services.telegram-storage.url'),
-            token: (string) config('services.telegram-storage.token'),
+            url: (string) config('services.python-service.url'),
+            token: (string) config('services.python-service.token'),
             sessionId: $sessionId,
         );
     }

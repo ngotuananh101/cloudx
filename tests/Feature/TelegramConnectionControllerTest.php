@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Session;
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
-    config(['services.telegram-storage.url' => 'http://localhost:8000']);
-    config(['services.telegram-storage.token' => 'test-token']);
+    config(['services.python-service.url' => 'http://localhost:8000']);
+    config(['services.python-service.token' => 'test-token']);
 });
 
 it('validates name and phone on requestCode', function () {

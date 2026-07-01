@@ -11,14 +11,18 @@ use Illuminate\Support\Facades\Http;
 
 class PythonServiceClient
 {
+    private readonly string $baseUrl;
+
     public function __construct(
-        private readonly string $url,
+        string $url,
         private readonly string $token,
-    ) {}
+    ) {
+        $this->baseUrl = $this->normalizeBaseUrl($url);
+    }
 
     public function url(): string
     {
-        return $this->url;
+        return $this->baseUrl;
     }
 
     public function token(): string
@@ -35,7 +39,7 @@ class PythonServiceClient
 
     protected function post(string $path, array $body, int $timeout = 30): Response
     {
-        $response = $this->request($timeout)->asJson()->post($this->url.$path, $body);
+        $response = $this->request($timeout)->asJson()->post($this->baseUrl.$path, $body);
 
         $this->assertSuccess($response);
 
@@ -44,7 +48,7 @@ class PythonServiceClient
 
     protected function postStream(string $path, array $body, int $timeout = 30): Response
     {
-        $response = $this->request($timeout)->withOptions(['stream' => true])->asJson()->post($this->url.$path, $body);
+        $response = $this->request($timeout)->withOptions(['stream' => true])->asJson()->post($this->baseUrl.$path, $body);
 
         $this->assertSuccess($response);
 
@@ -53,7 +57,7 @@ class PythonServiceClient
 
     protected function get(string $path, array $query = [], int $timeout = 30): Response
     {
-        $response = $this->request($timeout)->get($this->url.$path, $query);
+        $response = $this->request($timeout)->get($this->baseUrl.$path, $query);
 
         $this->assertSuccess($response);
 
@@ -74,5 +78,17 @@ class PythonServiceClient
         if ($response->failed()) {
             throw new PythonServiceException('Python service error: '.$response->body());
         }
+    }
+
+    private function normalizeBaseUrl(string $url): string
+    {
+        $baseUrl = rtrim(trim($url), '/');
+        $scheme = parse_url($baseUrl, PHP_URL_SCHEME);
+
+        if ($baseUrl === '' || ! in_array($scheme, ['http', 'https'], true)) {
+            throw new PythonServiceException('Python service URL must include http:// or https://.');
+        }
+
+        return $baseUrl;
     }
 }
