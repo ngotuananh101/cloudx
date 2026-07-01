@@ -15,9 +15,9 @@ import {
 import type { CSSProperties, KeyboardEvent } from 'react';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
+import files from '@/routes/cloud/files';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { Button } from './ui/button';
-import files from '@/routes/cloud/files';
 
 interface FileTableRowProps {
     item: CloudFile;
@@ -28,6 +28,8 @@ interface FileTableRowProps {
     onMove?: (item: CloudFile) => void;
     onShare?: (item: CloudFile) => void;
     onDelete?: (item: CloudFile) => void;
+    isSelected?: boolean;
+    onSelect?: (item: CloudFile, selected: boolean) => void;
     connectionId?: number;
 }
 
@@ -40,6 +42,8 @@ export function FileTableRow({
     onMove,
     onShare,
     onDelete,
+    isSelected = false,
+    onSelect,
     connectionId,
 }: FileTableRowProps) {
     const getIcon = () => {
@@ -70,7 +74,10 @@ export function FileTableRow({
     };
 
     const hasActions = Boolean(
-        capabilities?.share || capabilities?.download || capabilities?.delete,
+        capabilities?.share ||
+        capabilities?.move ||
+        capabilities?.download ||
+        capabilities?.delete,
     );
 
     const handleFolderKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
@@ -103,8 +110,20 @@ export function FileTableRow({
     return (
         <div
             style={style}
-            className="group absolute top-0 left-0 flex h-12 w-full items-center border-b border-border bg-card px-6 transition-colors hover:bg-muted"
+            className="group absolute top-0 left-0 flex h-12 w-full items-center border-b border-border bg-card pr-6 pl-4 transition-colors hover:bg-muted data-[selected=true]:bg-primary/5"
+            data-selected={isSelected}
         >
+            <div className="flex w-10 shrink-0 items-center justify-center">
+                <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={(event) => onSelect?.(item, event.target.checked)}
+                    onClick={(event) => event.stopPropagation()}
+                    className="h-4 w-4 rounded border-border bg-background text-primary accent-primary"
+                    aria-label={`Select ${item.name}`}
+                />
+            </div>
+
             {/* Name Column */}
             <div
                 className={`flex min-w-0 flex-1 cursor-pointer items-center gap-3 pr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring`}

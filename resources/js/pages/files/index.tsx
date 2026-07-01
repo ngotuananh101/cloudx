@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
+import { BulkFileActionsBar } from '@/components/files/BulkFileActionsBar';
 import { CreateFolderDialog } from '@/components/files/CreateFolderDialog';
 import { DeleteItemDialog } from '@/components/files/DeleteItemDialog';
 import { FileBrowserHeader } from '@/components/files/FileBrowserHeader';
@@ -36,10 +37,13 @@ export default function FileBrowser({
 }: FileBrowserProps) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
-    const [itemToDelete, setItemToDelete] = useState<CloudFile | null>(null);
+    const [itemsToDelete, setItemsToDelete] = useState<CloudFile[]>([]);
     const [previewItem, setPreviewItem] = useState<CloudFile | null>(null);
-    const [itemToMove, setItemToMove] = useState<CloudFile | null>(null);
+    const [itemsToMove, setItemsToMove] = useState<CloudFile[]>([]);
     const [itemToShare, setItemToShare] = useState<CloudFile | null>(null);
+    const [selectedPaths, setSelectedPaths] = useState<Set<string>>(
+        () => new Set(),
+    );
     const [pendingUploadFiles, setPendingUploadFiles] = useState<File[]>([]);
     const [isUploadModeDialogOpen, setIsUploadModeDialogOpen] = useState(false);
     const [isRemoteUploadDialogOpen, setIsRemoteUploadDialogOpen] =
@@ -66,23 +70,75 @@ export default function FileBrowser({
         );
     }, [files, searchQuery]);
 
+    const selectedItems = useMemo(
+        () => filteredFiles.filter((file) => selectedPaths.has(file.path)),
+        [filteredFiles, selectedPaths],
+    );
+
+    const isAllSelected =
+        filteredFiles.length > 0 &&
+        filteredFiles.every((file) => selectedPaths.has(file.path));
+    const isPartiallySelected = selectedItems.length > 0 && !isAllSelected;
+
+    const clearSelection = () => {
+        setSelectedPaths(new Set());
+    };
+
+    const handleSearchChange = (value: string) => {
+        setSearchQuery(value);
+        clearSelection();
+    };
+
+    const handleToggleSelection = (file: CloudFile, selected: boolean) => {
+        setSelectedPaths((currentPaths) => {
+            const nextPaths = new Set(currentPaths);
+
+            if (selected) {
+                nextPaths.add(file.path);
+            } else {
+                nextPaths.delete(file.path);
+            }
+
+            return nextPaths;
+        });
+    };
+
+    const handleToggleSelectAll = (selected: boolean) => {
+        setSelectedPaths((currentPaths) => {
+            const nextPaths = new Set(currentPaths);
+
+            filteredFiles.forEach((file) => {
+                if (selected) {
+                    nextPaths.add(file.path);
+                } else {
+                    nextPaths.delete(file.path);
+                }
+            });
+
+            return nextPaths;
+        });
+    };
+
     const handleNavigate = (file: CloudFile) => {
         if (!file.isDirectory) {
             return;
         }
 
         const encodedPath = encodeCloudPath(file.path);
+        clearSelection();
         router.visit(
             storageIndex.url({ connection: connection.id, path: encodedPath }),
         );
     };
 
     const handleNavigateHome = () => {
+        clearSelection();
         router.visit(storageIndex.url({ connection: connection.id }));
     };
 
     const handleNavigatePath = (path: string) => {
         const encodedPath = encodeCloudPath(path);
+        clearSelection();
 
         router.visit(
             storageIndex.url({ connection: connection.id, path: encodedPath }),
@@ -178,7 +234,7 @@ export default function FileBrowser({
             title="Files"
             cloudSearch={{
                 value: searchQuery,
-                onChange: setSearchQuery,
+                onChange: handleSearchChange,
                 placeholder: `Search in ${decodedPath ? decodedPath.split('/').pop() : 'My Files'}...`,
             }}
             cloudActions={{
@@ -209,10 +265,13 @@ export default function FileBrowser({
             />
 
             <DeleteItemDialog
-                item={itemToDelete}
+                items={itemsToDelete}
                 connectionId={connection.id}
-                onClose={() => setItemToDelete(null)}
-                onDeleted={refreshFiles}
+                onClose={() => setItemsToDelete([])}
+                onDeleted={() => {
+                    clearSelection();
+                    refreshFiles();
+                }}
             />
 
             <FilePreviewModal
@@ -222,12 +281,15 @@ export default function FileBrowser({
             />
 
             <MoveItemModal
-                isOpen={!!itemToMove}
-                onClose={() => setItemToMove(null)}
-                item={itemToMove}
+                isOpen={itemsToMove.length > 0}
+                onClose={() => setItemsToMove([])}
+                items={itemsToMove}
                 connectionId={connection.id}
                 currentParentPath={decodedPath}
-                onMoved={refreshFiles}
+                onMoved={() => {
+                    clearSelection();
+                    refreshFiles();
+                }}
             />
 
             <ShareItemModal
@@ -260,15 +322,29 @@ export default function FileBrowser({
 
             <div className="grid grid-cols-1 gap-6">
                 <div className="min-w-0 space-y-4">
+                    <BulkFileActionsBar
+                        selectedCount={selectedItems.length}
+                        canDelete={connection.capabilities?.delete}
+                        canMove={connection.capabilities?.move}
+                        onDelete={() => setItemsToDelete(selectedItems)}
+                        onMove={() => setItemsToMove(selectedItems)}
+                        onClear={clearSelection}
+                    />
+
                     <VirtualizedFileTable
                         files={filteredFiles}
                         searchQuery={searchQuery}
                         capabilities={connection.capabilities}
                         onNavigate={handleNavigate}
-                        onDelete={setItemToDelete}
+                        onDelete={(item) => setItemsToDelete([item])}
                         onPreview={setPreviewItem}
-                        onMove={setItemToMove}
+                        onMove={(item) => setItemsToMove([item])}
                         onShare={setItemToShare}
+                        selectedPaths={selectedPaths}
+                        isAllSelected={isAllSelected}
+                        isPartiallySelected={isPartiallySelected}
+                        onToggleSelection={handleToggleSelection}
+                        onToggleSelectAll={handleToggleSelectAll}
                         connectionId={connection.id}
                     />
                 </div>

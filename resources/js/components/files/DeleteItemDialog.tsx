@@ -9,32 +9,46 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import type { CloudFile } from '@/types/cloud';
 import { destroy } from '@/routes/connections/items';
+import type { CloudFile } from '@/types/cloud';
 
 interface DeleteItemDialogProps {
-    item: CloudFile | null;
+    item?: CloudFile | null;
+    items?: CloudFile[];
     connectionId: number;
     onClose: () => void;
     onDeleted?: () => void;
 }
 
 export function DeleteItemDialog({
-    item,
+    item = null,
+    items = [],
     connectionId,
     onClose,
     onDeleted,
 }: DeleteItemDialogProps) {
+    const selectedItems = items.length > 0 ? items : item ? [item] : [];
+    const targetItem = selectedItems[0] ?? null;
+    const isBulkDelete = selectedItems.length > 1;
+
     const deleteItem = () => {
-        if (!item) {
+        if (selectedItems.length === 0) {
             return;
         }
 
         router.delete(destroy.url({ connection: connectionId }), {
-            data: {
-                path: item.path,
-                is_directory: item.isDirectory,
-            },
+            data:
+                selectedItems.length === 1
+                    ? {
+                          path: selectedItems[0].path,
+                          is_directory: selectedItems[0].isDirectory,
+                      }
+                    : {
+                          items: selectedItems.map((selectedItem) => ({
+                              path: selectedItem.path,
+                              is_directory: selectedItem.isDirectory,
+                          })),
+                      },
             preserveScroll: true,
             onSuccess: () => {
                 onClose();
@@ -45,20 +59,36 @@ export function DeleteItemDialog({
 
     return (
         <AlertDialog
-            open={item !== null}
+            open={selectedItems.length > 0}
             onOpenChange={(open) => !open && onClose()}
         >
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>
-                        Delete {item?.isDirectory ? 'folder' : 'file'}?
+                        {isBulkDelete
+                            ? `Delete ${selectedItems.length} items?`
+                            : `Delete ${targetItem?.isDirectory ? 'folder' : 'file'}?`}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
-                        This will permanently remove{' '}
-                        <span className="font-semibold break-all text-foreground">
-                            "{item?.name}"
-                        </span>{' '}
-                        from your cloud storage. This action cannot be undone.
+                        {isBulkDelete ? (
+                            <>
+                                This will permanently remove{' '}
+                                <span className="font-semibold text-foreground">
+                                    {selectedItems.length} selected items
+                                </span>{' '}
+                                from your cloud storage. This action cannot be
+                                undone.
+                            </>
+                        ) : (
+                            <>
+                                This will permanently remove{' '}
+                                <span className="font-semibold break-all text-foreground">
+                                    "{targetItem?.name}"
+                                </span>{' '}
+                                from your cloud storage. This action cannot be
+                                undone.
+                            </>
+                        )}
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

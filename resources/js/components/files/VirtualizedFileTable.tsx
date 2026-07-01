@@ -1,5 +1,5 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { FileTableRow } from '@/components/FileTableRow';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { EmptyFileState } from './EmptyFileState';
@@ -13,6 +13,11 @@ interface VirtualizedFileTableProps {
     onMove?: (item: CloudFile) => void;
     onShare?: (item: CloudFile) => void;
     onDelete?: (item: CloudFile) => void;
+    selectedPaths: Set<string>;
+    isAllSelected: boolean;
+    isPartiallySelected: boolean;
+    onToggleSelection: (item: CloudFile, selected: boolean) => void;
+    onToggleSelectAll: (selected: boolean) => void;
     connectionId: number;
 }
 
@@ -25,9 +30,21 @@ export function VirtualizedFileTable({
     onMove,
     onShare,
     onDelete,
+    selectedPaths,
+    isAllSelected,
+    isPartiallySelected,
+    onToggleSelection,
+    onToggleSelectAll,
     connectionId,
 }: VirtualizedFileTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
+    const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (selectAllCheckboxRef.current) {
+            selectAllCheckboxRef.current.indeterminate = isPartiallySelected;
+        }
+    }, [isPartiallySelected]);
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
@@ -39,7 +56,20 @@ export function VirtualizedFileTable({
 
     return (
         <div className="flex h-[calc(100vh-180px)] min-h-100 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
-            <div className="flex items-center border-b border-border bg-muted/50 py-3 pr-6 pl-6 text-[11px] font-extrabold tracking-wider text-muted-foreground">
+            <div className="flex items-center border-b border-border bg-muted/50 py-3 pr-6 pl-4 text-[11px] font-extrabold tracking-wider text-muted-foreground">
+                <div className="flex w-10 shrink-0 items-center justify-center">
+                    <input
+                        ref={selectAllCheckboxRef}
+                        type="checkbox"
+                        checked={isAllSelected}
+                        disabled={files.length === 0}
+                        onChange={(event) =>
+                            onToggleSelectAll(event.target.checked)
+                        }
+                        className="h-4 w-4 rounded border-border bg-background text-primary accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+                        aria-label="Select all visible items"
+                    />
+                </div>
                 <div className="flex-1 pr-4">NAME</div>
                 <div className="w-32 shrink-0 pr-4">SIZE</div>
                 <div className="w-32 shrink-0 pr-4">TYPE</div>
@@ -75,6 +105,8 @@ export function VirtualizedFileTable({
                                     onMove={onMove}
                                     onShare={onShare}
                                     onDelete={onDelete}
+                                    isSelected={selectedPaths.has(file.path)}
+                                    onSelect={onToggleSelection}
                                     connectionId={connectionId}
                                     style={{
                                         position: 'absolute',

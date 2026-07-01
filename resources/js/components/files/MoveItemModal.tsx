@@ -17,7 +17,8 @@ import type { CloudFile } from '@/types/cloud';
 interface MoveItemModalProps {
     isOpen: boolean;
     onClose: () => void;
-    item: CloudFile | null;
+    item?: CloudFile | null;
+    items?: CloudFile[];
     connectionId: number;
     currentParentPath: string;
     onMoved?: () => void;
@@ -26,7 +27,8 @@ interface MoveItemModalProps {
 export default function MoveItemModal({
     isOpen,
     onClose,
-    item,
+    item = null,
+    items = [],
     connectionId,
     currentParentPath,
     onMoved,
@@ -36,6 +38,9 @@ export default function MoveItemModal({
     const [isLoading, setIsLoading] = useState(false);
     const [isMoving, setIsMoving] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const selectedItems = items.length > 0 ? items : item ? [item] : [];
+    const targetItem = selectedItems[0] ?? null;
+    const isBulkMove = selectedItems.length > 1;
 
     useEffect(() => {
         if (!isOpen) {
@@ -77,17 +82,26 @@ export default function MoveItemModal({
     }
 
     const handleMove = () => {
-        if (!item) {
+        if (selectedItems.length === 0) {
             return;
         }
 
         setIsMoving(true);
         router.post(
             connections.items.move.url({ connection: connectionId }),
-            {
-                source_path: item.path,
-                destination_folder: destinationPath,
-            },
+            selectedItems.length === 1
+                ? {
+                      source_path: selectedItems[0].path,
+                      is_directory: selectedItems[0].isDirectory,
+                      destination_folder: destinationPath,
+                  }
+                : {
+                      items: selectedItems.map((selectedItem) => ({
+                          path: selectedItem.path,
+                          is_directory: selectedItem.isDirectory,
+                      })),
+                      destination_folder: destinationPath,
+                  },
             {
                 preserveScroll: true,
                 onSuccess: () => {
@@ -108,31 +122,46 @@ export default function MoveItemModal({
         fetchFolders(newPath);
     };
 
-    // Prevent moving a folder into itself
+    const isFolderInsideSelectedFolder = (folder: CloudFile) => {
+        return selectedItems.some((selectedItem) => {
+            if (!selectedItem.isDirectory) {
+                return false;
+            }
+
+            const selectedPathWithSlash = `${selectedItem.path}/`;
+            const folderPathWithSlash = `${folder.path}/`;
+
+            return (
+                folder.path === selectedItem.path ||
+                folderPathWithSlash.startsWith(selectedPathWithSlash)
+            );
+        });
+    };
+
     const isDestinationValid = () => {
-        if (!item) {
+        if (selectedItems.length === 0) {
             return false;
         }
 
-        // Cannot move to the exact same directory it's already in
         if (destinationPath === currentParentPath) {
             return false;
         }
 
-        if (item.isDirectory) {
-            // Cannot move into itself or a subfolder of itself
-            const destWithSlash = destinationPath ? `${destinationPath}/` : '';
-            const itemWithSlash = `${item.path}/`;
-
-            if (
-                destinationPath === item.path ||
-                destWithSlash.startsWith(itemWithSlash)
-            ) {
+        return !selectedItems.some((selectedItem) => {
+            if (!selectedItem.isDirectory) {
                 return false;
             }
-        }
 
-        return true;
+            const destinationWithSlash = destinationPath
+                ? `${destinationPath}/`
+                : '';
+            const selectedPathWithSlash = `${selectedItem.path}/`;
+
+            return (
+                destinationPath === selectedItem.path ||
+                destinationWithSlash.startsWith(selectedPathWithSlash)
+            );
+        });
     };
 
     return (
@@ -140,7 +169,9 @@ export default function MoveItemModal({
             <DialogContent className="border-border bg-card sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle className="text-foreground">
-                        Move "{item?.name}"
+                        {isBulkMove
+                            ? `Move ${selectedItems.length} items`
+                            : `Move "${targetItem?.name ?? ''}"`}
                     </DialogTitle>
                     <DialogDescription className="text-muted-foreground">
                         Select a destination folder.
@@ -181,22 +212,22 @@ export default function MoveItemModal({
                                     </div>
                                 ) : (
                                     folders.map((folder) => {
-                                        // Disable moving a folder into itself
-                                        const isItself =
-                                            item?.isDirectory &&
-                                            folder.path === item.path;
+                                        const isDisabled =
+                                            isFolderInsideSelectedFolder(
+                                                folder,
+                                            );
 
                                         return (
                                             <button
                                                 key={folder.path}
                                                 type="button"
                                                 onClick={() =>
-                                                    !isItself &&
+                                                    !isDisabled &&
                                                     fetchFolders(folder.path)
                                                 }
-                                                disabled={isItself}
+                                                disabled={isDisabled}
                                                 className={`flex w-full items-center justify-between rounded-md p-2 text-sm transition-colors ${
-                                                    isItself
+                                                    isDisabled
                                                         ? 'cursor-not-allowed text-muted-foreground opacity-50'
                                                         : 'text-foreground hover:bg-muted'
                                                 }`}
