@@ -9,8 +9,8 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { destroy } from '@/routes/connections/items';
 import type { CloudFile } from '@/types/cloud';
+import { destroy } from '@/routes/connections/items';
 
 interface DeleteItemDialogProps {
     item?: CloudFile | null;
