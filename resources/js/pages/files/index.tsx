@@ -321,7 +321,7 @@ export default function FileBrowser({
             />
 
             <div className="grid grid-cols-1 gap-6">
-                <div className="min-w-0 space-y-4">
+                <div className="flex h-[calc(100vh-180px)] min-w-0 flex-col gap-4">
                     <BulkFileActionsBar
                         selectedCount={selectedItems.length}
                         canDelete={connection.capabilities?.delete}
@@ -331,22 +331,24 @@ export default function FileBrowser({
                         onClear={clearSelection}
                     />
 
-                    <VirtualizedFileTable
-                        files={filteredFiles}
-                        searchQuery={searchQuery}
-                        capabilities={connection.capabilities}
-                        onNavigate={handleNavigate}
-                        onDelete={(item) => setItemsToDelete([item])}
-                        onPreview={setPreviewItem}
-                        onMove={(item) => setItemsToMove([item])}
-                        onShare={setItemToShare}
-                        selectedPaths={selectedPaths}
-                        isAllSelected={isAllSelected}
-                        isPartiallySelected={isPartiallySelected}
-                        onToggleSelection={handleToggleSelection}
-                        onToggleSelectAll={handleToggleSelectAll}
-                        connectionId={connection.id}
-                    />
+                    <div className="min-h-0 flex-1">
+                        <VirtualizedFileTable
+                            files={filteredFiles}
+                            searchQuery={searchQuery}
+                            capabilities={connection.capabilities}
+                            onNavigate={handleNavigate}
+                            onDelete={(item) => setItemsToDelete([item])}
+                            onPreview={setPreviewItem}
+                            onMove={(item) => setItemsToMove([item])}
+                            onShare={setItemToShare}
+                            selectedPaths={selectedPaths}
+                            isAllSelected={isAllSelected}
+                            isPartiallySelected={isPartiallySelected}
+                            onToggleSelection={handleToggleSelection}
+                            onToggleSelectAll={handleToggleSelectAll}
+                            connectionId={connection.id}
+                        />
+                    </div>
                 </div>
             </div>
         </AuthenticatedLayout>

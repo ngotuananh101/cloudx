@@ -19,6 +19,7 @@ import EditS3ConnectionDialog from '@/components/cloud/EditS3ConnectionDialog';
 import EditSftpConnectionDialog from '@/components/cloud/EditSftpConnectionDialog';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { formatBytes } from '@/lib/format-bytes';
 import { index as storageIndex } from '@/routes/storage';
 import type { PageProps } from '@/types';
@@ -126,163 +127,174 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
             </div>
 
             {/* Sidebar Navigation */}
-            <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4">
-                {/* Main Menu */}
-                <div>
-                    <ul className="space-y-1">
-                        <li>
-                            <Link
-                                prefetch
-                                href="/dashboard"
-                                className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                            >
-                                {(url === '/dashboard' || url === '/') && (
-                                    <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
-                                )}
-                                <LayoutDashboard
-                                    className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-primary' : 'text-muted-foreground'}`}
-                                />
-                                DASHBOARD
-                            </Link>
-                        </li>
-                    </ul>
-                </div>
-
-                {/* Connected Storage */}
-                <div>
-                    <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-muted-foreground">
-                        CONNECTED STORAGE
-                    </div>
-                    {connections && connections.length > 0 ? (
+            <ScrollArea className="min-h-0 flex-1">
+                <div className="space-y-6 px-4 py-4">
+                    {/* Main Menu */}
+                    <div>
                         <ul className="space-y-1">
-                            {connections.map((connection: CloudConnection) => {
-                                const storageUrl = storageIndex.url({
-                                    connection: connection.id,
-                                });
-                                const isActive = url.startsWith(storageUrl);
-
-                                return (
-                                    <ConnectionNavItem
-                                        key={connection.id}
-                                        connection={connection}
-                                        href={storageUrl}
-                                        isActive={isActive}
-                                        onEditName={setConnectionBeingRenamed}
-                                        onEditConnection={
-                                            setConnectionBeingEdited
-                                        }
-                                        onDelete={setConnectionBeingDeleted}
+                            <li>
+                                <Link
+                                    prefetch
+                                    href="/dashboard"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {(url === '/dashboard' || url === '/') && (
+                                        <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    )}
+                                    <LayoutDashboard
+                                        className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-primary' : 'text-muted-foreground'}`}
                                     />
-                                );
-                            })}
+                                    DASHBOARD
+                                </Link>
+                            </li>
                         </ul>
-                    ) : (
-                        <div className="px-3 py-1.5 text-[11px] font-medium text-muted-foreground italic">
-                            No storage connected
-                        </div>
-                    )}
-                </div>
+                    </div>
 
-                {activeConnection &&
-                    (cloudActions?.canCreateFolder ||
-                        cloudActions?.canUpload) && (
-                        <div>
-                            <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-muted-foreground">
-                                CLOUD ACTIONS
-                            </div>
-                            <div className="space-y-2 px-3">
-                                {cloudActions?.canCreateFolder && (
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={cloudActions.onCreateFolder}
-                                        className="h-10 w-full justify-center rounded-xl text-xs font-bold tracking-wide text-foreground"
-                                    >
-                                        <FolderPlus className="h-4 w-4" />
-                                        New Folder
-                                    </Button>
+                    {/* Connected Storage */}
+                    <div>
+                        <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-muted-foreground">
+                            CONNECTED STORAGE
+                        </div>
+                        {connections && connections.length > 0 ? (
+                            <ul className="space-y-1">
+                                {connections.map(
+                                    (connection: CloudConnection) => {
+                                        const storageUrl = storageIndex.url({
+                                            connection: connection.id,
+                                        });
+                                        const isActive =
+                                            url.startsWith(storageUrl);
+
+                                        return (
+                                            <ConnectionNavItem
+                                                key={connection.id}
+                                                connection={connection}
+                                                href={storageUrl}
+                                                isActive={isActive}
+                                                onEditName={
+                                                    setConnectionBeingRenamed
+                                                }
+                                                onEditConnection={
+                                                    setConnectionBeingEdited
+                                                }
+                                                onDelete={
+                                                    setConnectionBeingDeleted
+                                                }
+                                            />
+                                        );
+                                    },
                                 )}
-                                {cloudActions?.canUpload && (
-                                    <>
-                                        <Button
-                                            type="button"
-                                            onClick={cloudActions.onUpload}
-                                            className="h-10 w-full justify-center rounded-xl bg-primary text-xs font-bold tracking-wide text-primary-foreground shadow-sm hover:bg-primary/90"
-                                        >
-                                            <Upload className="h-4 w-4" />
-                                            Upload
-                                        </Button>
+                            </ul>
+                        ) : (
+                            <div className="px-3 py-1.5 text-[11px] font-medium text-muted-foreground italic">
+                                No storage connected
+                            </div>
+                        )}
+                    </div>
+
+                    {activeConnection &&
+                        (cloudActions?.canCreateFolder ||
+                            cloudActions?.canUpload) && (
+                            <div>
+                                <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-muted-foreground">
+                                    CLOUD ACTIONS
+                                </div>
+                                <div className="space-y-2 px-3">
+                                    {cloudActions?.canCreateFolder && (
                                         <Button
                                             type="button"
                                             variant="outline"
                                             onClick={
-                                                cloudActions.onRemoteUpload
+                                                cloudActions.onCreateFolder
                                             }
                                             className="h-10 w-full justify-center rounded-xl text-xs font-bold tracking-wide text-foreground"
                                         >
-                                            <Download className="h-4 w-4" />
-                                            Remote upload
+                                            <FolderPlus className="h-4 w-4" />
+                                            New Folder
                                         </Button>
-                                    </>
-                                )}
+                                    )}
+                                    {cloudActions?.canUpload && (
+                                        <>
+                                            <Button
+                                                type="button"
+                                                onClick={cloudActions.onUpload}
+                                                className="h-10 w-full justify-center rounded-xl bg-primary text-xs font-bold tracking-wide text-primary-foreground shadow-sm hover:bg-primary/90"
+                                            >
+                                                <Upload className="h-4 w-4" />
+                                                Upload
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={
+                                                    cloudActions.onRemoteUpload
+                                                }
+                                                className="h-10 w-full justify-center rounded-xl text-xs font-bold tracking-wide text-foreground"
+                                            >
+                                                <Download className="h-4 w-4" />
+                                                Remote upload
+                                            </Button>
+                                        </>
+                                    )}
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                {/* System Section */}
-                <div>
-                    <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-muted-foreground">
-                        SYSTEM
+                    {/* System Section */}
+                    <div>
+                        <div className="mb-2 px-3 text-[10px] font-bold tracking-wider text-muted-foreground">
+                            SYSTEM
+                        </div>
+                        <ul className="space-y-1">
+                            <li>
+                                <Link
+                                    prefetch
+                                    href="/system/cloud-tasks"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/cloud-tasks') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {url.startsWith('/system/cloud-tasks') && (
+                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    )}
+                                    <ListTodo
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-primary' : 'text-muted-foreground'}`}
+                                    />
+                                    TASKS
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    prefetch
+                                    href="/system/shared-links"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/shared-links') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {url.startsWith('/system/shared-links') && (
+                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    )}
+                                    <LinkIcon
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/shared-links') ? 'text-primary' : 'text-muted-foreground'}`}
+                                    />
+                                    SHARED LINKS
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    prefetch
+                                    href="/video-downloader"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/video-downloader') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {url.startsWith('/video-downloader') && (
+                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    )}
+                                    <Download
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/video-downloader') ? 'text-primary' : 'text-muted-foreground'}`}
+                                    />
+                                    VIDEO DOWNLOADER
+                                </Link>
+                            </li>
+                        </ul>
                     </div>
-                    <ul className="space-y-1">
-                        <li>
-                            <Link
-                                prefetch
-                                href="/system/cloud-tasks"
-                                className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/cloud-tasks') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                            >
-                                {url.startsWith('/system/cloud-tasks') && (
-                                    <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
-                                )}
-                                <ListTodo
-                                    className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-primary' : 'text-muted-foreground'}`}
-                                />
-                                TASKS
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                prefetch
-                                href="/system/shared-links"
-                                className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/shared-links') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                            >
-                                {url.startsWith('/system/shared-links') && (
-                                    <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
-                                )}
-                                <LinkIcon
-                                    className={`h-4.5 w-4.5 ${url.startsWith('/system/shared-links') ? 'text-primary' : 'text-muted-foreground'}`}
-                                />
-                                SHARED LINKS
-                            </Link>
-                        </li>
-                        <li>
-                            <Link
-                                prefetch
-                                href="/video-downloader"
-                                className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/video-downloader') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                            >
-                                {url.startsWith('/video-downloader') && (
-                                    <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
-                                )}
-                                <Download
-                                    className={`h-4.5 w-4.5 ${url.startsWith('/video-downloader') ? 'text-primary' : 'text-muted-foreground'}`}
-                                />
-                                VIDEO DOWNLOADER
-                            </Link>
-                        </li>
-                    </ul>
                 </div>
-            </div>
+            </ScrollArea>
 
             {/* Sidebar Footer */}
             <div className="space-y-1 border-t border-border p-4">
