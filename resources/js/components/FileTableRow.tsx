@@ -13,11 +13,12 @@ import {
     ArrowRightLeft,
 } from 'lucide-react';
 import type { CSSProperties, KeyboardEvent } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
+import files from '@/routes/cloud/files';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { Button } from './ui/button';
-import files from '@/routes/cloud/files';
 
 interface FileTableRowProps {
     item: CloudFile;
@@ -114,12 +115,12 @@ export function FileTableRow({
             data-selected={isSelected}
         >
             <div className="flex w-10 shrink-0 items-center justify-center">
-                <input
-                    type="checkbox"
+                <Checkbox
                     checked={isSelected}
-                    onChange={(event) => onSelect?.(item, event.target.checked)}
+                    onCheckedChange={(checked) =>
+                        onSelect?.(item, checked === true)
+                    }
                     onClick={(event) => event.stopPropagation()}
-                    className="h-4 w-4 rounded border-border bg-background text-primary accent-primary"
                     aria-label={`Select ${item.name}`}
                 />
             </div>

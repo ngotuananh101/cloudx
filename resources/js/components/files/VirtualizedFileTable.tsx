@@ -1,6 +1,7 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { FileTableRow } from '@/components/FileTableRow';
+import { Checkbox } from '@/components/ui/checkbox';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { EmptyFileState } from './EmptyFileState';
 
@@ -38,13 +39,6 @@ export function VirtualizedFileTable({
     connectionId,
 }: VirtualizedFileTableProps) {
     const parentRef = useRef<HTMLDivElement>(null);
-    const selectAllCheckboxRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (selectAllCheckboxRef.current) {
-            selectAllCheckboxRef.current.indeterminate = isPartiallySelected;
-        }
-    }, [isPartiallySelected]);
 
     // eslint-disable-next-line react-hooks/incompatible-library
     const rowVirtualizer = useVirtualizer({
@@ -58,15 +52,16 @@ export function VirtualizedFileTable({
         <div className="flex h-[calc(100vh-180px)] min-h-100 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <div className="flex items-center border-b border-border bg-muted/50 py-3 pr-6 pl-4 text-[11px] font-extrabold tracking-wider text-muted-foreground">
                 <div className="flex w-10 shrink-0 items-center justify-center">
-                    <input
-                        ref={selectAllCheckboxRef}
-                        type="checkbox"
-                        checked={isAllSelected}
-                        disabled={files.length === 0}
-                        onChange={(event) =>
-                            onToggleSelectAll(event.target.checked)
+                    <Checkbox
+                        checked={
+                            isPartiallySelected
+                                ? 'indeterminate'
+                                : isAllSelected
                         }
-                        className="h-4 w-4 rounded border-border bg-background text-primary accent-primary disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={files.length === 0}
+                        onCheckedChange={(checked) =>
+                            onToggleSelectAll(checked === true)
+                        }
                         aria-label="Select all visible items"
                     />
                 </div>
