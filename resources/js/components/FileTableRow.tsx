@@ -114,7 +114,7 @@ export function FileTableRow({
             className="group absolute top-0 left-0 flex h-12 w-full items-center border-b border-border bg-card pr-6 pl-4 transition-colors hover:bg-muted data-[selected=true]:bg-primary/5"
             data-selected={isSelected}
         >
-            <div className="flex w-10 shrink-0 items-center justify-center">
+            <div className="flex w-10 shrink-0 items-center justify-start">
                 <Checkbox
                     checked={isSelected}
                     onCheckedChange={(checked) =>

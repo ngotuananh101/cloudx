@@ -51,7 +51,7 @@ export function VirtualizedFileTable({
     return (
         <div className="flex h-[calc(100vh-180px)] min-h-100 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm">
             <div className="flex items-center border-b border-border bg-muted/50 py-3 pr-6 pl-4 text-[11px] font-extrabold tracking-wider text-muted-foreground">
-                <div className="flex w-10 shrink-0 items-center justify-center">
+                <div className="flex w-10 shrink-0 items-center justify-start">
                     <Checkbox
                         checked={
                             isPartiallySelected
