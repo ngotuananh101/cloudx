@@ -16,9 +16,9 @@ import type { CSSProperties, KeyboardEvent } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { formatBytes } from '@/lib/format-bytes';
-import files from '@/routes/cloud/files';
 import type { CloudFile, ProviderCapabilities } from '@/types/cloud';
 import { Button } from './ui/button';
+import files from '@/routes/cloud/files';
 
 interface FileTableRowProps {
     item: CloudFile;
