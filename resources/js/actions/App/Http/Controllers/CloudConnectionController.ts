@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
 export const redirect = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ redirect.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
 redirect.url = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -44,7 +44,7 @@ redirect.url = (args: { provider: string | number } | [provider: string | number
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
 redirect.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -53,7 +53,7 @@ redirect.get = (args: { provider: string | number } | [provider: string | number
 })
 /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
 redirect.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -63,7 +63,7 @@ redirect.head = (args: { provider: string | number } | [provider: string | numbe
 
     /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
     const redirectForm = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -73,7 +73,7 @@ redirect.head = (args: { provider: string | number } | [provider: string | numbe
 
             /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
         redirectForm.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -82,7 +82,7 @@ redirect.head = (args: { provider: string | number } | [provider: string | numbe
         })
             /**
 * @see \App\Http\Controllers\CloudConnectionController::redirect
- * @see app/Http/Controllers/CloudConnectionController.php:21
+ * @see app/Http/Controllers/CloudConnectionController.php:24
  * @route '/oauth/{provider}/redirect'
  */
         redirectForm.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -98,7 +98,7 @@ redirect.head = (args: { provider: string | number } | [provider: string | numbe
     redirect.form = redirectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
 export const callback = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -113,7 +113,7 @@ callback.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
 callback.url = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -141,7 +141,7 @@ callback.url = (args: { provider: string | number } | [provider: string | number
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
 callback.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -150,7 +150,7 @@ callback.get = (args: { provider: string | number } | [provider: string | number
 })
 /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
 callback.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -160,7 +160,7 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
 
     /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
     const callbackForm = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -170,7 +170,7 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
 
             /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
         callbackForm.get = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -179,7 +179,7 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
         })
             /**
 * @see \App\Http\Controllers\CloudConnectionController::callback
- * @see app/Http/Controllers/CloudConnectionController.php:51
+ * @see app/Http/Controllers/CloudConnectionController.php:54
  * @route '/oauth/{provider}/callback'
  */
         callbackForm.head = (args: { provider: string | number } | [provider: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -195,7 +195,7 @@ callback.head = (args: { provider: string | number } | [provider: string | numbe
     callback.form = callbackForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
 export const reconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -210,7 +210,7 @@ reconnect.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
 reconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -243,7 +243,7 @@ reconnect.url = (args: { connection: string | number | { id: string | number } }
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
 reconnect.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -252,7 +252,7 @@ reconnect.get = (args: { connection: string | number | { id: string | number } }
 })
 /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
 reconnect.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -262,7 +262,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
 
     /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
     const reconnectForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -272,7 +272,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
 
             /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
         reconnectForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -281,7 +281,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
         })
             /**
 * @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:32
+ * @see app/Http/Controllers/CloudConnectionController.php:35
  * @route '/connections/{connection}/reconnect'
  */
         reconnectForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -297,7 +297,7 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
     reconnect.form = reconnectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @see app/Http/Controllers/CloudConnectionController.php:146
  * @route '/connections/{connection}'
  */
 export const disconnect = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -312,7 +312,7 @@ disconnect.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @see app/Http/Controllers/CloudConnectionController.php:146
  * @route '/connections/{connection}'
  */
 disconnect.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -345,7 +345,7 @@ disconnect.url = (args: { connection: string | number | { id: string | number } 
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @see app/Http/Controllers/CloudConnectionController.php:146
  * @route '/connections/{connection}'
  */
 disconnect.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -355,7 +355,7 @@ disconnect.delete = (args: { connection: string | number | { id: string | number
 
     /**
 * @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @see app/Http/Controllers/CloudConnectionController.php:146
  * @route '/connections/{connection}'
  */
     const disconnectForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -370,7 +370,7 @@ disconnect.delete = (args: { connection: string | number | { id: string | number
 
             /**
 * @see \App\Http\Controllers\CloudConnectionController::disconnect
- * @see app/Http/Controllers/CloudConnectionController.php:134
+ * @see app/Http/Controllers/CloudConnectionController.php:146
  * @route '/connections/{connection}'
  */
         disconnectForm.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -386,7 +386,7 @@ disconnect.delete = (args: { connection: string | number | { id: string | number
     disconnect.form = disconnectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
 export const updateName = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -401,7 +401,7 @@ updateName.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
 updateName.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -434,7 +434,7 @@ updateName.url = (args: { connection: string | number | { id: string | number } 
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
 updateName.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -444,7 +444,7 @@ updateName.patch = (args: { connection: string | number | { id: string | number 
 
     /**
 * @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
     const updateNameForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -459,7 +459,7 @@ updateName.patch = (args: { connection: string | number | { id: string | number 
 
             /**
 * @see \App\Http\Controllers\CloudConnectionController::updateName
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
         updateNameForm.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

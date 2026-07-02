@@ -3,12 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CloudProvider;
+use App\Models\ActivityLog;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
+    /**
+     * The number of most recent activity log entries shown on the dashboard.
+     */
+    private const RECENT_ACTIVITIES_LIMIT = 4;
+
     public function __construct(private CloudStorageManager $cloudStorageManager) {}
 
     /**
@@ -38,9 +44,18 @@ class HomeController extends Controller
                 ];
             });
 
+        $recentActivities = ActivityLog::query()
+            ->with('cloudConnection:id,name')
+            ->whereBelongsTo($request->user())
+            ->latest('created_at')
+            ->limit(self::RECENT_ACTIVITIES_LIMIT)
+            ->get()
+            ->map(fn (ActivityLog $log): array => $log->toApiArray());
+
         return inertia('dashboard', [
             'connections' => $connections,
             'availableProviders' => $this->availableProviders(),
+            'recentActivities' => $recentActivities,
         ]);
     }
 

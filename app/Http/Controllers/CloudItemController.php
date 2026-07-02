@@ -2,14 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class CloudItemController extends Controller
 {
-    public function __construct(private CloudStorageCache $cache) {}
+    public function __construct(
+        private CloudStorageCache $cache,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function destroy(Request $request, CloudConnection $connection): RedirectResponse
     {
@@ -39,6 +44,13 @@ class CloudItemController extends Controller
             } else {
                 $disk->delete($path);
             }
+
+            $this->activityLogger->log(
+                user: $request->user(),
+                action: ActivityAction::FileDeleted,
+                subjectName: basename($path),
+                connection: $connection,
+            );
 
             $parentPaths[$this->parentPath($path)] = true;
         }

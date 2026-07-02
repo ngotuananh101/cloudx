@@ -19,6 +19,7 @@ use App\Http\Controllers\S3ConnectionController;
 use App\Http\Controllers\SftpConnectionController;
 use App\Http\Controllers\ShareViewController;
 use App\Http\Controllers\StorageBrowserController;
+use App\Http\Controllers\System\ActivityLogController;
 use App\Http\Controllers\System\CloudTaskController;
 use App\Http\Controllers\System\SharedLinkController;
 use App\Http\Controllers\TelegramConnectionController;
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/', HomeController::class)->name('home');
     Route::get('/dashboard', HomeController::class)->name('dashboard');
     Route::get('/system/cloud-tasks', CloudTaskController::class)->name('system.cloud-tasks.index');
+    Route::get('/system/activity-logs', ActivityLogController::class)->name('system.activity-logs.index');
 
     Route::get('/system/shared-links', [SharedLinkController::class, 'index'])->name('system.shared-links.index');
     Route::delete('/system/shared-links/{shared_link}', [SharedLinkController::class, 'destroy'])->name('system.shared-links.destroy');

@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:15
+ * @see app/Http/Controllers/CloudFolderController.php:20
  * @route '/connections/{connection}/folders'
  */
 export const store = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:15
+ * @see app/Http/Controllers/CloudFolderController.php:20
  * @route '/connections/{connection}/folders'
  */
 store.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ store.url = (args: { connection: string | number | { id: string | number } } | [
 
 /**
 * @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:15
+ * @see app/Http/Controllers/CloudFolderController.php:20
  * @route '/connections/{connection}/folders'
  */
 store.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -59,7 +59,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
 
     /**
 * @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:15
+ * @see app/Http/Controllers/CloudFolderController.php:20
  * @route '/connections/{connection}/folders'
  */
     const storeForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -69,7 +69,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
 
             /**
 * @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:15
+ * @see app/Http/Controllers/CloudFolderController.php:20
  * @route '/connections/{connection}/folders'
  */
         storeForm.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

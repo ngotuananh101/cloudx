@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
+use App\Models\ActivityLog;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudStorageManager;
@@ -45,6 +47,9 @@ it('deletes multiple files and folders', function () {
     expect(Storage::disk('ftp')->exists('documents/report.txt'))->toBeFalse();
     expect(Storage::disk('ftp')->exists('documents/archive/photo.jpg'))->toBeFalse();
     expect(Storage::disk('ftp')->exists('keep.txt'))->toBeTrue();
+
+    expect(ActivityLog::query()->where('user_id', $user->id)->count())->toBe(2)
+        ->and(ActivityLog::query()->pluck('action')->unique()->all())->toBe([ActivityAction::FileDeleted]);
 });
 
 it('moves multiple files and folders to a shared destination', function () {
@@ -74,6 +79,9 @@ it('moves multiple files and folders to a shared destination', function () {
     expect(Storage::disk('ftp')->exists('dest_folder/folder/nested.txt'))->toBeTrue();
     expect(Storage::disk('ftp')->exists('inbox/source.txt'))->toBeFalse();
     expect(Storage::disk('ftp')->exists('inbox/folder/nested.txt'))->toBeFalse();
+
+    expect(ActivityLog::query()->where('user_id', $user->id)->count())->toBe(2)
+        ->and(ActivityLog::query()->pluck('action')->unique()->all())->toBe([ActivityAction::FileMoved]);
 });
 
 it('limits bulk item actions to one hundred items', function (string $method, string $routeName) {

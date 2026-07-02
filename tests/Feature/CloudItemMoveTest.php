@@ -1,6 +1,8 @@
 <?php
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
+use App\Models\ActivityLog;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudStorageManager;
@@ -31,6 +33,13 @@ it('moves a file to a new folder', function () {
 
     expect(Storage::disk('ftp')->exists('dest_folder/source.txt'))->toBeTrue();
     expect(Storage::disk('ftp')->exists('source.txt'))->toBeFalse();
+
+    $log = ActivityLog::query()->where('user_id', $user->id)->sole();
+    expect($log->action)->toBe(ActivityAction::FileMoved)
+        ->and($log->subject_name)->toBe('source.txt')
+        ->and($log->source_name)->toBe('/')
+        ->and($log->target_name)->toBe('dest_folder')
+        ->and($log->cloud_connection_id)->toBe($connection->id);
 });
 
 it('cannot move a root directory', function () {

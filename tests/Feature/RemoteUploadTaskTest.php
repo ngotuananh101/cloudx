@@ -6,6 +6,7 @@ use App\Jobs\RemoteUploadCloudTaskFileJob;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\RemoteUploadUrlGuard;
@@ -167,7 +168,7 @@ it('downloads a remote file and writes it to the cloud disk', function () {
     $cache->shouldReceive('flushFolder')->once();
     $cache->shouldReceive('flushQuota')->once();
 
-    (new RemoteUploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster, $urlGuard);
+    (new RemoteUploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster, $urlGuard, new ActivityLogger);
 
     $task->refresh();
 

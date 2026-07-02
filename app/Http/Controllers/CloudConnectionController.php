@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\CloudStorageManager;
 use Illuminate\Http\RedirectResponse;
@@ -16,6 +18,7 @@ class CloudConnectionController extends Controller
     public function __construct(
         private CloudStorageManager $cloudStorage,
         private CloudStorageCache $cache,
+        private ActivityLogger $activityLogger,
     ) {}
 
     public function redirect(string $provider): RedirectResponse
@@ -98,6 +101,15 @@ class CloudConnectionController extends Controller
                 'last_synced_at' => now(),
             ])->save();
 
+            if ($connection->wasRecentlyCreated) {
+                $this->activityLogger->log(
+                    user: $request->user(),
+                    action: ActivityAction::ConnectionCreated,
+                    subjectName: $connection->name,
+                    connection: $connection,
+                );
+            }
+
             return redirect()->route('dashboard')->with('success', "Successfully connected to {$cloudProvider->getDescription()}!");
         } catch (Throwable $exception) {
             $request->session()->forget('cloud_connection_reconnect');
@@ -143,6 +155,13 @@ class CloudConnectionController extends Controller
         }
 
         $this->cache->flushConnection($connection);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ConnectionDeleted,
+            subjectName: $connection->name,
+        );
+
         $connection->delete();
 
         return redirect()->route('dashboard')->with('success', 'Successfully disconnected '.$connection->name);

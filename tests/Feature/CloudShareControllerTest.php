@@ -1,11 +1,14 @@
 <?php
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Models\ActivityLog;
 use App\Models\CloudConnection;
 use App\Models\CloudShare;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
@@ -34,6 +37,41 @@ it('stores file size in extra_info when sharing a single file', function () {
 
     $share = CloudShare::firstOrFail();
     expect($share->extra_info)->toBe(['size' => 12345]);
+
+    $log = ActivityLog::query()->where('user_id', $user->id)->sole();
+    expect($log->action)->toBe(ActivityAction::ShareCreated)
+        ->and($log->subject_name)->toBe('report.pdf')
+        ->and($log->cloud_connection_id)->toBe($connection->id);
+});
+
+it('logs the activity and removes the share when destroyed', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => DRIVE_NAME,
+        'provider' => CloudProvider::ONEDRIVE,
+        'credentials' => ['access_token' => 'token'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+    $share = CloudShare::create([
+        'uuid' => (string) Str::uuid(),
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'docs/report.pdf',
+        'name' => 'report.pdf',
+        'is_directory' => false,
+        'type' => 'public',
+    ]);
+
+    $this->actingAs($user)->delete(
+        route('connections.shares.destroy', ['connection' => $connection->id, 'share' => $share->id])
+    )->assertRedirect();
+
+    expect(CloudShare::query()->whereKey($share->id)->exists())->toBeFalse();
+
+    $log = ActivityLog::query()->where('user_id', $user->id)->sole();
+    expect($log->action)->toBe(ActivityAction::ShareDeleted)
+        ->and($log->subject_name)->toBe('report.pdf');
 });
 
 it('does not store extra_info when sharing a directory', function () {

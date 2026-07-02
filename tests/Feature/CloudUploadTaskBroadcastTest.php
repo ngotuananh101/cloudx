@@ -6,6 +6,7 @@ use App\Jobs\UploadCloudTaskFileJob;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
 use App\Models\User;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Support\CloudUploadTaskBroadcaster;
@@ -204,7 +205,7 @@ it('does not start processing after a queued upload task is cancelled', function
 
     Event::fake([CloudUploadTaskUpdated::class]);
 
-    (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster);
+    (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster, new ActivityLogger);
 
     expect($task->refresh()->status === CloudTaskStatus::Cancelled)->toBeTrue()
         ->and($task->processing_at)->toBeNull();
@@ -253,7 +254,7 @@ it('marks an upload task as failed when provider upload fails', function () {
 
     Event::fake([CloudUploadTaskUpdated::class]);
 
-    expect(fn () => (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster))
+    expect(fn () => (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster, new ActivityLogger))
         ->toThrow(RuntimeException::class, 'cURL error 60');
 
     $task->refresh();

@@ -38,4 +38,12 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(CloudConnection::class);
     }
+
+    /**
+     * Get the activity logs for the user.
+     */
+    public function activityLogs(): HasMany
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
 }

@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
 export const update = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -16,7 +16,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
 update.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ update.url = (args: { connection: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
 update.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -59,7 +59,7 @@ update.patch = (args: { connection: string | number | { id: string | number } } 
 
     /**
 * @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
     const updateForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -74,7 +74,7 @@ update.patch = (args: { connection: string | number | { id: string | number } } 
 
             /**
 * @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:110
+ * @see app/Http/Controllers/CloudConnectionController.php:122
  * @route '/connections/{connection}/name'
  */
         updateForm.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

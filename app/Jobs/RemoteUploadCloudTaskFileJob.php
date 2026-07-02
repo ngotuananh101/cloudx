@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Models\CloudTask;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\RemoteUploadUrlGuard;
 use App\Support\CloudUploadTaskBroadcaster;
@@ -41,6 +43,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         CloudStorageCache $cache,
         CloudUploadTaskBroadcaster $broadcaster,
         RemoteUploadUrlGuard $urlGuard,
+        ActivityLogger $activityLogger,
     ): void {
         $task = DB::transaction(function (): ?CloudTask {
             $task = CloudTask::query()
@@ -123,6 +126,14 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
             Storage::disk($this->tempDiskName())->delete($tempPath);
             $cache->flushFolder($task->connection, $task->target_path);
             $cache->flushQuota($task->connection);
+
+            $activityLogger->log(
+                user: $task->user,
+                action: ActivityAction::FileUploaded,
+                subjectName: $filename,
+                targetName: $task->target_path === '' ? '/' : $task->target_path,
+                connection: $task->connection,
+            );
         } catch (Throwable $exception) {
             $task->forceFill([
                 'status' => CloudTaskStatus::Failed,

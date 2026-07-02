@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\System;
 
+use App\Enums\ActivityAction;
 use App\Http\Controllers\Controller;
 use App\Models\CloudShare;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -11,6 +13,8 @@ use Inertia\Response;
 
 class SharedLinkController extends Controller
 {
+    public function __construct(private ActivityLogger $activityLogger) {}
+
     /**
      * Display a listing of the shared links.
      */
@@ -66,6 +70,13 @@ class SharedLinkController extends Controller
         abort_if($shared_link->user_id !== $request->user()->id, 403, 'Unauthorized access to this share.');
 
         $shared_link->delete();
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ShareDeleted,
+            subjectName: $shared_link->name,
+            connection: $shared_link->cloudConnection,
+        );
 
         return back()->with('success', 'Shared link deleted successfully.');
     }

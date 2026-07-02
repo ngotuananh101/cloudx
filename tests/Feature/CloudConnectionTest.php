@@ -1,8 +1,10 @@
 <?php
 
 use App\Data\ConnectedAccountData;
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Models\ActivityLog;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudStorageManager;
@@ -128,6 +130,11 @@ it('handles Google OAuth callback successfully', function () {
         ->and($connection->credentials['refresh_token'])->toBe('mock_refresh_token')
         ->and($connection->total_space)->toBe(15000000000)
         ->and($connection->used_space)->toBe(5000000000);
+
+    $log = ActivityLog::query()->where('user_id', $user->id)->sole();
+    expect($log->action)->toBe(ActivityAction::ConnectionCreated)
+        ->and($log->subject_name)->toBe('Google Drive (test@gmail.com)')
+        ->and($log->cloud_connection_id)->toBe($connection->id);
 });
 
 it('returns 404 for unsupported OAuth providers', function () {
@@ -222,6 +229,10 @@ it('can disconnect a cloud connection', function () {
     $response->assertSessionHas('success', 'Successfully disconnected Google Drive (test@gmail.com)');
 
     expect(CloudConnection::find($connection->id))->toBeNull();
+
+    $log = ActivityLog::query()->where('user_id', $user->id)->sole();
+    expect($log->action)->toBe(ActivityAction::ConnectionDeleted)
+        ->and($log->subject_name)->toBe('Google Drive (test@gmail.com)');
 });
 
 it('shares connection action capabilities with inertia auth props', function () {

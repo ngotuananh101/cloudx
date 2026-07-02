@@ -7,16 +7,19 @@ import StorageOverviewCards from '@/components/cloud/StorageOverviewCards';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
+import type { ActivityLogEntry } from '@/types/activity';
 import type { AvailableProvider, CloudConnection } from '@/types/cloud';
 
 interface DashboardProps {
     connections: CloudConnection[];
     availableProviders: AvailableProvider[];
+    recentActivities: ActivityLogEntry[];
 }
 
 export default function Dashboard({
     connections = [],
     availableProviders = [],
+    recentActivities = [],
 }: DashboardProps) {
     const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 
@@ -45,7 +48,7 @@ export default function Dashboard({
             />
 
             <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-3">
-                <RecentActivityList />
+                <RecentActivityList activities={recentActivities} />
 
                 <div className="space-y-6 lg:col-span-1">
                     <Card className="rounded-2xl border border-border bg-card p-6 shadow-sm ring-0">

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Http\Requests\StoreFtpConnectionRequest;
 use App\Http\Requests\UpdateFtpConnectionRequest;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\Connectors\FtpConnector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +16,10 @@ use Throwable;
 
 class FtpConnectionController extends Controller
 {
-    public function __construct(private FtpConnector $connector) {}
+    public function __construct(
+        private FtpConnector $connector,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function store(StoreFtpConnectionRequest $request): RedirectResponse
     {
@@ -23,7 +28,7 @@ class FtpConnectionController extends Controller
 
         $this->testConnection($credentials);
 
-        $request->user()->cloudConnections()->create([
+        $connection = $request->user()->cloudConnections()->create([
             'name' => $validated['name'],
             'provider' => CloudProvider::FTP,
             'provider_id' => $this->providerId($credentials),
@@ -34,6 +39,13 @@ class FtpConnectionController extends Controller
             'error_message' => null,
             'last_synced_at' => now(),
         ]);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ConnectionCreated,
+            subjectName: $connection->name,
+            connection: $connection,
+        );
 
         return redirect()->route('dashboard')->with('success', 'Successfully connected to FTP Server!');
     }

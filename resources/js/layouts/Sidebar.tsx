@@ -8,6 +8,7 @@ import {
     ListTodo,
     Link as LinkIcon,
     Download,
+    History,
 } from 'lucide-react';
 import { useState } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
@@ -259,6 +260,23 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
                                         className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-primary' : 'text-muted-foreground'}`}
                                     />
                                     TASKS
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    prefetch
+                                    href="/system/activity-logs"
+                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/activity-logs') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
+                                >
+                                    {url.startsWith(
+                                        '/system/activity-logs',
+                                    ) && (
+                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    )}
+                                    <History
+                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/activity-logs') ? 'text-primary' : 'text-muted-foreground'}`}
+                                    />
+                                    ACTIVITY LOG
                                 </Link>
                             </li>
                             <li>

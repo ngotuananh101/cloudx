@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
 export const index = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
 index.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ index.url = (args: { connection: string | number | { id: string | number } } | [
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
 index.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -58,7 +58,7 @@ index.get = (args: { connection: string | number | { id: string | number } } | [
 })
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
 index.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -68,7 +68,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
 
     /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
     const indexForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -78,7 +78,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
 
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
         indexForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -87,7 +87,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
         })
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::index
- * @see app/Http/Controllers/CloudUploadTaskController.php:21
+ * @see app/Http/Controllers/CloudUploadTaskController.php:28
  * @route '/connections/{connection}/upload-tasks'
  */
         indexForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -103,7 +103,7 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
     index.form = indexForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:36
+ * @see app/Http/Controllers/CloudUploadTaskController.php:43
  * @route '/connections/{connection}/upload-tasks'
  */
 export const store = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -118,7 +118,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:36
+ * @see app/Http/Controllers/CloudUploadTaskController.php:43
  * @route '/connections/{connection}/upload-tasks'
  */
 store.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -151,7 +151,7 @@ store.url = (args: { connection: string | number | { id: string | number } } | [
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:36
+ * @see app/Http/Controllers/CloudUploadTaskController.php:43
  * @route '/connections/{connection}/upload-tasks'
  */
 store.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -161,7 +161,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
 
     /**
 * @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:36
+ * @see app/Http/Controllers/CloudUploadTaskController.php:43
  * @route '/connections/{connection}/upload-tasks'
  */
     const storeForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -171,7 +171,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
 
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::store
- * @see app/Http/Controllers/CloudUploadTaskController.php:36
+ * @see app/Http/Controllers/CloudUploadTaskController.php:43
  * @route '/connections/{connection}/upload-tasks'
  */
         storeForm.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -182,7 +182,7 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 export const show = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -197,7 +197,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 show.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
@@ -227,7 +227,7 @@ show.url = (args: { connection: string | number | { id: string | number }, task:
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 show.get = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -236,7 +236,7 @@ show.get = (args: { connection: string | number | { id: string | number }, task:
 })
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 show.head = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -246,7 +246,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
 
     /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
     const showForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -256,7 +256,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
 
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
         showForm.get = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -265,7 +265,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
         })
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::show
- * @see app/Http/Controllers/CloudUploadTaskController.php:91
+ * @see app/Http/Controllers/CloudUploadTaskController.php:102
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
         showForm.head = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -281,7 +281,7 @@ show.head = (args: { connection: string | number | { id: string | number }, task
     show.form = showForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:98
+ * @see app/Http/Controllers/CloudUploadTaskController.php:109
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
 export const pause = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -296,7 +296,7 @@ pause.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:98
+ * @see app/Http/Controllers/CloudUploadTaskController.php:109
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
 pause.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
@@ -326,7 +326,7 @@ pause.url = (args: { connection: string | number | { id: string | number }, task
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:98
+ * @see app/Http/Controllers/CloudUploadTaskController.php:109
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
 pause.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -336,7 +336,7 @@ pause.patch = (args: { connection: string | number | { id: string | number }, ta
 
     /**
 * @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:98
+ * @see app/Http/Controllers/CloudUploadTaskController.php:109
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
     const pauseForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -351,7 +351,7 @@ pause.patch = (args: { connection: string | number | { id: string | number }, ta
 
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::pause
- * @see app/Http/Controllers/CloudUploadTaskController.php:98
+ * @see app/Http/Controllers/CloudUploadTaskController.php:109
  * @route '/connections/{connection}/upload-tasks/{task}/pause'
  */
         pauseForm.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -367,7 +367,7 @@ pause.patch = (args: { connection: string | number | { id: string | number }, ta
     pause.form = pauseForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:110
+ * @see app/Http/Controllers/CloudUploadTaskController.php:121
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
 export const resume = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -382,7 +382,7 @@ resume.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:110
+ * @see app/Http/Controllers/CloudUploadTaskController.php:121
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
 resume.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
@@ -412,7 +412,7 @@ resume.url = (args: { connection: string | number | { id: string | number }, tas
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:110
+ * @see app/Http/Controllers/CloudUploadTaskController.php:121
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
 resume.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -422,7 +422,7 @@ resume.patch = (args: { connection: string | number | { id: string | number }, t
 
     /**
 * @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:110
+ * @see app/Http/Controllers/CloudUploadTaskController.php:121
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
     const resumeForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -437,7 +437,7 @@ resume.patch = (args: { connection: string | number | { id: string | number }, t
 
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::resume
- * @see app/Http/Controllers/CloudUploadTaskController.php:110
+ * @see app/Http/Controllers/CloudUploadTaskController.php:121
  * @route '/connections/{connection}/upload-tasks/{task}/resume'
  */
         resumeForm.patch = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -453,7 +453,7 @@ resume.patch = (args: { connection: string | number | { id: string | number }, t
     resume.form = resumeForm
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:122
+ * @see app/Http/Controllers/CloudUploadTaskController.php:133
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 export const destroy = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -468,7 +468,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:122
+ * @see app/Http/Controllers/CloudUploadTaskController.php:133
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 destroy.url = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
@@ -498,7 +498,7 @@ destroy.url = (args: { connection: string | number | { id: string | number }, ta
 
 /**
 * @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:122
+ * @see app/Http/Controllers/CloudUploadTaskController.php:133
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
 destroy.delete = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -508,7 +508,7 @@ destroy.delete = (args: { connection: string | number | { id: string | number },
 
     /**
 * @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:122
+ * @see app/Http/Controllers/CloudUploadTaskController.php:133
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
     const destroyForm = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -523,7 +523,7 @@ destroy.delete = (args: { connection: string | number | { id: string | number },
 
             /**
 * @see \App\Http\Controllers\CloudUploadTaskController::destroy
- * @see app/Http/Controllers/CloudUploadTaskController.php:122
+ * @see app/Http/Controllers/CloudUploadTaskController.php:133
  * @route '/connections/{connection}/upload-tasks/{task}'
  */
         destroyForm.delete = (args: { connection: string | number | { id: string | number }, task: string | number | { id: string | number } } | [connection: string | number | { id: string | number }, task: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

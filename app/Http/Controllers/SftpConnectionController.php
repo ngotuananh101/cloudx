@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Http\Requests\StoreSftpConnectionRequest;
 use App\Http\Requests\UpdateSftpConnectionRequest;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\Connectors\SftpConnector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +16,10 @@ use Throwable;
 
 class SftpConnectionController extends Controller
 {
-    public function __construct(private SftpConnector $connector) {}
+    public function __construct(
+        private SftpConnector $connector,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function store(StoreSftpConnectionRequest $request): RedirectResponse
     {
@@ -23,7 +28,7 @@ class SftpConnectionController extends Controller
 
         $this->testConnection($credentials);
 
-        $request->user()->cloudConnections()->create([
+        $connection = $request->user()->cloudConnections()->create([
             'name' => $validated['name'],
             'provider' => CloudProvider::SFTP,
             'provider_id' => $this->providerId($credentials),
@@ -34,6 +39,13 @@ class SftpConnectionController extends Controller
             'error_message' => null,
             'last_synced_at' => now(),
         ]);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ConnectionCreated,
+            subjectName: $connection->name,
+            connection: $connection,
+        );
 
         return redirect()->route('dashboard')->with('success', 'Successfully connected to SFTP Server!');
     }

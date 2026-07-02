@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,7 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class CloudItemMoveController extends Controller
 {
-    public function __construct(private CloudStorageCache $cache) {}
+    public function __construct(
+        private CloudStorageCache $cache,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function __invoke(Request $request, CloudConnection $connection): RedirectResponse
     {
@@ -49,6 +54,15 @@ class CloudItemMoveController extends Controller
             } catch (\Throwable $e) {
                 return back()->with('error', 'Failed to move item: '.$e->getMessage());
             }
+
+            $this->activityLogger->log(
+                user: $request->user(),
+                action: ActivityAction::FileMoved,
+                subjectName: basename($sourcePath),
+                targetName: $destinationFolder === '' ? '/' : $destinationFolder,
+                sourceName: $this->parentPath($sourcePath) === '' ? '/' : $this->parentPath($sourcePath),
+                connection: $connection,
+            );
 
             $flushedPaths[$this->parentPath($sourcePath)] = true;
             $movedCount++;

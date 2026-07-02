@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Http\JsonResponse;
@@ -18,7 +20,10 @@ use RuntimeException;
 
 class TelegramConnectionController extends Controller
 {
-    public function __construct(private CloudStorageCache $cache) {}
+    public function __construct(
+        private CloudStorageCache $cache,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     private function telegramClient(string $sessionId): TelegramClient
     {
@@ -121,6 +126,13 @@ class TelegramConnectionController extends Controller
         ]);
 
         $synced = $result['synced'] ?? 0;
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ConnectionCreated,
+            subjectName: $connection->name,
+            connection: $connection,
+        );
 
         Session::forget('telegram_connect');
 

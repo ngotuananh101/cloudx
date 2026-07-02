@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
 use App\Http\Requests\StoreS3ConnectionRequest;
 use App\Http\Requests\UpdateS3ConnectionRequest;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\Connectors\S3Connector;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
@@ -14,7 +16,10 @@ use Throwable;
 
 class S3ConnectionController extends Controller
 {
-    public function __construct(private S3Connector $connector) {}
+    public function __construct(
+        private S3Connector $connector,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function store(StoreS3ConnectionRequest $request): RedirectResponse
     {
@@ -23,7 +28,7 @@ class S3ConnectionController extends Controller
 
         $this->testConnection($credentials);
 
-        $request->user()->cloudConnections()->create([
+        $connection = $request->user()->cloudConnections()->create([
             'name' => $validated['name'],
             'provider' => CloudProvider::AWS_S3,
             'provider_id' => $this->providerId($credentials),
@@ -34,6 +39,13 @@ class S3ConnectionController extends Controller
             'error_message' => null,
             'last_synced_at' => now(),
         ]);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ConnectionCreated,
+            subjectName: $connection->name,
+            connection: $connection,
+        );
 
         return redirect()->route('dashboard')->with('success', 'Successfully connected to AWS S3!');
     }

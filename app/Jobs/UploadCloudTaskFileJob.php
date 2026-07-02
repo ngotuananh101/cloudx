@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Models\CloudTask;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Support\CloudUploadTaskBroadcaster;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -32,7 +34,7 @@ class UploadCloudTaskFileJob implements ShouldQueue
         return [10, 60, 300];
     }
 
-    public function handle(CloudStorageCache $cache, CloudUploadTaskBroadcaster $broadcaster): void
+    public function handle(CloudStorageCache $cache, CloudUploadTaskBroadcaster $broadcaster, ActivityLogger $activityLogger): void
     {
         $task = DB::transaction(function (): ?CloudTask {
             $task = CloudTask::query()
@@ -74,6 +76,14 @@ class UploadCloudTaskFileJob implements ShouldQueue
                 $broadcaster->broadcastStatus($task);
                 $cache->flushFolder($task->connection, $task->target_path);
                 $cache->flushQuota($task->connection);
+
+                $activityLogger->log(
+                    user: $task->user,
+                    action: ActivityAction::FileUploaded,
+                    subjectName: $filename,
+                    targetName: $task->target_path === '' ? '/' : $task->target_path,
+                    connection: $task->connection,
+                );
 
                 return;
             }
@@ -142,6 +152,14 @@ class UploadCloudTaskFileJob implements ShouldQueue
             $this->deleteTempFiles($task, $totalChunks, $tempPath);
             $cache->flushFolder($task->connection, $task->target_path);
             $cache->flushQuota($task->connection);
+
+            $activityLogger->log(
+                user: $task->user,
+                action: ActivityAction::FileUploaded,
+                subjectName: $filename,
+                targetName: $task->target_path === '' ? '/' : $task->target_path,
+                connection: $task->connection,
+            );
         } catch (Throwable $exception) {
             $task->forceFill([
                 'status' => CloudTaskStatus::Failed,

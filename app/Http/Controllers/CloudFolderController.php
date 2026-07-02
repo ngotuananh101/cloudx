@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Models\CloudConnection;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -10,7 +12,10 @@ use Illuminate\Validation\ValidationException;
 
 class CloudFolderController extends Controller
 {
-    public function __construct(private CloudStorageCache $cache) {}
+    public function __construct(
+        private CloudStorageCache $cache,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function store(Request $request, CloudConnection $connection): RedirectResponse
     {
@@ -34,6 +39,14 @@ class CloudFolderController extends Controller
 
         $connection->getDisk()->createDirectory($folderPath);
         $this->cache->flushFolder($connection, $path);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::FolderCreated,
+            subjectName: $name,
+            targetName: $path === '' ? '/' : $path,
+            connection: $connection,
+        );
 
         return back()->with('success', 'Folder created.');
     }

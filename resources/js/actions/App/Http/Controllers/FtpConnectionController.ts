@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\FtpConnectionController::store
- * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @see app/Http/Controllers/FtpConnectionController.php:24
  * @route '/connections/ftp'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\FtpConnectionController::store
- * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @see app/Http/Controllers/FtpConnectionController.php:24
  * @route '/connections/ftp'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\FtpConnectionController::store
- * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @see app/Http/Controllers/FtpConnectionController.php:24
  * @route '/connections/ftp'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\FtpConnectionController::store
- * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @see app/Http/Controllers/FtpConnectionController.php:24
  * @route '/connections/ftp'
  */
     const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\FtpConnectionController::store
- * @see app/Http/Controllers/FtpConnectionController.php:19
+ * @see app/Http/Controllers/FtpConnectionController.php:24
  * @route '/connections/ftp'
  */
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -56,7 +56,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\FtpConnectionController::update
- * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @see app/Http/Controllers/FtpConnectionController.php:53
  * @route '/connections/{connection}/ftp'
  */
 export const update = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -71,7 +71,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\FtpConnectionController::update
- * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @see app/Http/Controllers/FtpConnectionController.php:53
  * @route '/connections/{connection}/ftp'
  */
 update.url = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
@@ -104,7 +104,7 @@ update.url = (args: { connection: string | number | { id: string | number } } | 
 
 /**
 * @see \App\Http\Controllers\FtpConnectionController::update
- * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @see app/Http/Controllers/FtpConnectionController.php:53
  * @route '/connections/{connection}/ftp'
  */
 update.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -114,7 +114,7 @@ update.patch = (args: { connection: string | number | { id: string | number } } 
 
     /**
 * @see \App\Http\Controllers\FtpConnectionController::update
- * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @see app/Http/Controllers/FtpConnectionController.php:53
  * @route '/connections/{connection}/ftp'
  */
     const updateForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -129,7 +129,7 @@ update.patch = (args: { connection: string | number | { id: string | number } } 
 
             /**
 * @see \App\Http\Controllers\FtpConnectionController::update
- * @see app/Http/Controllers/FtpConnectionController.php:41
+ * @see app/Http/Controllers/FtpConnectionController.php:53
  * @route '/connections/{connection}/ftp'
  */
         updateForm.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ActivityAction;
 use App\Exceptions\PythonServiceException;
+use App\Services\ActivityLogger;
 use App\Services\Python\YtDlpClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -15,7 +17,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class VideoDownloaderController extends Controller
 {
-    public function __construct(private YtDlpClient $client) {}
+    public function __construct(
+        private YtDlpClient $client,
+        private ActivityLogger $activityLogger,
+    ) {}
 
     public function index(): Response
     {
@@ -79,6 +84,13 @@ class VideoDownloaderController extends Controller
             'Content-Length' => $result['content_length'],
             'Content-Disposition' => 'attachment; filename="'.$result['filename'].'"',
         ], fn ($v) => $v !== null);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::VideoDownloaded,
+            subjectName: $result['filename'],
+            targetName: $validated['url'],
+        );
 
         return response()->stream(function () use ($result) {
             set_time_limit(0);

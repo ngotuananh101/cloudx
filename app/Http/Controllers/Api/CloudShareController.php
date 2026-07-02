@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ActivityAction;
 use App\Http\Controllers\Controller;
 use App\Models\CloudConnection;
 use App\Models\CloudShare;
+use App\Services\ActivityLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -13,6 +15,8 @@ use Illuminate\Support\Str;
 
 class CloudShareController extends Controller
 {
+    public function __construct(private ActivityLogger $activityLogger) {}
+
     public function index(Request $request, CloudConnection $connection): JsonResponse
     {
         abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
@@ -66,6 +70,14 @@ class CloudShareController extends Controller
 
         $share->save();
 
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ShareCreated,
+            subjectName: $share->name,
+            targetName: $validated['type'] === 'password' ? 'Password protected' : 'Public link',
+            connection: $connection,
+        );
+
         return back()->with('success', 'Share link created successfully.');
     }
 
@@ -75,6 +87,13 @@ class CloudShareController extends Controller
         abort_if($share->cloud_connection_id !== $connection->id, 404, 'Share not found on this connection.');
 
         $share->delete();
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ShareDeleted,
+            subjectName: $share->name,
+            connection: $connection,
+        );
 
         return back()->with('success', 'Share link deleted successfully.');
     }

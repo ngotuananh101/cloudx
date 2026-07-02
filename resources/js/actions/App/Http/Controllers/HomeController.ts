@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
 const HomeController980bb49ee7ae63891f1d891d2fbcf1c9 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.definition = {
 
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
 HomeController980bb49ee7ae63891f1d891d2fbcf1c9.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.url = (options?: RouteQueryOption
 
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
 HomeController980bb49ee7ae63891f1d891d2fbcf1c9.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.get = (options?: RouteQueryOption
 })
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
 HomeController980bb49ee7ae63891f1d891d2fbcf1c9.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.head = (options?: RouteQueryOptio
 
     /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
     const HomeController980bb49ee7ae63891f1d891d2fbcf1c9Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.head = (options?: RouteQueryOptio
 
             /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
         HomeController980bb49ee7ae63891f1d891d2fbcf1c9Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.head = (options?: RouteQueryOptio
         })
             /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/'
  */
         HomeController980bb49ee7ae63891f1d891d2fbcf1c9Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -79,7 +79,7 @@ HomeController980bb49ee7ae63891f1d891d2fbcf1c9.head = (options?: RouteQueryOptio
     HomeController980bb49ee7ae63891f1d891d2fbcf1c9.form = HomeController980bb49ee7ae63891f1d891d2fbcf1c9Form
     /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
 const HomeController42a740574ecbfbac32f8cc353fc32db9 = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -94,7 +94,7 @@ HomeController42a740574ecbfbac32f8cc353fc32db9.definition = {
 
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
 HomeController42a740574ecbfbac32f8cc353fc32db9.url = (options?: RouteQueryOptions) => {
@@ -103,7 +103,7 @@ HomeController42a740574ecbfbac32f8cc353fc32db9.url = (options?: RouteQueryOption
 
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
 HomeController42a740574ecbfbac32f8cc353fc32db9.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -112,7 +112,7 @@ HomeController42a740574ecbfbac32f8cc353fc32db9.get = (options?: RouteQueryOption
 })
 /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
 HomeController42a740574ecbfbac32f8cc353fc32db9.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -122,7 +122,7 @@ HomeController42a740574ecbfbac32f8cc353fc32db9.head = (options?: RouteQueryOptio
 
     /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
     const HomeController42a740574ecbfbac32f8cc353fc32db9Form = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -132,7 +132,7 @@ HomeController42a740574ecbfbac32f8cc353fc32db9.head = (options?: RouteQueryOptio
 
             /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
         HomeController42a740574ecbfbac32f8cc353fc32db9Form.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -141,7 +141,7 @@ HomeController42a740574ecbfbac32f8cc353fc32db9.head = (options?: RouteQueryOptio
         })
             /**
 * @see \App\Http\Controllers\HomeController::__invoke
- * @see app/Http/Controllers/HomeController.php:17
+ * @see app/Http/Controllers/HomeController.php:23
  * @route '/dashboard'
  */
         HomeController42a740574ecbfbac32f8cc353fc32db9Form.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
