@@ -2,6 +2,7 @@
 
 namespace App\Services\CloudStorage;
 
+use App\Jobs\UpdateConnectionQuotaJob;
 use App\Models\CloudConnection;
 use Closure;
 use Illuminate\Cache\TaggedCache;
@@ -76,8 +77,8 @@ class CloudStorageCache
 
     public function flushQuota(CloudConnection $connection): void
     {
-        \Illuminate\Support\Facades\Cache::forget('quota_update_lock_' . $connection->id);
-        dispatch(new \App\Jobs\UpdateConnectionQuotaJob($connection->id));
+        Cache::forget('quota_update_lock_'.$connection->id);
+        dispatch(new UpdateConnectionQuotaJob($connection->id));
     }
 
     /**

@@ -9,6 +9,7 @@ use Illuminate\Console\Command;
 class SyncCloudQuotas extends Command
 {
     protected $signature = 'cloud:sync-quotas';
+
     protected $description = 'Sync quotas for all active connections';
 
     public function handle(): void
