@@ -16,7 +16,7 @@ class CloudStorageQuota
 
     public function refreshInBackground(CloudConnection $connection): void
     {
-        $lockKey = 'quota_update_lock_' . $connection->id;
+        $lockKey = 'quota_update_lock_'.$connection->id;
 
         if (! Cache::has($lockKey)) {
             Cache::put($lockKey, true, 600);

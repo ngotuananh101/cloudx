@@ -2,8 +2,8 @@
 
 namespace App\Services\CloudStorage\Connectors;
 
-use App\Data\ConnectedAccountData;
 use App\Data\CloudStorageQuotaData;
+use App\Data\ConnectedAccountData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
