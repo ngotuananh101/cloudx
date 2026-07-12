@@ -124,16 +124,35 @@ class CloudConnection extends Model
     public function handleApiException(\Throwable $exception): void
     {
         $statusCode = null;
+        $responseBody = '';
 
         if ($exception instanceof \Illuminate\Http\Client\RequestException) {
             $statusCode = $exception->response->status();
+            $responseBody = $exception->response->body();
         } elseif (method_exists($exception, 'getCode')) {
             $statusCode = $exception->getCode();
-        } elseif (method_exists($exception, 'getResponse') && method_exists($exception->getResponse(), 'getStatusCode')) {
-            $statusCode = $exception->getResponse()->getStatusCode();
         }
 
+        if (method_exists($exception, 'getResponse') && $exception->getResponse() !== null) {
+            $response = $exception->getResponse();
+            if (method_exists($response, 'getStatusCode')) {
+                $statusCode = $response->getStatusCode();
+            }
+            if (method_exists($response, 'getBody')) {
+                $responseBody = (string) $response->getBody();
+            }
+        }
+
+        $isExpired = false;
+
         if ($statusCode === 401 || $statusCode === 403) {
+            $isExpired = true;
+        } elseif ($statusCode === 400 && str_contains($responseBody, 'invalid_grant')) {
+            // Đặc biệt cho Google Drive khi token/refresh token hết hạn hoặc bị thu hồi
+            $isExpired = true;
+        }
+
+        if ($isExpired) {
             if ($this->status !== ConnectionStatus::EXPIRED) {
                 $this->update([
                     'status' => ConnectionStatus::EXPIRED,
