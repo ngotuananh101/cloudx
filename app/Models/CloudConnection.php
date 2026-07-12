@@ -144,11 +144,14 @@ class CloudConnection extends Model
             }
         }
 
+        // Đọc thông báo lỗi chung vì đôi khi body stream đã bị consume trước đó
+        $errorMessage = $exception->getMessage();
+
         $isExpired = false;
 
         if ($statusCode === 401 || $statusCode === 403) {
             $isExpired = true;
-        } elseif ($statusCode === 400 && str_contains($responseBody, 'invalid_grant')) {
+        } elseif ($statusCode === 400 && (str_contains($responseBody, 'invalid_grant') || str_contains($errorMessage, 'invalid_grant'))) {
             // Đặc biệt cho Google Drive khi token/refresh token hết hạn hoặc bị thu hồi
             $isExpired = true;
         }
