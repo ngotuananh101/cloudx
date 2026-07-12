@@ -176,7 +176,7 @@ class UploadCloudTaskFileJob implements ShouldQueue
     {
         $task = CloudTask::query()->find($this->taskId);
 
-        if ($task === null || ! $task->status === CloudTaskStatus::Processing) {
+        if ($task === null || $task->status !== CloudTaskStatus::Processing) {
             return;
         }
 

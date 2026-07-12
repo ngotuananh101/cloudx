@@ -10,3 +10,4 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command(PruneActivityLogs::class)->daily();
+Schedule::command(\App\Console\Commands\SyncCloudQuotas::class)->hourly();

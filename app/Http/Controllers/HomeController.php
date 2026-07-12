@@ -6,6 +6,7 @@ use App\Enums\CloudProvider;
 use App\Models\ActivityLog;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
+use App\Services\CloudStorage\CloudStorageQuota;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -15,7 +16,10 @@ class HomeController extends Controller
      */
     private const RECENT_ACTIVITIES_LIMIT = 4;
 
-    public function __construct(private CloudStorageManager $cloudStorageManager) {}
+    public function __construct(
+        private CloudStorageManager $cloudStorageManager,
+        private CloudStorageQuota $storageQuota
+    ) {}
 
     /**
      * Handle the incoming request.
@@ -26,6 +30,9 @@ class HomeController extends Controller
             ->latest()
             ->get()
             ->map(function (CloudConnection $connection) {
+                $this->storageQuota->refreshInBackground($connection);
+                $quota = $this->storageQuota->get($connection);
+
                 return [
                     'id' => $connection->id,
                     'name' => $connection->name,
@@ -34,13 +41,11 @@ class HomeController extends Controller
                     'provider_icon' => CloudProvider::getIcon($connection->provider->value),
                     'status' => $connection->status->getDescription(),
                     'status_value' => $connection->status->value,
-                    'used_space' => $connection->used_space,
-                    'total_space' => $connection->total_space,
-                    'used_formatted' => $this->formatBytes($connection->used_space),
-                    'total_formatted' => $this->formatBytes($connection->total_space),
-                    'percent' => $connection->total_space > 0
-                        ? round(($connection->used_space / $connection->total_space) * 100, 1)
-                        : 0,
+                    'used_space' => $quota['usedBytes'],
+                    'total_space' => $quota['totalBytes'],
+                    'used_formatted' => $this->formatBytes($quota['usedBytes']),
+                    'total_formatted' => $this->formatBytes($quota['totalBytes']),
+                    'percent' => $quota['usedPercent'] ?? 0,
                 ];
             });
 

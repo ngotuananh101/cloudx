@@ -3,38 +3,25 @@
 namespace App\Services\CloudStorage;
 
 use App\Data\CloudStorageQuotaData;
+use App\Jobs\UpdateConnectionQuotaJob;
 use App\Models\CloudConnection;
-use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
-use Throwable;
+use Illuminate\Support\Facades\Cache;
 
 class CloudStorageQuota
 {
-    public function __construct(
-        private CloudStorageManager $cloudStorage,
-        private CloudStorageCache $cache,
-    ) {}
-
-    /**
-     * @return array{totalBytes: int|null, usedBytes: int|null, remainingBytes: int|null, usedPercent: float|null, supported: bool}
-     */
     public function get(CloudConnection $connection): array
     {
-        return $this->cache->rememberQuota($connection, function () use ($connection): array {
-            $connector = $this->cloudStorage->connector($connection->provider);
+        return $this->storedQuota($connection)->toArray();
+    }
 
-            if ($connector instanceof ReportsStorageQuota) {
-                try {
-                    $quota = $connector->storageQuota($connection);
-                    $this->syncConnectionQuota($connection, $quota);
+    public function refreshInBackground(CloudConnection $connection): void
+    {
+        $lockKey = 'quota_update_lock_' . $connection->id;
 
-                    return $quota->toArray();
-                } catch (Throwable $exception) {
-                    report($exception);
-                }
-            }
-
-            return $this->storedQuota($connection)->toArray();
-        });
+        if (! Cache::has($lockKey)) {
+            Cache::put($lockKey, true, 600);
+            dispatch(new UpdateConnectionQuotaJob($connection->id));
+        }
     }
 
     private function storedQuota(CloudConnection $connection): CloudStorageQuotaData
@@ -53,18 +40,5 @@ class CloudStorageQuota
             remainingBytes: $remainingBytes,
             usedPercent: $totalBytes > 0 && $usedBytes !== null ? round(($usedBytes / $totalBytes) * 100, 1) : null,
         );
-    }
-
-    private function syncConnectionQuota(CloudConnection $connection, CloudStorageQuotaData $quota): void
-    {
-        if (! $quota->supported) {
-            return;
-        }
-
-        $connection->forceFill([
-            'total_space' => $quota->totalBytes,
-            'used_space' => $quota->usedBytes,
-            'last_synced_at' => now(),
-        ])->save();
     }
 }

@@ -76,11 +76,8 @@ class CloudStorageCache
 
     public function flushQuota(CloudConnection $connection): void
     {
-        if ($this->taggedRepository([$this->quotaTag($connection)])?->flush() !== null) {
-            return;
-        }
-
-        $this->baseRepository()->forget($this->quotaKey($connection));
+        \Illuminate\Support\Facades\Cache::forget('quota_update_lock_' . $connection->id);
+        dispatch(new \App\Jobs\UpdateConnectionQuotaJob($connection->id));
     }
 
     /**

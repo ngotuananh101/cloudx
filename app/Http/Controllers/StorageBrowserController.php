@@ -40,6 +40,7 @@ class StorageBrowserController extends Controller
         }
 
         $connector = $this->cloudStorage->connector($connection->provider);
+        $this->storageQuota->refreshInBackground($connection);
 
         return Inertia::render('files/index', [
             'connection' => [

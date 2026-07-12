@@ -3,10 +3,12 @@
 namespace App\Services\CloudStorage\Connectors;
 
 use App\Data\ConnectedAccountData;
+use App\Data\CloudStorageQuotaData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
+use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
 use Google\Client;
 use Google\Service\Drive;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -14,7 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 
-class GoogleDriveConnector implements CloudProviderConnector
+class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuota
 {
     public function provider(): CloudProvider
     {
@@ -127,6 +129,38 @@ class GoogleDriveConnector implements CloudProviderConnector
         } catch (\Exception $e) {
             return null;
         }
+    }
+
+    public function storageQuota(CloudConnection $connection): CloudStorageQuotaData
+    {
+        $client = $this->client();
+        $this->configureClient($client);
+        $client->setAccessToken($connection->credentials);
+
+        if ($client->isAccessTokenExpired() && $client->getRefreshToken()) {
+            $refreshToken = $client->getRefreshToken();
+            $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+
+            if (! isset($newAccessToken['error'])) {
+                $connection->update([
+                    'credentials' => array_merge($connection->credentials, $newAccessToken),
+                ]);
+            }
+        }
+
+        $drive = new Drive($client);
+        $quota = $drive->about->get(['fields' => 'storageQuota'])->getStorageQuota();
+
+        $totalBytes = $quota?->getLimit() !== null ? (int) $quota->getLimit() : null;
+        $usedBytes = $quota?->getUsage() !== null ? (int) $quota->getUsage() : null;
+        $remainingBytes = $totalBytes !== null && $usedBytes !== null ? max($totalBytes - $usedBytes, 0) : null;
+
+        return new CloudStorageQuotaData(
+            totalBytes: $totalBytes,
+            usedBytes: $usedBytes,
+            remainingBytes: $remainingBytes,
+            usedPercent: $totalBytes > 0 && $usedBytes !== null ? round(($usedBytes / $totalBytes) * 100, 1) : null,
+        );
     }
 
     private function client(): Client

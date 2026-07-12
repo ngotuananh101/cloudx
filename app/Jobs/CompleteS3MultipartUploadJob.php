@@ -43,7 +43,7 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (! $task->type === CloudTaskType::Upload || ! $task->status === CloudTaskStatus::Queued) {
+            if ($task->type !== CloudTaskType::Upload || $task->status !== CloudTaskStatus::Queued) {
                 return null;
             }
 

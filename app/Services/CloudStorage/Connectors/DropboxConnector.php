@@ -3,11 +3,13 @@
 namespace App\Services\CloudStorage\Connectors;
 
 use App\Data\ConnectedAccountData;
+use App\Data\CloudStorageQuotaData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
+use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
 use GrahamCampbell\GuzzleFactory\GuzzleFactory;
 use GuzzleHttp\Client as GuzzleClient;
 use Illuminate\Contracts\Filesystem\Filesystem;
@@ -19,7 +21,7 @@ use Illuminate\Support\Str;
 use RuntimeException;
 use Spatie\Dropbox\Client as DropboxClient;
 
-class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownloadLink
+class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownloadLink, ReportsStorageQuota
 {
     public const AUTHORIZE_URL = 'https://www.dropbox.com/oauth2/authorize';
 
@@ -139,6 +141,30 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
         $url = $dropboxClient->getTemporaryLink($path);
 
         return is_string($url) && $url !== '' ? $url : null;
+    }
+
+    public function storageQuota(CloudConnection $connection): CloudStorageQuotaData
+    {
+        $credentials = $this->freshCredentials($connection);
+
+        $spaceUsage = $this->http()->withToken($credentials['access_token'])
+            ->withBody('null', 'application/json')
+            ->retry([100, 250])
+            ->post(self::SPACE_USAGE_URL)
+            ->throw()
+            ->json();
+
+        $allocation = is_array($spaceUsage) ? ($spaceUsage['allocation'] ?? null) : null;
+        $totalBytes = is_array($allocation) && isset($allocation['allocated']) ? (int) $allocation['allocated'] : null;
+        $usedBytes = is_array($spaceUsage) && isset($spaceUsage['used']) ? (int) $spaceUsage['used'] : null;
+        $remainingBytes = $totalBytes !== null && $usedBytes !== null ? max($totalBytes - $usedBytes, 0) : null;
+
+        return new CloudStorageQuotaData(
+            totalBytes: $totalBytes,
+            usedBytes: $usedBytes,
+            remainingBytes: $remainingBytes,
+            usedPercent: $totalBytes > 0 && $usedBytes !== null ? round(($usedBytes / $totalBytes) * 100, 1) : null,
+        );
     }
 
     private function stateSessionKey(): string
