@@ -161,6 +161,8 @@ class UploadCloudTaskFileJob implements ShouldQueue
                 connection: $task->connection,
             );
         } catch (Throwable $exception) {
+            $task->connection->handleApiException($exception);
+
             $task->forceFill([
                 'status' => CloudTaskStatus::Failed,
                 'error_message' => $exception->getMessage(),

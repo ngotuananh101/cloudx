@@ -120,4 +120,26 @@ class CloudConnection extends Model
     {
         return app(CloudStorageManager::class)->disk($this);
     }
+
+    public function handleApiException(\Throwable $exception): void
+    {
+        $statusCode = null;
+
+        if ($exception instanceof \Illuminate\Http\Client\RequestException) {
+            $statusCode = $exception->response->status();
+        } elseif (method_exists($exception, 'getCode')) {
+            $statusCode = $exception->getCode();
+        } elseif (method_exists($exception, 'getResponse') && method_exists($exception->getResponse(), 'getStatusCode')) {
+            $statusCode = $exception->getResponse()->getStatusCode();
+        }
+
+        if ($statusCode === 401 || $statusCode === 403) {
+            if ($this->status !== ConnectionStatus::EXPIRED) {
+                $this->update([
+                    'status' => ConnectionStatus::EXPIRED,
+                    'error_message' => 'Connection expired or unauthorized. Please reconnect.',
+                ]);
+            }
+        }
+    }
 }

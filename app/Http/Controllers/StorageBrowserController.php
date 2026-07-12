@@ -29,6 +29,8 @@ class StorageBrowserController extends Controller
         try {
             $files = $this->fileBrowser->list($connection, $path);
         } catch (Throwable $exception) {
+            $connection->handleApiException($exception);
+
             Log::error('Could not retrieve cloud storage files.', [
                 'exception' => $exception,
                 'connection_id' => $connection->id,
@@ -36,7 +38,7 @@ class StorageBrowserController extends Controller
                 'path' => $path,
             ]);
             $files = [];
-            session()->flash('error', 'Could not retrieve files from this storage.');
+            session()->flash('error', $connection->status === \App\Enums\ConnectionStatus::EXPIRED ? 'Connection expired or unauthorized. Please reconnect.' : 'Could not retrieve files from this storage.');
         }
 
         $connector = $this->cloudStorage->connector($connection->provider);

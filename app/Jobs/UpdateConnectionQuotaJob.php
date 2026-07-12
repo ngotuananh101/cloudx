@@ -42,6 +42,7 @@ class UpdateConnectionQuotaJob implements ShouldQueue
                 ])->save();
             }
         } catch (Throwable $exception) {
+            $connection->handleApiException($exception);
             report($exception);
         }
     }
