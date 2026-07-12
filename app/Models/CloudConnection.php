@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Client\RequestException;
 
 class CloudConnection extends Model
 {
@@ -125,7 +126,7 @@ class CloudConnection extends Model
     {
         $statusCode = null;
 
-        if ($exception instanceof \Illuminate\Http\Client\RequestException) {
+        if ($exception instanceof RequestException) {
             $statusCode = $exception->response->status();
         } elseif (method_exists($exception, 'getCode')) {
             $statusCode = $exception->getCode();

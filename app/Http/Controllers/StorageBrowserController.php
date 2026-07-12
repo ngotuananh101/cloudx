@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CloudProvider;
+use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudFileBrowser;
 use App\Services\CloudStorage\CloudStorageManager;
@@ -38,7 +39,7 @@ class StorageBrowserController extends Controller
                 'path' => $path,
             ]);
             $files = [];
-            session()->flash('error', $connection->status === \App\Enums\ConnectionStatus::EXPIRED ? 'Connection expired or unauthorized. Please reconnect.' : 'Could not retrieve files from this storage.');
+            session()->flash('error', $connection->status === ConnectionStatus::EXPIRED ? 'Connection expired or unauthorized. Please reconnect.' : 'Could not retrieve files from this storage.');
         }
 
         $connector = $this->cloudStorage->connector($connection->provider);
