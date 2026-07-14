@@ -369,9 +369,11 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 
             setItems((currentItems) => [...queueItems, ...currentItems]);
             setIsPanelVisible(true);
-            queueItems.forEach(
-                (item) => void uploadFile(item.key, item.file, target),
-            );
+            queueItems.forEach((item) => {
+                uploadFile(item.key, item.file, target).catch(() => {
+                    // Errors are recorded on the queue item inside uploadFile.
+                });
+            });
         },
         [uploadFile],
     );
@@ -391,7 +393,9 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
 
             setItems((currentItems) => [item, ...currentItems]);
             setIsPanelVisible(true);
-            void uploadRemoteFile(item.key, remote, target);
+            uploadRemoteFile(item.key, remote, target).catch(() => {
+                // Errors are recorded on the queue item inside uploadRemoteFile.
+            });
         },
         [uploadRemoteFile],
     );
@@ -432,10 +436,12 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             updateItem(item.key, { task, status: 'uploading' });
 
             if (item.source === 'remote' && item.remote) {
-                void uploadRemoteFile(item.key, item.remote, {
+                uploadRemoteFile(item.key, item.remote, {
                     connectionId: item.connectionId,
                     path: item.path,
                     uploadMode: 'remote',
+                }).catch(() => {
+                    // Errors are recorded on the queue item inside uploadRemoteFile.
                 });
 
                 return;
@@ -445,7 +451,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            void uploadFile(
+            uploadFile(
                 item.key,
                 item.file,
                 {
@@ -454,7 +460,9 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                     uploadMode: item.uploadMode,
                 },
                 task,
-            );
+            ).catch(() => {
+                // Errors are recorded on the queue item inside uploadFile.
+            });
         },
         [updateItem, uploadFile, uploadRemoteFile],
     );
@@ -490,10 +498,12 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
             pausedUploads.current.delete(item.key);
 
             if (item.source === 'remote' && item.remote) {
-                void uploadRemoteFile(item.key, item.remote, {
+                uploadRemoteFile(item.key, item.remote, {
                     connectionId: item.connectionId,
                     path: item.path,
                     uploadMode: 'remote',
+                }).catch(() => {
+                    // Errors are recorded on the queue item inside uploadRemoteFile.
                 });
 
                 return;
@@ -503,7 +513,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                 return;
             }
 
-            void uploadFile(
+            uploadFile(
                 item.key,
                 item.file,
                 {
@@ -512,7 +522,9 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
                     uploadMode: item.uploadMode,
                 },
                 undefined,
-            );
+            ).catch(() => {
+                // Errors are recorded on the queue item inside uploadFile.
+            });
         },
         [uploadFile, uploadRemoteFile],
     );

@@ -124,45 +124,63 @@ class CloudConnection extends Model
 
     public function handleApiException(\Throwable $exception): void
     {
+        [$statusCode, $responseBody] = $this->extractApiErrorDetails($exception);
+
+        if (! $this->isAuthorizationFailure($statusCode, $responseBody, $exception->getMessage())) {
+            return;
+        }
+
+        if ($this->status === ConnectionStatus::EXPIRED) {
+            return;
+        }
+
+        $this->update([
+            'status' => ConnectionStatus::EXPIRED,
+            'error_message' => 'Connection expired or unauthorized. Please reconnect.',
+        ]);
+    }
+
+    /**
+     * @return array{0: int|string|null, 1: string}
+     */
+    private function extractApiErrorDetails(\Throwable $exception): array
+    {
         $statusCode = null;
         $responseBody = '';
 
         if ($exception instanceof RequestException) {
-            $statusCode = $exception->response->status();
-            $responseBody = $exception->response->body();
-        } elseif (method_exists($exception, 'getCode')) {
+            return [$exception->response->status(), $exception->response->body()];
+        }
+
+        if (method_exists($exception, 'getCode')) {
             $statusCode = $exception->getCode();
         }
 
-        if (method_exists($exception, 'getResponse') && $exception->getResponse() !== null) {
-            $response = $exception->getResponse();
-            if (method_exists($response, 'getStatusCode')) {
-                $statusCode = $response->getStatusCode();
-            }
-            if (method_exists($response, 'getBody')) {
-                $responseBody = (string) $response->getBody();
-            }
+        if (! method_exists($exception, 'getResponse') || $exception->getResponse() === null) {
+            return [$statusCode, $responseBody];
         }
 
-        // Đọc thông báo lỗi chung vì đôi khi body stream đã bị consume trước đó
-        $errorMessage = $exception->getMessage();
+        $response = $exception->getResponse();
 
-        $isExpired = false;
+        if (method_exists($response, 'getStatusCode')) {
+            $statusCode = $response->getStatusCode();
+        }
 
+        if (method_exists($response, 'getBody')) {
+            $responseBody = (string) $response->getBody();
+        }
+
+        return [$statusCode, $responseBody];
+    }
+
+    private function isAuthorizationFailure(int|string|null $statusCode, string $responseBody, string $errorMessage): bool
+    {
         if ($statusCode === 401 || $statusCode === 403) {
-            $isExpired = true;
-        } elseif ($statusCode === 400 && (str_contains($responseBody, 'invalid_grant') || str_contains($errorMessage, 'invalid_grant'))) {
-            // Đặc biệt cho Google Drive khi token/refresh token hết hạn hoặc bị thu hồi
-            $isExpired = true;
+            return true;
         }
 
-        if ($isExpired) {
-            if ($this->status !== ConnectionStatus::EXPIRED) {
-                $this->update([
-                    'status' => ConnectionStatus::EXPIRED,
-                    'error_message' => 'Connection expired or unauthorized. Please reconnect.',
-                ]);
-            }
-        }
+        // Google Drive returns 400 + invalid_grant when the refresh token is revoked.
+        return $statusCode === 400
+            && (str_contains($responseBody, 'invalid_grant') || str_contains($errorMessage, 'invalid_grant'));
     }
 }

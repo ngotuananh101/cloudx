@@ -68,24 +68,23 @@ class CloudStorageServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Storage::extend('onedrive', function ($app, array $config): FilesystemAdapter {
+        Storage::extend('onedrive', function (mixed $app, array $config): FilesystemAdapter {
+            unset($app);
+
             $connection = $config['connection'] ?? null;
 
             if (! $connection instanceof CloudConnection) {
-                $connectionId = $config['connection_id'] ?? null;
-                $connection = CloudConnection::query()->findOrFail($connectionId);
+                $connection = CloudConnection::query()->findOrFail($config['connection_id'] ?? null);
             }
 
             $adapter = new OneDriveAdapter(new OneDriveClient($connection));
 
-            return new FilesystemAdapter(
-                new Filesystem($adapter),
-                $adapter,
-                $config
-            );
+            return new FilesystemAdapter(new Filesystem($adapter), $adapter, $config);
         });
 
-        Storage::extend('dropbox', function ($app, array $config): FilesystemAdapter {
+        Storage::extend('dropbox', function (mixed $app, array $config): FilesystemAdapter {
+            unset($app);
+
             $client = app()->isLocal()
                 ? new GuzzleClient([
                     'handler' => GuzzleFactory::handler(),
@@ -98,49 +97,40 @@ class CloudStorageServiceProvider extends ServiceProvider
                 $client,
             ));
 
-            return new FilesystemAdapter(
-                new Filesystem($adapter, $config),
-                $adapter,
-                $config
-            );
+            return new FilesystemAdapter(new Filesystem($adapter, $config), $adapter, $config);
         });
 
-        Storage::extend('google_drive', function ($app, $config) {
+        Storage::extend('google_drive', function ($app, array $config): FilesystemAdapter {
             $client = $app->make(Client::class);
             $client->setClientId($config['client_id'] ?? config('services.google.client_id'));
             $client->setClientSecret($config['client_secret'] ?? config('services.google.client_secret'));
 
             if (isset($config['credentials'])) {
                 $client->setAccessToken($config['credentials']);
+                $refreshToken = $client->getRefreshToken();
 
-                if ($client->isAccessTokenExpired() && $client->getRefreshToken()) {
-                    $refreshToken = $client->getRefreshToken();
+                if ($client->isAccessTokenExpired() && is_string($refreshToken) && $refreshToken !== '') {
                     $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
+                    $connectionId = $config['connection_id'] ?? null;
 
-                    if (! isset($newAccessToken['error']) && isset($newAccessToken['access_token'], $config['connection_id'])) {
-                        $connection = CloudConnection::find($config['connection_id']);
-                        if ($connection) {
-                            $connection->update([
-                                'credentials' => array_merge(
-                                    $connection->credentials,
-                                    ['refresh_token' => $connection->credentials['refresh_token'] ?? $refreshToken],
-                                    $newAccessToken,
-                                ),
-                                'last_synced_at' => now(),
-                            ]);
-                        }
+                    if (! isset($newAccessToken['error']) && isset($newAccessToken['access_token']) && $connectionId) {
+                        $connection = CloudConnection::find($connectionId);
+
+                        $connection?->update([
+                            'credentials' => array_merge(
+                                $connection->credentials,
+                                ['refresh_token' => $connection->credentials['refresh_token'] ?? $refreshToken],
+                                $newAccessToken,
+                            ),
+                            'last_synced_at' => now(),
+                        ]);
                     }
                 }
             }
 
-            $service = new Drive($client);
-            $adapter = new GoogleDriveAdapter($service, $config['folder_id'] ?? '/');
+            $adapter = new GoogleDriveAdapter(new Drive($client), $config['folder_id'] ?? '/');
 
-            return new FilesystemAdapter(
-                new Filesystem($adapter),
-                $adapter,
-                $config
-            );
+            return new FilesystemAdapter(new Filesystem($adapter), $adapter, $config);
         });
     }
 }

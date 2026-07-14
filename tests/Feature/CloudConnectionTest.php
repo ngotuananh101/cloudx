@@ -184,8 +184,8 @@ it('does not persist Google refresh token error payloads', function () {
     $mockClient->shouldReceive('setClientId')->once();
     $mockClient->shouldReceive('setClientSecret')->once();
     $mockClient->shouldReceive('setAccessToken')->once()->with($connection->credentials);
+    $mockClient->shouldReceive('getRefreshToken')->once()->andReturn('valid_refresh_token');
     $mockClient->shouldReceive('isAccessTokenExpired')->once()->andReturnTrue();
-    $mockClient->shouldReceive('getRefreshToken')->twice()->andReturn('valid_refresh_token');
     $mockClient->shouldReceive('fetchAccessTokenWithRefreshToken')
         ->once()
         ->with('valid_refresh_token')

@@ -47,24 +47,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         RemoteUploadUrlGuard $urlGuard,
         ActivityLogger $activityLogger,
     ): void {
-        $task = DB::transaction(function (): ?CloudTask {
-            $task = CloudTask::query()
-                ->whereKey($this->taskId)
-                ->lockForUpdate()
-                ->firstOrFail();
-
-            if ($task->type !== CloudTaskType::Upload || $task->status !== CloudTaskStatus::Queued) {
-                return null;
-            }
-
-            $task->forceFill([
-                'status' => CloudTaskStatus::Processing,
-                'processing_at' => now(),
-                'error_message' => null,
-            ])->save();
-
-            return $task;
-        });
+        $task = $this->claimQueuedTask();
 
         if ($task === null) {
             return;
@@ -74,82 +57,11 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $broadcaster->broadcastStatus($task);
 
         try {
-            $payload = $task->payload;
-            $url = (string) ($task->secret_payload['url'] ?? $payload['remote_url'] ?? '');
-            $filename = (string) ($payload['filename'] ?? $task->name);
-            $headers = $task->secret_payload['headers'] ?? [];
-
-            if ($url === '' || $filename === '' || ! is_array($headers)) {
-                throw new RuntimeException('Remote upload task payload is invalid.');
-            }
-
-            $urlGuard->validate($url);
-
-            $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
-            $tempPath = $this->tempPath($task);
-            $absoluteTempPath = $this->absoluteTempPath($tempPath);
-
-            $this->ensureRemoteFileIsAllowed($url, $headers, $urlGuard);
-            $this->downloadRemoteFile($url, $headers, $absoluteTempPath, $urlGuard);
-
-            $downloadedSize = filesize($absoluteTempPath);
-
-            if ($downloadedSize === false || $downloadedSize < 1) {
-                throw new RuntimeException('Remote file is empty or could not be read.');
-            }
-
-            if ($downloadedSize > $this->maxFileSize()) {
-                throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
-            }
-
-            $uploadStream = fopen($absoluteTempPath, 'rb');
-
-            if ($uploadStream === false) {
-                throw new RuntimeException('Could not open downloaded remote file.');
-            }
-
-            $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
-            if (is_resource($uploadStream)) {
-                fclose($uploadStream);
-            }
-
-            $payload['size'] = $downloadedSize;
-            $payload['uploaded_chunks_count'] = 1;
-            $payload['total_chunks'] = 1;
-
-            $task->forceFill([
-                'status' => CloudTaskStatus::Completed,
-                'payload' => $payload,
-                'result' => ['path' => $targetPath],
-                'completed_at' => now(),
-            ])->save();
-            $broadcaster->broadcastStatus($task);
-
-            Storage::disk($this->tempDiskName())->delete($tempPath);
-            $cache->flushFolder($task->connection, $task->target_path);
-            $cache->flushQuota($task->connection);
-
-            $activityLogger->log(
-                user: $task->user,
-                action: ActivityAction::FileUploaded,
-                subjectName: $filename,
-                targetName: $task->target_path === '' ? '/' : $task->target_path,
-                connection: $task->connection,
-            );
+            $this->processRemoteUpload($task, $cache, $broadcaster, $urlGuard, $activityLogger);
         } catch (Throwable $exception) {
             $task->connection->handleApiException($exception);
-
             Storage::disk($this->tempDiskName())->delete($this->tempPath($task));
-
-            if ($this->attempts() >= $this->tries) {
-                $this->markFailed($task, $exception->getMessage(), $broadcaster);
-            } else {
-                $task->forceFill([
-                    'status' => CloudTaskStatus::Queued,
-                    'error_message' => $exception->getMessage(),
-                ])->save();
-                $broadcaster->broadcastStatus($task);
-            }
+            $this->requeueOrFail($task, $exception->getMessage(), $broadcaster);
 
             throw $exception;
         }
@@ -170,6 +82,120 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
             $exception?->getMessage() ?? 'Remote upload job failed.',
             app(CloudUploadTaskBroadcaster::class),
         );
+    }
+
+    private function claimQueuedTask(): ?CloudTask
+    {
+        return DB::transaction(function (): ?CloudTask {
+            $task = CloudTask::query()
+                ->whereKey($this->taskId)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            if ($task->type !== CloudTaskType::Upload || $task->status !== CloudTaskStatus::Queued) {
+                return null;
+            }
+
+            $task->forceFill([
+                'status' => CloudTaskStatus::Processing,
+                'processing_at' => now(),
+                'error_message' => null,
+            ])->save();
+
+            return $task;
+        });
+    }
+
+    private function processRemoteUpload(
+        CloudTask $task,
+        CloudStorageCache $cache,
+        CloudUploadTaskBroadcaster $broadcaster,
+        RemoteUploadUrlGuard $urlGuard,
+        ActivityLogger $activityLogger,
+    ): void {
+        $payload = $task->payload;
+        $url = (string) ($task->secret_payload['url'] ?? $payload['remote_url'] ?? '');
+        $filename = (string) ($payload['filename'] ?? $task->name);
+        $headers = $task->secret_payload['headers'] ?? [];
+
+        if ($url === '' || $filename === '' || ! is_array($headers)) {
+            throw new RuntimeException('Remote upload task payload is invalid.');
+        }
+
+        $urlGuard->validate($url);
+
+        $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
+        $tempPath = $this->tempPath($task);
+        $absoluteTempPath = $this->absoluteTempPath($tempPath);
+
+        $this->ensureRemoteFileIsAllowed($url, $headers, $urlGuard);
+        $this->downloadRemoteFile($url, $headers, $absoluteTempPath, $urlGuard);
+
+        $downloadedSize = filesize($absoluteTempPath);
+
+        if ($downloadedSize === false || $downloadedSize < 1) {
+            throw new RuntimeException('Remote file is empty or could not be read.');
+        }
+
+        if ($downloadedSize > $this->maxFileSize()) {
+            throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
+        }
+
+        $this->writeDownloadedFile($task, $targetPath, $absoluteTempPath);
+
+        $payload['size'] = $downloadedSize;
+        $payload['uploaded_chunks_count'] = 1;
+        $payload['total_chunks'] = 1;
+
+        $task->forceFill([
+            'status' => CloudTaskStatus::Completed,
+            'payload' => $payload,
+            'result' => ['path' => $targetPath],
+            'completed_at' => now(),
+        ])->save();
+        $broadcaster->broadcastStatus($task);
+
+        Storage::disk($this->tempDiskName())->delete($tempPath);
+        $cache->flushFolder($task->connection, $task->target_path);
+        $cache->flushQuota($task->connection);
+
+        $activityLogger->log(
+            user: $task->user,
+            action: ActivityAction::FileUploaded,
+            subjectName: $filename,
+            targetName: $task->target_path === '' ? '/' : $task->target_path,
+            connection: $task->connection,
+        );
+    }
+
+    private function writeDownloadedFile(CloudTask $task, string $targetPath, string $absoluteTempPath): void
+    {
+        $uploadStream = fopen($absoluteTempPath, 'rb');
+
+        if ($uploadStream === false) {
+            throw new RuntimeException('Could not open downloaded remote file.');
+        }
+
+        $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
+
+        if (is_resource($uploadStream)) {
+            fclose($uploadStream);
+        }
+    }
+
+    private function requeueOrFail(CloudTask $task, string $message, CloudUploadTaskBroadcaster $broadcaster): void
+    {
+        if ($this->attempts() >= $this->tries) {
+            $this->markFailed($task, $message, $broadcaster);
+
+            return;
+        }
+
+        $task->forceFill([
+            'status' => CloudTaskStatus::Queued,
+            'error_message' => $message,
+        ])->save();
+        $broadcaster->broadcastStatus($task);
     }
 
     private function markFailed(CloudTask $task, string $message, CloudUploadTaskBroadcaster $broadcaster): void

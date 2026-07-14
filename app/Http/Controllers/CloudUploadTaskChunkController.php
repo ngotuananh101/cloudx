@@ -21,27 +21,9 @@ class CloudUploadTaskChunkController extends Controller
 
     public function store(Request $request, CloudConnection $connection, CloudTask $task): JsonResponse
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
-        abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
-        abort_if($task->type !== CloudTaskType::Upload, 404);
+        $this->authorizeChunkUpload($request, $connection, $task);
 
-        if (($task->payload['upload_mode'] ?? 'backend') === 'direct') {
-            throw ValidationException::withMessages([
-                'chunk' => 'This upload task uses direct upload and does not accept backend chunks.',
-            ]);
-        }
-
-        if (! in_array($task->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading, CloudTaskStatus::Paused], true)) {
-            throw ValidationException::withMessages([
-                'chunk' => 'This upload task can no longer receive chunks.',
-            ]);
-        }
-
-        // Prefer the size negotiated when the task was created; fall back to config max.
-        $configuredChunkSize = (int) config('cloud-storage.uploads.chunk_size', 5242880);
-        $chunkSize = (int) ($task->payload['chunk_size'] ?? $configuredChunkSize);
-        $chunkSize = max(1024, min($chunkSize, $configuredChunkSize));
-        $maxKb = max(1, (int) ceil($chunkSize / 1024));
+        [$chunkSize, $maxKb] = $this->resolvedChunkLimits($task);
 
         $validated = $request->validate([
             'chunk' => ['required', 'file', "max:{$maxKb}"],
@@ -58,67 +40,13 @@ class CloudUploadTaskChunkController extends Controller
             ]);
         }
 
-        $totalChunks = (int) ($task->payload['total_chunks'] ?? 0);
-
-        if ($totalChunks < 1 || $index >= $totalChunks) {
-            throw ValidationException::withMessages([
-                'index' => 'Chunk index is invalid.',
-            ]);
-        }
-
-        if ($chunkSize > 0 && $index < $totalChunks - 1 && $chunk->getSize() !== $chunkSize) {
-            throw ValidationException::withMessages([
-                'chunk' => 'Chunk size is invalid.',
-            ]);
-        }
+        $this->assertChunkIndexAndSize($task, $index, $chunkSize, (int) $chunk->getSize());
 
         $path = $this->chunkPath($task, $index);
         Storage::disk($this->tempDiskName())->putFileAs(dirname($path), $chunk, basename($path));
 
         DB::transaction(function () use ($task, $index, $chunk, $validated): void {
-            $lockedTask = CloudTask::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
-
-            if (! in_array($lockedTask->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading, CloudTaskStatus::Paused], true)) {
-                throw ValidationException::withMessages([
-                    'chunk' => 'This upload task can no longer receive chunks.',
-                ]);
-            }
-
-            $lockedTask->chunks()->updateOrCreate([
-                'index' => $index,
-            ], [
-                'size' => (int) $chunk->getSize(),
-                'checksum' => $validated['checksum'] ?? null,
-            ]);
-
-            $uploadedChunksCount = $lockedTask->chunks()->count();
-            $payload = $lockedTask->payload;
-            $payload['uploaded_chunks_count'] = $uploadedChunksCount;
-            $totalChunks = (int) ($payload['total_chunks'] ?? 0);
-
-            if ($uploadedChunksCount >= $totalChunks && $totalChunks > 0) {
-                if (! in_array($lockedTask->status, [CloudTaskStatus::Queued, CloudTaskStatus::Processing, CloudTaskStatus::Completed], true)) {
-                    $lockedTask->forceFill([
-                        'status' => CloudTaskStatus::Queued,
-                        'payload' => $payload,
-                        'queued_at' => now(),
-                    ])->save();
-
-                    UploadCloudTaskFileJob::dispatch($lockedTask->id)->afterCommit();
-                }
-
-                return;
-            }
-
-            if ($lockedTask->status !== CloudTaskStatus::Paused) {
-                $lockedTask->forceFill([
-                    'status' => CloudTaskStatus::Uploading,
-                    'payload' => $payload,
-                    'started_at' => $lockedTask->started_at ?? now(),
-                ])->save();
-            } else {
-                $lockedTask->forceFill(['payload' => $payload])->save();
-            }
+            $this->persistChunkAndAdvanceTask($task, $index, (int) $chunk->getSize(), $validated['checksum'] ?? null);
         });
 
         $task->refresh()->load('chunks');
@@ -130,6 +58,112 @@ class CloudUploadTaskChunkController extends Controller
         }
 
         return response()->json(CloudUploadTaskData::fromTask($task));
+    }
+
+    private function authorizeChunkUpload(Request $request, CloudConnection $connection, CloudTask $task): void
+    {
+        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
+        abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
+        abort_if($task->type !== CloudTaskType::Upload, 404);
+
+        if (($task->payload['upload_mode'] ?? 'backend') === 'direct') {
+            throw ValidationException::withMessages([
+                'chunk' => 'This upload task uses direct upload and does not accept backend chunks.',
+            ]);
+        }
+
+        if (! in_array($task->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading, CloudTaskStatus::Paused], true)) {
+            throw ValidationException::withMessages([
+                'chunk' => 'This upload task can no longer receive chunks.',
+            ]);
+        }
+    }
+
+    /**
+     * @return array{0: int, 1: int}
+     */
+    private function resolvedChunkLimits(CloudTask $task): array
+    {
+        $configuredChunkSize = (int) config('cloud-storage.uploads.chunk_size', 5242880);
+        $chunkSize = max(1024, min((int) ($task->payload['chunk_size'] ?? $configuredChunkSize), $configuredChunkSize));
+
+        return [$chunkSize, max(1, (int) ceil($chunkSize / 1024))];
+    }
+
+    private function assertChunkIndexAndSize(CloudTask $task, int $index, int $chunkSize, int $actualSize): void
+    {
+        $totalChunks = (int) ($task->payload['total_chunks'] ?? 0);
+
+        if ($totalChunks < 1 || $index >= $totalChunks) {
+            throw ValidationException::withMessages([
+                'index' => 'Chunk index is invalid.',
+            ]);
+        }
+
+        if ($chunkSize > 0 && $index < $totalChunks - 1 && $actualSize !== $chunkSize) {
+            throw ValidationException::withMessages([
+                'chunk' => 'Chunk size is invalid.',
+            ]);
+        }
+    }
+
+    private function persistChunkAndAdvanceTask(CloudTask $task, int $index, int $size, ?string $checksum): void
+    {
+        $lockedTask = CloudTask::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
+
+        if (! in_array($lockedTask->status, [CloudTaskStatus::Pending, CloudTaskStatus::Uploading, CloudTaskStatus::Paused], true)) {
+            throw ValidationException::withMessages([
+                'chunk' => 'This upload task can no longer receive chunks.',
+            ]);
+        }
+
+        $lockedTask->chunks()->updateOrCreate([
+            'index' => $index,
+        ], [
+            'size' => $size,
+            'checksum' => $checksum,
+        ]);
+
+        $uploadedChunksCount = $lockedTask->chunks()->count();
+        $payload = $lockedTask->payload;
+        $payload['uploaded_chunks_count'] = $uploadedChunksCount;
+        $totalChunks = (int) ($payload['total_chunks'] ?? 0);
+
+        if ($uploadedChunksCount >= $totalChunks && $totalChunks > 0) {
+            $this->queueTaskIfReady($lockedTask, $payload);
+
+            return;
+        }
+
+        if ($lockedTask->status !== CloudTaskStatus::Paused) {
+            $lockedTask->forceFill([
+                'status' => CloudTaskStatus::Uploading,
+                'payload' => $payload,
+                'started_at' => $lockedTask->started_at ?? now(),
+            ])->save();
+
+            return;
+        }
+
+        $lockedTask->forceFill(['payload' => $payload])->save();
+    }
+
+    /**
+     * @param  array<string, mixed>  $payload
+     */
+    private function queueTaskIfReady(CloudTask $lockedTask, array $payload): void
+    {
+        if (in_array($lockedTask->status, [CloudTaskStatus::Queued, CloudTaskStatus::Processing, CloudTaskStatus::Completed], true)) {
+            return;
+        }
+
+        $lockedTask->forceFill([
+            'status' => CloudTaskStatus::Queued,
+            'payload' => $payload,
+            'queued_at' => now(),
+        ])->save();
+
+        UploadCloudTaskFileJob::dispatch($lockedTask->id)->afterCommit();
     }
 
     private function chunkPath(CloudTask $task, int $index): string
