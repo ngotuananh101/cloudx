@@ -45,6 +45,18 @@ function LoadingRenderer() {
     );
 }
 
+const sharePreviewDownloadRef: { current: (() => void) | null } = {
+    current: null,
+};
+
+function NoRendererOverride() {
+    return (
+        <NoRendererFallback
+            onDownload={() => sharePreviewDownloadRef.current?.()}
+        />
+    );
+}
+
 function PreviewChrome({
     fileName,
     fileSize,
@@ -123,9 +135,7 @@ function PreviewChrome({
                         themeMode: isDark ? 'dark' : 'light',
                         header: { disableHeader: true },
                         noRenderer: {
-                            overrideComponent: () => (
-                                <NoRendererFallback onDownload={onDownload} />
-                            ),
+                            overrideComponent: NoRendererOverride,
                         },
                         loadingRenderer: {
                             overrideComponent: LoadingRenderer,
@@ -154,6 +164,8 @@ export function SharePreview({
     const handleDownload = () => {
         globalThis.location.href = downloadUrl;
     };
+
+    sharePreviewDownloadRef.current = handleDownload;
 
     const previewContent = (
         <PreviewChrome

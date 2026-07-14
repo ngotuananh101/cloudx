@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 
+const DROPBOX_CALLBACK_URI = 'https://example.test/oauth/dropbox/callback';
+
 it('defines Dropbox provider metadata', function () {
     $provider = CloudProvider::DROPBOX;
 
@@ -24,7 +26,7 @@ it('defines Dropbox provider metadata', function () {
 
 it('builds the Dropbox OAuth redirect URL', function () {
     config()->set('services.dropbox.client_id', 'dropbox-client-id');
-    config()->set('services.dropbox.redirect_uri', 'https://example.test/oauth/dropbox/callback');
+    config()->set('services.dropbox.redirect_uri', DROPBOX_CALLBACK_URI);
 
     $redirectUrl = app(DropboxConnector::class)->redirectUrl();
     $redirectUrlParts = parse_url($redirectUrl);
@@ -35,7 +37,7 @@ it('builds the Dropbox OAuth redirect URL', function () {
         ->and($redirectUrlParts['path'])->toBe('/oauth2/authorize')
         ->and($query['client_id'])->toBe('dropbox-client-id')
         ->and($query['response_type'])->toBe('code')
-        ->and($query['redirect_uri'])->toBe('https://example.test/oauth/dropbox/callback')
+        ->and($query['redirect_uri'])->toBe(DROPBOX_CALLBACK_URI)
         ->and($query['token_access_type'])->toBe('offline')
         ->and($query['scope'])->toBe('account_info.read files.metadata.read files.content.read files.content.write')
         ->and($query['state'])->not->toBeEmpty()
@@ -57,7 +59,7 @@ it('rejects an invalid Dropbox OAuth callback state', function () {
 it('handles the Dropbox OAuth callback', function () {
     config()->set('services.dropbox.client_id', 'dropbox-client-id');
     config()->set('services.dropbox.client_secret', 'dropbox-client-secret');
-    config()->set('services.dropbox.redirect_uri', 'https://example.test/oauth/dropbox/callback');
+    config()->set('services.dropbox.redirect_uri', DROPBOX_CALLBACK_URI);
 
     session(['oauth_state_dropbox' => 'valid-state']);
 
@@ -109,7 +111,7 @@ it('handles the Dropbox OAuth callback', function () {
         && $request['client_id'] === 'dropbox-client-id'
         && $request['client_secret'] === 'dropbox-client-secret'
         && $request['code'] === 'valid-code'
-        && $request['redirect_uri'] === 'https://example.test/oauth/dropbox/callback'
+        && $request['redirect_uri'] === DROPBOX_CALLBACK_URI
         && $request['grant_type'] === 'authorization_code');
 
     Http::assertSent(fn ($request): bool => $request->url() === DropboxConnector::CURRENT_ACCOUNT_URL

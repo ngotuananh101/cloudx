@@ -67,19 +67,23 @@ done
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 step() {
-    echo -e "\n${CYAN}━━━ $1 ━━━${NC}"
+    local message=$1
+    echo -e "\n${CYAN}━━━ ${message} ━━━${NC}"
 }
 
 success() {
-    echo -e "${GREEN}✔ $1${NC}"
+    local message=$1
+    echo -e "${GREEN}✔ ${message}${NC}"
 }
 
 warn() {
-    echo -e "${YELLOW}⚠ $1${NC}"
+    local message=$1
+    echo -e "${YELLOW}⚠ ${message}${NC}"
 }
 
 fail() {
-    echo -e "${RED}✖ $1${NC}"
+    local message=$1
+    echo -e "${RED}✖ ${message}${NC}"
     exit 1
 }
 

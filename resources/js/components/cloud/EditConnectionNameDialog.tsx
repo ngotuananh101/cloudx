@@ -23,7 +23,7 @@ interface EditConnectionNameDialogProps {
 export default function EditConnectionNameDialog({
     connection,
     onClose,
-}: EditConnectionNameDialogProps) {
+}: Readonly<EditConnectionNameDialogProps>) {
     const form = useForm({
         name: connection?.name ?? '',
     });
@@ -38,7 +38,7 @@ export default function EditConnectionNameDialog({
         return null;
     }
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         form.patch(updateName.url(connection), {

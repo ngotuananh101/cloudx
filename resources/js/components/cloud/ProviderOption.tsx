@@ -3,7 +3,7 @@ import type { AvailableProvider } from '@/types/cloud';
 
 interface ProviderOptionProps {
     provider: AvailableProvider;
-    onSelectCredentialsProvider: (provider: AvailableProvider) => void;
+    onSelectCredentialsProvider: (provider: Readonly<AvailableProvider>) => void;
 }
 
 function isSvgIcon(icon: string | null | undefined): icon is string {
@@ -13,7 +13,7 @@ function isSvgIcon(icon: string | null | undefined): icon is string {
 export default function ProviderOption({
     provider,
     onSelectCredentialsProvider,
-}: ProviderOptionProps) {
+}: Readonly<ProviderOptionProps>) {
     const isSupportedCredentialsProvider =
         provider.authType === 'credentials' &&
         (provider.key === 'ftp' ||

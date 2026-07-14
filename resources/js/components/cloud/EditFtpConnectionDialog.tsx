@@ -59,7 +59,7 @@ const systemTypeOptions = [
 export default function EditFtpConnectionDialog({
     connection,
     onClose,
-}: EditFtpConnectionDialogProps) {
+}: Readonly<EditFtpConnectionDialogProps>) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<FtpConnectionFormData>(initialData(connection));
@@ -76,7 +76,7 @@ export default function EditFtpConnectionDialog({
         return null;
     }
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         router.patch(
@@ -401,13 +401,16 @@ function initialData(
         passive: config?.passive ?? true,
         timeout: config?.timeout ? String(config.timeout) : '',
         utf8: config?.utf8 ?? false,
-        ignorePassiveAddress:
-            config?.ignore_passive_address === undefined ||
-            config?.ignore_passive_address === null
-                ? 'default'
-                : config.ignore_passive_address
-                  ? 'true'
-                  : 'false',
+        ignorePassiveAddress: (() => {
+            if (
+                config?.ignore_passive_address === undefined ||
+                config?.ignore_passive_address === null
+            ) {
+                return 'default';
+            }
+
+            return config.ignore_passive_address ? 'true' : 'false';
+        })(),
         systemType: config?.system_type ?? 'auto',
         recurseManually: config?.recurse_manually ?? false,
         timestampsOnUnixListingsEnabled:
@@ -415,7 +418,7 @@ function initialData(
     };
 }
 
-function payload(data: FtpConnectionFormData) {
+function payload(data: Readonly<FtpConnectionFormData>) {
     return {
         ...data,
         port: Number(data.port),
@@ -434,12 +437,12 @@ function Field({
     error,
     required = false,
     children,
-}: {
+}: Readonly<{
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
-}) {
+}>) {
     const id = getChildId(children);
 
     return (
@@ -467,13 +470,13 @@ function CheckboxField({
     onChange,
     error,
     alignWithFields = false,
-}: {
+}: Readonly<{
     label: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
     error?: string;
     alignWithFields?: boolean;
-}) {
+}>) {
     return (
         <div className="space-y-2">
             {alignWithFields && <div className="h-4" aria-hidden="true" />}

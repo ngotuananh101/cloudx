@@ -81,6 +81,47 @@ class TelegramConnectionController extends Controller
             'password' => ['nullable', 'string', 'max:256'],
         ]);
 
+        $login = $this->attemptTelegramLogin($connect, $validated);
+
+        if ($login instanceof JsonResponse) {
+            return $login;
+        }
+
+        $connection = $request->user()->cloudConnections()->create([
+            'name' => $connect['name'],
+            'provider' => CloudProvider::TELEGRAM,
+            'provider_id' => $connect['session_id'],
+            'credentials' => ['session_id' => $connect['session_id']],
+            'status' => ConnectionStatus::CONNECTED,
+            'total_space' => null,
+            'used_space' => null,
+            'error_message' => null,
+            'last_synced_at' => now(),
+        ]);
+
+        $this->activityLogger->log(
+            user: $request->user(),
+            action: ActivityAction::ConnectionCreated,
+            subjectName: $connection->name,
+            connection: $connection,
+        );
+
+        Session::forget('telegram_connect');
+
+        return response()->json([
+            'success' => true,
+            'connection_id' => $connection->id,
+            'synced' => $login['synced'],
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $connect
+     * @param  array{code: string, password?: string|null}  $validated
+     * @return JsonResponse|array{synced: int}
+     */
+    private function attemptTelegramLogin(array $connect, array $validated): JsonResponse|array
+    {
         $client = $this->telegramClient($connect['session_id']);
 
         try {
@@ -113,34 +154,7 @@ class TelegramConnectionController extends Controller
             ], 422);
         }
 
-        $connection = $request->user()->cloudConnections()->create([
-            'name' => $connect['name'],
-            'provider' => CloudProvider::TELEGRAM,
-            'provider_id' => $connect['session_id'],
-            'credentials' => ['session_id' => $connect['session_id']],
-            'status' => ConnectionStatus::CONNECTED,
-            'total_space' => null,
-            'used_space' => null,
-            'error_message' => null,
-            'last_synced_at' => now(),
-        ]);
-
-        $synced = $result['synced'] ?? 0;
-
-        $this->activityLogger->log(
-            user: $request->user(),
-            action: ActivityAction::ConnectionCreated,
-            subjectName: $connection->name,
-            connection: $connection,
-        );
-
-        Session::forget('telegram_connect');
-
-        return response()->json([
-            'success' => true,
-            'connection_id' => $connection->id,
-            'synced' => $synced,
-        ]);
+        return ['synced' => (int) ($result['synced'] ?? 0)];
     }
 
     public function sync(Request $request, CloudConnection $connection): RedirectResponse

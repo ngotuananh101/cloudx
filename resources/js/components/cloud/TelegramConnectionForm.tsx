@@ -9,7 +9,7 @@ interface TelegramConnectionFormProps {
 export default function TelegramConnectionForm({
     onCancel,
     onSuccess,
-}: TelegramConnectionFormProps) {
+}: Readonly<TelegramConnectionFormProps>) {
     const [step, setStep] = useState<'phone' | 'code' | 'password' | 'done'>(
         'phone',
     );
@@ -25,7 +25,7 @@ export default function TelegramConnectionForm({
         (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
             ?.content ?? '';
 
-    const sendCode = (event: FormEvent) => {
+    const sendCode = (event: Readonly<FormEvent>) => {
         event.preventDefault();
         setLoading(true);
         setError(null);
@@ -52,7 +52,7 @@ export default function TelegramConnectionForm({
                 }
             })
             .then(() => setStep('code'))
-            .catch((err: unknown) =>
+            .catch((err: Readonly<unknown>) =>
                 setError(
                     err instanceof Error ? err.message : 'An error occurred',
                 ),
@@ -100,7 +100,7 @@ export default function TelegramConnectionForm({
                     setStep('done');
                 }
             })
-            .catch((err: unknown) =>
+            .catch((err: Readonly<unknown>) =>
                 setError(
                     err instanceof Error ? err.message : 'An error occurred',
                 ),

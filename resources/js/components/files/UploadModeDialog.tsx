@@ -13,14 +13,14 @@ import type { UploadMode } from '@/types/cloud';
 interface UploadModeDialogProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelect: (mode: UploadMode) => void;
+    onSelect: (mode: Readonly<UploadMode>) => void;
 }
 
 export function UploadModeDialog({
     isOpen,
     onClose,
     onSelect,
-}: UploadModeDialogProps) {
+}: Readonly<UploadModeDialogProps>) {
     const handleBackend = () => {
         onSelect('backend');
         onClose();

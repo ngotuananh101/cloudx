@@ -28,9 +28,9 @@ const errorConfig = {
 
 export default function ShareError({
     reason,
-}: {
+}: Readonly<{
     reason: keyof typeof errorConfig;
-}) {
+}>) {
     const config = errorConfig[reason] ?? errorConfig.not_found;
     const Icon = config.icon;
 

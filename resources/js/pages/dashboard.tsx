@@ -16,7 +16,7 @@ interface DashboardProps {
     recentActivities: ActivityLogEntry[];
 }
 
-function providerMiniIcon(provider: AvailableProvider) {
+function providerMiniIcon(provider: Readonly<AvailableProvider>) {
     if (provider.icon?.endsWith('.svg')) {
         return (
             <img src={provider.icon} className="h-5 w-5" alt={provider.label} />

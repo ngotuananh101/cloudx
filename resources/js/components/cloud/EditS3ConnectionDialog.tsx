@@ -64,7 +64,7 @@ const providerPresets = [
 export default function EditS3ConnectionDialog({
     connection,
     onClose,
-}: EditS3ConnectionDialogProps) {
+}: Readonly<EditS3ConnectionDialogProps>) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<S3ConnectionFormData>(initialData(connection));
@@ -81,7 +81,7 @@ export default function EditS3ConnectionDialog({
         return null;
     }
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         router.patch(
@@ -376,7 +376,7 @@ function initialData(connection: CloudConnection | null): S3ConnectionFormData {
     };
 }
 
-function payload(data: S3ConnectionFormData) {
+function payload(data: Readonly<S3ConnectionFormData>) {
     return {
         ...data,
         endpoint: data.endpoint || null,
@@ -391,12 +391,12 @@ function Field({
     error,
     required = false,
     children,
-}: {
+}: Readonly<{
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
-}) {
+}>) {
     const id = getChildId(children);
 
     return (
@@ -424,13 +424,13 @@ function CheckboxField({
     onChange,
     error,
     alignWithFields = false,
-}: {
+}: Readonly<{
     label: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
     error?: string;
     alignWithFields?: boolean;
-}) {
+}>) {
     return (
         <div className="space-y-2">
             {alignWithFields && <div className="h-4" aria-hidden="true" />}

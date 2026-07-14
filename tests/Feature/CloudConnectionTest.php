@@ -19,6 +19,13 @@ use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
+const OWNER_DRIVE_NAME = 'Owner Drive';
+const OWNER_EMAIL = 'owner@gmail.com';
+const ORIGINAL_EMAIL = 'original@gmail.com';
+const GOOGLE_OAUTH_URL = 'https://accounts.google.com/o/oauth2/auth?test=1';
+const TEST_EMAIL = 'test@gmail.com';
+const CONNECTION_GOOGLE_DRIVE_NAME = 'Google Drive (test@gmail.com)';
+
 it('creates a cloud connection and casts attributes correctly', function () {
     $user = User::factory()->create();
 
@@ -56,7 +63,7 @@ it('redirects to Google OAuth URL', function () {
     $user = User::factory()->create();
 
     $connector = Mockery::mock(CloudProviderConnector::class);
-    $connector->shouldReceive('redirectUrl')->once()->andReturn('https://accounts.google.com/o/oauth2/auth?test=1');
+    $connector->shouldReceive('redirectUrl')->once()->andReturn(GOOGLE_OAUTH_URL);
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('connector')->once()->with(Mockery::on(
@@ -67,7 +74,7 @@ it('redirects to Google OAuth URL', function () {
 
     $response = $this->actingAs($user)->get(route('oauth.redirect', ['provider' => 'google-drive']));
 
-    $response->assertRedirect('https://accounts.google.com/o/oauth2/auth?test=1');
+    $response->assertRedirect(GOOGLE_OAUTH_URL);
 });
 
 it('google connector creates redirect url', function () {
@@ -81,13 +88,13 @@ it('google connector creates redirect url', function () {
     $mockClient->shouldReceive('setAccessType')->once()->with('offline');
     $mockClient->shouldReceive('setPrompt')->once()->with('consent');
     $mockClient->shouldReceive('setState')->once()->with(Mockery::type('string'));
-    $mockClient->shouldReceive('createAuthUrl')->once()->andReturn('https://accounts.google.com/o/oauth2/auth?test=1');
+    $mockClient->shouldReceive('createAuthUrl')->once()->andReturn(GOOGLE_OAUTH_URL);
 
     $this->app->instance(Client::class, $mockClient);
 
     $connector = app(GoogleDriveConnector::class);
 
-    expect($connector->redirectUrl())->toBe('https://accounts.google.com/o/oauth2/auth?test=1');
+    expect($connector->redirectUrl())->toBe(GOOGLE_OAUTH_URL);
 });
 
 it('handles Google OAuth callback successfully', function () {
@@ -95,8 +102,8 @@ it('handles Google OAuth callback successfully', function () {
 
     $connector = Mockery::mock(CloudProviderConnector::class);
     $connector->shouldReceive('handleCallback')->once()->with(Mockery::type(Request::class))->andReturn(new ConnectedAccountData(
-        providerId: 'test@gmail.com',
-        name: 'Google Drive (test@gmail.com)',
+        providerId: TEST_EMAIL,
+        name: CONNECTION_GOOGLE_DRIVE_NAME,
         credentials: [
             'access_token' => 'mock_access_token',
             'refresh_token' => 'mock_refresh_token',
@@ -124,8 +131,8 @@ it('handles Google OAuth callback successfully', function () {
     $connection = $user->cloudConnections()->first();
     expect($connection)->not->toBeNull()
         ->and($connection->provider)->toBe(CloudProvider::GOOGLE_DRIVE)
-        ->and($connection->provider_id)->toBe('test@gmail.com')
-        ->and($connection->name)->toBe('Google Drive (test@gmail.com)')
+        ->and($connection->provider_id)->toBe(TEST_EMAIL)
+        ->and($connection->name)->toBe(CONNECTION_GOOGLE_DRIVE_NAME)
         ->and($connection->status)->toBe(ConnectionStatus::CONNECTED)
         ->and($connection->credentials['access_token'])->toBe('mock_access_token')
         ->and($connection->credentials['refresh_token'])->toBe('mock_refresh_token')
@@ -134,7 +141,7 @@ it('handles Google OAuth callback successfully', function () {
 
     $log = ActivityLog::query()->where('user_id', $user->id)->sole();
     expect($log->action)->toBe(ActivityAction::ConnectionCreated)
-        ->and($log->subject_name)->toBe('Google Drive (test@gmail.com)')
+        ->and($log->subject_name)->toBe(CONNECTION_GOOGLE_DRIVE_NAME)
         ->and($log->cloud_connection_id)->toBe($connection->id);
 });
 
@@ -168,9 +175,9 @@ it('does not persist Google refresh token error payloads', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive (test@gmail.com)',
+        'name' => CONNECTION_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'test@gmail.com',
+        'provider_id' => TEST_EMAIL,
         'credentials' => [
             'access_token' => 'expired_token',
             'refresh_token' => 'valid_refresh_token',
@@ -218,7 +225,7 @@ it('can disconnect a cloud connection', function () {
 
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive (test@gmail.com)',
+        'name' => CONNECTION_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
@@ -233,7 +240,7 @@ it('can disconnect a cloud connection', function () {
 
     $log = ActivityLog::query()->where('user_id', $user->id)->sole();
     expect($log->action)->toBe(ActivityAction::ConnectionDeleted)
-        ->and($log->subject_name)->toBe('Google Drive (test@gmail.com)');
+        ->and($log->subject_name)->toBe(CONNECTION_GOOGLE_DRIVE_NAME);
 });
 
 it('shares connection action capabilities with inertia auth props', function () {
@@ -241,9 +248,9 @@ it('shares connection action capabilities with inertia auth props', function () 
 
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive (test@gmail.com)',
+        'name' => CONNECTION_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'test@gmail.com',
+        'provider_id' => TEST_EMAIL,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -265,7 +272,7 @@ it('updates a cloud connection display name', function () {
         'user_id' => $user->id,
         'name' => 'Old name',
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'test@gmail.com',
+        'provider_id' => TEST_EMAIL,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -280,7 +287,7 @@ it('updates a cloud connection display name', function () {
     $connection->refresh();
 
     expect($connection->name)->toBe('Personal Drive')
-        ->and($connection->provider_id)->toBe('test@gmail.com')
+        ->and($connection->provider_id)->toBe(TEST_EMAIL)
         ->and($connection->credentials['access_token'])->toBe('token');
 });
 
@@ -290,7 +297,7 @@ it('validates cloud connection display names', function () {
         'user_id' => $user->id,
         'name' => 'Google Drive',
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'test@gmail.com',
+        'provider_id' => TEST_EMAIL,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -309,9 +316,9 @@ it('does not let users rename another users cloud connection', function () {
     $otherUser = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $owner->id,
-        'name' => 'Owner Drive',
+        'name' => OWNER_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'owner@gmail.com',
+        'provider_id' => OWNER_EMAIL,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -320,16 +327,16 @@ it('does not let users rename another users cloud connection', function () {
         ->patch(route('cloud-connections.name.update', $connection), ['name' => 'Stolen Drive'])
         ->assertForbidden();
 
-    expect($connection->fresh()->name)->toBe('Owner Drive');
+    expect($connection->fresh()->name)->toBe(OWNER_DRIVE_NAME);
 });
 
 it('starts reconnect for the users existing oauth connection', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive (test@gmail.com)',
+        'name' => CONNECTION_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'test@gmail.com',
+        'provider_id' => TEST_EMAIL,
         'credentials' => ['access_token' => 'old-token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -349,7 +356,7 @@ it('starts reconnect for the users existing oauth connection', function () {
     $response->assertRedirect('https://accounts.google.com/o/oauth2/auth?reconnect=1');
     $response->assertSessionHas('cloud_connection_reconnect.connection_id', $connection->id);
     $response->assertSessionHas('cloud_connection_reconnect.provider', CloudProvider::GOOGLE_DRIVE->value);
-    $response->assertSessionHas('cloud_connection_reconnect.provider_id', 'test@gmail.com');
+    $response->assertSessionHas('cloud_connection_reconnect.provider_id', TEST_EMAIL);
 });
 
 it('does not let users reconnect another users cloud connection', function () {
@@ -357,9 +364,9 @@ it('does not let users reconnect another users cloud connection', function () {
     $otherUser = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $owner->id,
-        'name' => 'Owner Drive',
+        'name' => OWNER_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'owner@gmail.com',
+        'provider_id' => OWNER_EMAIL,
         'credentials' => ['access_token' => 'old-token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -375,7 +382,7 @@ it('updates the existing connection when reconnect returns the same account', fu
         'user_id' => $user->id,
         'name' => 'Old Drive Name',
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'test@gmail.com',
+        'provider_id' => TEST_EMAIL,
         'credentials' => ['access_token' => 'old-token'],
         'status' => ConnectionStatus::CONNECTED,
         'total_space' => 10,
@@ -386,14 +393,14 @@ it('updates the existing connection when reconnect returns the same account', fu
         'cloud_connection_reconnect' => [
             'connection_id' => $connection->id,
             'provider' => CloudProvider::GOOGLE_DRIVE->value,
-            'provider_id' => 'test@gmail.com',
+            'provider_id' => TEST_EMAIL,
         ],
     ]);
 
     $connector = Mockery::mock(CloudProviderConnector::class);
     $connector->shouldReceive('handleCallback')->once()->with(Mockery::type(Request::class))->andReturn(new ConnectedAccountData(
-        providerId: 'test@gmail.com',
-        name: 'Google Drive (test@gmail.com)',
+        providerId: TEST_EMAIL,
+        name: CONNECTION_GOOGLE_DRIVE_NAME,
         credentials: ['access_token' => 'new-token', 'refresh_token' => 'new-refresh-token'],
         totalSpace: 100,
         usedSpace: 25,
@@ -418,7 +425,7 @@ it('updates the existing connection when reconnect returns the same account', fu
     $connection->refresh();
 
     expect($connection->name)->toBe('Old Drive Name')
-        ->and($connection->provider_id)->toBe('test@gmail.com')
+        ->and($connection->provider_id)->toBe(TEST_EMAIL)
         ->and($connection->credentials['access_token'])->toBe('new-token')
         ->and($connection->credentials['refresh_token'])->toBe('new-refresh-token')
         ->and($connection->total_space)->toBe(100)
@@ -433,7 +440,7 @@ it('rejects reconnect when oauth returns a different account', function () {
         'user_id' => $user->id,
         'name' => 'Original Drive',
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'original@gmail.com',
+        'provider_id' => ORIGINAL_EMAIL,
         'credentials' => ['access_token' => 'old-token'],
         'status' => ConnectionStatus::CONNECTED,
         'total_space' => 10,
@@ -444,7 +451,7 @@ it('rejects reconnect when oauth returns a different account', function () {
         'cloud_connection_reconnect' => [
             'connection_id' => $connection->id,
             'provider' => CloudProvider::GOOGLE_DRIVE->value,
-            'provider_id' => 'original@gmail.com',
+            'provider_id' => ORIGINAL_EMAIL,
         ],
     ]);
 
@@ -475,7 +482,7 @@ it('rejects reconnect when oauth returns a different account', function () {
 
     $connection->refresh();
 
-    expect($connection->provider_id)->toBe('original@gmail.com')
+    expect($connection->provider_id)->toBe(ORIGINAL_EMAIL)
         ->and($connection->credentials['access_token'])->toBe('old-token')
         ->and($connection->total_space)->toBe(10)
         ->and($connection->used_space)->toBe(5)
@@ -487,9 +494,9 @@ it('does not let users delete another users cloud connection', function () {
     $otherUser = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $owner->id,
-        'name' => 'Owner Drive',
+        'name' => OWNER_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
-        'provider_id' => 'owner@gmail.com',
+        'provider_id' => OWNER_EMAIL,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
     ]);

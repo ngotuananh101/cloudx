@@ -81,7 +81,7 @@ interface SharedLinksPageProps {
 export default function SharedLinksPage({
     shares,
     filters: initialFilters = {},
-}: SharedLinksPageProps) {
+}: Readonly<SharedLinksPageProps>) {
     const { props } = usePage() as any;
     const userConnections = props.auth?.user?.connections || [];
 
@@ -153,7 +153,7 @@ export default function SharedLinksPage({
             } catch {
                 toast.error('Failed to copy link');
             } finally {
-                document.body.removeChild(textArea);
+                textArea.remove();
             }
         }
     };
@@ -545,9 +545,9 @@ export default function SharedLinksPage({
                     {/* Pagination */}
                     {shares.last_page > 1 && (
                         <div className="flex items-center justify-center gap-1 border-t border-border p-4">
-                            {shares.links.map((link, i) => (
+                            {shares.links.map((link) => (
                                 <Button
-                                    key={i}
+                                    key={`${link.label}-${link.url ?? 'disabled'}-${link.active ? '1' : '0'}`}
                                     variant={
                                         link.active ? 'default' : 'outline'
                                     }
@@ -589,7 +589,7 @@ export default function SharedLinksPage({
                         <AlertDialogDescription className="text-muted-foreground">
                             Are you sure you want to delete the shared link for{' '}
                             <strong className="text-foreground">
-                                "{shareToDelete?.name}"
+                                &quot;{shareToDelete?.name}&quot;
                             </strong>
                             ? Anyone with this link will immediately lose
                             access. This action cannot be undone.

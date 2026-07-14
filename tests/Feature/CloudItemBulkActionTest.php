@@ -8,6 +8,9 @@ use App\Models\User;
 use App\Services\CloudStorage\CloudStorageManager;
 use Illuminate\Support\Facades\Storage;
 
+const BULK_REPORT_PATH = 'documents/report.txt';
+const BULK_SOURCE_PATH = 'inbox/source.txt';
+
 beforeEach(function () {
     Storage::fake('ftp');
 });
@@ -29,14 +32,14 @@ it('deletes multiple files and folders', function () {
         'provider' => CloudProvider::FTP,
     ]);
 
-    Storage::disk('ftp')->put('documents/report.txt', 'report');
+    Storage::disk('ftp')->put(BULK_REPORT_PATH, 'report');
     Storage::disk('ftp')->put('documents/archive/photo.jpg', 'photo');
     Storage::disk('ftp')->put('keep.txt', 'keep');
     bindFakeCloudDisk();
 
     $response = $this->actingAs($user)->delete(route('connections.items.destroy', $connection), [
         'items' => [
-            ['path' => 'documents/report.txt', 'is_directory' => false],
+            ['path' => BULK_REPORT_PATH, 'is_directory' => false],
             ['path' => 'documents/archive', 'is_directory' => true],
         ],
     ]);
@@ -44,7 +47,7 @@ it('deletes multiple files and folders', function () {
     $response->assertRedirect();
     $response->assertSessionHas('success', '2 items deleted.');
 
-    expect(Storage::disk('ftp')->exists('documents/report.txt'))->toBeFalse();
+    expect(Storage::disk('ftp')->exists(BULK_REPORT_PATH))->toBeFalse();
     expect(Storage::disk('ftp')->exists('documents/archive/photo.jpg'))->toBeFalse();
     expect(Storage::disk('ftp')->exists('keep.txt'))->toBeTrue();
 
@@ -59,7 +62,7 @@ it('moves multiple files and folders to a shared destination', function () {
         'provider' => CloudProvider::FTP,
     ]);
 
-    Storage::disk('ftp')->put('inbox/source.txt', 'content');
+    Storage::disk('ftp')->put(BULK_SOURCE_PATH, 'content');
     Storage::disk('ftp')->put('inbox/folder/nested.txt', 'nested');
     Storage::disk('ftp')->makeDirectory('dest_folder');
     bindFakeCloudDisk();
@@ -67,7 +70,7 @@ it('moves multiple files and folders to a shared destination', function () {
     $response = $this->actingAs($user)->post(route('connections.items.move', $connection), [
         'destination_folder' => 'dest_folder',
         'items' => [
-            ['path' => 'inbox/source.txt', 'is_directory' => false],
+            ['path' => BULK_SOURCE_PATH, 'is_directory' => false],
             ['path' => 'inbox/folder', 'is_directory' => true],
         ],
     ]);
@@ -77,7 +80,7 @@ it('moves multiple files and folders to a shared destination', function () {
 
     expect(Storage::disk('ftp')->exists('dest_folder/source.txt'))->toBeTrue();
     expect(Storage::disk('ftp')->exists('dest_folder/folder/nested.txt'))->toBeTrue();
-    expect(Storage::disk('ftp')->exists('inbox/source.txt'))->toBeFalse();
+    expect(Storage::disk('ftp')->exists(BULK_SOURCE_PATH))->toBeFalse();
     expect(Storage::disk('ftp')->exists('inbox/folder/nested.txt'))->toBeFalse();
 
     expect(ActivityLog::query()->where('user_id', $user->id)->count())->toBe(2)

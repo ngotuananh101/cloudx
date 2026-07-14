@@ -53,7 +53,7 @@ export default function ShareItemModal({
     onClose,
     item,
     connectionId,
-}: ShareItemModalProps) {
+}: Readonly<ShareItemModalProps>) {
     const [shares, setShares] = useState<CloudShare[]>([]);
     const [isLoadingShares, setIsLoadingShares] = useState(false);
 
@@ -130,7 +130,9 @@ export default function ShareItemModal({
             type: type,
             password: type === 'password' ? password : null,
             expires_in_days:
-                expiresInDays === '0' ? null : parseInt(expiresInDays, 10),
+                expiresInDays === '0'
+                    ? null
+                    : Number.parseInt(expiresInDays, 10),
             size: item.isDirectory ? null : item.size,
         };
 
@@ -218,7 +220,7 @@ export default function ShareItemModal({
             } catch {
                 toast.error('Failed to copy link');
             } finally {
-                container.removeChild(textArea);
+                textArea.remove();
             }
         }
     };
@@ -344,11 +346,12 @@ export default function ShareItemModal({
                         </div>
 
                         {/* Existing Shares List */}
-                        {isLoadingShares ? (
+                        {isLoadingShares && (
                             <div className="flex justify-center p-4">
                                 <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                             </div>
-                        ) : shares.length > 0 ? (
+                        )}
+                        {!isLoadingShares && shares.length > 0 && (
                             <div className="space-y-3">
                                 <h4 className="text-sm font-semibold text-foreground">
                                     Active Links
@@ -430,7 +433,7 @@ export default function ShareItemModal({
                                     ))}
                                 </div>
                             </div>
-                        ) : null}
+                        )}
                     </div>
                 </DialogContent>
             </Dialog>

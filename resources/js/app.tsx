@@ -28,14 +28,13 @@ createInertiaApp({
 
         createRoot(el).render(
             <ThemeProvider defaultTheme="system" storageKey="cloudx-ui-theme">
-                <App
-                    {...props}
-                    children={({ Component, props: pageProps, key }) => (
+                <App {...props}>
+                    {({ Component, props: pageProps, key }) => (
                         <UploadManagerProvider>
                             <Component {...pageProps} key={key} />
                         </UploadManagerProvider>
                     )}
-                />
+                </App>
                 <Toaster position="top-right" />
             </ThemeProvider>,
         );

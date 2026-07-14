@@ -21,7 +21,7 @@ interface ActivityLogsIndexProps {
 export default function ActivityLogsIndex({
     logs,
     retentionDays,
-}: ActivityLogsIndexProps) {
+}: Readonly<ActivityLogsIndexProps>) {
     return (
         <AuthenticatedLayout title="Activity Log">
             <Head title="Activity Log" />

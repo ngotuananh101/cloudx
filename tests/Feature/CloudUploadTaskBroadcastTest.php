@@ -22,18 +22,23 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Pusher\Pusher;
 
+const BROADCAST_AUTH_ROUTE = '/testing/broadcasting/auth';
+
 it('authorizes users to subscribe to their cloud task channel', function () {
     config()->set('broadcasting.default', 'reverb');
     config()->set('broadcasting.connections.reverb.key', 'testing');
     config()->set('broadcasting.connections.reverb.secret', 'testing');
     config()->set('broadcasting.connections.reverb.app_id', 'testing');
     app(BroadcastManager::class)->forgetDrivers();
-    Route::post('/testing/broadcasting/auth', '\\'.BroadcastController::class.'@authenticate')
+    Route::post(BROADCAST_AUTH_ROUTE, '\\'.BroadcastController::class.'@authenticate')
         ->middleware('web');
 
     Broadcast::connection('reverb')->setPusher(new class extends Pusher
     {
-        public function __construct() {}
+        public function __construct()
+        {
+            // No-op stub for Pusher authorization in feature tests.
+        }
 
         public function authorizeChannel(string $channel, string $socket_id, ?string $custom_data = null): string
         {
@@ -53,14 +58,14 @@ it('authorizes users to subscribe to their cloud task channel', function () {
     });
 
     $this->actingAs($user)
-        ->postJson('/testing/broadcasting/auth', [
+        ->postJson(BROADCAST_AUTH_ROUTE, [
             'socket_id' => '123.456',
             'channel_name' => "private-users.{$user->id}.cloud-tasks",
         ])
         ->assertOk();
 
     $this->actingAs($otherUser)
-        ->postJson('/testing/broadcasting/auth', [
+        ->postJson(BROADCAST_AUTH_ROUTE, [
             'socket_id' => '123.456',
             'channel_name' => "private-users.{$user->id}.cloud-tasks",
         ])

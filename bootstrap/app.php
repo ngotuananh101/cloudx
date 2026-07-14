@@ -22,5 +22,5 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Default exception handling. Parameter required by Laravel bootstrap.
     })->create();

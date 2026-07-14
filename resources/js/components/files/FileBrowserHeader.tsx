@@ -35,7 +35,7 @@ export function FileBrowserHeader({
     decodedPath,
     onNavigateHome,
     onNavigatePath,
-}: FileBrowserHeaderProps) {
+}: Readonly<FileBrowserHeaderProps>) {
     const segments = breadcrumbSegments(decodedPath);
     const hiddenSegments = segments.slice(0, -3);
     const visibleSegments = segments.slice(-3);

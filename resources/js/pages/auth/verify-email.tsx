@@ -6,7 +6,7 @@ import { resend } from '@/actions/App/Http/Controllers/Auth/VerifyEmailControlle
 import { Button } from '@/components/ui/button';
 import GuestLayout from '@/layouts/GuestLayout';
 
-export default function VerifyEmail({ status }: { status?: string }) {
+export default function VerifyEmail({ status }: Readonly<{ status?: string }>) {
     const { post, processing } = useForm({});
 
     const submit: FormEventHandler = (e) => {

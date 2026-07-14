@@ -33,7 +33,7 @@ export function ThemeProvider({
     storageKey = 'vite-ui-theme',
     ...props
 }: Readonly<ThemeProviderProps>) {
-    const [theme, setThemeState] = useState<Theme>(
+    const [theme, setTheme] = useState<Theme>(
         () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
     );
 
@@ -75,10 +75,10 @@ export function ThemeProvider({
         return () => mediaQuery.removeEventListener('change', handleChange);
     }, [theme]);
 
-    const setTheme = useCallback(
+    const updateTheme = useCallback(
         (nextTheme: Theme) => {
             localStorage.setItem(storageKey, nextTheme);
-            setThemeState(nextTheme);
+            setTheme(nextTheme);
         },
         [storageKey],
     );
@@ -86,9 +86,9 @@ export function ThemeProvider({
     const value = useMemo(
         () => ({
             theme,
-            setTheme,
+            setTheme: updateTheme,
         }),
-        [theme, setTheme],
+        [theme, updateTheme],
     );
 
     return (

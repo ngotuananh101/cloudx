@@ -54,7 +54,9 @@ const getQueueKey = (file: File, target: UploadTarget) =>
 const getRemoteQueueKey = (remote: RemoteUploadRequest, target: UploadTarget) =>
     `${target.connectionId}-${target.path}-${remote.url}-${remote.filename ?? ''}-${Date.now()}`;
 
-export function UploadManagerProvider({ children }: { children: ReactNode }) {
+export function UploadManagerProvider({
+    children,
+}: Readonly<{ children: ReactNode }>) {
     const [items, setItems] = useState<UploadQueueItem[]>([]);
     const [isPanelVisible, setIsPanelVisible] = useState(false);
     const pausedUploads = useRef(new Set<string>());
@@ -77,8 +79,7 @@ export function UploadManagerProvider({ children }: { children: ReactNode }) {
         const location = fileBrowserLocation.current;
 
         if (
-            location &&
-            location.connectionId === task.connection_id &&
+            location?.connectionId === task.connection_id &&
             location.path === task.target_path
         ) {
             router.reload({ only: ['files', 'connection'] });

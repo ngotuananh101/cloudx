@@ -13,6 +13,7 @@ use Illuminate\Support\Str;
 uses(RefreshDatabase::class);
 
 const DRIVE_NAME = 'My Drive';
+const SHARE_REPORT_PATH = 'docs/report.pdf';
 
 it('stores file size in extra_info when sharing a single file', function () {
     $user = User::factory()->create();
@@ -27,7 +28,7 @@ it('stores file size in extra_info when sharing a single file', function () {
     $this->actingAs($user)->post(
         route('connections.shares.store', ['connection' => $connection->id]),
         [
-            'path' => 'docs/report.pdf',
+            'path' => SHARE_REPORT_PATH,
             'name' => 'report.pdf',
             'is_directory' => false,
             'type' => 'public',
@@ -57,7 +58,7 @@ it('logs the activity and removes the share when destroyed', function () {
         'uuid' => (string) Str::uuid(),
         'user_id' => $user->id,
         'cloud_connection_id' => $connection->id,
-        'path' => 'docs/report.pdf',
+        'path' => SHARE_REPORT_PATH,
         'name' => 'report.pdf',
         'is_directory' => false,
         'type' => 'public',
@@ -112,7 +113,7 @@ it('accepts missing size for backwards compatibility with shares created before 
     $this->actingAs($user)->post(
         route('connections.shares.store', ['connection' => $connection->id]),
         [
-            'path' => 'docs/report.pdf',
+            'path' => SHARE_REPORT_PATH,
             'name' => 'report.pdf',
             'is_directory' => false,
             'type' => 'public',
@@ -137,7 +138,7 @@ it('hides the password hash when listing shares for a path', function () {
         'uuid' => (string) Str::uuid(),
         'user_id' => $user->id,
         'cloud_connection_id' => $connection->id,
-        'path' => 'docs/report.pdf',
+        'path' => SHARE_REPORT_PATH,
         'name' => 'report.pdf',
         'is_directory' => false,
         'type' => 'password',
@@ -145,7 +146,7 @@ it('hides the password hash when listing shares for a path', function () {
     ]);
 
     $response = $this->actingAs($user)->getJson(
-        route('connections.shares.index', ['connection' => $connection->id, 'path' => 'docs/report.pdf'])
+        route('connections.shares.index', ['connection' => $connection->id, 'path' => SHARE_REPORT_PATH])
     );
 
     $response->assertOk()

@@ -20,7 +20,7 @@ export function ShareBreadcrumb({
     currentPath,
     shareBasePath,
     onNavigate,
-}: ShareBreadcrumbProps) {
+}: Readonly<ShareBreadcrumbProps>) {
     // Build segments relative to share root
     const relativePath = currentPath.startsWith(shareBasePath)
         ? currentPath.slice(shareBasePath.length).replace(/^\//, '')

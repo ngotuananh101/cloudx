@@ -6,6 +6,8 @@ use App\Data\ProviderCapabilities;
 use App\Services\CloudStorage\CloudFileTypeDetector;
 use App\Services\CloudStorage\PathEncoder;
 
+const FILE_PATH = 'folder/file.pdf';
+
 it('encodes and decodes unicode cloud paths using url safe base64', function () {
     $path = 'Khách hàng/Ảnh hợp đồng.pdf';
 
@@ -42,8 +44,8 @@ it('serializes cloud storage data objects to arrays', function () {
     );
 
     $file = new CloudFileData(
-        id: 'folder/file.pdf',
-        path: 'folder/file.pdf',
+        id: FILE_PATH,
+        path: FILE_PATH,
         name: 'file.pdf',
         type: 'document',
         size: 1000,
@@ -69,8 +71,8 @@ it('serializes cloud storage data objects to arrays', function () {
             'total_space' => 100,
             'used_space' => 25,
         ])->and($file->toArray())->toMatchArray([
-            'id' => 'folder/file.pdf',
-            'path' => 'folder/file.pdf',
+            'id' => FILE_PATH,
+            'path' => FILE_PATH,
             'name' => 'file.pdf',
             'type' => 'document',
             'size' => 1000,

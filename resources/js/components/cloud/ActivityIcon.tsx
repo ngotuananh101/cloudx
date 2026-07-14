@@ -21,7 +21,7 @@ const ACTION_ICONS: Record<string, ComponentType<{ className?: string }>> = {
     download: Download,
 };
 
-export function ActivityIcon({ icon }: { icon: string }) {
+export function ActivityIcon({ icon }: Readonly<{ icon: string }>) {
     const Icon = ACTION_ICONS[icon] ?? FileText;
 
     return <Icon className="h-6 w-6" />;

@@ -49,6 +49,18 @@ function LoadingRenderer() {
     );
 }
 
+const filePreviewDownloadRef: { current: (() => void) | null } = {
+    current: null,
+};
+
+function NoRendererOverride() {
+    return (
+        <NoRendererFallback
+            onDownload={() => filePreviewDownloadRef.current?.()}
+        />
+    );
+}
+
 export default function FilePreviewModal({
     item,
     connectionId,
@@ -97,6 +109,8 @@ export default function FilePreviewModal({
     const handleDownload = () => {
         globalThis.location.href = downloadUrl;
     };
+
+    filePreviewDownloadRef.current = handleDownload;
 
     return (
         <Dialog
@@ -194,11 +208,7 @@ export default function FilePreviewModal({
                                     disableHeader: true,
                                 },
                                 noRenderer: {
-                                    overrideComponent: () => (
-                                        <NoRendererFallback
-                                            onDownload={handleDownload}
-                                        />
-                                    ),
+                                    overrideComponent: NoRendererOverride,
                                 },
                                 loadingRenderer: {
                                     overrideComponent: LoadingRenderer,

@@ -26,7 +26,7 @@ interface SftpConnectionFormData {
 export default function SftpConnectionForm({
     onCancel,
     onSuccess,
-}: SftpConnectionFormProps) {
+}: Readonly<SftpConnectionFormProps>) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<SftpConnectionFormData>({
@@ -43,7 +43,7 @@ export default function SftpConnectionForm({
         maxTries: '4',
     });
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         router.post(store.url(), payload(form.data), {
@@ -275,7 +275,7 @@ export default function SftpConnectionForm({
     );
 }
 
-function payload(data: SftpConnectionFormData) {
+function payload(data: Readonly<SftpConnectionFormData>) {
     return {
         ...data,
         port: Number(data.port),
@@ -293,12 +293,12 @@ function Field({
     error,
     required = false,
     children,
-}: {
+}: Readonly<{
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
-}) {
+}>) {
     const id = getChildId(children);
 
     return (

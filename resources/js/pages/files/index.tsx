@@ -34,7 +34,7 @@ export default function FileBrowser({
     connection,
     decodedPath,
     files,
-}: FileBrowserProps) {
+}: Readonly<FileBrowserProps>) {
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateFolderOpen, setIsCreateFolderOpen] = useState(false);
     const [itemsToDelete, setItemsToDelete] = useState<CloudFile[]>([]);
@@ -119,7 +119,7 @@ export default function FileBrowser({
         });
     };
 
-    const handleNavigate = (file: CloudFile) => {
+    const handleNavigate = (file: Readonly<CloudFile>) => {
         if (!file.isDirectory) {
             return;
         }
@@ -149,7 +149,7 @@ export default function FileBrowser({
         router.reload({ only: ['files', 'connection'] });
     };
 
-    const handleUploadFiles = (event: ChangeEvent<HTMLInputElement>) => {
+    const handleUploadFiles = (event: Readonly<ChangeEvent<HTMLInputElement>>) => {
         const selectedFiles = Array.from(event.target.files || []);
         event.target.value = '';
 
@@ -172,7 +172,7 @@ export default function FileBrowser({
         }
     };
 
-    const handleUploadModeSelect = (mode: UploadMode) => {
+    const handleUploadModeSelect = (mode: Readonly<UploadMode>) => {
         uploadManager.enqueue(pendingUploadFiles, {
             connectionId: connection.id,
             path: decodedPath,
@@ -182,7 +182,7 @@ export default function FileBrowser({
         setIsUploadModeDialogOpen(false);
     };
 
-    const handleRemoteUpload = (remoteUpload: RemoteUploadRequest) => {
+    const handleRemoteUpload = (remoteUpload: Readonly<RemoteUploadRequest>) => {
         uploadManager.enqueueRemote(remoteUpload, {
             connectionId: connection.id,
             path: decodedPath,

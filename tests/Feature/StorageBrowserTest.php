@@ -20,6 +20,8 @@ use Inertia\Testing\AssertableInertia;
 
 uses(RefreshDatabase::class);
 
+const BROWSER_GOOGLE_DRIVE_NAME = 'Google Drive';
+
 it('lists Google Drive files via Flysystem with normalized metadata and sorting', function () {
     Storage::fake('google-test');
     Storage::disk('google-test')->put('docs/report.pdf', 'contents');
@@ -30,7 +32,7 @@ it('lists Google Drive files via Flysystem with normalized metadata and sorting'
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive',
+        'name' => BROWSER_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
@@ -169,7 +171,7 @@ it('forbids non-owners from browsing a storage connection', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $owner->id,
-        'name' => 'Google Drive',
+        'name' => BROWSER_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
@@ -184,7 +186,7 @@ it('renders owner storage browser with capabilities and files', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive',
+        'name' => BROWSER_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,
@@ -223,7 +225,7 @@ it('renders an empty file list and flashes an error when browsing fails', functi
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'Google Drive',
+        'name' => BROWSER_GOOGLE_DRIVE_NAME,
         'provider' => CloudProvider::GOOGLE_DRIVE,
         'credentials' => ['access_token' => 'token'],
         'status' => ConnectionStatus::CONNECTED,

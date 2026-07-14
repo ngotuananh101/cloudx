@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Data\ConnectedAccountData;
 use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
@@ -66,59 +67,72 @@ class CloudConnectionController extends Controller
             $pendingReconnect = $request->session()->get('cloud_connection_reconnect');
 
             if ($pendingReconnect !== null) {
-                $request->session()->forget('cloud_connection_reconnect');
-
-                $connection = CloudConnection::whereKey($pendingReconnect['connection_id'])
-                    ->where('user_id', $request->user()->id)
-                    ->firstOrFail();
-
-                if ((int) $pendingReconnect['provider'] !== $cloudProvider->value || $pendingReconnect['provider_id'] !== $account->providerId) {
-                    return redirect()->route('dashboard')->with('error', "Reconnect failed because the selected account does not match {$connection->name}.");
-                }
-
-                $connection->fill([
-                    'credentials' => $account->credentials,
-                    'status' => ConnectionStatus::CONNECTED,
-                    'total_space' => $account->totalSpace,
-                    'used_space' => $account->usedSpace,
-                    'error_message' => null,
-                    'last_synced_at' => now(),
-                ])->save();
-
-                return redirect()->route('dashboard')->with('success', "Successfully reconnected {$connection->name}.");
+                return $this->completeReconnect($request, $cloudProvider, $account, $pendingReconnect);
             }
 
-            $connection = $request->user()->cloudConnections()->firstOrNew([
-                'provider' => $cloudProvider,
-                'provider_id' => $account->providerId,
-            ]);
-
-            $connection->fill([
-                'name' => $account->name,
-                'credentials' => $account->credentials,
-                'status' => ConnectionStatus::CONNECTED,
-                'total_space' => $account->totalSpace,
-                'used_space' => $account->usedSpace,
-                'error_message' => null,
-                'last_synced_at' => now(),
-            ])->save();
-
-            if ($connection->wasRecentlyCreated) {
-                $this->activityLogger->log(
-                    user: $request->user(),
-                    action: ActivityAction::ConnectionCreated,
-                    subjectName: $connection->name,
-                    connection: $connection,
-                );
-            }
-
-            return redirect()->route('dashboard')->with('success', "Successfully connected to {$cloudProvider->getDescription()}!");
+            return $this->completeConnect($request, $cloudProvider, $account);
         } catch (Throwable $exception) {
             $request->session()->forget('cloud_connection_reconnect');
             report($exception);
 
             return redirect()->route('dashboard')->with('error', "Could not connect to {$cloudProvider->getDescription()}.");
         }
+    }
+
+    /**
+     * @param  array{connection_id: int|string, provider: int|string, provider_id: string}  $pendingReconnect
+     */
+    private function completeReconnect(Request $request, CloudProvider $cloudProvider, ConnectedAccountData $account, array $pendingReconnect): RedirectResponse
+    {
+        $request->session()->forget('cloud_connection_reconnect');
+
+        $connection = CloudConnection::whereKey($pendingReconnect['connection_id'])
+            ->where('user_id', $request->user()->id)
+            ->firstOrFail();
+
+        if ((int) $pendingReconnect['provider'] !== $cloudProvider->value || $pendingReconnect['provider_id'] !== $account->providerId) {
+            return redirect()->route('dashboard')->with('error', "Reconnect failed because the selected account does not match {$connection->name}.");
+        }
+
+        $connection->fill([
+            'credentials' => $account->credentials,
+            'status' => ConnectionStatus::CONNECTED,
+            'total_space' => $account->totalSpace,
+            'used_space' => $account->usedSpace,
+            'error_message' => null,
+            'last_synced_at' => now(),
+        ])->save();
+
+        return redirect()->route('dashboard')->with('success', "Successfully reconnected {$connection->name}.");
+    }
+
+    private function completeConnect(Request $request, CloudProvider $cloudProvider, ConnectedAccountData $account): RedirectResponse
+    {
+        $connection = $request->user()->cloudConnections()->firstOrNew([
+            'provider' => $cloudProvider,
+            'provider_id' => $account->providerId,
+        ]);
+
+        $connection->fill([
+            'name' => $account->name,
+            'credentials' => $account->credentials,
+            'status' => ConnectionStatus::CONNECTED,
+            'total_space' => $account->totalSpace,
+            'used_space' => $account->usedSpace,
+            'error_message' => null,
+            'last_synced_at' => now(),
+        ])->save();
+
+        if ($connection->wasRecentlyCreated) {
+            $this->activityLogger->log(
+                user: $request->user(),
+                action: ActivityAction::ConnectionCreated,
+                subjectName: $connection->name,
+                connection: $connection,
+            );
+        }
+
+        return redirect()->route('dashboard')->with('success', "Successfully connected to {$cloudProvider->getDescription()}!");
     }
 
     public function updateName(Request $request, CloudConnection $connection): RedirectResponse

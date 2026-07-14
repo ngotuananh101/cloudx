@@ -18,9 +18,9 @@ import type { CloudConnection } from '@/types/cloud';
 
 interface ConnectionActionsMenuProps {
     connection: CloudConnection;
-    onEditName: (connection: CloudConnection) => void;
-    onEditConnection: (connection: CloudConnection) => void;
-    onDelete: (connection: CloudConnection) => void;
+    onEditName: (connection: Readonly<CloudConnection>) => void;
+    onEditConnection: (connection: Readonly<CloudConnection>) => void;
+    onDelete: (connection: Readonly<CloudConnection>) => void;
 }
 
 export default function ConnectionActionsMenu({
@@ -28,7 +28,7 @@ export default function ConnectionActionsMenu({
     onEditName,
     onEditConnection,
     onDelete,
-}: ConnectionActionsMenuProps) {
+}: Readonly<ConnectionActionsMenuProps>) {
     const actions = connection.actions;
 
     if (

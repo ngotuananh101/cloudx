@@ -17,7 +17,7 @@ export function BulkFileActionsBar({
     onDelete,
     onMove,
     onClear,
-}: BulkFileActionsBarProps) {
+}: Readonly<BulkFileActionsBarProps>) {
     if (selectedCount === 0) {
         return null;
     }

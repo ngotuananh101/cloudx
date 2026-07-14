@@ -16,6 +16,9 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 
+const ARCHIVE_URL = 'https://files.example.com/archive.zip';
+const AUTH_HEADER = 'Bearer secret-token';
+
 it('creates a queued remote upload task without exposing headers', function () {
     Queue::fake();
 
@@ -25,16 +28,16 @@ it('creates a queued remote upload task without exposing headers', function () {
     $urlGuard = Mockery::mock(RemoteUploadUrlGuard::class);
     $urlGuard->shouldReceive('validate')
         ->once()
-        ->with('https://files.example.com/archive.zip')
+        ->with(ARCHIVE_URL)
         ->andReturnNull();
     $this->app->instance(RemoteUploadUrlGuard::class, $urlGuard);
 
     $response = $this->actingAs($user)->postJson(route('connections.upload-tasks.store', $connection), [
         'path' => 'imports',
         'filename' => 'archive.zip',
-        'url' => 'https://files.example.com/archive.zip',
+        'url' => ARCHIVE_URL,
         'headers' => [
-            ['name' => 'Authorization', 'value' => 'Bearer secret-token'],
+            ['name' => 'Authorization', 'value' => AUTH_HEADER],
         ],
         'upload_mode' => 'remote',
     ]);
@@ -44,15 +47,15 @@ it('creates a queued remote upload task without exposing headers', function () {
         ->assertJsonPath('payload.upload_mode', 'remote')
         ->assertJsonPath('payload.remote_host', 'files.example.com')
         ->assertJsonPath('payload.remote_headers_count', 1)
-        ->assertJsonMissing(['remote_url' => 'https://files.example.com/archive.zip'])
-        ->assertJsonMissing(['headers' => ['Authorization' => 'Bearer secret-token']]);
+        ->assertJsonMissing(['remote_url' => ARCHIVE_URL])
+        ->assertJsonMissing(['headers' => ['Authorization' => AUTH_HEADER]]);
 
     $task = CloudTask::query()->sole();
 
     expect($task->type)->toBe(CloudTaskType::Upload)
         ->and($task->status)->toBe(CloudTaskStatus::Queued)
-        ->and($task->secret_payload['url'])->toBe('https://files.example.com/archive.zip')
-        ->and($task->secret_payload['headers']['Authorization'])->toBe('Bearer secret-token');
+        ->and($task->secret_payload['url'])->toBe(ARCHIVE_URL)
+        ->and($task->secret_payload['headers']['Authorization'])->toBe(AUTH_HEADER);
 
     Queue::assertPushed(RemoteUploadCloudTaskFileJob::class);
 });
@@ -86,7 +89,7 @@ it('rejects unsafe custom remote upload headers', function () {
     $connection = CloudConnection::factory()->for($user)->create();
 
     $this->actingAs($user)->postJson(route('connections.upload-tasks.store', $connection), [
-        'url' => 'https://files.example.com/archive.zip',
+        'url' => ARCHIVE_URL,
         'headers' => [
             ['name' => 'Host', 'value' => 'internal.test'],
         ],
@@ -137,9 +140,9 @@ it('downloads a remote file and writes it to the cloud disk', function () {
             'remote_host' => 'files.example.com',
         ],
         'secret_payload' => [
-            'url' => 'https://files.example.com/archive.zip',
+            'url' => ARCHIVE_URL,
             'headers' => [
-                'Authorization' => 'Bearer secret-token',
+                'Authorization' => AUTH_HEADER,
             ],
         ],
     ]);
@@ -147,7 +150,7 @@ it('downloads a remote file and writes it to the cloud disk', function () {
     $urlGuard = Mockery::mock(RemoteUploadUrlGuard::class);
     $urlGuard->shouldReceive('validate')
         ->once()
-        ->with('https://files.example.com/archive.zip')
+        ->with(ARCHIVE_URL)
         ->andReturnNull();
 
     $disk = Mockery::mock(Filesystem::class);
@@ -207,7 +210,7 @@ it('requeues a remote upload task when a retryable failure occurs', function () 
             'remote_host' => 'files.example.com',
         ],
         'secret_payload' => [
-            'url' => 'https://files.example.com/archive.zip',
+            'url' => ARCHIVE_URL,
             'headers' => [],
         ],
     ]);
@@ -215,7 +218,7 @@ it('requeues a remote upload task when a retryable failure occurs', function () 
     $urlGuard = Mockery::mock(RemoteUploadUrlGuard::class);
     $urlGuard->shouldReceive('validate')
         ->once()
-        ->with('https://files.example.com/archive.zip')
+        ->with(ARCHIVE_URL)
         ->andReturnNull();
 
     $manager = Mockery::mock(CloudStorageManager::class);

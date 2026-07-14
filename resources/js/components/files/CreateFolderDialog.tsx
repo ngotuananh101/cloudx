@@ -23,7 +23,7 @@ export function CreateFolderDialog({
     isOpen,
     onClose,
     onCreate,
-}: CreateFolderDialogProps) {
+}: Readonly<CreateFolderDialogProps>) {
     const [folderName, setFolderName] = useState('');
     const [folderError, setFolderError] = useState<string | null>(null);
     const [submitting, setSubmitting] = useState(false);
@@ -64,7 +64,7 @@ export function CreateFolderDialog({
         }
     };
 
-    const handleFormSubmit = (event: FormEvent<HTMLFormElement>) => {
+    const handleFormSubmit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
         void submit();
     };

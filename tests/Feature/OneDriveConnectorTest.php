@@ -11,9 +11,11 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
+const ONEDRIVE_CALLBACK_URI = 'https://example.test/oauth/onedrive/callback';
+
 it('builds the OneDrive OAuth redirect URL', function () {
     config()->set('services.microsoft.client_id', 'test-client-id');
-    config()->set('services.microsoft.redirect_uri', 'https://example.test/oauth/onedrive/callback');
+    config()->set('services.microsoft.redirect_uri', ONEDRIVE_CALLBACK_URI);
 
     $redirectUrl = app(OneDriveConnector::class)->redirectUrl();
     $redirectUrlParts = parse_url($redirectUrl);
@@ -24,7 +26,7 @@ it('builds the OneDrive OAuth redirect URL', function () {
         ->and($redirectUrlParts['path'])->toBe('/common/oauth2/v2.0/authorize')
         ->and($query['client_id'])->toBe('test-client-id')
         ->and($query['response_type'])->toBe('code')
-        ->and($query['redirect_uri'])->toBe('https://example.test/oauth/onedrive/callback')
+        ->and($query['redirect_uri'])->toBe(ONEDRIVE_CALLBACK_URI)
         ->and($query['response_mode'])->toBe('query')
         ->and($query['scope'])->toBe('User.Read Files.ReadWrite.All offline_access')
         ->and($query['state'])->not->toBeEmpty()
@@ -46,7 +48,7 @@ it('rejects an invalid OneDrive OAuth callback state', function () {
 it('handles the OneDrive OAuth callback', function () {
     config()->set('services.microsoft.client_id', 'test-client-id');
     config()->set('services.microsoft.client_secret', 'test-client-secret');
-    config()->set('services.microsoft.redirect_uri', 'https://example.test/oauth/onedrive/callback');
+    config()->set('services.microsoft.redirect_uri', ONEDRIVE_CALLBACK_URI);
 
     session(['oauth_state_onedrive' => 'valid-state']);
 
@@ -95,7 +97,7 @@ it('handles the OneDrive OAuth callback', function () {
         && $request['client_id'] === 'test-client-id'
         && $request['client_secret'] === 'test-client-secret'
         && $request['code'] === 'valid-code'
-        && $request['redirect_uri'] === 'https://example.test/oauth/onedrive/callback'
+        && $request['redirect_uri'] === ONEDRIVE_CALLBACK_URI
         && $request['grant_type'] === 'authorization_code');
 
     Http::assertSent(fn ($request): bool => $request->url() === 'https://graph.microsoft.com/v1.0/me'

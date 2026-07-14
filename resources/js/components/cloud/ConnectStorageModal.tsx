@@ -21,7 +21,7 @@ interface ConnectStorageModalProps {
 export default function ConnectStorageModal({
     providers,
     onClose,
-}: ConnectStorageModalProps) {
+}: Readonly<ConnectStorageModalProps>) {
     const [selectedCredentialsProvider, setSelectedCredentialsProvider] =
         useState<AvailableProvider | null>(null);
 

@@ -17,8 +17,8 @@ import type { CloudFile } from '@/types/cloud';
 interface ShareFileTableProps {
     files: CloudFile[];
     shareUuid: string;
-    onNavigate: (file: CloudFile) => void;
-    onPreview: (file: CloudFile) => void;
+    onNavigate: (file: Readonly<CloudFile>) => void;
+    onPreview: (file: Readonly<CloudFile>) => void;
 }
 
 function getFileIcon(type: string) {
@@ -47,8 +47,8 @@ export function ShareFileTable({
     shareUuid,
     onNavigate,
     onPreview,
-}: ShareFileTableProps) {
-    const handleDownload = (file: CloudFile) => {
+}: Readonly<ShareFileTableProps>) {
+    const handleDownload = (file: Readonly<CloudFile>) => {
         const encodedPath = encodeCloudPath(file.path);
         globalThis.location.href = `/s/${shareUuid}/download/${encodedPath}`;
     };

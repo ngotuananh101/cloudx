@@ -15,7 +15,7 @@ export function FileToolbar({
     searchQuery,
     setSearchQuery,
     capabilities,
-}: FileToolbarProps) {
+}: Readonly<FileToolbarProps>) {
     return (
         <div className="mb-3 flex flex-col items-center gap-3 rounded-2xl border border-border bg-card p-2.5 shadow-sm sm:flex-row">
             <div className="relative w-full flex-1">

@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Http;
 
 uses(RefreshDatabase::class);
 
+const BEARER_FRESH_TOKEN = 'Bearer fresh-token';
+const UPLOAD_SESSION_URL = 'https://upload.example/session';
+const SOURCE_DOC_PATH = 'Source/doc.txt';
+const TARGET_DOC_PATH = 'Target/doc2.txt';
+
 function oneDriveConnection(array $credentials = []): CloudConnection
 {
     $user = User::factory()->create();
@@ -132,7 +137,7 @@ it('downloads streams from response body once', function () {
 
     Http::assertSent(fn ($request): bool => $request->method() === 'GET'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/doc.txt:/content'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token'));
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN));
 });
 
 it('uploads empty streams with simple upload instead of an invalid content range', function () {
@@ -148,7 +153,7 @@ it('uploads empty streams with simple upload instead of an invalid content range
     Http::assertSentCount(1);
     Http::assertSent(fn ($request): bool => $request->method() === 'PUT'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/empty.txt:/content'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token')
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN)
         && $request->body() === '');
 });
 
@@ -156,9 +161,9 @@ it('creates upload sessions and uploads chunks until terminal completion', funct
     Http::preventStrayRequests();
     Http::fake([
         'https://graph.microsoft.com/v1.0/me/drive/root:/big.bin:/createUploadSession' => Http::response([
-            'uploadUrl' => 'https://upload.example/session',
+            'uploadUrl' => UPLOAD_SESSION_URL,
         ]),
-        'https://upload.example/session' => Http::sequence()
+        UPLOAD_SESSION_URL => Http::sequence()
             ->push(['nextExpectedRanges' => ['5242880-']], 202)
             ->push(['id' => 'uploaded-item'], 201),
     ]);
@@ -172,15 +177,15 @@ it('creates upload sessions and uploads chunks until terminal completion', funct
     Http::assertSentCount(3);
     Http::assertSent(fn ($request): bool => $request->method() === 'POST'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/big.bin:/createUploadSession'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token')
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN)
         && $request['item']['@microsoft.graph.conflictBehavior'] === 'replace');
     Http::assertSent(fn ($request): bool => $request->method() === 'PUT'
-        && $request->url() === 'https://upload.example/session'
+        && $request->url() === UPLOAD_SESSION_URL
         && $request->hasHeader('Content-Length', (string) (5 * 1024 * 1024))
         && $request->hasHeader('Content-Range', 'bytes 0-5242879/5242883')
         && $request->body() === str_repeat('a', 5 * 1024 * 1024));
     Http::assertSent(fn ($request): bool => $request->method() === 'PUT'
-        && $request->url() === 'https://upload.example/session'
+        && $request->url() === UPLOAD_SESSION_URL
         && $request->hasHeader('Content-Length', '3')
         && $request->hasHeader('Content-Range', 'bytes 5242880-5242882/5242883')
         && $request->body() === 'bbb');
@@ -200,10 +205,10 @@ it('deletes and creates folders through graph', function () {
     Http::assertSentCount(2);
     Http::assertSent(fn ($request): bool => $request->method() === 'DELETE'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/old.txt'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token'));
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN));
     Http::assertSent(fn ($request): bool => $request->method() === 'POST'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/Parent:/children'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token')
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN)
         && $request['name'] === 'New Folder'
         && $request['folder'] === []
         && $request['@microsoft.graph.conflictBehavior'] === 'fail');
@@ -212,7 +217,7 @@ it('deletes and creates folders through graph', function () {
 it('rejects empty or ambiguous destination paths before graph requests', function (string $path) {
     Http::preventStrayRequests();
 
-    expect(fn () => new OneDriveClient(oneDriveConnection())->move('Source/doc.txt', $path))
+    expect(fn () => new OneDriveClient(oneDriveConnection())->move(SOURCE_DOC_PATH, $path))
         ->toThrow(InvalidArgumentException::class, 'OneDrive destination path must include a file or folder name.');
 })->with([
     'empty' => '',
@@ -228,15 +233,15 @@ it('moves files through graph', function () {
         'https://graph.microsoft.com/v1.0/me/drive/root:/Source/doc.txt' => Http::response(['id' => 'moved'], 200),
     ]);
 
-    new OneDriveClient(oneDriveConnection())->move('Source/doc.txt', 'Target/doc2.txt');
+    new OneDriveClient(oneDriveConnection())->move(SOURCE_DOC_PATH, TARGET_DOC_PATH);
 
     Http::assertSentCount(2);
     Http::assertSent(fn ($request): bool => $request->method() === 'GET'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/Target'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token'));
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN));
     Http::assertSent(fn ($request): bool => $request->method() === 'PATCH'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/Source/doc.txt'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token')
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN)
         && $request['name'] === 'doc2.txt'
         && $request['parentReference']['id'] === 'target-id');
 });
@@ -247,7 +252,7 @@ it('rejects move destinations whose parent is missing or not a folder', function
         'https://graph.microsoft.com/v1.0/me/drive/root:/Target' => Http::response($parentItem),
     ]);
 
-    expect(fn () => new OneDriveClient(oneDriveConnection())->move('Source/doc.txt', 'Target/doc2.txt'))
+    expect(fn () => new OneDriveClient(oneDriveConnection())->move(SOURCE_DOC_PATH, TARGET_DOC_PATH))
         ->toThrow(OneDriveException::class, $message);
 })->with([
     'missing id' => [['folder' => []], 'OneDrive move destination parent is missing an id.'],
@@ -265,15 +270,15 @@ it('copies files and polls monitor url', function () {
             ->push(['status' => 'completed'], 200),
     ]);
 
-    new OneDriveClient(oneDriveConnection())->copy('Source/doc.txt', 'Target/doc2.txt');
+    new OneDriveClient(oneDriveConnection())->copy(SOURCE_DOC_PATH, TARGET_DOC_PATH);
 
     Http::assertSentCount(5);
     Http::assertSent(fn ($request): bool => $request->method() === 'GET'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/Target'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token'));
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN));
     Http::assertSent(fn ($request): bool => $request->method() === 'POST'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/Source/doc.txt:/copy'
-        && $request->hasHeader('Authorization', 'Bearer fresh-token')
+        && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN)
         && $request['name'] === 'doc2.txt'
         && $request['parentReference']['id'] === 'target-id');
 });
@@ -284,7 +289,7 @@ it('rejects copy destinations whose parent is missing or not a folder', function
         'https://graph.microsoft.com/v1.0/me/drive/root:/Target' => Http::response($parentItem),
     ]);
 
-    expect(fn () => new OneDriveClient(oneDriveConnection())->copy('Source/doc.txt', 'Target/doc2.txt'))
+    expect(fn () => new OneDriveClient(oneDriveConnection())->copy(SOURCE_DOC_PATH, TARGET_DOC_PATH))
         ->toThrow(OneDriveException::class, $message);
 })->with([
     'missing id' => [['folder' => []], 'OneDrive copy destination parent is missing an id.'],

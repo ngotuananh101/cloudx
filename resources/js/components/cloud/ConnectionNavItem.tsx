@@ -7,9 +7,9 @@ interface ConnectionNavItemProps {
     connection: CloudConnection;
     href: string;
     isActive: boolean;
-    onEditName: (connection: CloudConnection) => void;
-    onEditConnection: (connection: CloudConnection) => void;
-    onDelete: (connection: CloudConnection) => void;
+    onEditName: (connection: Readonly<CloudConnection>) => void;
+    onEditConnection: (connection: Readonly<CloudConnection>) => void;
+    onDelete: (connection: Readonly<CloudConnection>) => void;
 }
 
 export default function ConnectionNavItem({
@@ -19,7 +19,7 @@ export default function ConnectionNavItem({
     onEditName,
     onEditConnection,
     onDelete,
-}: ConnectionNavItemProps) {
+}: Readonly<ConnectionNavItemProps>) {
     return (
         <li>
             <div

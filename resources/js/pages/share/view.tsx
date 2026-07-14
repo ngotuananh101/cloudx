@@ -87,12 +87,12 @@ export default function ShareView({
     shareBasePath,
     previewUrl,
     downloadUrl,
-}: ShareViewProps) {
+}: Readonly<ShareViewProps>) {
     const [previewingFile, setPreviewingFile] = useState<CloudFile | null>(
         null,
     );
 
-    const handleNavigateFolder = (folderFile: CloudFile) => {
+    const handleNavigateFolder = (folderFile: Readonly<CloudFile>) => {
         const encodedPath = encodeCloudPath(folderFile.path);
         router.visit(`/s/${share.uuid}?path=${encodedPath}`);
     };
@@ -106,7 +106,7 @@ export default function ShareView({
         }
     };
 
-    const handlePreviewFile = (fileItem: CloudFile) => {
+    const handlePreviewFile = (fileItem: Readonly<CloudFile>) => {
         setPreviewingFile(fileItem);
     };
 

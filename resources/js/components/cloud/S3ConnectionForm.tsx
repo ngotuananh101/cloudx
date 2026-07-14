@@ -56,7 +56,7 @@ const providerPresets = [
 export default function S3ConnectionForm({
     onCancel,
     onSuccess,
-}: S3ConnectionFormProps) {
+}: Readonly<S3ConnectionFormProps>) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<S3ConnectionFormData>({
@@ -73,7 +73,7 @@ export default function S3ConnectionForm({
         cdn_url: '',
     });
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         router.post(store.url(), payload(form.data), {
@@ -313,7 +313,7 @@ export default function S3ConnectionForm({
     );
 }
 
-function payload(data: S3ConnectionFormData) {
+function payload(data: Readonly<S3ConnectionFormData>) {
     return {
         ...data,
         endpoint: data.endpoint || null,
@@ -328,12 +328,12 @@ function Field({
     error,
     required = false,
     children,
-}: {
+}: Readonly<{
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
-}) {
+}>) {
     const id = getChildId(children);
 
     return (
@@ -361,13 +361,13 @@ function CheckboxField({
     onChange,
     error,
     alignWithFields = false,
-}: {
+}: Readonly<{
     label: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
     error?: string;
     alignWithFields?: boolean;
-}) {
+}>) {
     return (
         <div className="space-y-2">
             {alignWithFields && <div className="h-4" aria-hidden="true" />}

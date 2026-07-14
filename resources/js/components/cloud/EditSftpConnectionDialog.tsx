@@ -34,7 +34,7 @@ interface SftpConnectionFormData {
 export default function EditSftpConnectionDialog({
     connection,
     onClose,
-}: EditSftpConnectionDialogProps) {
+}: Readonly<EditSftpConnectionDialogProps>) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<SftpConnectionFormData>(initialData(connection));
@@ -51,7 +51,7 @@ export default function EditSftpConnectionDialog({
         return null;
     }
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         router.patch(
@@ -352,7 +352,7 @@ function initialData(
     };
 }
 
-function payload(data: SftpConnectionFormData) {
+function payload(data: Readonly<SftpConnectionFormData>) {
     return {
         ...data,
         port: Number(data.port),
@@ -370,12 +370,12 @@ function Field({
     error,
     required = false,
     children,
-}: {
+}: Readonly<{
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
-}) {
+}>) {
     const id = getChildId(children);
 
     return (

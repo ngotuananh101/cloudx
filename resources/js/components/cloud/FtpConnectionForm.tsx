@@ -51,7 +51,7 @@ const systemTypeOptions = [
 export default function FtpConnectionForm({
     onCancel,
     onSuccess,
-}: FtpConnectionFormProps) {
+}: Readonly<FtpConnectionFormProps>) {
     const [showAdvanced, setShowAdvanced] = useState(false);
     const [processing, setProcessing] = useState(false);
     const form = useForm<FtpConnectionFormData>({
@@ -71,7 +71,7 @@ export default function FtpConnectionForm({
         timestampsOnUnixListingsEnabled: true,
     });
 
-    const submit = (event: FormEvent<HTMLFormElement>) => {
+    const submit = (event: Readonly<FormEvent<HTMLFormElement>>) => {
         event.preventDefault();
 
         router.post(store.url(), payload(form.data), {
@@ -360,7 +360,7 @@ export default function FtpConnectionForm({
     );
 }
 
-function payload(data: FtpConnectionFormData) {
+function payload(data: Readonly<FtpConnectionFormData>) {
     return {
         ...data,
         port: Number(data.port),
@@ -379,12 +379,12 @@ function Field({
     error,
     required = false,
     children,
-}: {
+}: Readonly<{
     label: string;
     error?: string;
     required?: boolean;
     children: React.ReactNode;
-}) {
+}>) {
     const id = getChildId(children);
 
     return (
@@ -412,13 +412,13 @@ function CheckboxField({
     onChange,
     error,
     alignWithFields = false,
-}: {
+}: Readonly<{
     label: string;
     checked: boolean;
     onChange: (checked: boolean) => void;
     error?: string;
     alignWithFields?: boolean;
-}) {
+}>) {
     return (
         <div className="space-y-2">
             {alignWithFields && <div className="h-4" aria-hidden="true" />}

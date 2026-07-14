@@ -20,7 +20,7 @@ interface DeleteConnectionDialogProps {
 export default function DeleteConnectionDialog({
     connection,
     onClose,
-}: DeleteConnectionDialogProps) {
+}: Readonly<DeleteConnectionDialogProps>) {
     const deleteConnection = () => {
         if (!connection) {
             return;

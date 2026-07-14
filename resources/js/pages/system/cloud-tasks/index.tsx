@@ -84,7 +84,7 @@ function statusClass(statusKey: string | null): string {
     }
 }
 
-function StatusIcon({ statusKey }: { statusKey: string | null }) {
+function StatusIcon({ statusKey }: Readonly<{ statusKey: string | null }>) {
     switch (statusKey) {
         case 'Completed':
             return <CheckCircle2 className="h-4 w-4" />;
@@ -99,7 +99,7 @@ function StatusIcon({ statusKey }: { statusKey: string | null }) {
     }
 }
 
-function TaskStatusBadge({ task }: { task: CloudTask }) {
+function TaskStatusBadge({ task }: Readonly<{ task: CloudTask }>) {
     return (
         <span
             className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-medium ${statusClass(task.status.key)}`}
@@ -113,10 +113,10 @@ function TaskStatusBadge({ task }: { task: CloudTask }) {
 function TaskDetailModal({
     task,
     onClose,
-}: {
+}: Readonly<{
     task: CloudTask | null;
     onClose: () => void;
-}) {
+}>) {
     const timeline = task
         ? [
               ['Created', task.created_at],
@@ -200,10 +200,10 @@ function TaskDetailModal({
 function DetailItem({
     label,
     children,
-}: {
+}: Readonly<{
     label: string;
     children: ReactNode;
-}) {
+}>) {
     return (
         <div className="rounded-xl border border-border bg-muted px-4 py-3">
             <div className="text-[10px] font-extrabold tracking-widest text-muted-foreground">
@@ -216,7 +216,7 @@ function DetailItem({
     );
 }
 
-export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
+export default function CloudTasksIndex({ tasks }: Readonly<CloudTasksIndexProps>) {
     const { props } = usePage() as any;
     const userConnections = props.auth?.user?.connections || [];
     const [selectedTask, setSelectedTask] = useState<CloudTask | null>(null);
@@ -282,7 +282,7 @@ export default function CloudTasksIndex({ tasks }: CloudTasksIndexProps) {
                                         {tasks.data.map((task) => {
                                             const fullConnection =
                                                 userConnections.find(
-                                                    (c: CloudConnection) =>
+                                                    (c: Readonly<CloudConnection>) =>
                                                         c.id ===
                                                         task.connection?.id,
                                                 );

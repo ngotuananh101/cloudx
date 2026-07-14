@@ -9,11 +9,11 @@ interface VirtualizedFileTableProps {
     files: CloudFile[];
     searchQuery: string;
     capabilities?: ProviderCapabilities;
-    onNavigate: (item: CloudFile) => void;
-    onPreview?: (item: CloudFile) => void;
-    onMove?: (item: CloudFile) => void;
-    onShare?: (item: CloudFile) => void;
-    onDelete?: (item: CloudFile) => void;
+    onNavigate: (item: Readonly<CloudFile>) => void;
+    onPreview?: (item: Readonly<CloudFile>) => void;
+    onMove?: (item: Readonly<CloudFile>) => void;
+    onShare?: (item: Readonly<CloudFile>) => void;
+    onDelete?: (item: Readonly<CloudFile>) => void;
     selectedPaths: Set<string>;
     isAllSelected: boolean;
     isPartiallySelected: boolean;
@@ -37,7 +37,7 @@ export function VirtualizedFileTable({
     onToggleSelection,
     onToggleSelectAll,
     connectionId,
-}: VirtualizedFileTableProps) {
+}: Readonly<VirtualizedFileTableProps>) {
     const parentRef = useRef<HTMLDivElement>(null);
 
     // eslint-disable-next-line react-hooks/incompatible-library

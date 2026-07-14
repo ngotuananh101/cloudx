@@ -33,6 +33,17 @@ class ShareViewController extends Controller
             ->with(['user', 'cloudConnection'])
             ->first();
 
+        $gate = $this->shareAccessResponse($request, $share, $uuid);
+
+        if ($gate !== null) {
+            return $gate;
+        }
+
+        return $this->renderShareView($request, $share, $uuid);
+    }
+
+    private function shareAccessResponse(Request $request, ?CloudShare $share, string $uuid): ?Response
+    {
         if (! $share) {
             return Inertia::render('share/error', [
                 'reason' => 'not_found',
@@ -54,6 +65,11 @@ class ShareViewController extends Controller
             ]);
         }
 
+        return null;
+    }
+
+    private function renderShareView(Request $request, CloudShare $share, string $uuid): Response
+    {
         $connection = $share->cloudConnection;
 
         if ($share->is_directory) {
@@ -85,7 +101,6 @@ class ShareViewController extends Controller
             ]);
         }
 
-        // Single file share
         return Inertia::render('share/view', [
             'share' => $this->shareData($share),
             'isDirectory' => false,

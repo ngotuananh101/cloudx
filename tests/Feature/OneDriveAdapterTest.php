@@ -15,40 +15,46 @@ use League\Flysystem\UnableToRetrieveMetadata;
 use League\Flysystem\UnableToSetVisibility;
 use League\Flysystem\UnableToWriteFile;
 
+const CREATED_AT = '2026-01-01T00:00:00Z';
+const ONEDRIVE_MIME_TEXT_PLAIN = 'text/plain';
+const UPDATED_AT = '2026-01-02T00:00:00Z';
+const NESTED_PATH = 'Docs/Nested';
+const TEMP_STREAM = 'php://temp';
+
 it('lists files and directories as flysystem attributes', function () {
     $client = Mockery::mock(OneDriveClient::class);
     $client->shouldReceive('listChildren')->with('Docs')->andReturn([
-        ['id' => 'folder-id', 'name' => 'Nested', 'folder' => [], 'size' => 0, 'lastModifiedDateTime' => '2026-01-01T00:00:00Z'],
-        ['id' => 'file-id', 'name' => 'a.txt', 'file' => ['mimeType' => 'text/plain'], 'size' => 12, 'lastModifiedDateTime' => '2026-01-02T00:00:00Z'],
+        ['id' => 'folder-id', 'name' => 'Nested', 'folder' => [], 'size' => 0, 'lastModifiedDateTime' => CREATED_AT],
+        ['id' => 'file-id', 'name' => 'a.txt', 'file' => ['mimeType' => ONEDRIVE_MIME_TEXT_PLAIN], 'size' => 12, 'lastModifiedDateTime' => UPDATED_AT],
     ]);
 
     $items = iterator_to_array(new OneDriveAdapter($client)->listContents('Docs', false));
 
     expect($items)->toHaveCount(2)
         ->and($items[0])->toBeInstanceOf(DirectoryAttributes::class)
-        ->and($items[0]->path())->toBe('Docs/Nested')
-        ->and($items[0]->lastModified())->toBe(strtotime('2026-01-01T00:00:00Z'))
+        ->and($items[0]->path())->toBe(NESTED_PATH)
+        ->and($items[0]->lastModified())->toBe(strtotime(CREATED_AT))
         ->and($items[1])->toBeInstanceOf(FileAttributes::class)
         ->and($items[1]->path())->toBe('Docs/a.txt')
         ->and($items[1]->fileSize())->toBe(12)
-        ->and($items[1]->mimeType())->toBe('text/plain')
-        ->and($items[1]->lastModified())->toBe(strtotime('2026-01-02T00:00:00Z'));
+        ->and($items[1]->mimeType())->toBe(ONEDRIVE_MIME_TEXT_PLAIN)
+        ->and($items[1]->lastModified())->toBe(strtotime(UPDATED_AT));
 });
 
 it('recursively lists nested directories when deep listing is requested', function () {
     $client = Mockery::mock(OneDriveClient::class);
     $client->shouldReceive('listChildren')->with('Docs')->andReturn([
-        ['name' => 'Nested', 'folder' => [], 'lastModifiedDateTime' => '2026-01-01T00:00:00Z'],
+        ['name' => 'Nested', 'folder' => [], 'lastModifiedDateTime' => CREATED_AT],
     ]);
-    $client->shouldReceive('listChildren')->with('Docs/Nested')->andReturn([
-        ['name' => 'deep.txt', 'file' => ['mimeType' => 'text/plain'], 'size' => 7, 'lastModifiedDateTime' => '2026-01-03T00:00:00Z'],
+    $client->shouldReceive('listChildren')->with(NESTED_PATH)->andReturn([
+        ['name' => 'deep.txt', 'file' => ['mimeType' => ONEDRIVE_MIME_TEXT_PLAIN], 'size' => 7, 'lastModifiedDateTime' => '2026-01-03T00:00:00Z'],
     ]);
 
     $items = iterator_to_array(new OneDriveAdapter($client)->listContents('Docs', true), false);
 
     expect($items)->toHaveCount(2)
         ->and($items[0])->toBeInstanceOf(DirectoryAttributes::class)
-        ->and($items[0]->path())->toBe('Docs/Nested')
+        ->and($items[0]->path())->toBe(NESTED_PATH)
         ->and($items[1])->toBeInstanceOf(FileAttributes::class)
         ->and($items[1]->path())->toBe('Docs/Nested/deep.txt');
 });
@@ -72,16 +78,16 @@ it('returns metadata attributes', function () {
     $client = Mockery::mock(OneDriveClient::class);
     $client->shouldReceive('item')->with('file.txt')->andReturn([
         'name' => 'file.txt',
-        'file' => ['mimeType' => 'text/plain'],
+        'file' => ['mimeType' => ONEDRIVE_MIME_TEXT_PLAIN],
         'size' => 12,
-        'lastModifiedDateTime' => '2026-01-02T00:00:00Z',
+        'lastModifiedDateTime' => UPDATED_AT,
     ]);
 
     $adapter = new OneDriveAdapter($client);
 
     expect($adapter->fileSize('file.txt')->fileSize())->toBe(12)
-        ->and($adapter->mimeType('file.txt')->mimeType())->toBe('text/plain')
-        ->and($adapter->lastModified('file.txt')->lastModified())->toBe(strtotime('2026-01-02T00:00:00Z'));
+        ->and($adapter->mimeType('file.txt')->mimeType())->toBe(ONEDRIVE_MIME_TEXT_PLAIN)
+        ->and($adapter->lastModified('file.txt')->lastModified())->toBe(strtotime(UPDATED_AT));
 });
 
 it('rejects unsupported visibility operations', function () {
@@ -94,12 +100,12 @@ it('rejects unsupported visibility operations', function () {
 it('delegates read and write operations to client', function () {
     $client = Mockery::mock(OneDriveClient::class);
     $client->shouldReceive('download')->with('a.txt')->once()->andReturn('body');
-    $client->shouldReceive('downloadStream')->with('a.txt')->once()->andReturn(fopen('php://temp', 'r+'));
+    $client->shouldReceive('downloadStream')->with('a.txt')->once()->andReturn(fopen(TEMP_STREAM, 'r+'));
     $client->shouldReceive('upload')->with('a.txt', 'new')->once();
     $client->shouldReceive('uploadStream')->once();
 
     $adapter = new OneDriveAdapter($client);
-    $stream = fopen('php://temp', 'r+');
+    $stream = fopen(TEMP_STREAM, 'r+');
 
     expect($adapter->read('a.txt'))->toBe('body')
         ->and(is_resource($adapter->readStream('a.txt')))->toBeTrue();
@@ -133,7 +139,7 @@ it('maps client failures to flysystem operation exceptions', function (string $m
     expect(fn () => new OneDriveAdapter($client)->{$method}(...$arguments))->toThrow($exceptionClass);
 })->with([
     ['write', ['a.txt', 'new', new Config], 'upload', ['a.txt', 'new'], UnableToWriteFile::class],
-    ['writeStream', ['a.txt', fopen('php://temp', 'r+'), new Config], 'uploadStream', ['a.txt', Mockery::type('resource')], UnableToWriteFile::class],
+    ['writeStream', ['a.txt', fopen(TEMP_STREAM, 'r+'), new Config], 'uploadStream', ['a.txt', Mockery::type('resource')], UnableToWriteFile::class],
     ['read', ['a.txt'], 'download', ['a.txt'], UnableToReadFile::class],
     ['readStream', ['a.txt'], 'downloadStream', ['a.txt'], UnableToReadFile::class],
     ['delete', ['a.txt'], 'delete', ['a.txt'], UnableToDeleteFile::class],

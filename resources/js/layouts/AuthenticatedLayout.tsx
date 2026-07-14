@@ -26,7 +26,7 @@ export default function AuthenticatedLayout({
     children,
     cloudSearch,
     cloudActions,
-}: AuthenticatedLayoutProps) {
+}: Readonly<AuthenticatedLayoutProps>) {
     return (
         <div className="flex h-screen w-screen overflow-hidden bg-muted font-sans text-foreground antialiased">
             <Sidebar cloudActions={cloudActions} />

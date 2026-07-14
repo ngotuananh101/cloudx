@@ -11,6 +11,11 @@ use Illuminate\Support\Facades\Session;
 
 uses(RefreshDatabase::class);
 
+const TELEGRAM_NAME = 'My Telegram';
+const TELEGRAM_PHONE = '+84912345678';
+const TELEGRAM_ROUTE = '/connections/telegram';
+const TELEGRAM_CODE = '12345';
+
 beforeEach(function () {
     config(['services.python-service.url' => 'http://localhost:8000']);
     config(['services.python-service.token' => 'test-token']);
@@ -37,8 +42,8 @@ it('sends code request to microservice and stores session', function () {
     $user = User::factory()->create();
 
     $response = $this->actingAs($user)->postJson('/connections/telegram/request-code', [
-        'name' => 'My Telegram',
-        'phone' => '+84912345678',
+        'name' => TELEGRAM_NAME,
+        'phone' => TELEGRAM_PHONE,
     ]);
 
     $response->assertOk();
@@ -47,20 +52,20 @@ it('sends code request to microservice and stores session', function () {
     $session = session('telegram_connect');
     expect($session)->not()->toBeNull()
         ->and($session['session_id'])->toBeString()
-        ->and($session['name'])->toBe('My Telegram')
-        ->and($session['phone'])->toBe('+84912345678');
+        ->and($session['name'])->toBe(TELEGRAM_NAME)
+        ->and($session['phone'])->toBe(TELEGRAM_PHONE);
 });
 
 it('validates code on store', function () {
     $user = User::factory()->create();
     Session::put('telegram_connect', [
         'session_id' => 'sess123',
-        'name' => 'My Telegram',
-        'phone' => '+84912345678',
+        'name' => TELEGRAM_NAME,
+        'phone' => TELEGRAM_PHONE,
         'phone_code_hash' => 'hash123',
     ]);
 
-    $response = $this->actingAs($user)->postJson('/connections/telegram', []);
+    $response = $this->actingAs($user)->postJson(TELEGRAM_ROUTE, []);
 
     $response->assertUnprocessable();
     $response->assertJsonValidationErrors(['code']);
@@ -79,13 +84,13 @@ it('handles password_required response', function () {
     $user = User::factory()->create();
     Session::put('telegram_connect', [
         'session_id' => 'sess123',
-        'name' => 'My Telegram',
-        'phone' => '+84912345678',
+        'name' => TELEGRAM_NAME,
+        'phone' => TELEGRAM_PHONE,
         'phone_code_hash' => 'hash123',
     ]);
 
-    $response = $this->actingAs($user)->postJson('/connections/telegram', [
-        'code' => '12345',
+    $response = $this->actingAs($user)->postJson(TELEGRAM_ROUTE, [
+        'code' => TELEGRAM_CODE,
     ]);
 
     $response->assertOk();
@@ -105,20 +110,20 @@ it('creates CloudConnection on successful login', function () {
     $user = User::factory()->create();
     Session::put('telegram_connect', [
         'session_id' => 'sess123',
-        'name' => 'My Telegram',
-        'phone' => '+84912345678',
+        'name' => TELEGRAM_NAME,
+        'phone' => TELEGRAM_PHONE,
         'phone_code_hash' => 'hash123',
     ]);
 
-    $response = $this->actingAs($user)->postJson('/connections/telegram', [
-        'code' => '12345',
+    $response = $this->actingAs($user)->postJson(TELEGRAM_ROUTE, [
+        'code' => TELEGRAM_CODE,
     ]);
 
     $response->assertOk();
     $response->assertJson(['success' => true, 'synced' => 42]);
 
     $this->assertDatabaseHas('cloud_connections', [
-        'name' => 'My Telegram',
+        'name' => TELEGRAM_NAME,
         'provider' => CloudProvider::TELEGRAM,
         'status' => ConnectionStatus::CONNECTED,
     ]);
@@ -131,8 +136,8 @@ it('creates CloudConnection on successful login', function () {
 it('rejects request with expired session', function () {
     $user = User::factory()->create();
 
-    $response = $this->actingAs($user)->postJson('/connections/telegram', [
-        'code' => '12345',
+    $response = $this->actingAs($user)->postJson(TELEGRAM_ROUTE, [
+        'code' => TELEGRAM_CODE,
     ]);
 
     $response->assertStatus(422);
@@ -151,7 +156,7 @@ it('flushes connection cache after successful telegram sync', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::create([
         'user_id' => $user->id,
-        'name' => 'My Telegram',
+        'name' => TELEGRAM_NAME,
         'provider' => CloudProvider::TELEGRAM,
         'credentials' => ['session_id' => 'sess123'],
         'status' => ConnectionStatus::CONNECTED,

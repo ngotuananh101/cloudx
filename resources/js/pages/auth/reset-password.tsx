@@ -11,10 +11,10 @@ import GuestLayout from '@/layouts/GuestLayout';
 export default function ResetPassword({
     token,
     email,
-}: {
+}: Readonly<{
     token: string;
     email: string;
-}) {
+}>) {
     const { data, setData, post, processing, errors } = useForm({
         token: token,
         email: email,
