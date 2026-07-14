@@ -52,8 +52,12 @@ class S3ConnectionController extends Controller
 
     public function update(UpdateS3ConnectionRequest $request, CloudConnection $connection): RedirectResponse
     {
-        if ($connection->user_id !== $request->user()->id || ! $connection->provider === CloudProvider::AWS_S3) {
-            abort($connection->user_id !== $request->user()->id ? 403 : 404);
+        if ($connection->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($connection->provider !== CloudProvider::AWS_S3) {
+            abort(404);
         }
 
         $validated = $request->validated();

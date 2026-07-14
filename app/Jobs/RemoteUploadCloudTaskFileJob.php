@@ -137,17 +137,48 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         } catch (Throwable $exception) {
             $task->connection->handleApiException($exception);
 
-            $task->forceFill([
-                'status' => CloudTaskStatus::Failed,
-                'error_message' => $exception->getMessage(),
-                'failed_at' => now(),
-            ])->save();
-            $broadcaster->broadcastStatus($task);
-
             Storage::disk($this->tempDiskName())->delete($this->tempPath($task));
+
+            if ($this->attempts() >= $this->tries) {
+                $this->markFailed($task, $exception->getMessage(), $broadcaster);
+            } else {
+                $task->forceFill([
+                    'status' => CloudTaskStatus::Queued,
+                    'error_message' => $exception->getMessage(),
+                ])->save();
+                $broadcaster->broadcastStatus($task);
+            }
 
             throw $exception;
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $task = CloudTask::query()->find($this->taskId);
+
+        if ($task === null || ! in_array($task->status, [CloudTaskStatus::Processing, CloudTaskStatus::Queued], true)) {
+            return;
+        }
+
+        Storage::disk($this->tempDiskName())->delete($this->tempPath($task));
+
+        $this->markFailed(
+            $task,
+            $exception?->getMessage() ?? 'Remote upload job failed.',
+            app(CloudUploadTaskBroadcaster::class),
+        );
+    }
+
+    private function markFailed(CloudTask $task, string $message, CloudUploadTaskBroadcaster $broadcaster): void
+    {
+        $task->forceFill([
+            'status' => CloudTaskStatus::Failed,
+            'error_message' => $message,
+            'failed_at' => now(),
+        ])->save();
+
+        $broadcaster->broadcastStatus($task);
     }
 
     /**

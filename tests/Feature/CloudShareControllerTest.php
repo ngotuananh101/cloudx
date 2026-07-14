@@ -122,3 +122,33 @@ it('accepts missing size for backwards compatibility with shares created before 
     $share = CloudShare::firstOrFail();
     expect($share->extra_info)->toBeNull();
 });
+
+it('hides the password hash when listing shares for a path', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => DRIVE_NAME,
+        'provider' => CloudProvider::ONEDRIVE,
+        'credentials' => ['access_token' => 'token'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    CloudShare::create([
+        'uuid' => (string) Str::uuid(),
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'docs/report.pdf',
+        'name' => 'report.pdf',
+        'is_directory' => false,
+        'type' => 'password',
+        'password' => bcrypt('secret-pass'),
+    ]);
+
+    $response = $this->actingAs($user)->getJson(
+        route('connections.shares.index', ['connection' => $connection->id, 'path' => 'docs/report.pdf'])
+    );
+
+    $response->assertOk()
+        ->assertJsonCount(1)
+        ->assertJsonMissingPath('0.password');
+});

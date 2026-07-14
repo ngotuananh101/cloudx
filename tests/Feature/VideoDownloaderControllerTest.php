@@ -67,6 +67,17 @@ it('returns 422 when the url is missing', function () {
         ->assertJsonValidationErrors(['url']);
 });
 
+it('rejects private network urls for metadata requests', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('video-downloader.metadata'), [
+            'url' => 'http://127.0.0.1/metadata',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['url']);
+});
+
 it('returns 502 when the microservice fails', function () {
     Http::fake([
         'http://localhost:8000/yt-dlp/metadata' => Http::response(['boom' => true], 500),

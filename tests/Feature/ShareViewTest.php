@@ -364,3 +364,109 @@ it('uses the original telegram file name for shared previews instead of the mess
         ->assertOk()
         ->assertHeader('Content-Disposition', 'inline; filename="photo.png"');
 });
+
+it('rejects browsing paths outside a shared folder', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'folder-escape-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'Projects',
+        'name' => 'Projects',
+        'is_directory' => true,
+        'type' => 'public',
+    ]);
+
+    $browser = Mockery::mock(CloudFileBrowser::class);
+    $browser->shouldNotReceive('list');
+    $this->app->instance(CloudFileBrowser::class, $browser);
+
+    $this->get(route('share.view', [
+        'uuid' => 'folder-escape-uuid',
+        'path' => PathEncoder::encode('Secrets'),
+    ]))->assertNotFound();
+});
+
+it('rejects download paths outside a shared folder', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'folder-download-escape-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'Projects',
+        'name' => 'Projects',
+        'is_directory' => true,
+        'type' => 'public',
+    ]);
+
+    $this->get(route('share.download', [
+        'uuid' => 'folder-download-escape-uuid',
+        'path' => PathEncoder::encode('Secrets/passwords.txt'),
+    ]))->assertNotFound();
+});
+
+it('rejects download of a different path for a single file share', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'file-escape-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'report.pdf',
+        'name' => 'report.pdf',
+        'is_directory' => false,
+        'type' => 'public',
+    ]);
+
+    $this->get(route('share.download', [
+        'uuid' => 'file-escape-uuid',
+        'path' => PathEncoder::encode('other-secret.pdf'),
+    ]))->assertNotFound();
+});
+
+it('rejects download of an expired share', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'expired-download-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'report.pdf',
+        'name' => 'report.pdf',
+        'is_directory' => false,
+        'type' => 'public',
+        'expires_at' => now()->subDay(),
+    ]);
+
+    $this->get(route('share.download', [
+        'uuid' => 'expired-download-uuid',
+        'path' => PathEncoder::encode('report.pdf'),
+    ]))->assertNotFound();
+});
+
+it('rejects preview of an expired share', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create(['user_id' => $user->id]);
+
+    CloudShare::create([
+        'uuid' => 'expired-preview-uuid',
+        'user_id' => $user->id,
+        'cloud_connection_id' => $connection->id,
+        'path' => 'report.pdf',
+        'name' => 'report.pdf',
+        'is_directory' => false,
+        'type' => 'public',
+        'expires_at' => now()->subDay(),
+    ]);
+
+    $this->get(route('share.preview', [
+        'uuid' => 'expired-preview-uuid',
+        'path' => PathEncoder::encode('report.pdf'),
+    ]))->assertNotFound();
+});

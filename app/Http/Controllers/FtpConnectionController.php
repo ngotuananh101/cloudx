@@ -52,8 +52,12 @@ class FtpConnectionController extends Controller
 
     public function update(UpdateFtpConnectionRequest $request, CloudConnection $connection): RedirectResponse
     {
-        if ($connection->user_id !== $request->user()->id || ! $connection->provider === CloudProvider::FTP) {
+        if ($connection->user_id !== $request->user()->id) {
             abort(403, 'Unauthorized action.');
+        }
+
+        if ($connection->provider !== CloudProvider::FTP) {
+            abort(404);
         }
 
         $validated = $request->validated();

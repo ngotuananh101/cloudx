@@ -52,8 +52,12 @@ class SftpConnectionController extends Controller
 
     public function update(UpdateSftpConnectionRequest $request, CloudConnection $connection): RedirectResponse
     {
-        if ($connection->user_id !== $request->user()->id || ! $connection->provider === CloudProvider::SFTP) {
-            abort($connection->user_id !== $request->user()->id ? 403 : 404);
+        if ($connection->user_id !== $request->user()->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($connection->provider !== CloudProvider::SFTP) {
+            abort(404);
         }
 
         $validated = $request->validated();

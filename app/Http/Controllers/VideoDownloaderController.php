@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\ActivityAction;
 use App\Exceptions\PythonServiceException;
 use App\Services\ActivityLogger;
+use App\Services\CloudStorage\RemoteUploadUrlGuard;
 use App\Services\Python\YtDlpClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,6 +21,7 @@ class VideoDownloaderController extends Controller
     public function __construct(
         private YtDlpClient $client,
         private ActivityLogger $activityLogger,
+        private RemoteUploadUrlGuard $urlGuard,
     ) {}
 
     public function index(): Response
@@ -33,6 +35,8 @@ class VideoDownloaderController extends Controller
             'url' => ['required', 'string', 'url', 'max:2048'],
             'cookies' => ['nullable', 'string', 'max:65535'],
         ]);
+
+        $this->urlGuard->validate($validated['url']);
 
         try {
             $data = $this->client->fetchMetadata(
@@ -61,6 +65,8 @@ class VideoDownloaderController extends Controller
             'audio_only' => ['nullable', 'boolean'],
             'cookies' => ['nullable', 'string', 'max:65535'],
         ]);
+
+        $this->urlGuard->validate($validated['url']);
 
         try {
             $result = $this->client->downloadStream(

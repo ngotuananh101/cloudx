@@ -2,10 +2,12 @@
 
 namespace App\Jobs;
 
+use App\Enums\ActivityAction;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Exceptions\MultipartUploadException;
 use App\Models\CloudTask;
+use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\S3\S3Presigner;
 use App\Support\CloudUploadTaskBroadcaster;
@@ -36,6 +38,7 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
         CloudStorageCache $cache,
         CloudUploadTaskBroadcaster $broadcaster,
         S3Presigner $presigner,
+        ActivityLogger $activityLogger,
     ): void {
         $task = DB::transaction(function (): ?CloudTask {
             $task = CloudTask::query()
@@ -87,15 +90,53 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
 
             $cache->flushFolder($task->connection, $task->target_path);
             $cache->flushQuota($task->connection);
+
+            $filename = (string) ($payload['filename'] ?? $task->name);
+            $activityLogger->log(
+                user: $task->user,
+                action: ActivityAction::FileUploaded,
+                subjectName: $filename,
+                targetName: $task->target_path === '' ? '/' : $task->target_path,
+                connection: $task->connection,
+            );
         } catch (Throwable $exception) {
-            $task->forceFill([
-                'status' => CloudTaskStatus::Failed,
-                'error_message' => $exception->getMessage(),
-                'failed_at' => now(),
-            ])->save();
-            $broadcaster->broadcastStatus($task);
+            if ($this->attempts() >= $this->tries) {
+                $this->markFailed($task, $exception->getMessage(), $broadcaster);
+            } else {
+                $task->forceFill([
+                    'status' => CloudTaskStatus::Queued,
+                    'error_message' => $exception->getMessage(),
+                ])->save();
+                $broadcaster->broadcastStatus($task);
+            }
 
             throw $exception;
         }
+    }
+
+    public function failed(?Throwable $exception): void
+    {
+        $task = CloudTask::query()->find($this->taskId);
+
+        if ($task === null || ! in_array($task->status, [CloudTaskStatus::Processing, CloudTaskStatus::Queued], true)) {
+            return;
+        }
+
+        $this->markFailed(
+            $task,
+            $exception?->getMessage() ?? 'Multipart upload job failed.',
+            app(CloudUploadTaskBroadcaster::class),
+        );
+    }
+
+    private function markFailed(CloudTask $task, string $message, CloudUploadTaskBroadcaster $broadcaster): void
+    {
+        $task->forceFill([
+            'status' => CloudTaskStatus::Failed,
+            'error_message' => $message,
+            'failed_at' => now(),
+        ])->save();
+
+        $broadcaster->broadcastStatus($task);
     }
 }

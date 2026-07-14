@@ -180,3 +180,60 @@ it('downloads a remote file and writes it to the cloud disk', function () {
     Http::assertSentCount(2);
     Storage::disk('local')->assertMissing('testing-remote-upload/remote-'.$task->id.'.download');
 });
+
+it('requeues a remote upload task when a retryable failure occurs', function () {
+    Storage::fake('local');
+    config()->set('cloud-storage.uploads.temp_disk', 'local');
+    config()->set('cloud-storage.uploads.temp_path', 'testing-remote-upload');
+
+    Http::preventStrayRequests();
+    Http::fake([
+        'files.example.com/archive.zip' => Http::response('server error', 500),
+    ]);
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->for($user)->create();
+    $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
+        'status' => CloudTaskStatus::Queued,
+        'target_path' => 'imports',
+        'name' => 'archive.zip',
+        'payload' => [
+            'filename' => 'archive.zip',
+            'size' => 0,
+            'chunk_size' => 1,
+            'total_chunks' => 1,
+            'uploaded_chunks_count' => 0,
+            'upload_mode' => 'remote',
+            'remote_host' => 'files.example.com',
+        ],
+        'secret_payload' => [
+            'url' => 'https://files.example.com/archive.zip',
+            'headers' => [],
+        ],
+    ]);
+
+    $urlGuard = Mockery::mock(RemoteUploadUrlGuard::class);
+    $urlGuard->shouldReceive('validate')
+        ->once()
+        ->with('https://files.example.com/archive.zip')
+        ->andReturnNull();
+
+    $manager = Mockery::mock(CloudStorageManager::class);
+    $manager->shouldReceive('disk')->never();
+    $this->app->instance(CloudStorageManager::class, $manager);
+
+    $cache = Mockery::mock(CloudStorageCache::class);
+    $cache->shouldReceive('flushFolder')->never();
+    $cache->shouldReceive('flushQuota')->never();
+
+    $job = new RemoteUploadCloudTaskFileJob($task->id);
+
+    try {
+        $job->handle($cache, new CloudUploadTaskBroadcaster, $urlGuard, new ActivityLogger);
+        $this->fail('Expected remote upload job to throw.');
+    } catch (Throwable) {
+        // Expected — intermediate failures requeue the task for retry.
+    }
+
+    expect($task->fresh()->status)->toBe(CloudTaskStatus::Queued);
+});

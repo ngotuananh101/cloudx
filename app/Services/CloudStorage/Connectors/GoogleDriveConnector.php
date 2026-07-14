@@ -14,6 +14,7 @@ use Google\Service\Drive;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use RuntimeException;
 
 class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuota
@@ -25,17 +26,28 @@ class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuot
 
     public function redirectUrl(): string
     {
+        $state = Str::random(40);
+        session()->put($this->stateSessionKey(), $state);
+
         $client = $this->client();
         $this->configureClient($client);
         $client->addScope(Drive::DRIVE);
         $client->setAccessType('offline');
         $client->setPrompt('consent');
+        $client->setState($state);
 
         return $client->createAuthUrl();
     }
 
     public function handleCallback(Request $request): ConnectedAccountData
     {
+        $state = $request->query('state');
+        $sessionState = $request->session()->pull($this->stateSessionKey());
+
+        if (! is_string($state) || ! is_string($sessionState) || ! hash_equals($sessionState, $state)) {
+            throw new RuntimeException('Invalid Google OAuth state.');
+        }
+
         $code = $request->string('code')->toString();
 
         if ($code === '') {
@@ -173,5 +185,10 @@ class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuot
         $client->setClientId(config('services.google.client_id'));
         $client->setClientSecret(config('services.google.client_secret'));
         $client->setRedirectUri(config('services.google.redirect_uri'));
+    }
+
+    private function stateSessionKey(): string
+    {
+        return 'google_oauth_state';
     }
 }

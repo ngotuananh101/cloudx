@@ -37,7 +37,7 @@ class ShareViewController extends Controller
             ]);
         }
 
-        if ($share->expires_at && $share->expires_at->isPast()) {
+        if ($this->isExpired($share)) {
             return Inertia::render('share/error', [
                 'reason' => 'expired',
             ]);
@@ -56,10 +56,9 @@ class ShareViewController extends Controller
 
         if ($share->is_directory) {
             $encodedPath = $request->query('path', '');
-            $decodedPath = $encodedPath ? PathEncoder::decode($encodedPath) : $share->path;
-
-            // Build the full path: share base path + subfolder path
-            $browsePath = $encodedPath ? $decodedPath : $share->path;
+            $browsePath = $encodedPath !== '' && $encodedPath !== null
+                ? $this->assertPathWithinShare($share, PathEncoder::decode((string) $encodedPath))
+                : $this->normalizePath($share->path);
 
             try {
                 $files = $this->fileBrowser->list($connection, PathEncoder::encode($browsePath));
@@ -78,7 +77,7 @@ class ShareViewController extends Controller
                 'files' => $files,
                 'file' => null,
                 'currentPath' => $browsePath,
-                'shareBasePath' => $share->path,
+                'shareBasePath' => $this->normalizePath($share->path),
                 'previewUrl' => null,
                 'downloadUrl' => null,
             ]);
@@ -96,7 +95,7 @@ class ShareViewController extends Controller
                 'type' => CloudFileTypeDetector::detect($share->name, false),
             ],
             'currentPath' => '',
-            'shareBasePath' => $share->path,
+            'shareBasePath' => $this->normalizePath($share->path),
             'previewUrl' => route('share.preview', ['uuid' => $uuid, 'path' => PathEncoder::encode($share->path)]),
             'downloadUrl' => route('share.download', ['uuid' => $uuid, 'path' => PathEncoder::encode($share->path)]),
         ]);
@@ -105,6 +104,8 @@ class ShareViewController extends Controller
     public function verify(Request $request, string $uuid): RedirectResponse
     {
         $share = CloudShare::where('uuid', $uuid)->firstOrFail();
+
+        abort_if($this->isExpired($share), 404, 'This share link has expired.');
 
         $request->validate([
             'password' => 'required|string',
@@ -122,7 +123,7 @@ class ShareViewController extends Controller
     public function preview(Request $request, string $uuid, ?string $path = null): StreamedResponse
     {
         $share = $this->resolveAndVerify($request, $uuid);
-        $decodedPath = $path ? PathEncoder::decode($path) : $share->path;
+        $decodedPath = $this->resolvedSharePath($share, $path);
 
         try {
             $connector = $this->cloudStorage->connector($share->cloudConnection->provider);
@@ -170,7 +171,7 @@ class ShareViewController extends Controller
     public function download(Request $request, string $uuid, ?string $path = null): StreamedResponse|RedirectResponse
     {
         $share = $this->resolveAndVerify($request, $uuid);
-        $decodedPath = $path ? PathEncoder::decode($path) : $share->path;
+        $decodedPath = $this->resolvedSharePath($share, $path);
 
         try {
             $connector = $this->cloudStorage->connector($share->cloudConnection->provider);
@@ -226,6 +227,8 @@ class ShareViewController extends Controller
             ->with('cloudConnection')
             ->firstOrFail();
 
+        abort_if($this->isExpired($share), 404, 'This share link has expired.');
+
         abort_if(
             $share->type === 'password' && ! $request->session()->get("share_verified_{$share->id}"),
             403,
@@ -233,6 +236,65 @@ class ShareViewController extends Controller
         );
 
         return $share;
+    }
+
+    private function resolvedSharePath(CloudShare $share, ?string $encodedPath): string
+    {
+        if ($encodedPath === null || $encodedPath === '') {
+            return $this->assertPathWithinShare($share, $share->path);
+        }
+
+        return $this->assertPathWithinShare($share, PathEncoder::decode($encodedPath));
+    }
+
+    private function assertPathWithinShare(CloudShare $share, string $path): string
+    {
+        $normalizedPath = $this->normalizePath($path);
+        $shareBasePath = $this->normalizePath($share->path);
+
+        if (! $share->is_directory) {
+            abort_unless($normalizedPath === $shareBasePath, 404, 'File not found.');
+
+            return $normalizedPath;
+        }
+
+        if ($shareBasePath === '') {
+            return $normalizedPath;
+        }
+
+        abort_unless(
+            $normalizedPath === $shareBasePath || str_starts_with($normalizedPath.'/', $shareBasePath.'/'),
+            404,
+            'File not found.'
+        );
+
+        return $normalizedPath;
+    }
+
+    private function normalizePath(string $path): string
+    {
+        $segments = [];
+
+        foreach (explode('/', str_replace('\\', '/', $path)) as $segment) {
+            if ($segment === '' || $segment === '.') {
+                continue;
+            }
+
+            if ($segment === '..') {
+                array_pop($segments);
+
+                continue;
+            }
+
+            $segments[] = $segment;
+        }
+
+        return implode('/', $segments);
+    }
+
+    private function isExpired(CloudShare $share): bool
+    {
+        return $share->expires_at !== null && $share->expires_at->isPast();
     }
 
     /**

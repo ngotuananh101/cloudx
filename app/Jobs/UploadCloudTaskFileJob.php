@@ -163,12 +163,15 @@ class UploadCloudTaskFileJob implements ShouldQueue
         } catch (Throwable $exception) {
             $task->connection->handleApiException($exception);
 
-            $task->forceFill([
-                'status' => CloudTaskStatus::Failed,
-                'error_message' => $exception->getMessage(),
-                'failed_at' => now(),
-            ])->save();
-            $broadcaster->broadcastStatus($task);
+            if ($this->attempts() >= $this->tries) {
+                $this->markFailed($task, $exception->getMessage(), $broadcaster);
+            } else {
+                $task->forceFill([
+                    'status' => CloudTaskStatus::Queued,
+                    'error_message' => $exception->getMessage(),
+                ])->save();
+                $broadcaster->broadcastStatus($task);
+            }
 
             throw $exception;
         }
@@ -178,17 +181,26 @@ class UploadCloudTaskFileJob implements ShouldQueue
     {
         $task = CloudTask::query()->find($this->taskId);
 
-        if ($task === null || $task->status !== CloudTaskStatus::Processing) {
+        if ($task === null || ! in_array($task->status, [CloudTaskStatus::Processing, CloudTaskStatus::Queued], true)) {
             return;
         }
 
+        $this->markFailed(
+            $task,
+            $exception?->getMessage() ?? 'Upload job failed.',
+            app(CloudUploadTaskBroadcaster::class),
+        );
+    }
+
+    private function markFailed(CloudTask $task, string $message, CloudUploadTaskBroadcaster $broadcaster): void
+    {
         $task->forceFill([
             'status' => CloudTaskStatus::Failed,
-            'error_message' => $exception?->getMessage() ?? 'Upload job failed.',
+            'error_message' => $message,
             'failed_at' => now(),
         ])->save();
 
-        app(CloudUploadTaskBroadcaster::class)->broadcastStatus($task);
+        $broadcaster->broadcastStatus($task);
     }
 
     private function deleteTempFiles(CloudTask $task, int $totalChunks, string $tempPath): void

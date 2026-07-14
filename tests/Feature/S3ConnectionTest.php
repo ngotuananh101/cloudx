@@ -165,6 +165,26 @@ it('preserves secret access key on update when secret is blank', function () {
         ->and($connection->credentials['secret_access_key'])->toBe('existing-secret');
 });
 
+it('rejects updating a non-s3 connection through the s3 endpoint', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::FTP,
+        'credentials' => [
+            'host' => 'ftp.example.com',
+            'port' => 21,
+            'username' => 'user',
+            'password' => 'pass',
+        ],
+    ]);
+
+    $this->actingAs($user)
+        ->patch(route('connections.s3.update', $connection), s3Payload())
+        ->assertNotFound();
+
+    expect($connection->fresh()->provider)->toBe(CloudProvider::FTP);
+});
+
 /**
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>
