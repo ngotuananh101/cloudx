@@ -2,6 +2,7 @@
 
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Exceptions\CloudOAuthException;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudStorageManager;
@@ -40,7 +41,7 @@ it('rejects an invalid OneDrive OAuth callback state', function () {
     $request->setLaravelSession(session()->driver());
 
     app(OneDriveConnector::class)->handleCallback($request);
-})->throws(RuntimeException::class, 'Invalid OneDrive OAuth state.');
+})->throws(CloudOAuthException::class, 'Invalid OneDrive OAuth state.');
 
 it('handles the OneDrive OAuth callback', function () {
     config()->set('services.microsoft.client_id', 'test-client-id');

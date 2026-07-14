@@ -2,11 +2,11 @@
 
 namespace App\Services\OneDrive;
 
+use App\Exceptions\OneDriveException;
 use App\Models\CloudConnection;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 use InvalidArgumentException;
-use RuntimeException;
 
 class OneDriveClient
 {
@@ -33,7 +33,7 @@ class OneDriveClient
         $refreshToken = $credentials['refresh_token'] ?? null;
 
         if (! is_string($refreshToken) || $refreshToken === '') {
-            throw new RuntimeException('OneDrive refresh token is missing.');
+            throw new OneDriveException('OneDrive refresh token is missing.');
         }
 
         $token = $this->http()->asForm()
@@ -138,7 +138,7 @@ class OneDriveClient
         $stream = fopen('php://temp', 'r+');
 
         if ($stream === false) {
-            throw new RuntimeException('Could not create OneDrive download stream.');
+            throw new OneDriveException('Could not create OneDrive download stream.');
         }
 
         fwrite($stream, $response->body());
@@ -175,7 +175,7 @@ class OneDriveClient
         $uploadUrl = is_array($session) ? ($session['uploadUrl'] ?? null) : null;
 
         if (! is_string($uploadUrl) || $uploadUrl === '') {
-            throw new RuntimeException('OneDrive upload session was not created.');
+            throw new OneDriveException('OneDrive upload session was not created.');
         }
 
         $offset = 0;
@@ -184,7 +184,7 @@ class OneDriveClient
             $chunk = fread($contents, self::UPLOAD_CHUNK_SIZE);
 
             if ($chunk === false) {
-                throw new RuntimeException('Could not read OneDrive upload stream.');
+                throw new OneDriveException('Could not read OneDrive upload stream.');
             }
 
             if ($chunk === '') {
@@ -203,14 +203,14 @@ class OneDriveClient
             }
 
             if ($response->status() !== 202) {
-                throw new RuntimeException('OneDrive upload session returned an unexpected response.');
+                throw new OneDriveException('OneDrive upload session returned an unexpected response.');
             }
 
             $nextExpectedRanges = $response->json('nextExpectedRanges');
             $offset = $this->nextUploadOffset(is_array($nextExpectedRanges) ? $nextExpectedRanges : null, $end + 1);
         }
 
-        throw new RuntimeException('OneDrive upload session did not complete.');
+        throw new OneDriveException('OneDrive upload session did not complete.');
     }
 
     public function delete(string $path): void
@@ -269,11 +269,11 @@ class OneDriveClient
             }
 
             if ($status === 'failed') {
-                throw new RuntimeException('OneDrive copy failed.');
+                throw new OneDriveException('OneDrive copy failed.');
             }
 
             if (! in_array($status, ['notStarted', 'inProgress'], true)) {
-                throw new RuntimeException('OneDrive copy returned an unexpected monitor status.');
+                throw new OneDriveException('OneDrive copy returned an unexpected monitor status.');
             }
 
             if ($attempt < 4) {
@@ -281,7 +281,7 @@ class OneDriveClient
             }
         }
 
-        throw new RuntimeException('OneDrive copy did not complete in time.');
+        throw new OneDriveException('OneDrive copy did not complete in time.');
     }
 
     /**
@@ -308,15 +308,15 @@ class OneDriveClient
     private function assertDestinationParent(?array $parentItem, string $operation): void
     {
         if (! is_array($parentItem)) {
-            throw new RuntimeException("OneDrive {$operation} destination parent does not exist.");
+            throw new OneDriveException("OneDrive {$operation} destination parent does not exist.");
         }
 
         if (! isset($parentItem['id']) || ! is_string($parentItem['id']) || $parentItem['id'] === '') {
-            throw new RuntimeException("OneDrive {$operation} destination parent is missing an id.");
+            throw new OneDriveException("OneDrive {$operation} destination parent is missing an id.");
         }
 
         if (! array_key_exists('folder', $parentItem) || ! is_array($parentItem['folder'])) {
-            throw new RuntimeException("OneDrive {$operation} destination parent is not a folder.");
+            throw new OneDriveException("OneDrive {$operation} destination parent is not a folder.");
         }
     }
 
@@ -328,7 +328,7 @@ class OneDriveClient
         $stats = fstat($contents);
 
         if (! is_array($stats) || ! isset($stats['size'])) {
-            throw new RuntimeException('Could not determine OneDrive upload stream size.');
+            throw new OneDriveException('Could not determine OneDrive upload stream size.');
         }
 
         return (int) $stats['size'];

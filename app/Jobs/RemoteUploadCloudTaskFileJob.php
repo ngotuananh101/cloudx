@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\ActivityAction;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
+use App\Exceptions\CloudUploadException;
 use App\Models\CloudTask;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
@@ -18,7 +19,6 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Throwable;
 
 class RemoteUploadCloudTaskFileJob implements ShouldQueue
@@ -119,7 +119,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $headers = $task->secret_payload['headers'] ?? [];
 
         if ($url === '' || $filename === '' || ! is_array($headers)) {
-            throw new RuntimeException('Remote upload task payload is invalid.');
+            throw new CloudUploadException('Remote upload task payload is invalid.');
         }
 
         $urlGuard->validate($url);
@@ -134,11 +134,11 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $downloadedSize = filesize($absoluteTempPath);
 
         if ($downloadedSize === false || $downloadedSize < 1) {
-            throw new RuntimeException('Remote file is empty or could not be read.');
+            throw new CloudUploadException('Remote file is empty or could not be read.');
         }
 
         if ($downloadedSize > $this->maxFileSize()) {
-            throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
+            throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
         }
 
         $this->writeDownloadedFile($task, $targetPath, $absoluteTempPath);
@@ -173,7 +173,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $uploadStream = fopen($absoluteTempPath, 'rb');
 
         if ($uploadStream === false) {
-            throw new RuntimeException('Could not open downloaded remote file.');
+            throw new CloudUploadException('Could not open downloaded remote file.');
         }
 
         $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
@@ -224,7 +224,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $contentLength = (int) $response->header('Content-Length');
 
         if ($contentLength > $this->maxFileSize()) {
-            throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
+            throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
         }
     }
 
@@ -245,7 +245,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $contentLength = (int) $response->header('Content-Length');
 
         if ($contentLength > $this->maxFileSize()) {
-            throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
+            throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
         }
     }
 

@@ -16,11 +16,29 @@ interface DashboardProps {
     recentActivities: ActivityLogEntry[];
 }
 
+function providerMiniIcon(provider: AvailableProvider) {
+    if (provider.icon?.endsWith('.svg')) {
+        return (
+            <img
+                src={provider.icon}
+                className="h-5 w-5"
+                alt={provider.label}
+            />
+        );
+    }
+
+    if (provider.key === 'aws-s3') {
+        return <Database className="h-5 w-5 text-muted-foreground" />;
+    }
+
+    return <Cloud className="h-5 w-5 text-muted-foreground" />;
+}
+
 export default function Dashboard({
     connections = [],
     availableProviders = [],
     recentActivities = [],
-}: DashboardProps) {
+}: Readonly<DashboardProps>) {
     const [isConnectModalOpen, setIsConnectModalOpen] = useState(false);
 
     return (
@@ -62,33 +80,17 @@ export default function Dashboard({
                             </p>
 
                             <div className="my-6 grid grid-cols-3 gap-3">
-                                {availableProviders.map((provider) => {
-                                    const miniIcon = provider.icon?.endsWith(
-                                        '.svg',
-                                    ) ? (
-                                        <img
-                                            src={provider.icon}
-                                            className="h-5 w-5"
-                                            alt={provider.label}
-                                        />
-                                    ) : provider.key === 'aws-s3' ? (
-                                        <Database className="h-5 w-5 text-muted-foreground" />
-                                    ) : (
-                                        <Cloud className="h-5 w-5 text-muted-foreground" />
-                                    );
-
-                                    return (
-                                        <div
-                                            key={provider.key}
-                                            className="flex flex-col items-center justify-center rounded-xl border border-border bg-muted py-3 text-center transition-colors hover:bg-muted/70"
-                                        >
-                                            {miniIcon}
-                                            <span className="mt-1 text-[8px] font-black tracking-wider text-muted-foreground">
-                                                {provider.label.toUpperCase()}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
+                                {availableProviders.map((provider) => (
+                                    <div
+                                        key={provider.key}
+                                        className="flex flex-col items-center justify-center rounded-xl border border-border bg-muted py-3 text-center transition-colors hover:bg-muted/70"
+                                    >
+                                        {providerMiniIcon(provider)}
+                                        <span className="mt-1 text-[8px] font-black tracking-wider text-muted-foreground">
+                                            {provider.label.toUpperCase()}
+                                        </span>
+                                    </div>
+                                ))}
                             </div>
 
                             <Button

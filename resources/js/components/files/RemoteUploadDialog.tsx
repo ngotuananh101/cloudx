@@ -20,14 +20,16 @@ interface RemoteUploadDialogProps {
     onSubmit: (remoteUpload: RemoteUploadRequest) => void;
 }
 
+type HeaderRow = RemoteUploadHeader & { id: string };
+
 export function RemoteUploadDialog({
     isOpen,
     onClose,
     onSubmit,
-}: RemoteUploadDialogProps) {
+}: Readonly<RemoteUploadDialogProps>) {
     const [url, setUrl] = useState('');
     const [filename, setFilename] = useState('');
-    const [headers, setHeaders] = useState<RemoteUploadHeader[]>([]);
+    const [headers, setHeaders] = useState<HeaderRow[]>([]);
     const [error, setError] = useState<string | null>(null);
 
     const reset = () => {
@@ -49,25 +51,29 @@ export function RemoteUploadDialog({
     const addHeader = () => {
         setHeaders((currentHeaders) => [
             ...currentHeaders,
-            { name: '', value: '' },
+            {
+                id: crypto.randomUUID(),
+                name: '',
+                value: '',
+            },
         ]);
     };
 
     const updateHeader = (
-        index: number,
+        id: string,
         field: keyof RemoteUploadHeader,
         value: string,
     ) => {
         setHeaders((currentHeaders) =>
-            currentHeaders.map((header, currentIndex) =>
-                currentIndex === index ? { ...header, [field]: value } : header,
+            currentHeaders.map((header) =>
+                header.id === id ? { ...header, [field]: value } : header,
             ),
         );
     };
 
-    const removeHeader = (index: number) => {
+    const removeHeader = (id: string) => {
         setHeaders((currentHeaders) =>
-            currentHeaders.filter((_, currentIndex) => currentIndex !== index),
+            currentHeaders.filter((header) => header.id !== id),
         );
     };
 
@@ -84,11 +90,11 @@ export function RemoteUploadDialog({
             (header) => header.name.trim() !== '' || header.value.trim() !== '',
         );
 
-        const incompleteHeader = activeHeaders.find(
+        const hasIncompleteHeader = activeHeaders.some(
             (header) => header.name.trim() === '' || header.value.trim() === '',
         );
 
-        if (incompleteHeader) {
+        if (hasIncompleteHeader) {
             setError('Header rows need both a name and a value.');
 
             return;
@@ -172,16 +178,16 @@ export function RemoteUploadDialog({
 
                         {headers.length > 0 && (
                             <div className="space-y-2">
-                                {headers.map((header, index) => (
+                                {headers.map((header) => (
                                     <div
-                                        key={index}
+                                        key={header.id}
                                         className="grid grid-cols-[1fr_1fr_auto] gap-2"
                                     >
                                         <Input
                                             value={header.name}
                                             onChange={(event) =>
                                                 updateHeader(
-                                                    index,
+                                                    header.id,
                                                     'name',
                                                     event.target.value,
                                                 )
@@ -193,7 +199,7 @@ export function RemoteUploadDialog({
                                             value={header.value}
                                             onChange={(event) =>
                                                 updateHeader(
-                                                    index,
+                                                    header.id,
                                                     'value',
                                                     event.target.value,
                                                 )
@@ -205,7 +211,9 @@ export function RemoteUploadDialog({
                                             type="button"
                                             variant="ghost"
                                             size="icon-sm"
-                                            onClick={() => removeHeader(index)}
+                                            onClick={() =>
+                                                removeHeader(header.id)
+                                            }
                                             aria-label="Remove header"
                                         >
                                             <Trash2 className="h-4 w-4" />

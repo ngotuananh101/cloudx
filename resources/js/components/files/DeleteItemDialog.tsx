@@ -20,16 +20,28 @@ interface DeleteItemDialogProps {
     onDeleted?: () => void;
 }
 
+function resolveSelectedItems(
+    items: CloudFile[],
+    item: CloudFile | null,
+): CloudFile[] {
+    if (items.length > 0) {
+        return items;
+    }
+
+    return item ? [item] : [];
+}
+
 export function DeleteItemDialog({
     item = null,
     items = [],
     connectionId,
     onClose,
     onDeleted,
-}: DeleteItemDialogProps) {
-    const selectedItems = items.length > 0 ? items : item ? [item] : [];
+}: Readonly<DeleteItemDialogProps>) {
+    const selectedItems = resolveSelectedItems(items, item);
     const targetItem = selectedItems[0] ?? null;
     const isBulkDelete = selectedItems.length > 1;
+    const itemTypeLabel = targetItem?.isDirectory ? 'folder' : 'file';
 
     const deleteItem = () => {
         if (selectedItems.length === 0) {
@@ -67,7 +79,7 @@ export function DeleteItemDialog({
                     <AlertDialogTitle>
                         {isBulkDelete
                             ? `Delete ${selectedItems.length} items?`
-                            : `Delete ${targetItem?.isDirectory ? 'folder' : 'file'}?`}
+                            : `Delete ${itemTypeLabel}?`}
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                         {isBulkDelete ? (

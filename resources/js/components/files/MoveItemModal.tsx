@@ -24,6 +24,17 @@ interface MoveItemModalProps {
     onMoved?: () => void;
 }
 
+function resolveSelectedItems(
+    items: CloudFile[],
+    item: CloudFile | null,
+): CloudFile[] {
+    if (items.length > 0) {
+        return items;
+    }
+
+    return item ? [item] : [];
+}
+
 export default function MoveItemModal({
     isOpen,
     onClose,
@@ -32,13 +43,13 @@ export default function MoveItemModal({
     connectionId,
     currentParentPath,
     onMoved,
-}: MoveItemModalProps) {
+}: Readonly<MoveItemModalProps>) {
     const [destinationPath, setDestinationPath] = useState(currentParentPath);
     const [folders, setFolders] = useState<CloudFile[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isMoving, setIsMoving] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const selectedItems = items.length > 0 ? items : item ? [item] : [];
+    const selectedItems = resolveSelectedItems(items, item);
     const targetItem = selectedItems[0] ?? null;
     const isBulkMove = selectedItems.length > 1;
 
@@ -185,15 +196,19 @@ export default function MoveItemModal({
                     </div>
 
                     <div className="flex-1 space-y-1 overflow-y-auto">
-                        {isLoading ? (
+                        {isLoading && (
                             <div className="flex h-full items-center justify-center">
                                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                             </div>
-                        ) : error ? (
+                        )}
+
+                        {!isLoading && error && (
                             <div className="p-2 text-center text-sm text-destructive">
                                 {error}
                             </div>
-                        ) : (
+                        )}
+
+                        {!isLoading && !error && (
                             <>
                                 {destinationPath !== '' && (
                                     <button

@@ -17,15 +17,47 @@ import { formatBytes } from '@/lib/format-bytes';
 import type { CloudFile } from '@/types/cloud';
 import files from '@/routes/cloud/files';
 
+function NoRendererFallback({
+    onDownload,
+}: Readonly<{ onDownload: () => void }>) {
+    return (
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
+            <div className="mb-4 rounded-full bg-muted p-4">
+                <File className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h4 className="text-lg font-medium text-foreground">
+                Preview not supported
+            </h4>
+            <p className="mt-2 text-sm text-muted-foreground">
+                This file type cannot be previewed in the browser.
+            </p>
+            <Button className="mt-6" onClick={onDownload}>
+                Download File
+            </Button>
+        </div>
+    );
+}
+
+function LoadingRenderer() {
+    return (
+        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
+            <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary" />
+            <p className="text-sm font-medium text-foreground">
+                Loading preview...
+            </p>
+        </div>
+    );
+}
+
 export default function FilePreviewModal({
     item,
     connectionId,
     onClose,
-}: {
+}: Readonly<{
     item: CloudFile | null;
     connectionId: number;
     onClose: () => void;
-}) {
+}>) {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const { max_preview_size } = usePage<any>().props;
     const { theme } = useTheme();
@@ -65,32 +97,6 @@ export default function FilePreviewModal({
     const handleDownload = () => {
         globalThis.location.href = downloadUrl;
     };
-
-    const NoRendererFallback = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
-            <div className="mb-4 rounded-full bg-muted p-4">
-                <File className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <h4 className="text-lg font-medium text-foreground">
-                Preview not supported
-            </h4>
-            <p className="mt-2 text-sm text-muted-foreground">
-                This file type cannot be previewed in the browser.
-            </p>
-            <Button className="mt-6" onClick={handleDownload}>
-                Download File
-            </Button>
-        </div>
-    );
-
-    const LoadingRenderer = () => (
-        <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
-            <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary" />
-            <p className="text-sm font-medium text-foreground">
-                Loading preview...
-            </p>
-        </div>
-    );
 
     return (
         <Dialog
@@ -188,7 +194,11 @@ export default function FilePreviewModal({
                                     disableHeader: true,
                                 },
                                 noRenderer: {
-                                    overrideComponent: NoRendererFallback,
+                                    overrideComponent: () => (
+                                        <NoRendererFallback
+                                            onDownload={handleDownload}
+                                        />
+                                    ),
                                 },
                                 loadingRenderer: {
                                     overrideComponent: LoadingRenderer,

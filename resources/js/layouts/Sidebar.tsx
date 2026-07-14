@@ -36,6 +36,49 @@ interface SidebarProps {
     };
 }
 
+function navLinkClass(isActive: boolean, size: 'sm' | 'xs' = 'xs'): string {
+    const base =
+        size === 'sm'
+            ? 'relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors'
+            : 'relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors';
+
+    return isActive
+        ? `${base} bg-accent text-accent-foreground`
+        : `${base} text-muted-foreground hover:bg-muted hover:text-foreground`;
+}
+
+function SidebarNavLink({
+    href,
+    label,
+    icon: Icon,
+    isActive,
+    size = 'xs',
+}: Readonly<{
+    href: string;
+    label: string;
+    icon: typeof LayoutDashboard;
+    isActive: boolean;
+    size?: 'sm' | 'xs';
+}>) {
+    return (
+        <Link prefetch href={href} className={navLinkClass(isActive, size)}>
+            {isActive && (
+                <div
+                    className={`absolute top-1/2 left-0 -translate-y-1/2 rounded-r-md bg-primary ${
+                        size === 'sm' ? 'h-8 w-1' : 'h-7 w-1'
+                    }`}
+                />
+            )}
+            <Icon
+                className={`${size === 'sm' ? 'h-5 w-5' : 'h-4.5 w-4.5'} ${
+                    isActive ? 'text-primary' : 'text-muted-foreground'
+                }`}
+            />
+            {label}
+        </Link>
+    );
+}
+
 function SidebarModals({
     connectionBeingRenamed,
     setConnectionBeingRenamed,
@@ -134,19 +177,15 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
                     <div>
                         <ul className="space-y-1">
                             <li>
-                                <Link
-                                    prefetch
+                                <SidebarNavLink
                                     href="/dashboard"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors ${url === '/dashboard' || url === '/' ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                                >
-                                    {(url === '/dashboard' || url === '/') && (
-                                        <div className="absolute top-1/2 left-0 h-8 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
-                                    )}
-                                    <LayoutDashboard
-                                        className={`h-5 w-5 ${url === '/dashboard' || url === '/' ? 'text-primary' : 'text-muted-foreground'}`}
-                                    />
-                                    DASHBOARD
-                                </Link>
+                                    label="DASHBOARD"
+                                    icon={LayoutDashboard}
+                                    isActive={
+                                        url === '/dashboard' || url === '/'
+                                    }
+                                    size="sm"
+                                />
                             </li>
                         </ul>
                     </div>
@@ -248,66 +287,44 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
                         </div>
                         <ul className="space-y-1">
                             <li>
-                                <Link
-                                    prefetch
+                                <SidebarNavLink
                                     href="/system/cloud-tasks"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/cloud-tasks') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                                >
-                                    {url.startsWith('/system/cloud-tasks') && (
-                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    label="TASKS"
+                                    icon={ListTodo}
+                                    isActive={url.startsWith(
+                                        '/system/cloud-tasks',
                                     )}
-                                    <ListTodo
-                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/cloud-tasks') ? 'text-primary' : 'text-muted-foreground'}`}
-                                    />
-                                    TASKS
-                                </Link>
+                                />
                             </li>
                             <li>
-                                <Link
-                                    prefetch
+                                <SidebarNavLink
                                     href="/system/activity-logs"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/activity-logs') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                                >
-                                    {url.startsWith(
+                                    label="ACTIVITY LOG"
+                                    icon={History}
+                                    isActive={url.startsWith(
                                         '/system/activity-logs',
-                                    ) && (
-                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
                                     )}
-                                    <History
-                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/activity-logs') ? 'text-primary' : 'text-muted-foreground'}`}
-                                    />
-                                    ACTIVITY LOG
-                                </Link>
+                                />
                             </li>
                             <li>
-                                <Link
-                                    prefetch
+                                <SidebarNavLink
                                     href="/system/shared-links"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/system/shared-links') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                                >
-                                    {url.startsWith('/system/shared-links') && (
-                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    label="SHARED LINKS"
+                                    icon={LinkIcon}
+                                    isActive={url.startsWith(
+                                        '/system/shared-links',
                                     )}
-                                    <LinkIcon
-                                        className={`h-4.5 w-4.5 ${url.startsWith('/system/shared-links') ? 'text-primary' : 'text-muted-foreground'}`}
-                                    />
-                                    SHARED LINKS
-                                </Link>
+                                />
                             </li>
                             <li>
-                                <Link
-                                    prefetch
+                                <SidebarNavLink
                                     href="/video-downloader"
-                                    className={`relative flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-bold tracking-wide transition-colors ${url.startsWith('/video-downloader') ? 'bg-accent text-accent-foreground' : 'text-muted-foreground hover:bg-muted hover:text-foreground'}`}
-                                >
-                                    {url.startsWith('/video-downloader') && (
-                                        <div className="absolute top-1/2 left-0 h-7 w-1 -translate-y-1/2 rounded-r-md bg-primary" />
+                                    label="VIDEO DOWNLOADER"
+                                    icon={Download}
+                                    isActive={url.startsWith(
+                                        '/video-downloader',
                                     )}
-                                    <Download
-                                        className={`h-4.5 w-4.5 ${url.startsWith('/video-downloader') ? 'text-primary' : 'text-muted-foreground'}`}
-                                    />
-                                    VIDEO DOWNLOADER
-                                </Link>
+                                />
                             </li>
                         </ul>
                     </div>

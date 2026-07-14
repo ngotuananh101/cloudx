@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import {
+    createContext,
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
 
 type Theme = 'dark' | 'light' | 'system';
 
@@ -25,8 +32,8 @@ export function ThemeProvider({
     defaultTheme = 'system',
     storageKey = 'vite-ui-theme',
     ...props
-}: ThemeProviderProps) {
-    const [theme, setTheme] = useState<Theme>(
+}: Readonly<ThemeProviderProps>) {
+    const [theme, setThemeState] = useState<Theme>(
         () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
     );
 
@@ -68,13 +75,21 @@ export function ThemeProvider({
         return () => mediaQuery.removeEventListener('change', handleChange);
     }, [theme]);
 
-    const value = {
-        theme,
-        setTheme: (theme: Theme) => {
-            localStorage.setItem(storageKey, theme);
-            setTheme(theme);
+    const setTheme = useCallback(
+        (nextTheme: Theme) => {
+            localStorage.setItem(storageKey, nextTheme);
+            setThemeState(nextTheme);
         },
-    };
+        [storageKey],
+    );
+
+    const value = useMemo(
+        () => ({
+            theme,
+            setTheme,
+        }),
+        [theme, setTheme],
+    );
 
     return (
         <ThemeProviderContext.Provider {...props} value={value}>

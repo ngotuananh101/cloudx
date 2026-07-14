@@ -2,6 +2,7 @@
 
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Exceptions\CloudOAuthException;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudStorageManager;
@@ -51,7 +52,7 @@ it('rejects an invalid Dropbox OAuth callback state', function () {
     $request->setLaravelSession(session()->driver());
 
     app(DropboxConnector::class)->handleCallback($request);
-})->throws(RuntimeException::class, 'Invalid Dropbox OAuth state.');
+})->throws(CloudOAuthException::class, 'Invalid Dropbox OAuth state.');
 
 it('handles the Dropbox OAuth callback', function () {
     config()->set('services.dropbox.client_id', 'dropbox-client-id');

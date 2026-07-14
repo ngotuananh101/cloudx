@@ -13,24 +13,8 @@ interface SharePreviewProps {
     downloadUrl: string;
 }
 
-export function SharePreview({
-    previewUrl,
-    fileName,
-    fileSize,
-    downloadUrl,
-}: SharePreviewProps) {
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const { theme } = useTheme();
-    const isDark =
-        theme === 'dark' ||
-        (theme === 'system' &&
-            globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    const handleDownload = () => {
-        globalThis.location.href = downloadUrl;
-    };
-
-    const NoRendererFallback = () => (
+function NoRendererFallback({ onDownload }: Readonly<{ onDownload: () => void }>) {
+    return (
         <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
             <div className="mb-4 rounded-full bg-muted p-4">
                 <File className="h-8 w-8 text-muted-foreground" />
@@ -41,13 +25,15 @@ export function SharePreview({
             <p className="mt-2 text-sm text-muted-foreground">
                 This file type cannot be previewed in the browser.
             </p>
-            <Button className="mt-6" onClick={handleDownload}>
+            <Button className="mt-6" onClick={onDownload}>
                 Download File
             </Button>
         </div>
     );
+}
 
-    const LoadingRenderer = () => (
+function LoadingRenderer() {
+    return (
         <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
             <Loader2 className="mb-4 h-8 w-8 animate-spin text-primary" />
             <p className="text-sm font-medium text-foreground">
@@ -55,12 +41,31 @@ export function SharePreview({
             </p>
         </div>
     );
+}
 
-    const previewContent = (
+function PreviewChrome({
+    fileName,
+    fileSize,
+    isFullscreen,
+    isDark,
+    previewUrl,
+    onDownload,
+    onToggleFullscreen,
+    onExitFullscreen,
+}: Readonly<{
+    fileName: string;
+    fileSize: number;
+    isFullscreen: boolean;
+    isDark: boolean;
+    previewUrl: string;
+    onDownload: () => void;
+    onToggleFullscreen: () => void;
+    onExitFullscreen: () => void;
+}>) {
+    return (
         <div
             className={`flex flex-col ${isFullscreen ? 'h-screen w-screen' : 'h-[500px]'}`}
         >
-            {/* Header bar */}
             <div className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2.5">
                 <div className="min-w-0 flex-1 pr-4">
                     <h3 className="truncate text-sm font-semibold text-foreground">
@@ -75,7 +80,7 @@ export function SharePreview({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground"
-                        onClick={handleDownload}
+                        onClick={onDownload}
                         title="Download"
                     >
                         <Download className="h-4 w-4" />
@@ -84,7 +89,7 @@ export function SharePreview({
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground"
-                        onClick={() => setIsFullscreen(!isFullscreen)}
+                        onClick={onToggleFullscreen}
                         title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
                     >
                         {isFullscreen ? (
@@ -98,7 +103,7 @@ export function SharePreview({
                             variant="ghost"
                             size="icon"
                             className="h-8 w-8 text-muted-foreground hover:text-foreground dark:text-muted-foreground"
-                            onClick={() => setIsFullscreen(false)}
+                            onClick={onExitFullscreen}
                             title="Close"
                         >
                             <X className="h-5 w-5" />
@@ -107,7 +112,6 @@ export function SharePreview({
                 </div>
             </div>
 
-            {/* DocViewer area */}
             <div className="min-h-0 flex-1 overflow-hidden bg-muted">
                 <DocViewer
                     documents={[{ uri: previewUrl, fileName }]}
@@ -116,7 +120,11 @@ export function SharePreview({
                     config={{
                         themeMode: isDark ? 'dark' : 'light',
                         header: { disableHeader: true },
-                        noRenderer: { overrideComponent: NoRendererFallback },
+                        noRenderer: {
+                            overrideComponent: () => (
+                                <NoRendererFallback onDownload={onDownload} />
+                            ),
+                        },
                         loadingRenderer: {
                             overrideComponent: LoadingRenderer,
                             showLoadingTimeout: 500,
@@ -126,25 +134,59 @@ export function SharePreview({
             </div>
         </div>
     );
+}
+
+export function SharePreview({
+    previewUrl,
+    fileName,
+    fileSize,
+    downloadUrl,
+}: Readonly<SharePreviewProps>) {
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const { theme } = useTheme();
+    const isDark =
+        theme === 'dark' ||
+        (theme === 'system' &&
+            globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
+
+    const handleDownload = () => {
+        globalThis.location.href = downloadUrl;
+    };
+
+    const previewContent = (
+        <PreviewChrome
+            fileName={fileName}
+            fileSize={fileSize}
+            isFullscreen={isFullscreen}
+            isDark={isDark}
+            previewUrl={previewUrl}
+            onDownload={handleDownload}
+            onToggleFullscreen={() => setIsFullscreen((current) => !current)}
+            onExitFullscreen={() => setIsFullscreen(false)}
+        />
+    );
 
     if (isFullscreen) {
         return (
             <>
-                {/* Keep the inline preview visible behind the overlay */}
                 <div className="overflow-hidden rounded-xl border border-border">
                     {previewContent}
                 </div>
-                {/* Fullscreen overlay */}
-                <div
-                    className="fixed inset-0 z-50 bg-card"
-                    onKeyDown={(e) => {
-                        if (e.key === 'Escape') {
+                <dialog
+                    open
+                    className="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none border-0 bg-card p-0"
+                    onCancel={(event) => {
+                        event.preventDefault();
+                        setIsFullscreen(false);
+                    }}
+                    onKeyDown={(event) => {
+                        if (event.key === 'Escape') {
                             setIsFullscreen(false);
                         }
                     }}
                 >
                     {previewContent}
-                </div>
+                </dialog>
             </>
         );
     }

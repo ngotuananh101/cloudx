@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Enums\ActivityAction;
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Exceptions\TelegramServiceException;
 use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
@@ -16,7 +17,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class TelegramConnectionController extends Controller
 {
@@ -46,7 +46,7 @@ class TelegramConnectionController extends Controller
 
         try {
             $phoneCodeHash = $client->sendCodeRequest($validated['phone']);
-        } catch (RuntimeException $e) {
+        } catch (TelegramServiceException $e) {
             report($e);
 
             return response()->json([
@@ -90,7 +90,7 @@ class TelegramConnectionController extends Controller
                 phoneCodeHash: $connect['phone_code_hash'] ?? null,
                 password: $validated['password'] ?? null,
             );
-        } catch (RuntimeException $e) {
+        } catch (TelegramServiceException $e) {
             report($e);
 
             return response()->json([
@@ -162,7 +162,7 @@ class TelegramConnectionController extends Controller
 
         try {
             $syncedCount = $client->sync();
-        } catch (RuntimeException $e) {
+        } catch (TelegramServiceException $e) {
             report($e);
 
             return redirect()->back()->withErrors([

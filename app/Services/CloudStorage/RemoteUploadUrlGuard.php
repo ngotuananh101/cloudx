@@ -39,6 +39,14 @@ class RemoteUploadUrlGuard
             return $address !== $host && $this->isPublicIp($address);
         }
 
+        return $this->dnsRecordsArePublic($records);
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $records
+     */
+    private function dnsRecordsArePublic(array $records): bool
+    {
         foreach ($records as $record) {
             $address = $record['ip'] ?? $record['ipv6'] ?? null;
 

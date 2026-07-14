@@ -6,6 +6,7 @@ use App\Data\CloudStorageQuotaData;
 use App\Data\ConnectedAccountData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
+use App\Exceptions\CloudOAuthException;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
@@ -18,7 +19,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use RuntimeException;
 use Spatie\Dropbox\Client as DropboxClient;
 
 class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownloadLink, ReportsStorageQuota
@@ -60,13 +60,13 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
         $sessionState = $request->session()->pull($this->stateSessionKey());
 
         if (! is_string($state) || ! is_string($sessionState) || ! hash_equals($sessionState, $state)) {
-            throw new RuntimeException('Invalid Dropbox OAuth state.');
+            throw new CloudOAuthException('Invalid Dropbox OAuth state.');
         }
 
         $code = $request->query('code');
 
         if (! is_string($code) || $code === '') {
-            throw new RuntimeException('Dropbox authentication failed or was cancelled.');
+            throw new CloudOAuthException('Dropbox authentication failed or was cancelled.');
         }
 
         $token = $this->tokenFromAuthorizationCode($code);
@@ -199,7 +199,7 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
             ->json();
 
         if (! is_array($token) || ! isset($token['access_token']) || ! is_string($token['access_token']) || $token['access_token'] === '') {
-            throw new RuntimeException('Dropbox authentication failed or was cancelled.');
+            throw new CloudOAuthException('Dropbox authentication failed or was cancelled.');
         }
 
         $token['expires_at'] = now()->addSeconds((int) ($token['expires_in'] ?? 14400))->timestamp;
@@ -214,14 +214,12 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
     {
         $credentials = $connection->credentials;
         $expiresAt = (int) ($credentials['expires_at'] ?? 0);
-
-        if ($expiresAt > now()->addMinute()->timestamp) {
-            return $credentials;
-        }
-
         $refreshToken = $credentials['refresh_token'] ?? null;
+        $needsRefresh = $expiresAt <= now()->addMinute()->timestamp
+            && is_string($refreshToken)
+            && $refreshToken !== '';
 
-        if (! is_string($refreshToken) || $refreshToken === '') {
+        if (! $needsRefresh) {
             return $credentials;
         }
 

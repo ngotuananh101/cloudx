@@ -10,5 +10,5 @@ export function formatBytes(bytes: number, precision = 1): string {
         units.length - 1,
     );
 
-    return `${parseFloat((bytes / Math.pow(base, unitIndex)).toFixed(precision))} ${units[unitIndex]}`;
+    return `${Number.parseFloat((bytes / Math.pow(base, unitIndex)).toFixed(precision))} ${units[unitIndex]}`;
 }

@@ -2,6 +2,7 @@
 
 use App\Enums\CloudProvider;
 use App\Enums\ConnectionStatus;
+use App\Exceptions\OneDriveException;
 use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\OneDrive\OneDriveClient;
@@ -65,7 +66,7 @@ it('fails before http when refresh token is missing', function () {
     ]);
 
     expect(fn () => new OneDriveClient($connection)->credentials())
-        ->toThrow(RuntimeException::class, 'OneDrive refresh token is missing.');
+        ->toThrow(OneDriveException::class, 'OneDrive refresh token is missing.');
 });
 
 it('encodes graph path segments safely', function () {
@@ -247,7 +248,7 @@ it('rejects move destinations whose parent is missing or not a folder', function
     ]);
 
     expect(fn () => new OneDriveClient(oneDriveConnection())->move('Source/doc.txt', 'Target/doc2.txt'))
-        ->toThrow(RuntimeException::class, $message);
+        ->toThrow(OneDriveException::class, $message);
 })->with([
     'missing id' => [['folder' => []], 'OneDrive move destination parent is missing an id.'],
     'not folder' => [['id' => 'target-id', 'file' => []], 'OneDrive move destination parent is not a folder.'],
@@ -284,7 +285,7 @@ it('rejects copy destinations whose parent is missing or not a folder', function
     ]);
 
     expect(fn () => new OneDriveClient(oneDriveConnection())->copy('Source/doc.txt', 'Target/doc2.txt'))
-        ->toThrow(RuntimeException::class, $message);
+        ->toThrow(OneDriveException::class, $message);
 })->with([
     'missing id' => [['folder' => []], 'OneDrive copy destination parent is missing an id.'],
     'not folder' => [['id' => 'target-id', 'file' => []], 'OneDrive copy destination parent is not a folder.'],

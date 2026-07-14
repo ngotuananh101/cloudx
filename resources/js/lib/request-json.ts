@@ -17,7 +17,7 @@ export const requestJson = async <T>(
             Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
             'X-XSRF-TOKEN': csrfToken(),
-            ...(options.headers || {}),
+            ...options.headers,
         },
     });
 

@@ -6,6 +6,7 @@ use App\Data\CloudStorageQuotaData;
 use App\Data\ConnectedAccountData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
+use App\Exceptions\CloudOAuthException;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
 use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
@@ -15,7 +16,6 @@ use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuota
 {
@@ -45,13 +45,13 @@ class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuot
         $sessionState = $request->session()->pull($this->stateSessionKey());
 
         if (! is_string($state) || ! is_string($sessionState) || ! hash_equals($sessionState, $state)) {
-            throw new RuntimeException('Invalid Google OAuth state.');
+            throw new CloudOAuthException('Invalid Google OAuth state.');
         }
 
         $code = $request->string('code')->toString();
 
         if ($code === '') {
-            throw new RuntimeException('Google OAuth callback is missing an authorization code.');
+            throw new CloudOAuthException('Google OAuth callback is missing an authorization code.');
         }
 
         $client = $this->client();
@@ -60,7 +60,7 @@ class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuot
         $token = $client->fetchAccessTokenWithAuthCode($code);
 
         if (isset($token['error'])) {
-            throw new RuntimeException((string) ($token['error_description'] ?? $token['error']));
+            throw new CloudOAuthException((string) ($token['error_description'] ?? $token['error']));
         }
 
         $client->setAccessToken($token);
@@ -72,7 +72,7 @@ class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuot
         $email = $user?->getEmailAddress();
 
         if (! is_string($email) || $email === '') {
-            throw new RuntimeException('Google Drive account email could not be determined.');
+            throw new CloudOAuthException('Google Drive account email could not be determined.');
         }
 
         return new ConnectedAccountData(

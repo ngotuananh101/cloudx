@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use App\Exceptions\TelegramServiceException;
 use App\Services\Python\PythonServiceClient;
 use Illuminate\Http\Client\PendingRequest;
-use RuntimeException;
 
 class TelegramClient extends PythonServiceClient
 {
@@ -62,7 +62,7 @@ class TelegramClient extends PythonServiceClient
             ->get($this->url().'/read');
 
         if ($response->status() === 404) {
-            throw new RuntimeException('Telegram file not found.');
+            throw new TelegramServiceException('Telegram file not found.');
         }
 
         $this->assertSuccess($response);
@@ -80,7 +80,7 @@ class TelegramClient extends PythonServiceClient
         $stream = fopen('php://temp', 'r+');
 
         if ($stream === false) {
-            throw new RuntimeException('Could not create download stream.');
+            throw new TelegramServiceException('Could not create download stream.');
         }
 
         fwrite($stream, $body);
@@ -96,7 +96,7 @@ class TelegramClient extends PythonServiceClient
             ->delete($this->url().'/delete');
 
         if ($response->status() === 404) {
-            throw new RuntimeException('Telegram file not found.');
+            throw new TelegramServiceException('Telegram file not found.');
         }
 
         $this->assertSuccess($response);
@@ -148,7 +148,7 @@ class TelegramClient extends PythonServiceClient
         $data = $this->post('/request-code', ['phone' => $phone])->json();
 
         if (! is_array($data) || ! isset($data['phone_code_hash'])) {
-            throw new RuntimeException('Microservice did not return a phone code hash.');
+            throw new TelegramServiceException('Microservice did not return a phone code hash.');
         }
 
         return (string) $data['phone_code_hash'];

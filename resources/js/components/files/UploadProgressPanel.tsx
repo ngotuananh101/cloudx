@@ -16,13 +16,13 @@ import { useUploadManager } from '@/contexts/UploadManagerContext';
 import { formatBytes } from '@/lib/format-bytes';
 import type { UploadQueueItem, CloudConnection } from '@/types/cloud';
 
-const ACTIVE_STATUSES: UploadQueueItem['status'][] = [
+const ACTIVE_STATUSES = new Set<UploadQueueItem['status']>([
     'pending',
     'uploading',
     'paused',
     'queued',
     'processing',
-];
+]);
 
 function getStatusLabel(item: UploadQueueItem): string {
     if (item.status === 'uploading' && item.file) {
@@ -83,7 +83,7 @@ export default function UploadProgressPanel() {
     }
 
     const activeCount = items.filter((item) =>
-        ACTIVE_STATUSES.includes(item.status),
+        ACTIVE_STATUSES.has(item.status),
     ).length;
     const completedCount = items.filter(
         (item) => item.status === 'completed',

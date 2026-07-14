@@ -5,6 +5,7 @@ namespace App\Jobs;
 use App\Enums\ActivityAction;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
+use App\Exceptions\CloudUploadException;
 use App\Models\CloudTask;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
@@ -13,7 +14,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use RuntimeException;
 use Throwable;
 
 class UploadCloudTaskFileJob implements ShouldQueue
@@ -96,16 +96,17 @@ class UploadCloudTaskFileJob implements ShouldQueue
         $totalChunks = (int) ($payload['total_chunks'] ?? 0);
 
         if ($totalChunks < 1 || $filename === '') {
-            throw new RuntimeException('Upload task payload is invalid.');
+            throw new CloudUploadException('Upload task payload is invalid.');
         }
 
         if ($task->chunks()->count() !== $totalChunks) {
-            throw new RuntimeException('Upload task is missing chunks.');
+            throw new CloudUploadException('Upload task is missing chunks.');
         }
 
         $tempPath = $this->mergedTempPath($task);
         $this->mergeAndUploadChunks($task, $targetPath, $totalChunks, $tempPath);
-        $this->completeUpload($task, $targetPath, $filename, $cache, $broadcaster, $activityLogger, $totalChunks, $tempPath);
+        $this->completeUpload($task, $targetPath, $filename, $cache, $broadcaster, $activityLogger);
+        $this->deleteTempFiles($task, $totalChunks, $tempPath);
     }
 
     private function mergeAndUploadChunks(CloudTask $task, string $targetPath, int $totalChunks, string $tempPath): void
@@ -114,20 +115,20 @@ class UploadCloudTaskFileJob implements ShouldQueue
         $stream = fopen('php://temp', 'w+');
 
         if ($stream === false) {
-            throw new RuntimeException('Could not create upload merge stream.');
+            throw new CloudUploadException('Could not create upload merge stream.');
         }
 
         for ($index = 0; $index < $totalChunks; $index++) {
             $chunkPath = $this->chunkPath($task, $index);
 
             if (! $tempDisk->exists($chunkPath)) {
-                throw new RuntimeException("Upload chunk {$index} is missing.");
+                throw new CloudUploadException("Upload chunk {$index} is missing.");
             }
 
             $chunkStream = $tempDisk->readStream($chunkPath);
 
             if ($chunkStream === false) {
-                throw new RuntimeException("Could not read upload chunk {$index}.");
+                throw new CloudUploadException("Could not read upload chunk {$index}.");
             }
 
             stream_copy_to_stream($chunkStream, $stream);
@@ -147,7 +148,7 @@ class UploadCloudTaskFileJob implements ShouldQueue
         $uploadStream = $tempDisk->readStream($tempPath);
 
         if ($uploadStream === false) {
-            throw new RuntimeException('Could not read merged upload file.');
+            throw new CloudUploadException('Could not read merged upload file.');
         }
 
         $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
@@ -164,8 +165,6 @@ class UploadCloudTaskFileJob implements ShouldQueue
         CloudStorageCache $cache,
         CloudUploadTaskBroadcaster $broadcaster,
         ActivityLogger $activityLogger,
-        ?int $totalChunks = null,
-        ?string $tempPath = null,
     ): void {
         $task->forceFill([
             'status' => CloudTaskStatus::Completed,
@@ -173,10 +172,6 @@ class UploadCloudTaskFileJob implements ShouldQueue
             'completed_at' => now(),
         ])->save();
         $broadcaster->broadcastStatus($task);
-
-        if ($totalChunks !== null && $tempPath !== null) {
-            $this->deleteTempFiles($task, $totalChunks, $tempPath);
-        }
 
         $cache->flushFolder($task->connection, $task->target_path);
         $cache->flushQuota($task->connection);

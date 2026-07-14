@@ -6,6 +6,7 @@ use App\Data\CloudStorageQuotaData;
 use App\Data\ConnectedAccountData;
 use App\Data\ProviderCapabilities;
 use App\Enums\CloudProvider;
+use App\Exceptions\CloudOAuthException;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\Contracts\CloudProviderConnector;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
@@ -17,7 +18,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use RuntimeException;
 
 class OneDriveConnector implements CloudProviderConnector, ProvidesDirectDownloadLink, ReportsStorageQuota
 {
@@ -52,13 +52,13 @@ class OneDriveConnector implements CloudProviderConnector, ProvidesDirectDownloa
         $sessionState = $request->session()->pull($this->stateSessionKey());
 
         if (! is_string($state) || ! is_string($sessionState) || ! hash_equals($sessionState, $state)) {
-            throw new RuntimeException('Invalid OneDrive OAuth state.');
+            throw new CloudOAuthException('Invalid OneDrive OAuth state.');
         }
 
         $code = $request->query('code');
 
         if (! is_string($code) || $code === '') {
-            throw new RuntimeException('Microsoft authentication failed or was cancelled.');
+            throw new CloudOAuthException('Microsoft authentication failed or was cancelled.');
         }
 
         $token = $this->http()->asForm()
@@ -74,7 +74,7 @@ class OneDriveConnector implements CloudProviderConnector, ProvidesDirectDownloa
             ->json();
 
         if (! is_array($token) || ! isset($token['access_token']) || ! is_string($token['access_token']) || $token['access_token'] === '') {
-            throw new RuntimeException('Microsoft authentication failed or was cancelled.');
+            throw new CloudOAuthException('Microsoft authentication failed or was cancelled.');
         }
 
         $token['expires_at'] = now()->addSeconds((int) ($token['expires_in'] ?? 3600))->timestamp;
