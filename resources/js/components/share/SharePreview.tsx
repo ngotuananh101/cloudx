@@ -13,7 +13,9 @@ interface SharePreviewProps {
     downloadUrl: string;
 }
 
-function NoRendererFallback({ onDownload }: Readonly<{ onDownload: () => void }>) {
+function NoRendererFallback({
+    onDownload,
+}: Readonly<{ onDownload: () => void }>) {
     return (
         <div className="flex h-full w-full flex-col items-center justify-center bg-muted p-6 text-center">
             <div className="mb-4 rounded-full bg-muted p-4">
@@ -174,7 +176,7 @@ export function SharePreview({
                 </div>
                 <dialog
                     open
-                    className="fixed inset-0 z-50 m-0 h-full w-full max-h-none max-w-none border-0 bg-card p-0"
+                    className="fixed inset-0 z-50 m-0 h-full max-h-none w-full max-w-none border-0 bg-card p-0"
                     onCancel={(event) => {
                         event.preventDefault();
                         setIsFullscreen(false);

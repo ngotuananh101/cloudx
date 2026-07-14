@@ -19,11 +19,7 @@ interface DashboardProps {
 function providerMiniIcon(provider: AvailableProvider) {
     if (provider.icon?.endsWith('.svg')) {
         return (
-            <img
-                src={provider.icon}
-                className="h-5 w-5"
-                alt={provider.label}
-            />
+            <img src={provider.icon} className="h-5 w-5" alt={provider.label} />
         );
     }
 
