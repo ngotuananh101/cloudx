@@ -15,11 +15,13 @@ use Illuminate\Support\Str;
 
 class CloudShareController extends Controller
 {
+    private const UNAUTHORIZED_CONNECTION = 'Unauthorized access to this connection.';
+
     public function __construct(private ActivityLogger $activityLogger) {}
 
     public function index(Request $request, CloudConnection $connection): JsonResponse
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
+        abort_if($connection->user_id !== $request->user()->id, 403, self::UNAUTHORIZED_CONNECTION);
 
         $request->validate([
             'path' => 'required|string',
@@ -35,7 +37,7 @@ class CloudShareController extends Controller
 
     public function store(Request $request, CloudConnection $connection): RedirectResponse
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
+        abort_if($connection->user_id !== $request->user()->id, 403, self::UNAUTHORIZED_CONNECTION);
 
         $validated = $request->validate([
             'path' => 'required|string',
@@ -83,7 +85,7 @@ class CloudShareController extends Controller
 
     public function destroy(Request $request, CloudConnection $connection, CloudShare $share): RedirectResponse
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized access to this connection.');
+        abort_if($connection->user_id !== $request->user()->id, 403, self::UNAUTHORIZED_CONNECTION);
         abort_if($share->cloud_connection_id !== $connection->id, 404, 'Share not found on this connection.');
 
         $share->delete();

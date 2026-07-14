@@ -15,6 +15,7 @@ use Illuminate\Broadcasting\BroadcastController;
 use Illuminate\Broadcasting\BroadcastManager;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Queue\Jobs\FakeJob;
 use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
@@ -254,7 +255,13 @@ it('marks an upload task as failed when provider upload fails', function () {
 
     Event::fake([CloudUploadTaskUpdated::class]);
 
-    expect(fn () => (new UploadCloudTaskFileJob($task->id))->handle($cache, new CloudUploadTaskBroadcaster, new ActivityLogger))
+    // Simulate the final attempt so the job marks Failed instead of requeueing.
+    $job = new UploadCloudTaskFileJob($task->id);
+    $fakeJob = new FakeJob;
+    $fakeJob->attempts = $job->tries;
+    $job->setJob($fakeJob);
+
+    expect(fn () => $job->handle($cache, new CloudUploadTaskBroadcaster, new ActivityLogger))
         ->toThrow(RuntimeException::class, 'cURL error 60');
 
     $task->refresh();

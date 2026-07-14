@@ -15,6 +15,8 @@ use Throwable;
 
 class CloudConnectionController extends Controller
 {
+    private const UNAUTHORIZED_ACTION = 'Unauthorized action.';
+
     public function __construct(
         private CloudStorageManager $cloudStorage,
         private CloudStorageCache $cache,
@@ -35,7 +37,7 @@ class CloudConnectionController extends Controller
     public function reconnect(Request $request, CloudConnection $connection): RedirectResponse
     {
         if ($connection->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized action.');
+            abort(403, self::UNAUTHORIZED_ACTION);
         }
 
         if (! $connection->canReconnect()) {
@@ -122,7 +124,7 @@ class CloudConnectionController extends Controller
     public function updateName(Request $request, CloudConnection $connection): RedirectResponse
     {
         if ($connection->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized action.');
+            abort(403, self::UNAUTHORIZED_ACTION);
         }
 
         if (! $connection->canEditName()) {
@@ -147,7 +149,7 @@ class CloudConnectionController extends Controller
     {
         // Ensure the connection belongs to the logged-in user
         if ($connection->user_id !== $request->user()->id) {
-            abort(403, 'Unauthorized action.');
+            abort(403, self::UNAUTHORIZED_ACTION);
         }
 
         if (! $connection->canDelete()) {

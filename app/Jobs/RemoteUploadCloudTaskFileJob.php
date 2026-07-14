@@ -25,6 +25,8 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
 {
     use Queueable;
 
+    private const REMOTE_FILE_TOO_LARGE = 'Remote file exceeds the allowed size.';
+
     public int $tries = 3;
 
     public int $timeout = 1500;
@@ -97,7 +99,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
             }
 
             if ($downloadedSize > $this->maxFileSize()) {
-                throw new RuntimeException('Remote file exceeds the allowed size.');
+                throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
             }
 
             $uploadStream = fopen($absoluteTempPath, 'rb');
@@ -196,7 +198,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $contentLength = (int) $response->header('Content-Length');
 
         if ($contentLength > $this->maxFileSize()) {
-            throw new RuntimeException('Remote file exceeds the allowed size.');
+            throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
         }
     }
 
@@ -217,7 +219,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $contentLength = (int) $response->header('Content-Length');
 
         if ($contentLength > $this->maxFileSize()) {
-            throw new RuntimeException('Remote file exceeds the allowed size.');
+            throw new RuntimeException(self::REMOTE_FILE_TOO_LARGE);
         }
     }
 

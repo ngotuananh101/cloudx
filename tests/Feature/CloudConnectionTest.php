@@ -80,6 +80,7 @@ it('google connector creates redirect url', function () {
     $mockClient->shouldReceive('addScope')->once()->with(Drive::DRIVE);
     $mockClient->shouldReceive('setAccessType')->once()->with('offline');
     $mockClient->shouldReceive('setPrompt')->once()->with('consent');
+    $mockClient->shouldReceive('setState')->once()->with(Mockery::type('string'));
     $mockClient->shouldReceive('createAuthUrl')->once()->andReturn('https://accounts.google.com/o/oauth2/auth?test=1');
 
     $this->app->instance(Client::class, $mockClient);

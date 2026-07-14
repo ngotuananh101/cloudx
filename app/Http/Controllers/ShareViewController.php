@@ -20,6 +20,8 @@ use Throwable;
 
 class ShareViewController extends Controller
 {
+    private const FILE_NOT_FOUND = 'File not found.';
+
     public function __construct(
         private CloudFileBrowser $fileBrowser,
         private CloudStorageManager $cloudStorage,
@@ -129,7 +131,7 @@ class ShareViewController extends Controller
             $connector = $this->cloudStorage->connector($share->cloudConnection->provider);
             $disk = $connector->disk($share->cloudConnection);
 
-            abort_unless($disk->exists($decodedPath), 404, 'File not found.');
+            abort_unless($disk->exists($decodedPath), 404, self::FILE_NOT_FOUND);
 
             $name = TelegramHelper::filenameFor($disk, $decodedPath) ?? basename($decodedPath);
 
@@ -184,7 +186,7 @@ class ShareViewController extends Controller
             }
 
             $disk = $connector->disk($share->cloudConnection);
-            abort_unless($disk->exists($decodedPath), 404, 'File not found.');
+            abort_unless($disk->exists($decodedPath), 404, self::FILE_NOT_FOUND);
 
             $name = TelegramHelper::filenameFor($disk, $decodedPath) ?? basename($decodedPath);
 
@@ -253,7 +255,7 @@ class ShareViewController extends Controller
         $shareBasePath = $this->normalizePath($share->path);
 
         if (! $share->is_directory) {
-            abort_unless($normalizedPath === $shareBasePath, 404, 'File not found.');
+            abort_unless($normalizedPath === $shareBasePath, 404, self::FILE_NOT_FOUND);
 
             return $normalizedPath;
         }
@@ -265,7 +267,7 @@ class ShareViewController extends Controller
         abort_unless(
             $normalizedPath === $shareBasePath || str_starts_with($normalizedPath.'/', $shareBasePath.'/'),
             404,
-            'File not found.'
+            self::FILE_NOT_FOUND
         );
 
         return $normalizedPath;

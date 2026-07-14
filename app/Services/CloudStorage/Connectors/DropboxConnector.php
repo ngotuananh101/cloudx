@@ -31,6 +31,8 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
 
     public const SPACE_USAGE_URL = 'https://api.dropboxapi.com/2/users/get_space_usage';
 
+    private const JSON_CONTENT_TYPE = 'application/json';
+
     public function provider(): CloudProvider
     {
         return CloudProvider::DROPBOX;
@@ -71,14 +73,14 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
         $accessToken = (string) $token['access_token'];
 
         $account = $this->http()->withToken($accessToken)
-            ->withBody('null', 'application/json')
+            ->withBody('null', self::JSON_CONTENT_TYPE)
             ->retry([100, 250])
             ->post(self::CURRENT_ACCOUNT_URL)
             ->throw()
             ->json();
 
         $spaceUsage = $this->http()->withToken($accessToken)
-            ->withBody('null', 'application/json')
+            ->withBody('null', self::JSON_CONTENT_TYPE)
             ->retry([100, 250])
             ->post(self::SPACE_USAGE_URL)
             ->throw()
@@ -148,7 +150,7 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
         $credentials = $this->freshCredentials($connection);
 
         $spaceUsage = $this->http()->withToken($credentials['access_token'])
-            ->withBody('null', 'application/json')
+            ->withBody('null', self::JSON_CONTENT_TYPE)
             ->retry([100, 250])
             ->post(self::SPACE_USAGE_URL)
             ->throw()

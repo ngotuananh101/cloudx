@@ -193,7 +193,7 @@ class CloudStorageCache
 
     private function pathHash(string $path): string
     {
-        return sha1(trim($path, '/'));
+        return hash('sha256', trim($path, '/'));
     }
 
     private function ttl(): int

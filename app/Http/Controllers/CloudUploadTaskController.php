@@ -19,6 +19,8 @@ use Illuminate\Validation\ValidationException;
 
 class CloudUploadTaskController extends Controller
 {
+    private const UNAUTHORIZED_ACTION = 'Unauthorized action.';
+
     public function __construct(
         private readonly CloudUploadTaskBroadcaster $broadcaster,
         private readonly RemoteUploadHeaders $remoteUploadHeaders,
@@ -27,7 +29,7 @@ class CloudUploadTaskController extends Controller
 
     public function index(Request $request, CloudConnection $connection): JsonResponse
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
+        abort_if($connection->user_id !== $request->user()->id, 403, self::UNAUTHORIZED_ACTION);
 
         $tasks = $connection->tasks()
             ->where('type', CloudTaskType::Upload)
@@ -42,7 +44,7 @@ class CloudUploadTaskController extends Controller
 
     public function store(Request $request, CloudConnection $connection): JsonResponse
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
+        abort_if($connection->user_id !== $request->user()->id, 403, self::UNAUTHORIZED_ACTION);
 
         $validated = $request->validate([
             'path' => ['nullable', 'string', 'max:2048'],
@@ -166,7 +168,7 @@ class CloudUploadTaskController extends Controller
 
     private function authorizeTask(Request $request, CloudConnection $connection, CloudTask $task): void
     {
-        abort_if($connection->user_id !== $request->user()->id, 403, 'Unauthorized action.');
+        abort_if($connection->user_id !== $request->user()->id, 403, self::UNAUTHORIZED_ACTION);
         abort_if($task->cloud_connection_id !== $connection->id || $task->user_id !== $request->user()->id, 404);
         abort_if($task->type !== CloudTaskType::Upload, 404);
     }

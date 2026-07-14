@@ -37,9 +37,11 @@ class CloudUploadTaskChunkController extends Controller
             ]);
         }
 
-        // Prefer the size negotiated when the task was created; fall back to global config.
-        $chunkSize = (int) ($task->payload['chunk_size'] ?? config('cloud-storage.uploads.chunk_size', 5242880));
-        $maxKb = (int) ceil($chunkSize / 1024);
+        // Prefer the size negotiated when the task was created; fall back to config max.
+        $configuredChunkSize = (int) config('cloud-storage.uploads.chunk_size', 5242880);
+        $chunkSize = (int) ($task->payload['chunk_size'] ?? $configuredChunkSize);
+        $chunkSize = max(1024, min($chunkSize, $configuredChunkSize));
+        $maxKb = max(1, (int) ceil($chunkSize / 1024));
 
         $validated = $request->validate([
             'chunk' => ['required', 'file', "max:{$maxKb}"],
