@@ -24,7 +24,7 @@ export default function Welcome() {
                                         </span>
                                     </span>
                                     <span>
-                                        Read the
+                                        Read the{' '}
                                         <a
                                             href="https://laravel.com/docs"
                                             target="_blank"
@@ -55,7 +55,7 @@ export default function Welcome() {
                                         </span>
                                     </span>
                                     <span>
-                                        Watch video tutorials at
+                                        Watch video tutorials at{' '}
                                         <a
                                             href="https://laracasts.com"
                                             target="_blank"

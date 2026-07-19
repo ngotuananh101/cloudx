@@ -52,7 +52,7 @@ export default function Dashboard({
                 </div>
                 <div className="flex items-center gap-2 self-start rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-xs font-semibold text-primary shadow-sm sm:self-center">
                     <span className="h-2 w-2 animate-pulse rounded-full bg-primary" />
-                    All systems operational
+                    {' '}All systems operational
                 </div>
             </div>
 

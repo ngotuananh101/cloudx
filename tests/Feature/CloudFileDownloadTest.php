@@ -41,12 +41,12 @@ it('redirects to the direct download link when the connector provides one', func
 
         public function handleCallback(Request $request): ConnectedAccountData
         {
-            throw new RuntimeException('Not used.');
+            throw new LogicException('handleCallback is not used in this test.');
         }
 
         public function disk(CloudConnection $connection): Filesystem
         {
-            throw new RuntimeException('Disk should not be called when direct link is available.');
+            throw new LogicException('Disk should not be called when direct link is available.');
         }
 
         public function capabilities(): ProviderCapabilities
@@ -135,7 +135,7 @@ it('falls back to streaming when ProvidesDirectDownloadLink returns null', funct
 
         public function handleCallback(Request $request): ConnectedAccountData
         {
-            throw new RuntimeException('Not used.');
+            throw new LogicException('handleCallback is not used in this test.');
         }
 
         public function disk(CloudConnection $connection): Filesystem

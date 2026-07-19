@@ -2,7 +2,6 @@
 
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
-use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
 
@@ -21,6 +20,6 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        // Default exception handling. Parameter required by Laravel bootstrap.
+    ->withExceptions(function (): void {
+        // Default exception handling.
     })->create();

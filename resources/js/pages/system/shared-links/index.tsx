@@ -591,7 +591,7 @@ export default function SharedLinksPage({
                             <strong className="text-foreground">
                                 &quot;{shareToDelete?.name}&quot;
                             </strong>
-                            ? Anyone with this link will immediately lose
+                            {' '}? Anyone with this link will immediately lose
                             access. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

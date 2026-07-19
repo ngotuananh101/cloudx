@@ -45,27 +45,35 @@ class ShareViewController extends Controller
     private function shareAccessResponse(Request $request, ?CloudShare $share, string $uuid): ?Response
     {
         if (! $share) {
-            return Inertia::render('share/error', [
-                'reason' => 'not_found',
-            ]);
+            return $this->renderShareError('not_found');
         }
 
         if ($this->isExpired($share)) {
-            return Inertia::render('share/error', [
-                'reason' => 'expired',
-            ]);
+            return $this->renderShareError('expired');
         }
 
         if ($share->type === 'password' && ! $request->session()->get("share_verified_{$share->id}")) {
-            return Inertia::render('share/password', [
-                'uuid' => $uuid,
-                'share' => [
-                    'name' => $share->name,
-                ],
-            ]);
+            return $this->renderPasswordPrompt($share, $uuid);
         }
 
         return null;
+    }
+
+    private function renderShareError(string $reason): Response
+    {
+        return Inertia::render('share/error', [
+            'reason' => $reason,
+        ]);
+    }
+
+    private function renderPasswordPrompt(CloudShare $share, string $uuid): Response
+    {
+        return Inertia::render('share/password', [
+            'uuid' => $uuid,
+            'share' => [
+                'name' => $share->name,
+            ],
+        ]);
     }
 
     private function renderShareView(Request $request, CloudShare $share, string $uuid): Response

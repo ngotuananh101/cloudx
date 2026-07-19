@@ -4,7 +4,7 @@ use App\Exceptions\PythonServiceException;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Support\Facades\Http;
 
-const MICROSERVICE_URL = 'http://microservice:8000';
+const MICROSERVICE_URL = 'https://microservice:8000';
 const TELEGRAM_MIME_TEXT_PLAIN = 'text/plain';
 const FIXED_TIMESTAMP = '2026-01-01T00:00:00';
 

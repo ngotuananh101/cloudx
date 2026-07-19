@@ -82,12 +82,12 @@ it('lists files via a direct browsing connector with normalized metadata and sor
 
         public function handleCallback(Request $request): ConnectedAccountData
         {
-            throw new RuntimeException('Not used.');
+            throw new LogicException('handleCallback is not used in this test.');
         }
 
         public function disk(CloudConnection $connection): Filesystem
         {
-            throw new RuntimeException('OneDrive disk should not be called.');
+            throw new LogicException('OneDrive disk should not be called.');
         }
 
         public function capabilities(): ProviderCapabilities

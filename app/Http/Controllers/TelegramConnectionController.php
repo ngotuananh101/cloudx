@@ -134,10 +134,7 @@ class TelegramConnectionController extends Controller
         } catch (TelegramServiceException $e) {
             report($e);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'Could not connect to Telegram service.',
-            ], 422);
+            return $this->failedLoginResponse('Could not connect to Telegram service.');
         }
 
         if ($result['password_required'] ?? false) {
@@ -148,13 +145,18 @@ class TelegramConnectionController extends Controller
         }
 
         if (! ($result['success'] ?? false)) {
-            return response()->json([
-                'success' => false,
-                'message' => $result['message'] ?? 'Login failed. Please try again.',
-            ], 422);
+            return $this->failedLoginResponse($result['message'] ?? 'Login failed. Please try again.');
         }
 
         return ['synced' => (int) ($result['synced'] ?? 0)];
+    }
+
+    private function failedLoginResponse(string $message): JsonResponse
+    {
+        return response()->json([
+            'success' => false,
+            'message' => $message,
+        ], 422);
     }
 
     public function sync(Request $request, CloudConnection $connection): RedirectResponse
