@@ -590,8 +590,8 @@ export default function SharedLinksPage({
                             Are you sure you want to delete the shared link for{' '}
                             <strong className="text-foreground">
                                 &quot;{shareToDelete?.name}&quot;
-                            </strong>
-                            {' '}? Anyone with this link will immediately lose
+                            </strong>{' '}
+                            ? Anyone with this link will immediately lose
                             access. This action cannot be undone.
                         </AlertDialogDescription>
                     </AlertDialogHeader>

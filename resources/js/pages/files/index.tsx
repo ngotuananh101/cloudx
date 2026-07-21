@@ -149,7 +149,9 @@ export default function FileBrowser({
         router.reload({ only: ['files', 'connection'] });
     };
 
-    const handleUploadFiles = (event: Readonly<ChangeEvent<HTMLInputElement>>) => {
+    const handleUploadFiles = (
+        event: Readonly<ChangeEvent<HTMLInputElement>>,
+    ) => {
         const selectedFiles = Array.from(event.target.files || []);
         event.target.value = '';
 
@@ -182,7 +184,9 @@ export default function FileBrowser({
         setIsUploadModeDialogOpen(false);
     };
 
-    const handleRemoteUpload = (remoteUpload: Readonly<RemoteUploadRequest>) => {
+    const handleRemoteUpload = (
+        remoteUpload: Readonly<RemoteUploadRequest>,
+    ) => {
         uploadManager.enqueueRemote(remoteUpload, {
             connectionId: connection.id,
             path: decodedPath,

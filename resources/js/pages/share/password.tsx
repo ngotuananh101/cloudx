@@ -12,7 +12,10 @@ interface SharePasswordProps {
     };
 }
 
-export default function SharePassword({ uuid, share }: Readonly<SharePasswordProps>) {
+export default function SharePassword({
+    uuid,
+    share,
+}: Readonly<SharePasswordProps>) {
     const { data, setData, post, processing, errors } = useForm({
         password: '',
     });

@@ -3,7 +3,9 @@ import type { AvailableProvider } from '@/types/cloud';
 
 interface ProviderOptionProps {
     provider: AvailableProvider;
-    onSelectCredentialsProvider: (provider: Readonly<AvailableProvider>) => void;
+    onSelectCredentialsProvider: (
+        provider: Readonly<AvailableProvider>,
+    ) => void;
 }
 
 function isSvgIcon(icon: string | null | undefined): icon is string {

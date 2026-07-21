@@ -216,7 +216,9 @@ function DetailItem({
     );
 }
 
-export default function CloudTasksIndex({ tasks }: Readonly<CloudTasksIndexProps>) {
+export default function CloudTasksIndex({
+    tasks,
+}: Readonly<CloudTasksIndexProps>) {
     const { props } = usePage() as any;
     const userConnections = props.auth?.user?.connections || [];
     const [selectedTask, setSelectedTask] = useState<CloudTask | null>(null);
@@ -282,7 +284,9 @@ export default function CloudTasksIndex({ tasks }: Readonly<CloudTasksIndexProps
                                         {tasks.data.map((task) => {
                                             const fullConnection =
                                                 userConnections.find(
-                                                    (c: Readonly<CloudConnection>) =>
+                                                    (
+                                                        c: Readonly<CloudConnection>,
+                                                    ) =>
                                                         c.id ===
                                                         task.connection?.id,
                                                 );
