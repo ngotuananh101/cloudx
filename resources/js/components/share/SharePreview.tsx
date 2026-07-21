@@ -1,7 +1,7 @@
 import DocViewer, { DocViewerRenderers } from '@iamjariwala/react-doc-viewer';
 import '@iamjariwala/react-doc-viewer/dist/index.css';
 import { Download, File, Loader2, Maximize2, Minimize2, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import { formatBytes } from '@/lib/format-bytes';
@@ -161,11 +161,13 @@ export function SharePreview({
         (theme === 'system' &&
             globalThis.matchMedia('(prefers-color-scheme: dark)').matches);
 
-    const handleDownload = () => {
+    const handleDownload = useCallback(() => {
         globalThis.location.href = downloadUrl;
-    };
+    }, [downloadUrl]);
 
-    sharePreviewDownloadRef.current = handleDownload;
+    useEffect(() => {
+        sharePreviewDownloadRef.current = handleDownload;
+    }, [handleDownload]);
 
     const previewContent = (
         <PreviewChrome

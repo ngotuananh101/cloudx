@@ -2,7 +2,7 @@ import DocViewer, { DocViewerRenderers } from '@iamjariwala/react-doc-viewer';
 import '@iamjariwala/react-doc-viewer/dist/index.css';
 import { usePage } from '@inertiajs/react';
 import { Download, Maximize2, Minimize2, X, File, Loader2 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '@/components/ThemeProvider';
 import { Button } from '@/components/ui/button';
 import {
@@ -106,11 +106,13 @@ export default function FilePreviewModal({
         path: encodeCloudPath(item.path),
     });
 
-    const handleDownload = () => {
+    const handleDownload = useCallback(() => {
         globalThis.location.href = downloadUrl;
-    };
+    }, [downloadUrl]);
 
-    filePreviewDownloadRef.current = handleDownload;
+    useEffect(() => {
+        filePreviewDownloadRef.current = handleDownload;
+    }, [handleDownload]);
 
     return (
         <Dialog
