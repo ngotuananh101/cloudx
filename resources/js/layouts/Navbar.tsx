@@ -75,12 +75,18 @@ export function Navbar({ cloudSearch, cloudActions }: Readonly<NavbarProps>) {
 
             {/* Right: Actions and User */}
             <div className="flex items-center gap-4">
-                <button className="relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-muted">
+                <button
+                    type="button"
+                    className="relative flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-muted"
+                >
                     <Bell className="h-5 w-5 text-muted-foreground" />
                     <span className="absolute top-3 right-3 h-2 w-2 rounded-full bg-primary" />
                 </button>
 
-                <button className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-muted">
+                <button
+                    type="button"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl transition-colors hover:bg-muted"
+                >
                     <Settings className="h-5 w-5 text-muted-foreground" />
                 </button>
 

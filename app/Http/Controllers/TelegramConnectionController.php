@@ -144,11 +144,9 @@ class TelegramConnectionController extends Controller
             ]);
         }
 
-        if (! ($result['success'] ?? false)) {
-            return $this->failedLoginResponse($result['message'] ?? 'Login failed. Please try again.');
-        }
-
-        return ['synced' => (int) ($result['synced'] ?? 0)];
+        return ($result['success'] ?? false)
+            ? ['synced' => (int) ($result['synced'] ?? 0)]
+            : $this->failedLoginResponse($result['message'] ?? 'Login failed. Please try again.');
     }
 
     private function failedLoginResponse(string $message): JsonResponse

@@ -170,6 +170,7 @@ it('paginates listContents across multiple pages', function () {
             $offset = 0;
             $limit = 2;
             $result = [];
+            $files = [];
 
             do {
                 $result = $this->client->listAll($limit, $offset);

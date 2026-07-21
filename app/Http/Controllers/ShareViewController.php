@@ -52,11 +52,9 @@ class ShareViewController extends Controller
             return $this->renderShareError('expired');
         }
 
-        if ($share->type === 'password' && ! $request->session()->get("share_verified_{$share->id}")) {
-            return $this->renderPasswordPrompt($share, $uuid);
-        }
-
-        return null;
+        return ($share->type === 'password' && ! $request->session()->get("share_verified_{$share->id}"))
+            ? $this->renderPasswordPrompt($share, $uuid)
+            : null;
     }
 
     private function renderShareError(string $reason): Response

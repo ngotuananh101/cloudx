@@ -89,6 +89,23 @@ export default function FilePreviewModal({
         }
     }, [item]);
 
+    const downloadUrl = item
+        ? files.download.url({
+              connection: connectionId,
+              path: encodeCloudPath(item.path),
+          })
+        : '';
+
+    const handleDownload = useCallback(() => {
+        if (downloadUrl) {
+            globalThis.location.href = downloadUrl;
+        }
+    }, [downloadUrl]);
+
+    useEffect(() => {
+        filePreviewDownloadRef.current = handleDownload;
+    }, [handleDownload]);
+
     if (!item) {
         return null;
     }
@@ -100,19 +117,6 @@ export default function FilePreviewModal({
         connection: connectionId,
         path: encodeCloudPath(item.path),
     });
-
-    const downloadUrl = files.download.url({
-        connection: connectionId,
-        path: encodeCloudPath(item.path),
-    });
-
-    const handleDownload = useCallback(() => {
-        globalThis.location.href = downloadUrl;
-    }, [downloadUrl]);
-
-    useEffect(() => {
-        filePreviewDownloadRef.current = handleDownload;
-    }, [handleDownload]);
 
     return (
         <Dialog
