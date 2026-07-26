@@ -133,11 +133,52 @@ it('downloads streams from response body once', function () {
 
     $stream = new OneDriveClient(oneDriveConnection())->downloadStream('doc.txt');
 
-    expect(stream_get_contents($stream))->toBe('hello');
+    expect(is_resource($stream))->toBeTrue()
+        ->and(stream_get_contents($stream))->toBe('hello');
 
     Http::assertSent(fn ($request): bool => $request->method() === 'GET'
         && $request->url() === 'https://graph.microsoft.com/v1.0/me/drive/root:/doc.txt:/content'
         && $request->hasHeader('Authorization', BEARER_FRESH_TOKEN));
+});
+
+it('downloads streams using fallback when detach is not supported', function () {
+    Http::preventStrayRequests();
+    Http::fake([
+        'https://graph.microsoft.com/v1.0/me/drive/root:/doc.txt:/content' => function () {
+            $stream = new class('fallback-content') implements \Psr\Http\Message\StreamInterface {
+                private $resource;
+                public function __construct(string $content) {
+                    $this->resource = fopen('php://temp', 'r+');
+                    fwrite($this->resource, $content);
+                    rewind($this->resource);
+                }
+                public function __toString(): string { return ''; }
+                public function close(): void {}
+                public function detach() { return null; }
+                public function getSize(): ?int { return null; }
+                public function tell(): int { return ftell($this->resource); }
+                public function eof(): bool { return feof($this->resource); }
+                public function isSeekable(): bool { return true; }
+                public function seek($offset, $whence = SEEK_SET): void { fseek($this->resource, $offset, $whence); }
+                public function rewind(): void { rewind($this->resource); }
+                public function isWritable(): bool { return false; }
+                public function write($string): int { return 0; }
+                public function isReadable(): bool { return true; }
+                public function read($length): string { return fread($this->resource, $length); }
+                public function getContents(): string { return stream_get_contents($this->resource); }
+                public function getMetadata($key = null) { return null; }
+            };
+
+            return \GuzzleHttp\Promise\Create::promiseFor(
+                new \GuzzleHttp\Psr7\Response(200, [], $stream)
+            );
+        },
+    ]);
+
+    $stream = new OneDriveClient(oneDriveConnection())->downloadStream('doc.txt');
+
+    expect(is_resource($stream))->toBeTrue()
+        ->and(stream_get_contents($stream))->toBe('fallback-content');
 });
 
 it('uploads empty streams with simple upload instead of an invalid content range', function () {
