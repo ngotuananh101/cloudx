@@ -50,9 +50,14 @@ export const UploadManagerStateContext = createContext<{
     isPanelVisible: boolean;
 } | null>(null);
 
-export const UploadManagerActionsContext = createContext<Omit<UploadManagerContextValue, 'items' | 'isPanelVisible'> | null>(null);
+export const UploadManagerActionsContext = createContext<Omit<
+    UploadManagerContextValue,
+    'items' | 'isPanelVisible'
+> | null>(null);
 
-const UploadManagerContext = createContext<UploadManagerContextValue | null>(null);
+const UploadManagerContext = createContext<UploadManagerContextValue | null>(
+    null,
+);
 
 const getQueueKey = (file: File, target: UploadTarget) =>
     `${target.connectionId}-${target.path}-${file.name}-${file.size}-${file.lastModified}-${target.uploadMode ?? 'backend'}`;
@@ -69,7 +74,9 @@ export function UploadManagerProvider({
     const cancelledUploads = useRef(new Set<string>());
     const activeUploadKeys = useRef(new Set<string>());
     const abortControllers = useRef(new Map<string, AbortController>());
-    const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
+        null,
+    );
     const MAX_CONCURRENT_UPLOADS = 3;
     const fileBrowserLocation = useRef<FileBrowserLocation | null>(null);
     const { props } = usePage<{ auth?: { user?: User | null } }>();
@@ -82,7 +89,7 @@ export function UploadManagerProvider({
                     if (item.key === key) {
                         const updated = { ...item, ...changes };
 
-                        if (['completed', 'failed', 'cancelled'].includes(updated.status)) {
+                        if (updated.status === 'completed') {
                             delete updated.file;
                             delete updated.remote;
                         }
@@ -91,7 +98,7 @@ export function UploadManagerProvider({
                     }
 
                     return item;
-                })
+                }),
             );
         },
         [],
@@ -150,8 +157,8 @@ export function UploadManagerProvider({
                     );
                 } catch (err: any) {
                     if (err.name === 'AbortError') {
-return;
-}
+                        return;
+                    }
 
                     throw err;
                 } finally {
@@ -209,7 +216,7 @@ return;
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ part_number: partNumber }),
-                            signal: controller.signal
+                            signal: controller.signal,
                         },
                     );
 
@@ -219,12 +226,12 @@ return;
                             index * chunkSize,
                             Math.min(file.size, (index + 1) * chunkSize),
                         ),
-                        signal: controller.signal
+                        signal: controller.signal,
                     });
                 } catch (err: any) {
                     if (err.name === 'AbortError') {
-return;
-}
+                        return;
+                    }
 
                     throw err;
                 } finally {
@@ -257,13 +264,13 @@ return;
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ etag }),
-                            signal: doneController.signal
+                            signal: doneController.signal,
                         },
                     );
                 } catch (err: any) {
                     if (err.name === 'AbortError') {
-return;
-}
+                        return;
+                    }
 
                     throw err;
                 } finally {
@@ -297,8 +304,8 @@ return;
                 );
             } catch (err: any) {
                 if (err.name === 'AbortError') {
-return;
-}
+                    return;
+                }
 
                 throw err;
             } finally {
@@ -366,13 +373,13 @@ return;
                         {
                             method: 'POST',
                             body: formData,
-                            signal: controller.signal
+                            signal: controller.signal,
                         },
                     );
                 } catch (err: any) {
                     if (err.name === 'AbortError') {
-return;
-}
+                        return;
+                    }
 
                     throw err;
                 } finally {
@@ -439,13 +446,13 @@ return;
                                     ),
                                     upload_mode: uploadMode,
                                 }),
-                                signal: controller.signal
+                                signal: controller.signal,
                             },
                         );
                     } catch (err: any) {
                         if (err.name === 'AbortError') {
-return;
-}
+                            return;
+                        }
 
                         throw err;
                     } finally {
@@ -507,13 +514,13 @@ return;
                                 headers: remote.headers,
                                 upload_mode: 'remote',
                             }),
-                            signal: controller.signal
+                            signal: controller.signal,
                         },
                     );
                 } catch (err: any) {
                     if (err.name === 'AbortError') {
-return;
-}
+                        return;
+                    }
 
                     throw err;
                 } finally {
@@ -539,47 +546,71 @@ return;
         [updateItem],
     );
 
-    const pumpQueue = useCallback((currentItems: UploadQueueItem[]) => {
-        const activeCount = activeUploadKeys.current.size;
-        const availableSlots = Math.max(0, MAX_CONCURRENT_UPLOADS - activeCount);
+    const pumpQueue = useCallback(
+        (currentItems: UploadQueueItem[]) => {
+            const activeCount = activeUploadKeys.current.size;
+            const availableSlots = Math.max(
+                0,
+                MAX_CONCURRENT_UPLOADS - activeCount,
+            );
 
-        if (availableSlots <= 0) {
-            return;
-        }
-
-        const pendingItems = currentItems.filter((i) => i.status === 'pending' && !activeUploadKeys.current.has(i.key));
-        const itemsToStart = pendingItems.slice(0, availableSlots);
-
-        itemsToStart.forEach((item) => {
-            activeUploadKeys.current.add(item.key);
-
-            if (item.source === 'remote' && item.remote) {
-                uploadRemoteFile(item.key, item.remote, {
-                    connectionId: item.connectionId,
-                    path: item.path,
-                    uploadMode: 'remote',
-                }).finally(() => {
-                    activeUploadKeys.current.delete(item.key);
-                    // trigger a state update to re-evaluate the effect
-                    setItems((latest) => [...latest]);
-                });
-            } else if (item.file) {
-                uploadFile(item.key, item.file, {
-                    connectionId: item.connectionId,
-                    path: item.path,
-                    uploadMode: item.uploadMode,
-                }, item.task).finally(() => {
-                    activeUploadKeys.current.delete(item.key);
-                    // trigger a state update to re-evaluate the effect
-                    setItems((latest) => [...latest]);
-                });
+            if (availableSlots <= 0) {
+                return;
             }
-        });
-    }, [uploadFile, uploadRemoteFile]);
+
+            const pendingItems = currentItems.filter(
+                (i) =>
+                    i.status === 'pending' &&
+                    !activeUploadKeys.current.has(i.key),
+            );
+            const itemsToStart = pendingItems.slice(0, availableSlots);
+
+            itemsToStart.forEach((item) => {
+                activeUploadKeys.current.add(item.key);
+
+                if (item.source === 'remote' && item.remote) {
+                    uploadRemoteFile(item.key, item.remote, {
+                        connectionId: item.connectionId,
+                        path: item.path,
+                        uploadMode: 'remote',
+                    }).finally(() => {
+                        activeUploadKeys.current.delete(item.key);
+                        // trigger a state update to re-evaluate the effect
+                        setItems((latest) => [...latest]);
+                    });
+                } else if (item.file) {
+                    uploadFile(
+                        item.key,
+                        item.file,
+                        {
+                            connectionId: item.connectionId,
+                            path: item.path,
+                            uploadMode: item.uploadMode,
+                        },
+                        item.task,
+                    ).finally(() => {
+                        activeUploadKeys.current.delete(item.key);
+                        // trigger a state update to re-evaluate the effect
+                        setItems((latest) => [...latest]);
+                    });
+                }
+            });
+        },
+        [uploadFile, uploadRemoteFile],
+    );
 
     useEffect(() => {
         pumpQueue(items);
     }, [items, pumpQueue]);
+
+    useEffect(() => {
+        return () => {
+            if (refreshTimeoutRef.current) {
+                clearTimeout(refreshTimeoutRef.current);
+                refreshTimeoutRef.current = null;
+            }
+        };
+    }, []);
 
     const enqueue = useCallback(
         (files: File[], target: UploadTarget) => {
@@ -798,7 +829,7 @@ return;
                             error: task.error_message || undefined,
                         };
 
-                        if (task.status === 'completed' || task.status === 'failed' || task.status === 'cancelled') {
+                        if (task.status === 'completed') {
                             delete updatedItem.file;
                             delete updatedItem.remote;
                         }
@@ -818,20 +849,26 @@ return;
     );
 
     const activeTaskIdsAndConnectionIds = items
-        .filter((i) => i.task && (i.status === 'queued' || i.status === 'processing'))
+        .filter(
+            (i) =>
+                i.task && (i.status === 'queued' || i.status === 'processing'),
+        )
         .map((i) => `${i.task!.id}:${i.connectionId}`)
         .sort()
         .join(',');
 
     useEffect(() => {
         if (!activeTaskIdsAndConnectionIds) {
-return;
-}
+            return;
+        }
 
         const taskRefs = activeTaskIdsAndConnectionIds.split(',').map((ref) => {
             const [taskId, connectionId] = ref.split(':');
 
-            return { taskId: Number(taskId), connectionId: Number(connectionId) };
+            return {
+                taskId: Number(taskId),
+                connectionId: Number(connectionId),
+            };
         });
 
         const inFlightPolls = new Set<number>();
@@ -839,8 +876,8 @@ return;
         const intervalId = globalThis.setInterval(() => {
             taskRefs.forEach(({ taskId, connectionId }) => {
                 if (inFlightPolls.has(taskId)) {
-return;
-}
+                    return;
+                }
 
                 inFlightPolls.add(taskId);
                 requestJson<CloudUploadTask>(
@@ -897,7 +934,9 @@ return;
 
     return (
         <UploadManagerContext.Provider value={value}>
-            <UploadManagerStateContext.Provider value={{ items, isPanelVisible }}>
+            <UploadManagerStateContext.Provider
+                value={{ items, isPanelVisible }}
+            >
                 <UploadManagerActionsContext.Provider
                     value={{
                         enqueue: value.enqueue,
@@ -908,17 +947,18 @@ return;
                         retry: value.retry,
                         remove: value.remove,
                         closePanel: value.closePanel,
-                        registerFileBrowserLocation: value.registerFileBrowserLocation,
+                        registerFileBrowserLocation:
+                            value.registerFileBrowserLocation,
                     }}
                 >
-            {user?.id ? (
-                <CloudTaskBroadcastListener
-                    userId={user.id}
-                    onUpdate={mergeBroadcastTask}
-                />
-            ) : null}
-            {children}
-                        </UploadManagerActionsContext.Provider>
+                    {user?.id ? (
+                        <CloudTaskBroadcastListener
+                            userId={user.id}
+                            onUpdate={mergeBroadcastTask}
+                        />
+                    ) : null}
+                    {children}
+                </UploadManagerActionsContext.Provider>
             </UploadManagerStateContext.Provider>
         </UploadManagerContext.Provider>
     );
@@ -944,8 +984,10 @@ export function useUploadManagerState() {
     const context = useContext(UploadManagerStateContext);
 
     if (!context) {
-throw new Error('useUploadManagerState must be used within an UploadManagerProvider.');
-}
+        throw new Error(
+            'useUploadManagerState must be used within an UploadManagerProvider.',
+        );
+    }
 
     return context;
 }
@@ -954,8 +996,10 @@ export function useUploadManagerActions() {
     const context = useContext(UploadManagerActionsContext);
 
     if (!context) {
-throw new Error('useUploadManagerActions must be used within an UploadManagerProvider.');
-}
+        throw new Error(
+            'useUploadManagerActions must be used within an UploadManagerProvider.',
+        );
+    }
 
     return context;
 }
