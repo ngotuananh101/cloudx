@@ -55,6 +55,21 @@ class PythonServiceClient
         return $response;
     }
 
+    protected function getStream(string $path, array $query = [], int $timeout = 30): Response
+    {
+        $response = $this->request($timeout)
+            ->withOptions(['stream' => true])
+            ->get($this->baseUrl.$path, $query);
+
+        $this->assertAuthenticated($response);
+
+        if ($response->failed()) {
+            throw new PythonServiceException('Python service error: HTTP '.$response->status());
+        }
+
+        return $response;
+    }
+
     protected function get(string $path, array $query = [], int $timeout = 30): Response
     {
         $response = $this->request($timeout)->get($this->baseUrl.$path, $query);

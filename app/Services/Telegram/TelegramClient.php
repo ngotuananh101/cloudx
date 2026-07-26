@@ -75,15 +75,39 @@ class TelegramClient extends PythonServiceClient
      */
     public function downloadStream(int $messageId)
     {
-        $body = $this->download($messageId);
+        $timeout = (int) config('cloud-storage.telegram.download_timeout', 600);
 
+        $response = $this->request($timeout)
+            ->withOptions(['stream' => true])
+            ->withQueryParameters(['message_id' => $messageId])
+            ->get($this->url().'/read');
+
+        if ($response->status() === 404) {
+            throw new TelegramServiceException('Telegram file not found.');
+        }
+
+        $this->assertAuthenticated($response);
+        if ($response->failed()) {
+            throw new TelegramServiceException('Python service error: HTTP '.$response->status());
+        }
+
+        $psr = $response->toPsrResponse()->getBody();
+        $resource = $psr->detach();
+
+        if (is_resource($resource)) {
+            return $resource;
+        }
+
+        // chunk fallback vào php://temp
         $stream = fopen('php://temp', 'r+');
 
         if ($stream === false) {
             throw new TelegramServiceException('Could not create download stream.');
         }
 
-        fwrite($stream, $body);
+        while (! $psr->eof()) {
+            fwrite($stream, $psr->read(8192));
+        }
         rewind($stream);
 
         return $stream;

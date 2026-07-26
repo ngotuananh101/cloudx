@@ -6,6 +6,11 @@ return [
         'ttl' => (int) env('CLOUD_STORAGE_CACHE_TTL', 21600),
     ],
 
+    'telegram' => [
+        'download_timeout' => (int) env('CLOUD_TELEGRAM_DOWNLOAD_TIMEOUT', 600),
+        'max_list_items' => (int) env('CLOUD_TELEGRAM_MAX_LIST_ITEMS', 2000),
+    ],
+
     'uploads' => [
         'chunk_size' => (int) env('CLOUD_UPLOAD_CHUNK_SIZE', 5 * 1024 * 1024),
         'max_file_size' => (int) env('CLOUD_UPLOAD_MAX_FILE_SIZE', 5 * 1024 * 1024 * 1024),
