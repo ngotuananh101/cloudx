@@ -143,17 +143,34 @@ class OneDriveClient
      */
     public function downloadStream(string $path)
     {
-        $response = $this->contentGraph()->get($this->contentUrl($path))->throw();
-        $stream = fopen('php://temp', 'r+');
+        $response = $this->contentGraph()
+            ->withOptions(['stream' => true])
+            ->get($this->contentUrl($path))
+            ->throw();
 
-        if ($stream === false) {
-            throw new OneDriveException('Could not create OneDrive download stream.');
+        $psrStream = $response->toPsrResponse()->getBody();
+
+        if ($psrStream->isSeekable()) {
+            $psrStream->rewind();
         }
 
-        fwrite($stream, $response->body());
-        rewind($stream);
+        $resource = $psrStream->detach();
 
-        return $stream;
+        if (! is_resource($resource)) {
+            $resource = fopen('php://temp', 'r+');
+
+            if ($resource === false) {
+                throw new OneDriveException('Could not create OneDrive download stream.');
+            }
+
+            while (! $psrStream->eof()) {
+                fwrite($resource, $psrStream->read(8192));
+            }
+
+            rewind($resource);
+        }
+
+        return $resource;
     }
 
     public function upload(string $path, string $contents): void
