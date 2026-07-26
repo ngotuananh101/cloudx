@@ -5,8 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\PathEncoder;
-use App\Services\Telegram\TelegramHelper;
-use App\Support\ContentDisposition;
+use App\Support\CloudFileResponseFactory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -43,40 +42,9 @@ class CloudFilePreviewController extends Controller
 
     private function streamFromDisk(Filesystem $disk, string $path): StreamedResponse
     {
-        abort_unless($disk->exists($path), 404, 'File not found on storage.');
+        /** @var CloudFileResponseFactory $factory */
+        $factory = app(CloudFileResponseFactory::class);
 
-        $name = TelegramHelper::filenameFor($disk, $path) ?? basename($path);
-
-        try {
-            $mimeType = $disk->mimeType($path);
-        } catch (Throwable $e) {
-            $mimeType = 'application/octet-stream';
-        }
-
-        try {
-            $fileSize = $disk->fileSize($path);
-        } catch (Throwable $e) {
-            $fileSize = null;
-        }
-
-        $headers = array_filter([
-            'Content-Type' => $mimeType,
-            'Content-Length' => $fileSize,
-            'Content-Disposition' => ContentDisposition::inline($name),
-            'Cache-Control' => 'private, max-age=3600, must-revalidate',
-            'X-Content-Type-Options' => 'nosniff',
-        ]);
-
-        if (in_array(strtolower((string) $mimeType), ['text/html', 'image/svg+xml', 'application/xml', 'text/xml'], true)) {
-            $headers['Content-Security-Policy'] = "default-src 'none'; sandbox";
-        }
-
-        return response()->stream(function () use ($disk, $path) {
-            $stream = $disk->readStream($path);
-            if (is_resource($stream)) {
-                fpassthru($stream);
-                fclose($stream);
-            }
-        }, 200, $headers);
+        return $factory->streamInline($disk, $path);
     }
 }

@@ -9,8 +9,7 @@ use App\Services\CloudStorage\CloudPath;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
-use App\Services\Telegram\TelegramHelper;
-use App\Support\ContentDisposition;
+use App\Support\CloudFileResponseFactory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -154,41 +153,10 @@ class ShareViewController extends Controller
             $connector = $this->cloudStorage->connector($share->cloudConnection->provider);
             $disk = $connector->disk($share->cloudConnection);
 
-            abort_unless($disk->exists($decodedPath), 404, self::FILE_NOT_FOUND);
+            /** @var CloudFileResponseFactory $factory */
+            $factory = app(CloudFileResponseFactory::class);
 
-            $name = TelegramHelper::filenameFor($disk, $decodedPath) ?? basename($decodedPath);
-
-            try {
-                $mimeType = $disk->mimeType($decodedPath);
-            } catch (Throwable) {
-                $mimeType = 'application/octet-stream';
-            }
-
-            try {
-                $fileSize = $disk->fileSize($decodedPath);
-            } catch (Throwable) {
-                $fileSize = null;
-            }
-
-            $headers = array_filter([
-                'Content-Type' => $mimeType,
-                'Content-Length' => $fileSize,
-                'Content-Disposition' => ContentDisposition::inline($name),
-                'Cache-Control' => 'private, max-age=3600, must-revalidate',
-                'X-Content-Type-Options' => 'nosniff',
-            ]);
-
-            if (in_array(strtolower((string) $mimeType), ['text/html', 'image/svg+xml', 'application/xml', 'text/xml'], true)) {
-                $headers['Content-Security-Policy'] = "default-src 'none'; sandbox";
-            }
-
-            return response()->stream(function () use ($disk, $decodedPath) {
-                $stream = $disk->readStream($decodedPath);
-                if (is_resource($stream)) {
-                    fpassthru($stream);
-                    fclose($stream);
-                }
-            }, 200, $headers);
+            return $factory->streamInline($disk, $decodedPath);
         } catch (Throwable $exception) {
             Log::error('Could not preview shared file.', [
                 'exception' => $exception,
@@ -216,40 +184,11 @@ class ShareViewController extends Controller
             }
 
             $disk = $connector->disk($share->cloudConnection);
-            abort_unless($disk->exists($decodedPath), 404, self::FILE_NOT_FOUND);
 
-            $name = TelegramHelper::filenameFor($disk, $decodedPath) ?? basename($decodedPath);
+            /** @var CloudFileResponseFactory $factory */
+            $factory = app(CloudFileResponseFactory::class);
 
-            try {
-                $mimeType = $disk->mimeType($decodedPath);
-            } catch (Throwable) {
-                $mimeType = 'application/octet-stream';
-            }
-
-            try {
-                $fileSize = $disk->fileSize($decodedPath);
-            } catch (Throwable) {
-                $fileSize = null;
-            }
-
-            $safeName = str_replace(["\r", "\n", '"', '\\'], '', basename($name));
-            $safeName = $safeName === '' ? 'download' : $safeName;
-
-            $response = response()->streamDownload(function () use ($disk, $decodedPath) {
-                $stream = $disk->readStream($decodedPath);
-                if (is_resource($stream)) {
-                    fpassthru($stream);
-                    fclose($stream);
-                }
-            }, $safeName, array_filter([
-                'Content-Type' => $mimeType,
-                'Content-Length' => $fileSize,
-                'X-Content-Type-Options' => 'nosniff',
-            ]));
-
-            $response->headers->set('Content-Disposition', ContentDisposition::attachment($safeName));
-
-            return $response;
+            return $factory->streamDownload($disk, $decodedPath);
         } catch (Throwable $exception) {
             Log::error('Could not download shared file.', [
                 'exception' => $exception,

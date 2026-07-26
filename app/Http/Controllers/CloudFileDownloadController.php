@@ -6,8 +6,7 @@ use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
-use App\Services\Telegram\TelegramHelper;
-use App\Support\ContentDisposition;
+use App\Support\CloudFileResponseFactory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -54,39 +53,9 @@ class CloudFileDownloadController extends Controller
 
     private function streamFromDisk(Filesystem $disk, string $path): StreamedResponse
     {
-        abort_unless($disk->exists($path), 404, 'File not found on storage.');
+        /** @var CloudFileResponseFactory $factory */
+        $factory = app(CloudFileResponseFactory::class);
 
-        $name = TelegramHelper::filenameFor($disk, $path) ?? basename($path);
-
-        try {
-            $mimeType = $disk->mimeType($path);
-        } catch (Throwable $e) {
-            $mimeType = 'application/octet-stream';
-        }
-
-        try {
-            $fileSize = $disk->fileSize($path);
-        } catch (Throwable $e) {
-            $fileSize = null;
-        }
-
-        $safeName = str_replace(["\r", "\n", '"', '\\'], '', basename($name));
-        $safeName = $safeName === '' ? 'download' : $safeName;
-
-        $response = response()->streamDownload(function () use ($disk, $path) {
-            $stream = $disk->readStream($path);
-            if (is_resource($stream)) {
-                fpassthru($stream);
-                fclose($stream);
-            }
-        }, $safeName, array_filter([
-            'Content-Type' => $mimeType,
-            'Content-Length' => $fileSize,
-            'X-Content-Type-Options' => 'nosniff',
-        ]));
-
-        $response->headers->set('Content-Disposition', ContentDisposition::attachment($safeName));
-
-        return $response;
+        return $factory->streamDownload($disk, $path);
     }
 }
