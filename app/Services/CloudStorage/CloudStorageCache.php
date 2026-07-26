@@ -13,22 +13,6 @@ use Illuminate\Support\Str;
 
 class CloudStorageCache
 {
-    public function getFolderListing(CloudConnection $connection, string $path): mixed
-    {
-        return $this->repository($this->folderTags($connection, $path))->get(
-            $this->folderKey($connection, $path)
-        );
-    }
-
-    public function putFolderListing(CloudConnection $connection, string $path, mixed $value): void
-    {
-        $this->repository($this->folderTags($connection, $path))->put(
-            $this->folderKey($connection, $path),
-            $value,
-            $this->ttl()
-        );
-    }
-
     /**
      * @template TReturn
      *

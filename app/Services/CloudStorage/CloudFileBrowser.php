@@ -50,37 +50,8 @@ class CloudFileBrowser
     {
         $decodedPath = $this->decodedPath($encodedPath);
 
-        $folders = $this->cache->rememberDirectoryListing($connection, $decodedPath, function () use ($connection, $decodedPath): array {
-            $fullList = $this->cache->getFolderListing($connection, $decodedPath);
-
-            if ($fullList !== null) {
-                return collect($fullList)
-                    ->filter(fn (array $item): bool => $item['isDirectory'] === true)
-                    ->values()
-                    ->all();
-            }
-
-            $connector = $this->cloudStorage->connector($connection->provider);
-
-            $fullList = $connector instanceof BrowsesCloudFiles
-                ? $this->listDirectProvider($connection, $decodedPath, $connector)
-                : $this->listFlysystem($connection, $decodedPath);
-
-            usort($fullList, function (array $first, array $second): int {
-                if ($first['isDirectory'] && ! $second['isDirectory']) {
-                    return -1;
-                }
-
-                if (! $first['isDirectory'] && $second['isDirectory']) {
-                    return 1;
-                }
-
-                return strnatcasecmp($first['name'], $second['name']);
-            });
-
-            $this->cache->putFolderListing($connection, $decodedPath, $fullList);
-
-            return collect($fullList)
+        $folders = $this->cache->rememberDirectoryListing($connection, $decodedPath, function () use ($connection, $encodedPath): array {
+            return collect($this->list($connection, $encodedPath))
                 ->filter(fn (array $item): bool => $item['isDirectory'] === true)
                 ->values()
                 ->all();

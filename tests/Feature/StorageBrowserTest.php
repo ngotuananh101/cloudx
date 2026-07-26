@@ -275,8 +275,9 @@ it('listDirectories avoids provider call when full list is cached', function () 
     $cache->shouldReceive('rememberDirectoryListing')->once()->andReturnUsing(function (CloudConnection $connection, string $path, Closure $callback) {
         return $callback();
     });
-    // mock getFolderListing to simulate a cache hit
-    $cache->shouldReceive('getFolderListing')->once()->andReturn([
+    // listDirectories reuses list(), which goes through the single-flight cache;
+    // a cache hit returns the full listing without touching the provider
+    $cache->shouldReceive('rememberFolderListing')->once()->andReturn([
         ['id' => 'docs', 'path' => 'docs', 'name' => 'docs', 'type' => 'folder', 'size' => 0, 'updatedAt' => '--', 'isDirectory' => true],
         ['id' => 'file', 'path' => 'file.txt', 'name' => 'file.txt', 'type' => 'document', 'size' => 10, 'updatedAt' => '--', 'isDirectory' => false],
     ]);
