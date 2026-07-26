@@ -6,12 +6,29 @@ use App\Jobs\UpdateConnectionQuotaJob;
 use App\Models\CloudConnection;
 use Closure;
 use Illuminate\Cache\TaggedCache;
+use Illuminate\Contracts\Cache\LockTimeoutException;
 use Illuminate\Contracts\Cache\Repository;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class CloudStorageCache
 {
+    public function getFolderListing(CloudConnection $connection, string $path): mixed
+    {
+        return $this->repository($this->folderTags($connection, $path))->get(
+            $this->folderKey($connection, $path)
+        );
+    }
+
+    public function putFolderListing(CloudConnection $connection, string $path, mixed $value): void
+    {
+        $this->repository($this->folderTags($connection, $path))->put(
+            $this->folderKey($connection, $path),
+            $value,
+            $this->ttl()
+        );
+    }
+
     /**
      * @template TReturn
      *
@@ -20,11 +37,46 @@ class CloudStorageCache
      */
     public function rememberFolderListing(CloudConnection $connection, string $path, Closure $callback): mixed
     {
-        return $this->repository($this->folderTags($connection, $path))->remember(
-            $this->folderKey($connection, $path),
-            $this->ttl(),
-            $callback,
-        );
+        $repository = $this->repository($this->folderTags($connection, $path));
+        $key = $this->folderKey($connection, $path);
+
+        $value = $repository->get($key);
+
+        if ($value !== null) {
+            return $value;
+        }
+
+        $store = $this->baseRepository()->getStore();
+
+        if (method_exists($store, 'lock')) {
+            $lock = $store->lock('cloud:list:lock:'.$connection->id.':'.$this->pathHash($path), 10);
+
+            try {
+                if ($lock->block(5)) {
+                    // Try to get again after acquiring the lock in case another process already filled it
+                    $value = $repository->get($key);
+                    if ($value !== null) {
+                        return $value;
+                    }
+
+                    $value = $callback();
+                    $repository->put($key, $value, $this->ttl());
+
+                    return $value;
+                }
+            } catch (LockTimeoutException $e) {
+                // If we couldn't get the lock in 5 seconds, fallback to calling the provider
+                // to avoid throwing an error to the user
+            } finally {
+                optional($lock)->release();
+            }
+        }
+
+        // Fallback for stores without lock support or if lock timed out
+        $value = $callback();
+        $repository->put($key, $value, $this->ttl());
+
+        return $value;
     }
 
     /**
@@ -77,8 +129,7 @@ class CloudStorageCache
 
     public function flushQuota(CloudConnection $connection): void
     {
-        Cache::forget('quota_update_lock_'.$connection->id);
-        dispatch(new UpdateConnectionQuotaJob($connection->id));
+        dispatch(new UpdateConnectionQuotaJob($connection->id))->delay(now()->addSeconds(15));
     }
 
     /**

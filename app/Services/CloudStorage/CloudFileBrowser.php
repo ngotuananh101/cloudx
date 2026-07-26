@@ -49,35 +49,39 @@ class CloudFileBrowser
     public function listDirectories(CloudConnection $connection, string $encodedPath): array
     {
         $decodedPath = $this->decodedPath($encodedPath);
-        $folders = $this->cache->rememberDirectoryListing($connection, $decodedPath, function () use ($connection, $decodedPath): array {
-            $connector = $this->cloudStorage->connector($connection->provider);
 
-            if ($connector instanceof BrowsesCloudFiles) {
-                return collect($connector->listContents($connection, $decodedPath))
+        $folders = $this->cache->rememberDirectoryListing($connection, $decodedPath, function () use ($connection, $decodedPath): array {
+            $fullList = $this->cache->getFolderListing($connection, $decodedPath);
+
+            if ($fullList !== null) {
+                return collect($fullList)
                     ->filter(fn (array $item): bool => $item['isDirectory'] === true)
-                    ->reject(fn (array $item): bool => str_starts_with((string) $item['name'], '.'))
-                    ->map(fn (array $item): array => $this->fileData(
-                        id: (string) $item['id'],
-                        path: (string) $item['path'],
-                        name: (string) $item['name'],
-                        isDirectory: true,
-                        size: 0,
-                        lastModifiedTimestamp: $item['lastModifiedTimestamp'] ?? null,
-                    )->toArray())
                     ->values()
                     ->all();
             }
 
-            return collect($this->cloudStorage->disk($connection)->directories($decodedPath))
-                ->reject(fn (string $path): bool => str_starts_with(basename($path), '.'))
-                ->map(fn (string $path): array => $this->fileData(
-                    id: $path,
-                    path: $path,
-                    name: basename($path),
-                    isDirectory: true,
-                    size: 0,
-                    lastModifiedTimestamp: null,
-                )->toArray())
+            $connector = $this->cloudStorage->connector($connection->provider);
+
+            $fullList = $connector instanceof BrowsesCloudFiles
+                ? $this->listDirectProvider($connection, $decodedPath, $connector)
+                : $this->listFlysystem($connection, $decodedPath);
+
+            usort($fullList, function (array $first, array $second): int {
+                if ($first['isDirectory'] && ! $second['isDirectory']) {
+                    return -1;
+                }
+
+                if (! $first['isDirectory'] && $second['isDirectory']) {
+                    return 1;
+                }
+
+                return strnatcasecmp($first['name'], $second['name']);
+            });
+
+            $this->cache->putFolderListing($connection, $decodedPath, $fullList);
+
+            return collect($fullList)
+                ->filter(fn (array $item): bool => $item['isDirectory'] === true)
                 ->values()
                 ->all();
         });

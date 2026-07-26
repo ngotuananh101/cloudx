@@ -6,11 +6,12 @@ use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
-class UpdateConnectionQuotaJob implements ShouldQueue
+class UpdateConnectionQuotaJob implements ShouldBeUnique, ShouldQueue
 {
     use Queueable;
 
@@ -18,7 +19,14 @@ class UpdateConnectionQuotaJob implements ShouldQueue
 
     public int $timeout = 60;
 
+    public int $uniqueFor = 300;
+
     public function __construct(public int $connectionId) {}
+
+    public function uniqueId(): string
+    {
+        return (string) $this->connectionId;
+    }
 
     public function handle(CloudStorageManager $manager): void
     {

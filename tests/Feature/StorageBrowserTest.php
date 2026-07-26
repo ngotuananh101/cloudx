@@ -254,3 +254,37 @@ it('renders an empty file list and flashes an error when browsing fails', functi
             ->etc()
         );
 });
+
+it('listDirectories avoids provider call when full list is cached', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::create([
+        'user_id' => $user->id,
+        'name' => 'OneDrive',
+        'provider' => CloudProvider::ONEDRIVE,
+        'credentials' => ['access_token' => 'token'],
+        'status' => ConnectionStatus::CONNECTED,
+    ]);
+
+    $manager = Mockery::mock(CloudStorageManager::class);
+    // connector and disk should NOT be called because we mock full list cache hit
+    $manager->shouldNotReceive('connector');
+    $manager->shouldNotReceive('disk');
+
+    $cache = Mockery::mock(CloudStorageCache::class);
+    // when rememberDirectoryListing is called, it executes the callback
+    $cache->shouldReceive('rememberDirectoryListing')->once()->andReturnUsing(function (CloudConnection $connection, string $path, Closure $callback) {
+        return $callback();
+    });
+    // mock getFolderListing to simulate a cache hit
+    $cache->shouldReceive('getFolderListing')->once()->andReturn([
+        ['id' => 'docs', 'path' => 'docs', 'name' => 'docs', 'type' => 'folder', 'size' => 0, 'updatedAt' => '--', 'isDirectory' => true],
+        ['id' => 'file', 'path' => 'file.txt', 'name' => 'file.txt', 'type' => 'document', 'size' => 10, 'updatedAt' => '--', 'isDirectory' => false],
+    ]);
+
+    $browser = new CloudFileBrowser($manager, $cache);
+    $folders = $browser->listDirectories($connection, '');
+
+    expect($folders)->toHaveCount(1)
+        ->and($folders[0]['name'])->toBe('docs')
+        ->and($folders[0]['isDirectory'])->toBeTrue();
+});
