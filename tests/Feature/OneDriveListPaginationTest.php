@@ -4,6 +4,8 @@ use App\Models\CloudConnection;
 use App\Services\OneDrive\OneDriveClient;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Tests\TestCase;
+
 
 test('it paginates over odata.nextLink correctly', function () {
     Http::fake([

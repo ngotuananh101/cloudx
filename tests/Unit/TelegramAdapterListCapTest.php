@@ -3,6 +3,9 @@
 use App\Services\Telegram\TelegramAdapter;
 use App\Services\Telegram\TelegramClient;
 use Illuminate\Support\Facades\Log;
+use Tests\TestCase;
+
+uses(TestCase::class);
 
 test('it stops yielding items when reaching max list items cap and logs a warning', function () {
     $client = Mockery::mock(TelegramClient::class);
