@@ -77,18 +77,10 @@ class TelegramClient extends PythonServiceClient
     {
         $timeout = (int) config('cloud-storage.telegram.download_timeout', 600);
 
-        $response = $this->request($timeout)
-            ->withOptions(['stream' => true])
-            ->withQueryParameters(['message_id' => $messageId])
-            ->get($this->url().'/read');
+        $response = $this->getStream('/read', ['message_id' => $messageId], $timeout, [404]);
 
         if ($response->status() === 404) {
             throw new TelegramServiceException('Telegram file not found.');
-        }
-
-        $this->assertAuthenticated($response);
-        if ($response->failed()) {
-            throw new TelegramServiceException('Python service error: HTTP '.$response->status());
         }
 
         $psr = $response->toPsrResponse()->getBody();
