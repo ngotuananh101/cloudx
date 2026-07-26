@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services\Telegram;
 
+use Illuminate\Support\Facades\Log;
 use League\Flysystem\Config;
 use League\Flysystem\FileAttributes;
 use League\Flysystem\FilesystemAdapter;
@@ -122,13 +123,23 @@ class TelegramAdapter implements FilesystemAdapter
     {
         $offset = 0;
         $limit = 100;
+        $yielded = 0;
+        $max = (int) config('cloud-storage.telegram.max_list_items', 2000);
 
         do {
             $result = $this->client->listAll($limit, $offset);
             $files = $result['files'] ?? [];
 
             foreach ($files as $file) {
+                if ($yielded >= $max) {
+                    Log::warning('Telegram listContents reached max limit', [
+                        'max' => $max,
+                        'total_remote' => $result['total'] ?? 0,
+                    ]);
+                    break 2;
+                }
                 yield $this->fileAttribute($file);
+                $yielded++;
             }
 
             $offset += $limit;

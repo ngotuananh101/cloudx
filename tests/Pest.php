@@ -48,3 +48,4 @@ function something(): void
 {
     // Intentionally empty scaffold reserved for shared Pest helpers.
 }
+pest()->extend(TestCase::class)->use(RefreshDatabase::class)->in('Unit');

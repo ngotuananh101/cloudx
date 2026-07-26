@@ -6,6 +6,7 @@ use App\Exceptions\OneDriveException;
 use App\Models\CloudConnection;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 
 class OneDriveClient
@@ -102,9 +103,29 @@ class OneDriveClient
      */
     public function listChildren(string $path): array
     {
-        $response = $this->graph()->get($this->childrenUrl($path))->throw()->json();
+        $items = [];
+        $url = $this->childrenUrl($path);
+        $pages = 0;
+        $maxPages = 50;
 
-        return is_array($response) && isset($response['value']) && is_array($response['value']) ? $response['value'] : [];
+        do {
+            $response = $this->graph()->get($url)->throw()->json();
+            $pageItems = is_array($response) && isset($response['value']) && is_array($response['value']) ? $response['value'] : [];
+            array_push($items, ...$pageItems);
+
+            $url = is_array($response) && isset($response['@odata.nextLink']) && is_string($response['@odata.nextLink']) ? $response['@odata.nextLink'] : null;
+            $pages++;
+
+            if ($url !== null && $pages >= $maxPages) {
+                Log::warning('OneDrive listChildren reached max pages limit', [
+                    'path' => $path,
+                    'pages' => $pages,
+                    'items_count' => count($items),
+                ]);
+            }
+        } while ($url !== null && $pages < $maxPages);
+
+        return $items;
     }
 
     /**
