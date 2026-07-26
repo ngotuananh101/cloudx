@@ -8,13 +8,16 @@ use DateTimeImmutable;
 
 class S3Presigner
 {
-    public function __construct(private readonly S3ClientFactory $factory) {}
+    public function __construct(
+        private readonly S3ClientFactory $factory,
+        private readonly S3ConnectionConfig $connectionConfig,
+    ) {}
 
     public function initiateMultipartUpload(CloudConnection $connection, string $key, ?string $mimeType): string
     {
         $result = $this->factory->make($connection)->createMultipartUpload(array_filter([
             'Bucket' => $connection->credentials['bucket'] ?? '',
-            'Key' => $key,
+            'Key' => $this->connectionConfig->objectKey($connection->credentials, $key),
             'ContentType' => $mimeType,
         ], static fn (mixed $value): bool => $value !== null && $value !== ''));
 
@@ -26,7 +29,7 @@ class S3Presigner
         $client = $this->factory->make($connection);
         $command = $client->getCommand('UploadPart', [
             'Bucket' => $connection->credentials['bucket'] ?? '',
-            'Key' => $key,
+            'Key' => $this->connectionConfig->objectKey($connection->credentials, $key),
             'UploadId' => $uploadId,
             'PartNumber' => $partNumber,
         ]);
@@ -48,7 +51,7 @@ class S3Presigner
 
         $this->factory->make($connection)->completeMultipartUpload([
             'Bucket' => $connection->credentials['bucket'] ?? '',
-            'Key' => $key,
+            'Key' => $this->connectionConfig->objectKey($connection->credentials, $key),
             'UploadId' => $uploadId,
             'MultipartUpload' => [
                 'Parts' => $parts,
@@ -60,7 +63,7 @@ class S3Presigner
     {
         $this->factory->make($connection)->abortMultipartUpload([
             'Bucket' => $connection->credentials['bucket'] ?? '',
-            'Key' => $key,
+            'Key' => $this->connectionConfig->objectKey($connection->credentials, $key),
             'UploadId' => $uploadId,
         ]);
     }

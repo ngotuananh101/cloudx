@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\ActivityAction;
+use App\Enums\CloudProvider;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Exceptions\CloudUploadException;
@@ -85,7 +86,7 @@ class UploadCloudTaskFileJob implements ShouldQueue
     ): void {
         $payload = $task->payload;
         $filename = (string) ($payload['filename'] ?? $task->name);
-        $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
+        $targetPath = $this->destinationPath($task, $filename);
 
         if (($payload['upload_mode'] ?? 'backend') === 'direct') {
             $this->completeUpload($task, $targetPath, $filename, $cache, $broadcaster, $activityLogger);
@@ -112,37 +113,43 @@ class UploadCloudTaskFileJob implements ShouldQueue
     private function mergeAndUploadChunks(CloudTask $task, string $targetPath, int $totalChunks, string $tempPath): void
     {
         $tempDisk = Storage::disk($this->tempDiskName());
-        $stream = fopen('php://temp', 'w+');
+        $absoluteTempPath = $tempDisk->path($tempPath);
+        $absoluteDirectory = dirname($absoluteTempPath);
+
+        if (! is_dir($absoluteDirectory)) {
+            mkdir($absoluteDirectory, 0755, true);
+        }
+
+        $stream = fopen($absoluteTempPath, 'wb');
 
         if ($stream === false) {
             throw new CloudUploadException('Could not create upload merge stream.');
         }
 
-        for ($index = 0; $index < $totalChunks; $index++) {
-            $chunkPath = $this->chunkPath($task, $index);
+        try {
+            for ($index = 0; $index < $totalChunks; $index++) {
+                $chunkPath = $this->chunkPath($task, $index);
 
-            if (! $tempDisk->exists($chunkPath)) {
-                throw new CloudUploadException("Upload chunk {$index} is missing.");
+                if (! $tempDisk->exists($chunkPath)) {
+                    throw new CloudUploadException("Upload chunk {$index} is missing.");
+                }
+
+                $chunkStream = $tempDisk->readStream($chunkPath);
+
+                if ($chunkStream === false) {
+                    throw new CloudUploadException("Could not read upload chunk {$index}.");
+                }
+
+                stream_copy_to_stream($chunkStream, $stream);
+
+                if (is_resource($chunkStream)) {
+                    fclose($chunkStream);
+                }
             }
-
-            $chunkStream = $tempDisk->readStream($chunkPath);
-
-            if ($chunkStream === false) {
-                throw new CloudUploadException("Could not read upload chunk {$index}.");
+        } finally {
+            if (is_resource($stream)) {
+                fclose($stream);
             }
-
-            stream_copy_to_stream($chunkStream, $stream);
-
-            if (is_resource($chunkStream)) {
-                fclose($chunkStream);
-            }
-        }
-
-        rewind($stream);
-        $tempDisk->put($tempPath, $stream);
-
-        if (is_resource($stream)) {
-            fclose($stream);
         }
 
         $uploadStream = $tempDisk->readStream($tempPath);
@@ -208,6 +215,12 @@ class UploadCloudTaskFileJob implements ShouldQueue
             return;
         }
 
+        $totalChunks = (int) ($task->payload['total_chunks'] ?? 0);
+
+        if ($totalChunks > 0) {
+            $this->deleteTempFiles($task, $totalChunks, $this->mergedTempPath($task));
+        }
+
         $this->markFailed(
             $task,
             $exception?->getMessage() ?? 'Upload job failed.',
@@ -235,6 +248,15 @@ class UploadCloudTaskFileJob implements ShouldQueue
         }
 
         $tempDisk->delete($tempPath);
+    }
+
+    private function destinationPath(CloudTask $task, string $filename): string
+    {
+        if ($task->connection?->provider === CloudProvider::TELEGRAM) {
+            return $filename;
+        }
+
+        return trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
     }
 
     private function chunkPath(CloudTask $task, int $index): string

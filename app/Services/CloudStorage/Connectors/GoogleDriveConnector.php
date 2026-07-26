@@ -153,11 +153,20 @@ class GoogleDriveConnector implements CloudProviderConnector, ReportsStorageQuot
             $refreshToken = $client->getRefreshToken();
             $newAccessToken = $client->fetchAccessTokenWithRefreshToken($refreshToken);
 
-            if (! isset($newAccessToken['error'])) {
-                $connection->update([
-                    'credentials' => array_merge($connection->credentials, $newAccessToken),
-                ]);
+            if (isset($newAccessToken['error']) || ! isset($newAccessToken['access_token'])) {
+                $exception = new CloudOAuthException((string) ($newAccessToken['error_description'] ?? $newAccessToken['error'] ?? 'Google token refresh failed.'));
+                $connection->handleApiException($exception);
+
+                throw $exception;
             }
+
+            $connection->update([
+                'credentials' => array_merge(
+                    $connection->credentials,
+                    ['refresh_token' => $connection->credentials['refresh_token'] ?? $refreshToken],
+                    $newAccessToken,
+                ),
+            ]);
         }
 
         $drive = new Drive($client);

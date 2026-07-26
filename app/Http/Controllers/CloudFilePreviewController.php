@@ -6,6 +6,7 @@ use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\PathEncoder;
 use App\Services\Telegram\TelegramHelper;
+use App\Support\ContentDisposition;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -58,17 +59,24 @@ class CloudFilePreviewController extends Controller
             $fileSize = null;
         }
 
+        $headers = array_filter([
+            'Content-Type' => $mimeType,
+            'Content-Length' => $fileSize,
+            'Content-Disposition' => ContentDisposition::inline($name),
+            'Cache-Control' => 'private, max-age=3600, must-revalidate',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+
+        if (in_array(strtolower((string) $mimeType), ['text/html', 'image/svg+xml', 'application/xml', 'text/xml'], true)) {
+            $headers['Content-Security-Policy'] = "default-src 'none'; sandbox";
+        }
+
         return response()->stream(function () use ($disk, $path) {
             $stream = $disk->readStream($path);
             if (is_resource($stream)) {
                 fpassthru($stream);
                 fclose($stream);
             }
-        }, 200, array_filter([
-            'Content-Type' => $mimeType,
-            'Content-Length' => $fileSize,
-            'Content-Disposition' => 'inline; filename="'.addslashes($name).'"',
-            'Cache-Control' => 'public, max-age=31536000, immutable',
-        ]));
+        }, 200, $headers);
     }
 }

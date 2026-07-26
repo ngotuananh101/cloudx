@@ -14,6 +14,7 @@ use App\Support\CloudUploadTaskBroadcaster;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class CompleteS3MultipartUploadJob implements ShouldQueue
@@ -131,6 +132,23 @@ class CompleteS3MultipartUploadJob implements ShouldQueue
 
     private function markFailed(CloudTask $task, string $message, CloudUploadTaskBroadcaster $broadcaster): void
     {
+        $multipart = $task->payload['s3_multipart'] ?? null;
+
+        if (is_array($multipart) && ! empty($multipart['upload_id']) && ! empty($multipart['key']) && $task->connection) {
+            try {
+                app(S3Presigner::class)->abortMultipartUpload(
+                    $task->connection,
+                    (string) $multipart['key'],
+                    (string) $multipart['upload_id'],
+                );
+            } catch (Throwable $exception) {
+                Log::warning('Could not abort failed S3 multipart upload.', [
+                    'task_id' => $task->id,
+                    'exception' => $exception,
+                ]);
+            }
+        }
+
         $task->forceFill([
             'status' => CloudTaskStatus::Failed,
             'error_message' => $message,

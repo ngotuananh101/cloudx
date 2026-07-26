@@ -1,11 +1,4 @@
-const csrfToken = () => {
-    const cookie = document.cookie
-        .split('; ')
-        .find((row) => row.startsWith('XSRF-TOKEN='))
-        ?.split('=')[1];
-
-    return cookie ? decodeURIComponent(cookie) : '';
-};
+import { xsrfToken } from '@/lib/csrf';
 
 export const requestJson = async <T>(
     url: string,
@@ -16,7 +9,7 @@ export const requestJson = async <T>(
         headers: {
             Accept: 'application/json',
             'X-Requested-With': 'XMLHttpRequest',
-            'X-XSRF-TOKEN': csrfToken(),
+            'X-XSRF-TOKEN': xsrfToken(),
             ...options.headers,
         },
     });

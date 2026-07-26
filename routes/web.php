@@ -31,7 +31,9 @@ require __DIR__.'/auth.php';
 // Public share routes (no auth required)
 Route::prefix('s')->group(function () {
     Route::get('{uuid}', [ShareViewController::class, 'index'])->name('share.view');
-    Route::post('{uuid}/verify', [ShareViewController::class, 'verify'])->name('share.verify');
+    Route::post('{uuid}/verify', [ShareViewController::class, 'verify'])
+        ->middleware('throttle:5,1')
+        ->name('share.verify');
     Route::get('{uuid}/preview/{path?}', [ShareViewController::class, 'preview'])
         ->name('share.preview')
         ->where('path', '.*');

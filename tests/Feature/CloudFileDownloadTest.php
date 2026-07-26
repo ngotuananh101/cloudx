@@ -105,7 +105,7 @@ it('streams file contents from the disk when no direct link is available', funct
         ->assertOk()
         ->assertHeader('Content-Type', 'text/plain; charset=utf-8')
         ->assertHeader('Content-Length', '11')
-        ->assertHeader('Content-Disposition', 'attachment; filename=readme.txt');
+        ->assertHeader('Content-Disposition', 'attachment; filename="readme.txt"; filename*=UTF-8\'\'readme.txt');
 });
 
 it('falls back to streaming when ProvidesDirectDownloadLink returns null', function () {

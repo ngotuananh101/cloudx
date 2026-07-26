@@ -44,7 +44,7 @@ class CloudShareController extends Controller
             'name' => 'required|string',
             'is_directory' => 'required|boolean',
             'type' => 'required|string|in:public,password',
-            'password' => 'required_if:type,password|nullable|string|min:4',
+            'password' => 'required_if:type,password|nullable|string|min:8',
             'expires_in_days' => 'nullable|integer|min:1',
             'size' => 'nullable|integer|min:0',
         ]);

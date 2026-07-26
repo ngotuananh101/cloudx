@@ -9,6 +9,7 @@ use App\Exceptions\PythonServiceException;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\RemoteUploadUrlGuard;
 use App\Services\Python\YtDlpClient;
+use App\Support\ContentDisposition;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -38,6 +39,8 @@ class VideoDownloaderController extends Controller
 
         $this->urlGuard->validate($validated['url']);
 
+        $request->session()->put('video_downloader.cookies', $validated['cookies'] ?? null);
+
         try {
             $data = $this->client->fetchMetadata(
                 $validated['url'],
@@ -63,17 +66,19 @@ class VideoDownloaderController extends Controller
             'url' => ['required', 'string', 'url', 'max:2048'],
             'format_id' => ['required', 'string', 'max:64'],
             'audio_only' => ['nullable', 'boolean'],
-            'cookies' => ['nullable', 'string', 'max:65535'],
         ]);
 
         $this->urlGuard->validate($validated['url']);
+
+        $cookies = $request->session()->get('video_downloader.cookies');
+        $cookies = is_string($cookies) ? $cookies : null;
 
         try {
             $result = $this->client->downloadStream(
                 $validated['url'],
                 $validated['format_id'],
                 (bool) ($validated['audio_only'] ?? false),
-                $validated['cookies'] ?? null,
+                $cookies,
             );
         } catch (PythonServiceException $exception) {
             Log::warning('yt-dlp download request failed.', [
@@ -88,7 +93,8 @@ class VideoDownloaderController extends Controller
         $headers = array_filter([
             'Content-Type' => $result['content_type'],
             'Content-Length' => $result['content_length'],
-            'Content-Disposition' => 'attachment; filename="'.$result['filename'].'"',
+            'Content-Disposition' => ContentDisposition::attachment((string) $result['filename']),
+            'X-Content-Type-Options' => 'nosniff',
         ], fn ($v) => $v !== null);
 
         $this->activityLogger->log(

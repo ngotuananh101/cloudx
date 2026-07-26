@@ -299,7 +299,7 @@ it('uses the original telegram file name for shared downloads instead of the mes
 
     $this->get(route('share.download', ['uuid' => 'tg-download-uuid', 'path' => PathEncoder::encode(TG_FILE_ID)]))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'attachment; filename=photo.png');
+        ->assertHeader('Content-Disposition', 'attachment; filename="photo.png"; filename*=UTF-8\'\'photo.png');
 });
 
 it('uses the original telegram file name for shared previews instead of the message id', function () {
@@ -362,7 +362,8 @@ it('uses the original telegram file name for shared previews instead of the mess
 
     $this->get(route('share.preview', ['uuid' => 'tg-preview-uuid', 'path' => PathEncoder::encode(TG_FILE_ID)]))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'inline; filename="photo.png"');
+        ->assertHeader('Content-Disposition', 'inline; filename="photo.png"; filename*=UTF-8\'\'photo.png')
+        ->assertHeader('Cache-Control', 'max-age=3600, must-revalidate, private');
 });
 
 it('rejects browsing paths outside a shared folder', function () {

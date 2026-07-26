@@ -557,18 +557,19 @@ export default function SharedLinksPage({
                                     asChild
                                 >
                                     {link.url ? (
-                                        <Link
-                                            href={link.url}
-                                            dangerouslySetInnerHTML={{
-                                                __html: link.label,
-                                            }}
-                                        />
+                                        <Link href={link.url}>
+                                            {link.label
+                                                .replace(/&laquo;/g, '«')
+                                                .replace(/&raquo;/g, '»')
+                                                .replace(/&amp;/g, '&')}
+                                        </Link>
                                     ) : (
-                                        <span
-                                            dangerouslySetInnerHTML={{
-                                                __html: link.label,
-                                            }}
-                                        />
+                                        <span>
+                                            {link.label
+                                                .replace(/&laquo;/g, '«')
+                                                .replace(/&raquo;/g, '»')
+                                                .replace(/&amp;/g, '&')}
+                                        </span>
                                     )}
                                 </Button>
                             ))}

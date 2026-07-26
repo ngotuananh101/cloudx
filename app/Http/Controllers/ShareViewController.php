@@ -5,10 +5,12 @@ namespace App\Http\Controllers;
 use App\Models\CloudShare;
 use App\Services\CloudStorage\CloudFileBrowser;
 use App\Services\CloudStorage\CloudFileTypeDetector;
+use App\Services\CloudStorage\CloudPath;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
 use App\Services\Telegram\TelegramHelper;
+use App\Support\ContentDisposition;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -52,7 +54,7 @@ class ShareViewController extends Controller
             return $this->renderShareError('expired');
         }
 
-        return ($share->type === 'password' && ! $request->session()->get("share_verified_{$share->id}"))
+        return ($share->type === 'password' && ! $this->isSharePasswordVerified($request, $share))
             ? $this->renderPasswordPrompt($share, $uuid)
             : null;
     }
@@ -138,7 +140,7 @@ class ShareViewController extends Controller
             return back()->withErrors(['password' => 'Incorrect password.']);
         }
 
-        $request->session()->put("share_verified_{$share->id}", true);
+        $request->session()->put("share_verified_{$share->id}", now()->timestamp);
 
         return redirect()->route('share.view', ['uuid' => $uuid]);
     }
@@ -168,18 +170,25 @@ class ShareViewController extends Controller
                 $fileSize = null;
             }
 
+            $headers = array_filter([
+                'Content-Type' => $mimeType,
+                'Content-Length' => $fileSize,
+                'Content-Disposition' => ContentDisposition::inline($name),
+                'Cache-Control' => 'private, max-age=3600, must-revalidate',
+                'X-Content-Type-Options' => 'nosniff',
+            ]);
+
+            if (in_array(strtolower((string) $mimeType), ['text/html', 'image/svg+xml', 'application/xml', 'text/xml'], true)) {
+                $headers['Content-Security-Policy'] = "default-src 'none'; sandbox";
+            }
+
             return response()->stream(function () use ($disk, $decodedPath) {
                 $stream = $disk->readStream($decodedPath);
                 if (is_resource($stream)) {
                     fpassthru($stream);
                     fclose($stream);
                 }
-            }, 200, array_filter([
-                'Content-Type' => $mimeType,
-                'Content-Length' => $fileSize,
-                'Content-Disposition' => 'inline; filename="'.addslashes($name).'"',
-                'Cache-Control' => 'public, max-age=31536000, immutable',
-            ]));
+            }, 200, $headers);
         } catch (Throwable $exception) {
             Log::error('Could not preview shared file.', [
                 'exception' => $exception,
@@ -223,16 +232,24 @@ class ShareViewController extends Controller
                 $fileSize = null;
             }
 
-            return response()->streamDownload(function () use ($disk, $decodedPath) {
+            $safeName = str_replace(["\r", "\n", '"', '\\'], '', basename($name));
+            $safeName = $safeName === '' ? 'download' : $safeName;
+
+            $response = response()->streamDownload(function () use ($disk, $decodedPath) {
                 $stream = $disk->readStream($decodedPath);
                 if (is_resource($stream)) {
                     fpassthru($stream);
                     fclose($stream);
                 }
-            }, $name, array_filter([
+            }, $safeName, array_filter([
                 'Content-Type' => $mimeType,
                 'Content-Length' => $fileSize,
+                'X-Content-Type-Options' => 'nosniff',
             ]));
+
+            $response->headers->set('Content-Disposition', ContentDisposition::attachment($safeName));
+
+            return $response;
         } catch (Throwable $exception) {
             Log::error('Could not download shared file.', [
                 'exception' => $exception,
@@ -253,12 +270,29 @@ class ShareViewController extends Controller
         abort_if($this->isExpired($share), 404, 'This share link has expired.');
 
         abort_if(
-            $share->type === 'password' && ! $request->session()->get("share_verified_{$share->id}"),
+            $share->type === 'password' && ! $this->isSharePasswordVerified($request, $share),
             403,
             'Password verification required.'
         );
 
         return $share;
+    }
+
+    private function isSharePasswordVerified(Request $request, CloudShare $share): bool
+    {
+        $verifiedAt = $request->session()->get("share_verified_{$share->id}");
+
+        if ($verifiedAt === true) {
+            return true;
+        }
+
+        if (! is_numeric($verifiedAt)) {
+            return false;
+        }
+
+        $ttlSeconds = (int) config('cloud-storage.share.password_session_ttl_seconds', 7200);
+
+        return ((int) $verifiedAt) >= now()->subSeconds($ttlSeconds)->timestamp;
     }
 
     private function resolvedSharePath(CloudShare $share, ?string $encodedPath): string
@@ -296,23 +330,7 @@ class ShareViewController extends Controller
 
     private function normalizePath(string $path): string
     {
-        $segments = [];
-
-        foreach (explode('/', str_replace('\\', '/', $path)) as $segment) {
-            if ($segment === '' || $segment === '.') {
-                continue;
-            }
-
-            if ($segment === '..') {
-                array_pop($segments);
-
-                continue;
-            }
-
-            $segments[] = $segment;
-        }
-
-        return implode('/', $segments);
+        return CloudPath::normalize($path);
     }
 
     private function isExpired(CloudShare $share): bool

@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateS3ConnectionRequest;
 use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\Connectors\S3Connector;
+use App\Services\CloudStorage\HostAddressGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -19,11 +20,13 @@ class S3ConnectionController extends Controller
     public function __construct(
         private S3Connector $connector,
         private ActivityLogger $activityLogger,
+        private HostAddressGuard $hostAddressGuard,
     ) {}
 
     public function store(StoreS3ConnectionRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $this->assertEndpointHostAllowed($validated['endpoint'] ?? null);
         $credentials = $this->credentialsFromValidated($validated);
 
         $this->testConnection($credentials);
@@ -61,6 +64,7 @@ class S3ConnectionController extends Controller
         }
 
         $validated = $request->validated();
+        $this->assertEndpointHostAllowed($validated['endpoint'] ?? null);
         $credentials = $this->credentialsFromValidated($validated, $connection->credentials);
 
         $this->testConnection($credentials);
@@ -78,6 +82,23 @@ class S3ConnectionController extends Controller
         ]);
 
         return redirect()->route('dashboard')->with('success', 'AWS S3 connection updated.');
+    }
+
+    private function assertEndpointHostAllowed(mixed $endpoint): void
+    {
+        if (! is_string($endpoint) || trim($endpoint) === '') {
+            return;
+        }
+
+        $host = parse_url($endpoint, PHP_URL_HOST);
+
+        if (! is_string($host) || $host === '') {
+            throw ValidationException::withMessages([
+                'endpoint' => 'S3 endpoint must include a valid host.',
+            ]);
+        }
+
+        $this->hostAddressGuard->assertConnectionHostAllowed($host, 'endpoint');
     }
 
     /**

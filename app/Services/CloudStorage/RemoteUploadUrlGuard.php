@@ -6,6 +6,8 @@ use Illuminate\Validation\ValidationException;
 
 class RemoteUploadUrlGuard
 {
+    public function __construct(private HostAddressGuard $hostAddressGuard) {}
+
     public function validate(string $url, string $field = 'url'): void
     {
         $parts = parse_url($url);
@@ -18,52 +20,10 @@ class RemoteUploadUrlGuard
             ]);
         }
 
-        if (! $this->hostResolvesToPublicAddress($host)) {
+        if (! $this->hostAddressGuard->hostIsAllowed($host)) {
             throw ValidationException::withMessages([
                 $field => 'Remote upload URL must resolve to a public address.',
             ]);
         }
-    }
-
-    private function hostResolvesToPublicAddress(string $host): bool
-    {
-        if (filter_var($host, FILTER_VALIDATE_IP)) {
-            return $this->isPublicIp($host);
-        }
-
-        $records = dns_get_record($host, DNS_A + DNS_AAAA);
-
-        if ($records === false || $records === []) {
-            $address = gethostbyname($host);
-
-            return $address !== $host && $this->isPublicIp($address);
-        }
-
-        return $this->dnsRecordsArePublic($records);
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $records
-     */
-    private function dnsRecordsArePublic(array $records): bool
-    {
-        foreach ($records as $record) {
-            $address = $record['ip'] ?? $record['ipv6'] ?? null;
-
-            if (is_string($address) && ! $this->isPublicIp($address)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private function isPublicIp(string $address): bool
-    {
-        return filter_var(
-            $address,
-            FILTER_VALIDATE_IP,
-            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE,
-        ) !== false;
     }
 }

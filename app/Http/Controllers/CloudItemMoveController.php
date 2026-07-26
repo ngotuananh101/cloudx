@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ActivityAction;
 use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
+use App\Services\CloudStorage\CloudPath;
 use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class CloudItemMoveController extends Controller
             'items.*.is_directory' => ['required', 'boolean'],
         ]);
 
-        $destinationFolder = trim((string) ($validated['destination_folder'] ?? ''), '/');
+        $destinationFolder = CloudPath::normalize(trim((string) ($validated['destination_folder'] ?? ''), '/'));
         $items = $this->itemsFromValidated($validated);
 
         foreach ($items as $index => $item) {
@@ -84,7 +85,7 @@ class CloudItemMoveController extends Controller
         if (isset($validated['items']) && is_array($validated['items'])) {
             return collect($validated['items'])
                 ->map(fn (array $item): array => [
-                    'path' => trim((string) $item['path'], '/'),
+                    'path' => CloudPath::normalize(trim((string) $item['path'], '/')),
                     'is_directory' => (bool) $item['is_directory'],
                 ])
                 ->values()
@@ -92,7 +93,7 @@ class CloudItemMoveController extends Controller
         }
 
         return [[
-            'path' => trim((string) $validated['source_path'], '/'),
+            'path' => CloudPath::normalize(trim((string) $validated['source_path'], '/')),
             'is_directory' => (bool) ($validated['is_directory'] ?? true),
         ]];
     }

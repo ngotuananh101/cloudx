@@ -26,4 +26,16 @@ return [
     'direct_upload' => [
         'part_ttl_seconds' => (int) env('CLOUD_DIRECT_UPLOAD_PART_TTL_SECONDS', 900),
     ],
+
+    'host_policy' => [
+        'allow_private_connection_hosts' => (bool) env('CLOUD_ALLOW_PRIVATE_CONNECTION_HOSTS', false),
+        'allowed_private_hosts' => array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('CLOUD_ALLOWED_PRIVATE_HOSTS', '')),
+        ))),
+    ],
+
+    'share' => [
+        'password_session_ttl_seconds' => (int) env('CLOUD_SHARE_PASSWORD_SESSION_TTL_SECONDS', 7200),
+    ],
 ];

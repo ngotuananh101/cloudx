@@ -175,7 +175,8 @@ class CloudConnection extends Model
 
     private function isAuthorizationFailure(int|string|null $statusCode, string $responseBody, string $errorMessage): bool
     {
-        if ($statusCode === 401 || $statusCode === 403) {
+        // 403 alone is often file ACL / policy, not a revoked connection token.
+        if ($statusCode === 401) {
             return true;
         }
 

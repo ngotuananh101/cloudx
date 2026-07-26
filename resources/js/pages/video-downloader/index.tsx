@@ -2,6 +2,7 @@ import { Download, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
+import { xsrfToken } from '@/lib/csrf';
 import { formatBytes } from '@/lib/format-bytes';
 import type { VideoFormat, VideoMetadata } from '@/types/video-downloader';
 
@@ -46,10 +47,6 @@ export default function VideoDownloaderIndex() {
         null,
     );
 
-    const csrfToken = (): string =>
-        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
-            ?.content ?? '';
-
     const fetchInfo = async (event: FormEvent) => {
         event.preventDefault();
         setLoading(true);
@@ -62,7 +59,8 @@ export default function VideoDownloaderIndex() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-XSRF-TOKEN': xsrfToken(),
                     Accept: 'application/json',
                 },
                 body: JSON.stringify({
@@ -90,6 +88,11 @@ export default function VideoDownloaderIndex() {
         }
     };
 
+    const selectedFormat: VideoFormat | null =
+        metadata?.formats.find(
+            (format) => format.format_id === selectedFormatId,
+        ) ?? null;
+
     const triggerDownload = () => {
         if (!metadata || !selectedFormatId) {
             return;
@@ -98,16 +101,14 @@ export default function VideoDownloaderIndex() {
         const params = new URLSearchParams({
             url,
             format_id: selectedFormatId,
-            cookies: cookies || '',
         });
+
+        if (selectedFormat?.audio_only) {
+            params.set('audio_only', '1');
+        }
 
         globalThis.location.href = `/video-downloader/download?${params.toString()}`;
     };
-
-    const selectedFormat: VideoFormat | null =
-        metadata?.formats.find(
-            (format) => format.format_id === selectedFormatId,
-        ) ?? null;
 
     return (
         <AuthenticatedLayout title="Video Downloader">

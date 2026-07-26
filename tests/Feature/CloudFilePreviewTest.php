@@ -47,7 +47,9 @@ it('streams file contents from the disk for preview', function () {
         ->assertOk()
         ->assertHeader('Content-Type', 'text/plain; charset=utf-8')
         ->assertHeader('Content-Length', '11')
-        ->assertHeader('Content-Disposition', 'inline; filename="readme.txt"');
+        ->assertHeader('Content-Disposition', 'inline; filename="readme.txt"; filename*=UTF-8\'\'readme.txt')
+        ->assertHeader('Cache-Control', 'max-age=3600, must-revalidate, private')
+        ->assertHeader('X-Content-Type-Options', 'nosniff');
 });
 
 it('forbids non-owners from previewing a file', function () {
@@ -151,5 +153,5 @@ it('uses the original telegram file name when previewing instead of the message 
             'path' => PathEncoder::encode('12345'),
         ]))
         ->assertOk()
-        ->assertHeader('Content-Disposition', 'inline; filename="photo.png"');
+        ->assertHeader('Content-Disposition', 'inline; filename="photo.png"; filename*=UTF-8\'\'photo.png');
 });

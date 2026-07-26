@@ -7,6 +7,7 @@ use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ProvidesDirectDownloadLink;
 use App\Services\CloudStorage\PathEncoder;
 use App\Services\Telegram\TelegramHelper;
+use App\Support\ContentDisposition;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Log;
@@ -69,15 +70,23 @@ class CloudFileDownloadController extends Controller
             $fileSize = null;
         }
 
-        return response()->streamDownload(function () use ($disk, $path) {
+        $safeName = str_replace(["\r", "\n", '"', '\\'], '', basename($name));
+        $safeName = $safeName === '' ? 'download' : $safeName;
+
+        $response = response()->streamDownload(function () use ($disk, $path) {
             $stream = $disk->readStream($path);
             if (is_resource($stream)) {
                 fpassthru($stream);
                 fclose($stream);
             }
-        }, $name, array_filter([
+        }, $safeName, array_filter([
             'Content-Type' => $mimeType,
             'Content-Length' => $fileSize,
+            'X-Content-Type-Options' => 'nosniff',
         ]));
+
+        $response->headers->set('Content-Disposition', ContentDisposition::attachment($safeName));
+
+        return $response;
     }
 }

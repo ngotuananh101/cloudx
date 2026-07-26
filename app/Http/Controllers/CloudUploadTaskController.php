@@ -8,6 +8,7 @@ use App\Enums\CloudTaskType;
 use App\Jobs\RemoteUploadCloudTaskFileJob;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
+use App\Services\CloudStorage\CloudPath;
 use App\Services\CloudStorage\RemoteUploadHeaders;
 use App\Services\CloudStorage\RemoteUploadUrlGuard;
 use App\Support\CloudUploadTaskBroadcaster;
@@ -83,7 +84,7 @@ class CloudUploadTaskController extends Controller
             'cloud_connection_id' => $connection->id,
             'type' => CloudTaskType::Upload,
             'status' => CloudTaskStatus::Pending,
-            'target_path' => trim((string) ($validated['path'] ?? ''), '/'),
+            'target_path' => CloudPath::normalize(trim((string) ($validated['path'] ?? ''), '/')),
             'name' => $filename,
             'payload' => [
                 'filename' => $filename,
@@ -147,6 +148,7 @@ class CloudUploadTaskController extends Controller
                 CloudTaskStatus::Uploading,
                 CloudTaskStatus::Paused,
                 CloudTaskStatus::Queued,
+                CloudTaskStatus::Processing,
             ], true)) {
                 return [$lockedTask->load('chunks'), false];
             }
@@ -194,7 +196,7 @@ class CloudUploadTaskController extends Controller
             'cloud_connection_id' => $connection->id,
             'type' => CloudTaskType::Upload,
             'status' => CloudTaskStatus::Queued,
-            'target_path' => trim((string) ($validated['path'] ?? ''), '/'),
+            'target_path' => CloudPath::normalize(trim((string) ($validated['path'] ?? ''), '/')),
             'name' => $filename,
             'payload' => [
                 'filename' => $filename,

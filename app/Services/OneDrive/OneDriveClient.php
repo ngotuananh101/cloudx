@@ -36,19 +36,28 @@ class OneDriveClient
             throw new OneDriveException('OneDrive refresh token is missing.');
         }
 
-        $token = $this->http()->asForm()
-            ->retry([100, 250])
-            ->post(self::TOKEN_URL, [
-                'client_id' => config('services.microsoft.client_id'),
-                'client_secret' => config('services.microsoft.client_secret'),
-                'refresh_token' => $refreshToken,
-                'grant_type' => 'refresh_token',
-            ])
-            ->throw()
-            ->json();
+        try {
+            $token = $this->http()->asForm()
+                ->retry([100, 250])
+                ->post(self::TOKEN_URL, [
+                    'client_id' => config('services.microsoft.client_id'),
+                    'client_secret' => config('services.microsoft.client_secret'),
+                    'refresh_token' => $refreshToken,
+                    'grant_type' => 'refresh_token',
+                ])
+                ->throw()
+                ->json();
+        } catch (\Throwable $exception) {
+            $this->connection->handleApiException($exception);
+
+            throw $exception;
+        }
 
         if (! is_array($token) || ! isset($token['access_token']) || ! is_string($token['access_token']) || $token['access_token'] === '') {
-            return $credentials;
+            $exception = new OneDriveException('OneDrive token refresh did not return an access token.');
+            $this->connection->handleApiException($exception);
+
+            throw $exception;
         }
 
         $credentials = array_merge($credentials, $token, [
@@ -126,7 +135,7 @@ class OneDriveClient
 
     public function download(string $path): string
     {
-        return $this->graph()->get($this->contentUrl($path))->throw()->body();
+        return $this->contentGraph()->get($this->contentUrl($path))->throw()->body();
     }
 
     /**
@@ -134,7 +143,7 @@ class OneDriveClient
      */
     public function downloadStream(string $path)
     {
-        $response = $this->graph()->get($this->contentUrl($path))->throw();
+        $response = $this->contentGraph()->get($this->contentUrl($path))->throw();
         $stream = fopen('php://temp', 'r+');
 
         if ($stream === false) {
@@ -149,7 +158,7 @@ class OneDriveClient
 
     public function upload(string $path, string $contents): void
     {
-        $this->graph()->withBody($contents)->put($this->contentUrl($path))->throw();
+        $this->contentGraph()->withBody($contents)->put($this->contentUrl($path))->throw();
     }
 
     /**
@@ -165,7 +174,7 @@ class OneDriveClient
             return;
         }
 
-        $session = $this->graph()
+        $session = $this->contentGraph()
             ->post($this->itemUrl($path).':/createUploadSession', [
                 'item' => ['@microsoft.graph.conflictBehavior' => 'replace'],
             ])
@@ -193,7 +202,7 @@ class OneDriveClient
 
             $chunkLength = strlen($chunk);
             $end = $offset + $chunkLength - 1;
-            $response = $this->http()->withHeaders([
+            $response = $this->contentHttp()->withHeaders([
                 'Content-Length' => (string) $chunkLength,
                 'Content-Range' => "bytes {$offset}-{$end}/{$size}",
             ])->withBody($chunk)->put($uploadUrl)->throw();
@@ -350,17 +359,32 @@ class OneDriveClient
 
     protected function graph(): PendingRequest
     {
+        return $this->authenticatedHttp(10);
+    }
+
+    private function contentGraph(): PendingRequest
+    {
+        return $this->authenticatedHttp(120);
+    }
+
+    private function authenticatedHttp(int $timeout): PendingRequest
+    {
         $credentials = $this->credentials();
 
-        return $this->http()->withToken((string) ($credentials['access_token'] ?? ''))
+        return $this->http($timeout)->withToken((string) ($credentials['access_token'] ?? ''))
             ->retry([100, 250], throw: false);
     }
 
-    private function http(): PendingRequest
+    private function http(?int $timeout = null): PendingRequest
     {
-        $request = Http::connectTimeout(5)->timeout(10);
+        $request = Http::connectTimeout(5)->timeout($timeout ?? 10);
 
         return app()->isLocal() ? $request->withoutVerifying() : $request;
+    }
+
+    private function contentHttp(): PendingRequest
+    {
+        return $this->http(120);
     }
 
     private function encodePath(string $path): string

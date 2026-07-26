@@ -4,6 +4,7 @@ import {
     createContext,
     useCallback,
     useContext,
+    useEffect,
     useMemo,
     useRef,
     useState,
@@ -60,6 +61,7 @@ export function UploadManagerProvider({
     const [items, setItems] = useState<UploadQueueItem[]>([]);
     const [isPanelVisible, setIsPanelVisible] = useState(false);
     const pausedUploads = useRef(new Set<string>());
+    const cancelledUploads = useRef(new Set<string>());
     const fileBrowserLocation = useRef<FileBrowserLocation | null>(null);
     const { props } = usePage<{ auth?: { user?: User | null } }>();
     const user = props.auth?.user;
@@ -93,20 +95,38 @@ export function UploadManagerProvider({
             target: UploadTarget,
             task: CloudUploadTask,
         ) => {
-            const initialized = await requestJson<{
-                task: CloudUploadTask;
-                multipart: {
-                    upload_id: string;
-                    key: string;
-                    parts: Array<{ ETag: string; PartNumber: number }>;
-                };
-            }>(
-                `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/init`,
-                { method: 'POST' },
-            );
+            let latestTask = task;
 
-            let latestTask = initialized.task;
+            const existingMultipart = task.payload.s3_multipart;
+            const canResume =
+                typeof existingMultipart?.upload_id === 'string' &&
+                existingMultipart.upload_id !== '' &&
+                Array.isArray(existingMultipart.parts) &&
+                existingMultipart.parts.length > 0;
+
+            if (!canResume) {
+                const initialized = await requestJson<{
+                    task: CloudUploadTask;
+                    multipart: {
+                        upload_id: string;
+                        key: string;
+                        parts: Array<{ ETag: string; PartNumber: number }>;
+                    };
+                }>(
+                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/init`,
+                    { method: 'POST' },
+                );
+
+                latestTask = initialized.task;
+            }
+
             updateItem(key, { task: latestTask, uploadMode: 'direct' });
+
+            if (cancelledUploads.current.has(key)) {
+                updateItem(key, { status: 'cancelled' });
+
+                return;
+            }
 
             const chunkSize = latestTask.payload.chunk_size;
 
@@ -115,6 +135,12 @@ export function UploadManagerProvider({
                 index < latestTask.payload.total_chunks;
                 index++
             ) {
+                if (cancelledUploads.current.has(key)) {
+                    updateItem(key, { status: 'cancelled' });
+
+                    return;
+                }
+
                 if (pausedUploads.current.has(key)) {
                     updateItem(key, { status: 'paused' });
 
@@ -122,6 +148,14 @@ export function UploadManagerProvider({
                 }
 
                 const partNumber = index + 1;
+                const alreadyUploaded = (
+                    latestTask.payload.s3_multipart?.parts ?? []
+                ).some((part) => part.PartNumber === partNumber);
+
+                if (alreadyUploaded) {
+                    continue;
+                }
+
                 const part = await requestJson<{ url: string }>(
                     `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/part`,
                     {
@@ -141,6 +175,12 @@ export function UploadManagerProvider({
 
                 if (!response.ok) {
                     throw new Error('Direct upload failed.');
+                }
+
+                if (cancelledUploads.current.has(key)) {
+                    updateItem(key, { status: 'cancelled' });
+
+                    return;
                 }
 
                 const etag = response.headers.get('etag');
@@ -167,6 +207,12 @@ export function UploadManagerProvider({
                     ),
                     status: 'uploading',
                 });
+            }
+
+            if (cancelledUploads.current.has(key)) {
+                updateItem(key, { status: 'cancelled' });
+
+                return;
             }
 
             latestTask = await requestJson<CloudUploadTask>(
@@ -422,10 +468,11 @@ export function UploadManagerProvider({
 
     const resume = useCallback(
         async (item: UploadQueueItem) => {
-            if (!item.task) {
+            if (!item.task || item.source === 'remote') {
                 return;
             }
 
+            cancelledUploads.current.delete(item.key);
             pausedUploads.current.delete(item.key);
             const task = await requestJson<CloudUploadTask>(
                 connections.uploadTasks.resume({
@@ -435,18 +482,6 @@ export function UploadManagerProvider({
                 { method: 'PATCH' },
             );
             updateItem(item.key, { task, status: 'uploading' });
-
-            if (item.source === 'remote' && item.remote) {
-                uploadRemoteFile(item.key, item.remote, {
-                    connectionId: item.connectionId,
-                    path: item.path,
-                    uploadMode: 'remote',
-                }).catch(() => {
-                    // Errors are recorded on the queue item inside uploadRemoteFile.
-                });
-
-                return;
-            }
 
             if (!item.file) {
                 return;
@@ -465,11 +500,12 @@ export function UploadManagerProvider({
                 // Errors are recorded on the queue item inside uploadFile.
             });
         },
-        [updateItem, uploadFile, uploadRemoteFile],
+        [updateItem, uploadFile],
     );
 
     const cancel = useCallback(
         async (item: UploadQueueItem) => {
+            cancelledUploads.current.add(item.key);
             pausedUploads.current.add(item.key);
 
             if (item.task) {
@@ -575,6 +611,43 @@ export function UploadManagerProvider({
         },
         [refreshFilesIfActive],
     );
+
+    useEffect(() => {
+        const activeItems = items.filter(
+            (item) =>
+                item.task &&
+                (item.status === 'queued' || item.status === 'processing'),
+        );
+
+        if (activeItems.length === 0) {
+            return;
+        }
+
+        const intervalId = globalThis.setInterval(() => {
+            activeItems.forEach((item) => {
+                if (!item.task) {
+                    return;
+                }
+
+                requestJson<CloudUploadTask>(
+                    connections.uploadTasks.show({
+                        connection: item.connectionId,
+                        task: item.task.id,
+                    }).url,
+                )
+                    .then((task) => {
+                        mergeBroadcastTask(task);
+                    })
+                    .catch(() => {
+                        // Polling is best-effort when Echo is unavailable.
+                    });
+            });
+        }, 3000);
+
+        return () => {
+            globalThis.clearInterval(intervalId);
+        };
+    }, [items, mergeBroadcastTask]);
 
     const value = useMemo(
         () => ({

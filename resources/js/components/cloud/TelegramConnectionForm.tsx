@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { xsrfToken } from '@/lib/csrf';
 
 interface TelegramConnectionFormProps {
     onCancel: () => void;
@@ -21,10 +22,6 @@ export default function TelegramConnectionForm({
     const [loading, setLoading] = useState(false);
     const [syncedCount, setSyncedCount] = useState(0);
 
-    const csrfToken = (): string =>
-        (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)
-            ?.content ?? '';
-
     const sendCode = (event: Readonly<FormEvent>) => {
         event.preventDefault();
         setLoading(true);
@@ -34,7 +31,8 @@ export default function TelegramConnectionForm({
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': xsrfToken(),
                 Accept: 'application/json',
             },
             body: JSON.stringify({ name, phone }),
@@ -75,7 +73,8 @@ export default function TelegramConnectionForm({
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken(),
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-XSRF-TOKEN': xsrfToken(),
                 Accept: 'application/json',
             },
             body: JSON.stringify(payload),

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ActivityAction;
 use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
+use App\Services\CloudStorage\CloudPath;
 use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +27,7 @@ class CloudFolderController extends Controller
             'name' => ['required', 'string', 'max:255'],
         ]);
 
-        $path = trim((string) ($validated['path'] ?? ''), '/');
+        $path = CloudPath::normalize(trim((string) ($validated['path'] ?? ''), '/'));
         $name = trim((string) $validated['name']);
 
         if ($name === '' || str_contains($name, '/') || str_contains($name, '\\') || str_contains($name, '..')) {

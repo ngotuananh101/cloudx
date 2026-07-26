@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Enums\ConnectionStatus;
 use App\Models\CloudConnection;
 use App\Services\CloudStorage\CloudStorageManager;
 use App\Services\CloudStorage\Contracts\ReportsStorageQuota;
@@ -23,7 +24,7 @@ class UpdateConnectionQuotaJob implements ShouldQueue
     {
         $connection = CloudConnection::find($this->connectionId);
 
-        if (! $connection || $connection->status->value !== 1) {
+        if (! $connection || $connection->status !== ConnectionStatus::CONNECTED) {
             return;
         }
 

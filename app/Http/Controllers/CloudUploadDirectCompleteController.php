@@ -12,6 +12,7 @@ use App\Support\CloudUploadTaskBroadcaster;
 use App\Support\CloudUploadTaskData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class CloudUploadDirectCompleteController extends Controller
@@ -30,37 +31,56 @@ class CloudUploadDirectCompleteController extends Controller
             'etag' => ['required', 'string', 'max:1024'],
         ]);
 
-        $payload = $task->payload;
-        $multipart = $payload['s3_multipart'] ?? null;
+        $task = DB::transaction(function () use ($task, $partNumber, $validated): CloudTask {
+            $lockedTask = CloudTask::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
 
-        if (! is_array($multipart)) {
-            throw ValidationException::withMessages([
-                'task' => 'Multipart upload has not been initialized.',
-            ]);
-        }
+            $this->assertTaskAcceptsParts($lockedTask);
 
-        $parts = collect($multipart['parts'] ?? [])
-            ->reject(fn (array $part): bool => (int) ($part['PartNumber'] ?? 0) === $partNumber)
-            ->values()
-            ->all();
+            $payload = $lockedTask->payload;
+            $multipart = $payload['s3_multipart'] ?? null;
 
-        $parts[] = [
-            'ETag' => $validated['etag'],
-            'PartNumber' => $partNumber,
-        ];
+            if (! is_array($multipart)) {
+                throw ValidationException::withMessages([
+                    'task' => 'Multipart upload has not been initialized.',
+                ]);
+            }
 
-        $payload['upload_mode'] = 'direct';
-        $payload['uploaded_chunks_count'] = count($parts);
-        $payload['s3_multipart'] = [
-            ...$multipart,
-            'parts' => $parts,
-        ];
+            $partsByNumber = [];
 
-        $task->forceFill([
-            'status' => CloudTaskStatus::Uploading,
-            'payload' => $payload,
-            'started_at' => $task->started_at ?? now(),
-        ])->save();
+            foreach ($multipart['parts'] ?? [] as $part) {
+                if (! is_array($part)) {
+                    continue;
+                }
+
+                $number = (int) ($part['PartNumber'] ?? 0);
+
+                if ($number > 0) {
+                    $partsByNumber[$number] = $part;
+                }
+            }
+
+            $partsByNumber[$partNumber] = [
+                'ETag' => $validated['etag'],
+                'PartNumber' => $partNumber,
+            ];
+
+            ksort($partsByNumber);
+
+            $payload['upload_mode'] = 'direct';
+            $payload['uploaded_chunks_count'] = count($partsByNumber);
+            $payload['s3_multipart'] = [
+                ...$multipart,
+                'parts' => array_values($partsByNumber),
+            ];
+
+            $lockedTask->forceFill([
+                'status' => CloudTaskStatus::Uploading,
+                'payload' => $payload,
+                'started_at' => $lockedTask->started_at ?? now(),
+            ])->save();
+
+            return $lockedTask;
+        });
 
         $task->refresh()->load('chunks');
         $this->broadcaster->broadcastProgressIfNeeded($task);
@@ -73,27 +93,49 @@ class CloudUploadDirectCompleteController extends Controller
         $this->authorizeTask($request, $connection, $task);
         $this->ensureS3Connection($connection);
 
-        $payload = $task->payload;
-        $multipart = $payload['s3_multipart'] ?? null;
-        $totalChunks = (int) ($payload['total_chunks'] ?? 0);
-        $uploadedChunksCount = (int) ($payload['uploaded_chunks_count'] ?? 0);
+        $task = DB::transaction(function () use ($task): CloudTask {
+            $lockedTask = CloudTask::query()->whereKey($task->id)->lockForUpdate()->firstOrFail();
 
-        if (! is_array($multipart) || empty($multipart['upload_id']) || empty($multipart['key'])) {
-            throw ValidationException::withMessages([
-                'task' => 'Multipart upload has not been initialized.',
-            ]);
-        }
+            $this->assertTaskAcceptsParts($lockedTask);
 
-        if ($uploadedChunksCount !== $totalChunks) {
-            throw ValidationException::withMessages([
-                'task' => 'Upload parts are still missing.',
-            ]);
-        }
+            $payload = $lockedTask->payload;
+            $multipart = $payload['s3_multipart'] ?? null;
+            $totalChunks = (int) ($payload['total_chunks'] ?? 0);
+            $parts = is_array($multipart) ? ($multipart['parts'] ?? []) : [];
 
-        $task->forceFill([
-            'status' => CloudTaskStatus::Queued,
-            'queued_at' => now(),
-        ])->save();
+            if (! is_array($multipart) || empty($multipart['upload_id']) || empty($multipart['key'])) {
+                throw ValidationException::withMessages([
+                    'task' => 'Multipart upload has not been initialized.',
+                ]);
+            }
+
+            if (! is_array($parts) || count($parts) !== $totalChunks || $totalChunks < 1) {
+                throw ValidationException::withMessages([
+                    'task' => 'Upload parts are still missing.',
+                ]);
+            }
+
+            $numbers = collect($parts)
+                ->map(fn (array $part): int => (int) ($part['PartNumber'] ?? 0))
+                ->sort()
+                ->values()
+                ->all();
+
+            $expected = range(1, $totalChunks);
+
+            if ($numbers !== $expected) {
+                throw ValidationException::withMessages([
+                    'task' => 'Upload parts are incomplete or out of order.',
+                ]);
+            }
+
+            $lockedTask->forceFill([
+                'status' => CloudTaskStatus::Queued,
+                'queued_at' => now(),
+            ])->save();
+
+            return $lockedTask;
+        });
 
         CompleteS3MultipartUploadJob::dispatch($task->id)->afterCommit();
         $this->broadcaster->broadcastStatus($task);
@@ -116,13 +158,32 @@ class CloudUploadDirectCompleteController extends Controller
             );
         }
 
-        $task->forceFill([
-            'status' => CloudTaskStatus::Cancelled,
-            'cancelled_at' => now(),
-        ])->save();
-        $this->broadcaster->broadcastStatus($task);
+        if (! in_array($task->status, [
+            CloudTaskStatus::Completed,
+            CloudTaskStatus::Failed,
+            CloudTaskStatus::Cancelled,
+        ], true)) {
+            $task->forceFill([
+                'status' => CloudTaskStatus::Cancelled,
+                'cancelled_at' => now(),
+            ])->save();
+            $this->broadcaster->broadcastStatus($task);
+        }
 
         return response()->json(CloudUploadTaskData::fromTask($task));
+    }
+
+    private function assertTaskAcceptsParts(CloudTask $task): void
+    {
+        if (! in_array($task->status, [
+            CloudTaskStatus::Pending,
+            CloudTaskStatus::Uploading,
+            CloudTaskStatus::Paused,
+        ], true)) {
+            throw ValidationException::withMessages([
+                'task' => 'This upload task can no longer accept parts.',
+            ]);
+        }
     }
 
     private function authorizeTask(Request $request, CloudConnection $connection, CloudTask $task): void

@@ -70,6 +70,21 @@ export default function FileBrowser({
         );
     }, [files, searchQuery]);
 
+    useEffect(() => {
+        setSelectedPaths((currentPaths) => {
+            if (currentPaths.size === 0) {
+                return currentPaths;
+            }
+
+            const availablePaths = new Set((files || []).map((file) => file.path));
+            const nextPaths = new Set(
+                [...currentPaths].filter((path) => availablePaths.has(path)),
+            );
+
+            return nextPaths.size === currentPaths.size ? currentPaths : nextPaths;
+        });
+    }, [files]);
+
     const selectedItems = useMemo(
         () => filteredFiles.filter((file) => selectedPaths.has(file.path)),
         [filteredFiles, selectedPaths],

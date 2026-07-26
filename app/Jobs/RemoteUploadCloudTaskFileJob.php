@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Enums\ActivityAction;
+use App\Enums\CloudProvider;
 use App\Enums\CloudTaskStatus;
 use App\Enums\CloudTaskType;
 use App\Exceptions\CloudUploadException;
@@ -124,7 +125,9 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
 
         $urlGuard->validate($url);
 
-        $targetPath = trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename;
+        $targetPath = $task->connection?->provider === CloudProvider::TELEGRAM
+            ? $filename
+            : (trim($task->target_path, '/') === '' ? $filename : trim($task->target_path, '/').'/'.$filename);
         $tempPath = $this->tempPath($task);
         $absoluteTempPath = $this->absoluteTempPath($tempPath);
 
@@ -237,14 +240,31 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         string $absoluteTempPath,
         RemoteUploadUrlGuard $urlGuard,
     ): void {
+        $maxFileSize = $this->maxFileSize();
+
         $response = $this->request($headers, $urlGuard)
+            ->withOptions([
+                'progress' => function (int $downloadTotal, int $downloadedBytes) use ($absoluteTempPath, $maxFileSize): void {
+                    if ($downloadedBytes > $maxFileSize) {
+                        if (is_file($absoluteTempPath)) {
+                            unlink($absoluteTempPath);
+                        }
+
+                        throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
+                    }
+                },
+            ])
             ->sink($absoluteTempPath)
             ->get($url)
             ->throw();
 
         $contentLength = (int) $response->header('Content-Length');
 
-        if ($contentLength > $this->maxFileSize()) {
+        if ($contentLength > $maxFileSize) {
+            if (is_file($absoluteTempPath)) {
+                unlink($absoluteTempPath);
+            }
+
             throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
         }
     }
@@ -262,8 +282,8 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
             ->withOptions([
                 'allow_redirects' => [
                     'max' => (int) config('cloud-storage.remote_upload.max_redirects', 3),
-                    'on_redirect' => function ($request) use ($urlGuard): void {
-                        $urlGuard->validate((string) $request->getUri());
+                    'on_redirect' => function ($request, $response, $uri) use ($urlGuard): void {
+                        $urlGuard->validate((string) $uri);
                     },
                 ],
             ]);

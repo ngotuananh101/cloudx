@@ -110,7 +110,7 @@ it('streams the downloaded file with the original Content-Disposition filename',
         ]))
         ->assertOk()
         ->assertHeader('Content-Type', 'video/mp4')
-        ->assertHeader('Content-Disposition', 'attachment; filename="ytdlp_dl_abc.mp4"');
+        ->assertHeader('Content-Disposition', 'attachment; filename="ytdlp_dl_abc.mp4"; filename*=UTF-8\'\'ytdlp_dl_abc.mp4');
 });
 
 it('returns 422 when the download url is missing', function () {

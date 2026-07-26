@@ -143,3 +143,35 @@ it('queues multipart completion when all direct parts are uploaded', function ()
     expect($task->refresh()->status === CloudTaskStatus::Queued)->toBeTrue();
     Queue::assertPushed(CompleteS3MultipartUploadJob::class);
 });
+
+it('rejects part updates after the task is cancelled', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::AWS_S3,
+    ]);
+    $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
+        'status' => CloudTaskStatus::Cancelled,
+        'payload' => [
+            'filename' => 'proposal.pdf',
+            'mime_type' => MIME_PDF,
+            'size' => 1024,
+            'chunk_size' => 1024,
+            'total_chunks' => 1,
+            'uploaded_chunks_count' => 0,
+            'upload_mode' => 'direct',
+            's3_multipart' => [
+                'upload_id' => 'upload-id-1',
+                'key' => 'proposal.pdf',
+                'parts' => [],
+            ],
+        ],
+    ]);
+
+    $this->actingAs($user)
+        ->postJson(route('connections.upload-tasks.direct.parts.done', [$connection, $task, 'partNumber' => 1]), [
+            'etag' => 'etag-1',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('task');
+});

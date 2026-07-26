@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateFtpConnectionRequest;
 use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\Connectors\FtpConnector;
+use App\Services\CloudStorage\HostAddressGuard;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Validation\ValidationException;
 use Throwable;
@@ -19,11 +20,13 @@ class FtpConnectionController extends Controller
     public function __construct(
         private FtpConnector $connector,
         private ActivityLogger $activityLogger,
+        private HostAddressGuard $hostAddressGuard,
     ) {}
 
     public function store(StoreFtpConnectionRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $this->hostAddressGuard->assertConnectionHostAllowed((string) $validated['host']);
         $credentials = $this->credentialsFromValidated($validated);
 
         $this->testConnection($credentials);
@@ -61,6 +64,7 @@ class FtpConnectionController extends Controller
         }
 
         $validated = $request->validated();
+        $this->hostAddressGuard->assertConnectionHostAllowed((string) $validated['host']);
         $credentials = $this->credentialsFromValidated($validated, $connection->credentials);
 
         $this->testConnection($credentials);

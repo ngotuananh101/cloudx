@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\ActivityAction;
 use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
+use App\Services\CloudStorage\CloudPath;
 use App\Services\CloudStorage\CloudStorageCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -73,7 +74,7 @@ class CloudItemController extends Controller
         if (isset($validated['items']) && is_array($validated['items'])) {
             return collect($validated['items'])
                 ->map(fn (array $item): array => [
-                    'path' => trim((string) $item['path'], '/'),
+                    'path' => CloudPath::normalize(trim((string) $item['path'], '/')),
                     'is_directory' => (bool) $item['is_directory'],
                 ])
                 ->values()
@@ -81,7 +82,7 @@ class CloudItemController extends Controller
         }
 
         return [[
-            'path' => trim((string) $validated['path'], '/'),
+            'path' => CloudPath::normalize(trim((string) $validated['path'], '/')),
             'is_directory' => (bool) $validated['is_directory'],
         ]];
     }

@@ -223,19 +223,28 @@ class DropboxConnector implements CloudProviderConnector, ProvidesDirectDownload
             return $credentials;
         }
 
-        $token = $this->http()->asForm()
-            ->retry([100, 250])
-            ->post(self::TOKEN_URL, [
-                'client_id' => config('services.dropbox.client_id'),
-                'client_secret' => config('services.dropbox.client_secret'),
-                'refresh_token' => $refreshToken,
-                'grant_type' => 'refresh_token',
-            ])
-            ->throw()
-            ->json();
+        try {
+            $token = $this->http()->asForm()
+                ->retry([100, 250])
+                ->post(self::TOKEN_URL, [
+                    'client_id' => config('services.dropbox.client_id'),
+                    'client_secret' => config('services.dropbox.client_secret'),
+                    'refresh_token' => $refreshToken,
+                    'grant_type' => 'refresh_token',
+                ])
+                ->throw()
+                ->json();
+        } catch (\Throwable $exception) {
+            $connection->handleApiException($exception);
+
+            throw $exception;
+        }
 
         if (! is_array($token) || ! isset($token['access_token']) || ! is_string($token['access_token']) || $token['access_token'] === '') {
-            return $credentials;
+            $exception = new CloudOAuthException('Dropbox token refresh did not return an access token.');
+            $connection->handleApiException($exception);
+
+            throw $exception;
         }
 
         $freshCredentials = array_merge($credentials, $token, [

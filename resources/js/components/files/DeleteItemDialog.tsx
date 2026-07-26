@@ -1,4 +1,5 @@
 import { router } from '@inertiajs/react';
+import { useState } from 'react';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -38,15 +39,18 @@ export function DeleteItemDialog({
     onClose,
     onDeleted,
 }: Readonly<DeleteItemDialogProps>) {
+    const [isDeleting, setIsDeleting] = useState(false);
     const selectedItems = resolveSelectedItems(items, item);
     const targetItem = selectedItems[0] ?? null;
     const isBulkDelete = selectedItems.length > 1;
     const itemTypeLabel = targetItem?.isDirectory ? 'folder' : 'file';
 
     const deleteItem = () => {
-        if (selectedItems.length === 0) {
+        if (selectedItems.length === 0 || isDeleting) {
             return;
         }
+
+        setIsDeleting(true);
 
         router.delete(destroy.url({ connection: connectionId }), {
             data:
@@ -65,6 +69,9 @@ export function DeleteItemDialog({
             onSuccess: () => {
                 onClose();
                 onDeleted?.();
+            },
+            onFinish: () => {
+                setIsDeleting(false);
             },
         });
     };
@@ -104,12 +111,13 @@ export function DeleteItemDialog({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         className="bg-destructive text-white hover:bg-destructive/90"
+                        disabled={isDeleting}
                         onClick={deleteItem}
                     >
-                        Delete
+                        {isDeleting ? 'Deleting...' : 'Delete'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

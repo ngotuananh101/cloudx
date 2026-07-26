@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\CloudProvider;
+use App\Enums\CloudTaskStatus;
 use App\Models\CloudConnection;
 use App\Models\CloudTask;
 use App\Services\CloudStorage\S3\S3Presigner;
@@ -24,7 +25,27 @@ class CloudUploadPresignController extends Controller
         $this->authorizeTask($request, $connection, $task);
         $this->ensureS3Connection($connection);
 
+        if (! in_array($task->status, [CloudTaskStatus::Pending, CloudTaskStatus::Paused, CloudTaskStatus::Uploading], true)) {
+            throw ValidationException::withMessages([
+                'task' => 'This upload task cannot be initialized.',
+            ]);
+        }
+
         $payload = $task->payload;
+        $existingMultipart = $payload['s3_multipart'] ?? null;
+
+        if (is_array($existingMultipart) && ! empty($existingMultipart['upload_id']) && ! empty($existingMultipart['key'])) {
+            try {
+                $this->presigner->abortMultipartUpload(
+                    $connection,
+                    (string) $existingMultipart['key'],
+                    (string) $existingMultipart['upload_id'],
+                );
+            } catch (\Throwable) {
+                // Best-effort cleanup of the previous incomplete multipart.
+            }
+        }
+
         $filename = (string) ($payload['filename'] ?? $task->name);
         $uploadId = $this->presigner->initiateMultipartUpload(
             $connection,
