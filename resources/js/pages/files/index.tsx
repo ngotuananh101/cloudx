@@ -11,7 +11,7 @@ import { RemoteUploadDialog } from '@/components/files/RemoteUploadDialog';
 import ShareItemModal from '@/components/files/ShareItemModal';
 import { UploadModeDialog } from '@/components/files/UploadModeDialog';
 import { VirtualizedFileTable } from '@/components/files/VirtualizedFileTable';
-import { useUploadManager } from '@/contexts/UploadManagerContext';
+import { useUploadManagerActions } from '@/contexts/UploadManagerContext';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { encodeCloudPath } from '@/lib/cloud-path';
 import { destroy as clearCache } from '@/routes/cloud-connections/cache';
@@ -48,7 +48,7 @@ export default function FileBrowser({
     const [isUploadModeDialogOpen, setIsUploadModeDialogOpen] = useState(false);
     const [isRemoteUploadDialogOpen, setIsRemoteUploadDialogOpen] =
         useState(false);
-    const uploadManager = useUploadManager();
+    const uploadManager = useUploadManagerActions();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {

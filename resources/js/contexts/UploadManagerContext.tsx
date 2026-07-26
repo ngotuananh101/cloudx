@@ -45,9 +45,14 @@ interface UploadManagerContextValue {
     registerFileBrowserLocation: (location: FileBrowserLocation | null) => void;
 }
 
-const UploadManagerContext = createContext<UploadManagerContextValue | null>(
-    null,
-);
+export const UploadManagerStateContext = createContext<{
+    items: UploadQueueItem[];
+    isPanelVisible: boolean;
+} | null>(null);
+
+export const UploadManagerActionsContext = createContext<Omit<UploadManagerContextValue, 'items' | 'isPanelVisible'> | null>(null);
+
+const UploadManagerContext = createContext<UploadManagerContextValue | null>(null);
 
 const getQueueKey = (file: File, target: UploadTarget) =>
     `${target.connectionId}-${target.path}-${file.name}-${file.size}-${file.lastModified}-${target.uploadMode ?? 'backend'}`;
@@ -62,6 +67,10 @@ export function UploadManagerProvider({
     const [isPanelVisible, setIsPanelVisible] = useState(false);
     const pausedUploads = useRef(new Set<string>());
     const cancelledUploads = useRef(new Set<string>());
+    const activeUploadKeys = useRef(new Set<string>());
+    const abortControllers = useRef(new Map<string, AbortController>());
+    const refreshTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const MAX_CONCURRENT_UPLOADS = 3;
     const fileBrowserLocation = useRef<FileBrowserLocation | null>(null);
     const { props } = usePage<{ auth?: { user?: User | null } }>();
     const user = props.auth?.user;
@@ -69,9 +78,20 @@ export function UploadManagerProvider({
     const updateItem = useCallback(
         (key: string, changes: Partial<UploadQueueItem>) => {
             setItems((currentItems) =>
-                currentItems.map((item) =>
-                    item.key === key ? { ...item, ...changes } : item,
-                ),
+                currentItems.map((item) => {
+                    if (item.key === key) {
+                        const updated = { ...item, ...changes };
+
+                        if (['completed', 'failed', 'cancelled'].includes(updated.status)) {
+                            delete updated.file;
+                            delete updated.remote;
+                        }
+
+                        return updated;
+                    }
+
+                    return item;
+                })
             );
         },
         [],
@@ -84,7 +104,14 @@ export function UploadManagerProvider({
             location?.connectionId === task.connection_id &&
             location.path === task.target_path
         ) {
-            router.reload({ only: ['files', 'connection'] });
+            if (refreshTimeoutRef.current) {
+                clearTimeout(refreshTimeoutRef.current);
+            }
+
+            refreshTimeoutRef.current = setTimeout(() => {
+                router.reload({ only: ['files', 'connection'] });
+                refreshTimeoutRef.current = null;
+            }, 400);
         }
     }, []);
 
@@ -105,17 +132,31 @@ export function UploadManagerProvider({
                 existingMultipart.parts.length > 0;
 
             if (!canResume) {
-                const initialized = await requestJson<{
-                    task: CloudUploadTask;
-                    multipart: {
-                        upload_id: string;
-                        key: string;
-                        parts: Array<{ ETag: string; PartNumber: number }>;
-                    };
-                }>(
-                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/init`,
-                    { method: 'POST' },
-                );
+                const controller = new AbortController();
+                abortControllers.current.set(key, controller);
+                let initialized;
+
+                try {
+                    initialized = await requestJson<{
+                        task: CloudUploadTask;
+                        multipart: {
+                            upload_id: string;
+                            key: string;
+                            parts: Array<{ ETag: string; PartNumber: number }>;
+                        };
+                    }>(
+                        `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/init`,
+                        { method: 'POST', signal: controller.signal },
+                    );
+                } catch (err: any) {
+                    if (err.name === 'AbortError') {
+return;
+}
+
+                    throw err;
+                } finally {
+                    abortControllers.current.delete(key);
+                }
 
                 latestTask = initialized.task;
             }
@@ -156,22 +197,39 @@ export function UploadManagerProvider({
                     continue;
                 }
 
-                const part = await requestJson<{ url: string }>(
-                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/part`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ part_number: partNumber }),
-                    },
-                );
+                const controller = new AbortController();
+                abortControllers.current.set(key, controller);
 
-                const response = await fetch(part.url, {
-                    method: 'PUT',
-                    body: file.slice(
-                        index * chunkSize,
-                        Math.min(file.size, (index + 1) * chunkSize),
-                    ),
-                });
+                let part, response;
+
+                try {
+                    part = await requestJson<{ url: string }>(
+                        `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/part`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ part_number: partNumber }),
+                            signal: controller.signal
+                        },
+                    );
+
+                    response = await fetch(part.url, {
+                        method: 'PUT',
+                        body: file.slice(
+                            index * chunkSize,
+                            Math.min(file.size, (index + 1) * chunkSize),
+                        ),
+                        signal: controller.signal
+                    });
+                } catch (err: any) {
+                    if (err.name === 'AbortError') {
+return;
+}
+
+                    throw err;
+                } finally {
+                    abortControllers.current.delete(key);
+                }
 
                 if (!response.ok) {
                     throw new Error('Direct upload failed.');
@@ -189,14 +247,28 @@ export function UploadManagerProvider({
                     throw new Error('Direct upload did not return an ETag.');
                 }
 
-                latestTask = await requestJson<CloudUploadTask>(
-                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/parts/${partNumber}/done`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ etag }),
-                    },
-                );
+                const doneController = new AbortController();
+                abortControllers.current.set(key, doneController);
+
+                try {
+                    latestTask = await requestJson<CloudUploadTask>(
+                        `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/parts/${partNumber}/done`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ etag }),
+                            signal: doneController.signal
+                        },
+                    );
+                } catch (err: any) {
+                    if (err.name === 'AbortError') {
+return;
+}
+
+                    throw err;
+                } finally {
+                    abortControllers.current.delete(key);
+                }
 
                 updateItem(key, {
                     task: latestTask,
@@ -215,10 +287,23 @@ export function UploadManagerProvider({
                 return;
             }
 
-            latestTask = await requestJson<CloudUploadTask>(
-                `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/complete`,
-                { method: 'POST' },
-            );
+            const completeController = new AbortController();
+            abortControllers.current.set(key, completeController);
+
+            try {
+                latestTask = await requestJson<CloudUploadTask>(
+                    `/connections/${target.connectionId}/upload-tasks/${task.id}/direct/complete`,
+                    { method: 'POST', signal: completeController.signal },
+                );
+            } catch (err: any) {
+                if (err.name === 'AbortError') {
+return;
+}
+
+                throw err;
+            } finally {
+                abortControllers.current.delete(key);
+            }
 
             updateItem(key, {
                 task: latestTask,
@@ -240,6 +325,12 @@ export function UploadManagerProvider({
             const uploadedChunks = new Set(task.uploaded_chunks || []);
 
             for (let index = 0; index < task.payload.total_chunks; index++) {
+                if (cancelledUploads.current.has(key)) {
+                    updateItem(key, { status: 'cancelled' });
+
+                    return;
+                }
+
                 if (pausedUploads.current.has(key)) {
                     updateItem(key, { status: 'paused' });
 
@@ -261,16 +352,32 @@ export function UploadManagerProvider({
                 );
                 formData.append('index', String(index));
 
-                const updatedTask = await requestJson<CloudUploadTask>(
-                    connections.uploadTasks.chunks.store({
-                        connection: target.connectionId,
-                        task: task.id,
-                    }).url,
-                    {
-                        method: 'POST',
-                        body: formData,
-                    },
-                );
+                const controller = new AbortController();
+                abortControllers.current.set(key, controller);
+
+                let updatedTask;
+
+                try {
+                    updatedTask = await requestJson<CloudUploadTask>(
+                        connections.uploadTasks.chunks.store({
+                            connection: target.connectionId,
+                            task: task.id,
+                        }).url,
+                        {
+                            method: 'POST',
+                            body: formData,
+                            signal: controller.signal
+                        },
+                    );
+                } catch (err: any) {
+                    if (err.name === 'AbortError') {
+return;
+}
+
+                    throw err;
+                } finally {
+                    abortControllers.current.delete(key);
+                }
 
                 updateItem(key, {
                     task: updatedTask,
@@ -307,28 +414,44 @@ export function UploadManagerProvider({
                     target.uploadMode ??
                     existingTask?.payload.upload_mode ??
                     'backend';
-                const task =
-                    existingTask ||
-                    (await requestJson<CloudUploadTask>(
-                        connections.uploadTasks.store({
-                            connection: target.connectionId,
-                        }).url,
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                path: target.path,
-                                filename: file.name,
-                                mime_type: file.type || null,
-                                size: file.size,
-                                chunk_size: Math.min(
-                                    5 * 1024 * 1024,
-                                    Math.max(1024, file.size),
-                                ),
-                                upload_mode: uploadMode,
-                            }),
-                        },
-                    ));
+                const controller = new AbortController();
+                abortControllers.current.set(key, controller);
+
+                let task = existingTask;
+
+                if (!task) {
+                    try {
+                        task = await requestJson<CloudUploadTask>(
+                            connections.uploadTasks.store({
+                                connection: target.connectionId,
+                            }).url,
+                            {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    path: target.path,
+                                    filename: file.name,
+                                    mime_type: file.type || null,
+                                    size: file.size,
+                                    chunk_size: Math.min(
+                                        5 * 1024 * 1024,
+                                        Math.max(1024, file.size),
+                                    ),
+                                    upload_mode: uploadMode,
+                                }),
+                                signal: controller.signal
+                            },
+                        );
+                    } catch (err: any) {
+                        if (err.name === 'AbortError') {
+return;
+}
+
+                        throw err;
+                    } finally {
+                        abortControllers.current.delete(key);
+                    }
+                }
 
                 updateItem(key, { task, uploadMode });
 
@@ -365,22 +488,37 @@ export function UploadManagerProvider({
                     error: undefined,
                 });
 
-                const task = await requestJson<CloudUploadTask>(
-                    connections.uploadTasks.store({
-                        connection: target.connectionId,
-                    }).url,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            path: target.path,
-                            filename: remote.filename || null,
-                            url: remote.url,
-                            headers: remote.headers,
-                            upload_mode: 'remote',
-                        }),
-                    },
-                );
+                const controller = new AbortController();
+                abortControllers.current.set(key, controller);
+                let task;
+
+                try {
+                    task = await requestJson<CloudUploadTask>(
+                        connections.uploadTasks.store({
+                            connection: target.connectionId,
+                        }).url,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                path: target.path,
+                                filename: remote.filename || null,
+                                url: remote.url,
+                                headers: remote.headers,
+                                upload_mode: 'remote',
+                            }),
+                            signal: controller.signal
+                        },
+                    );
+                } catch (err: any) {
+                    if (err.name === 'AbortError') {
+return;
+}
+
+                    throw err;
+                } finally {
+                    abortControllers.current.delete(key);
+                }
 
                 updateItem(key, {
                     task,
@@ -401,6 +539,48 @@ export function UploadManagerProvider({
         [updateItem],
     );
 
+    const pumpQueue = useCallback((currentItems: UploadQueueItem[]) => {
+        const activeCount = activeUploadKeys.current.size;
+        const availableSlots = Math.max(0, MAX_CONCURRENT_UPLOADS - activeCount);
+
+        if (availableSlots <= 0) {
+            return;
+        }
+
+        const pendingItems = currentItems.filter((i) => i.status === 'pending' && !activeUploadKeys.current.has(i.key));
+        const itemsToStart = pendingItems.slice(0, availableSlots);
+
+        itemsToStart.forEach((item) => {
+            activeUploadKeys.current.add(item.key);
+
+            if (item.source === 'remote' && item.remote) {
+                uploadRemoteFile(item.key, item.remote, {
+                    connectionId: item.connectionId,
+                    path: item.path,
+                    uploadMode: 'remote',
+                }).finally(() => {
+                    activeUploadKeys.current.delete(item.key);
+                    // trigger a state update to re-evaluate the effect
+                    setItems((latest) => [...latest]);
+                });
+            } else if (item.file) {
+                uploadFile(item.key, item.file, {
+                    connectionId: item.connectionId,
+                    path: item.path,
+                    uploadMode: item.uploadMode,
+                }, item.task).finally(() => {
+                    activeUploadKeys.current.delete(item.key);
+                    // trigger a state update to re-evaluate the effect
+                    setItems((latest) => [...latest]);
+                });
+            }
+        });
+    }, [uploadFile, uploadRemoteFile]);
+
+    useEffect(() => {
+        pumpQueue(items);
+    }, [items, pumpQueue]);
+
     const enqueue = useCallback(
         (files: File[], target: UploadTarget) => {
             const queueItems = files.map((file) => ({
@@ -414,15 +594,15 @@ export function UploadManagerProvider({
                 status: 'pending' as const,
             }));
 
-            setItems((currentItems) => [...queueItems, ...currentItems]);
-            setIsPanelVisible(true);
-            queueItems.forEach((item) => {
-                uploadFile(item.key, item.file, target).catch(() => {
-                    // Errors are recorded on the queue item inside uploadFile.
-                });
+            setItems((currentItems) => {
+                const nextItems = [...queueItems, ...currentItems];
+                setTimeout(() => pumpQueue(nextItems), 0);
+
+                return nextItems;
             });
+            setIsPanelVisible(true);
         },
-        [uploadFile],
+        [pumpQueue],
     );
 
     const enqueueRemote = useCallback(
@@ -438,18 +618,29 @@ export function UploadManagerProvider({
                 status: 'pending' as const,
             };
 
-            setItems((currentItems) => [item, ...currentItems]);
-            setIsPanelVisible(true);
-            uploadRemoteFile(item.key, remote, target).catch(() => {
-                // Errors are recorded on the queue item inside uploadRemoteFile.
+            setItems((currentItems) => {
+                const nextItems = [item, ...currentItems];
+                setTimeout(() => pumpQueue(nextItems), 0);
+
+                return nextItems;
             });
+            setIsPanelVisible(true);
         },
-        [uploadRemoteFile],
+        [pumpQueue],
     );
 
     const pause = useCallback(
         async (item: UploadQueueItem) => {
             pausedUploads.current.add(item.key);
+
+            const controller = abortControllers.current.get(item.key);
+
+            if (controller) {
+                controller.abort();
+                abortControllers.current.delete(item.key);
+            }
+
+            updateItem(item.key, { status: 'paused' });
 
             if (item.task) {
                 await requestJson<CloudUploadTask>(
@@ -458,10 +649,8 @@ export function UploadManagerProvider({
                         task: item.task.id,
                     }).url,
                     { method: 'PATCH' },
-                );
+                ).catch(() => {});
             }
-
-            updateItem(item.key, { status: 'paused' });
         },
         [updateItem],
     );
@@ -508,12 +697,21 @@ export function UploadManagerProvider({
             cancelledUploads.current.add(item.key);
             pausedUploads.current.add(item.key);
 
+            const controller = abortControllers.current.get(item.key);
+
+            if (controller) {
+                controller.abort();
+                abortControllers.current.delete(item.key);
+            }
+
+            updateItem(item.key, { status: 'cancelled' });
+
             if (item.task) {
                 if (item.uploadMode === 'direct') {
                     await requestJson<CloudUploadTask>(
                         `/connections/${item.connectionId}/upload-tasks/${item.task.id}/direct/abort`,
                         { method: 'DELETE' },
-                    );
+                    ).catch(() => {});
                 } else {
                     await requestJson<CloudUploadTask>(
                         connections.uploadTasks.destroy({
@@ -521,11 +719,9 @@ export function UploadManagerProvider({
                             task: item.task.id,
                         }).url,
                         { method: 'DELETE' },
-                    );
+                    ).catch(() => {});
                 }
             }
-
-            updateItem(item.key, { status: 'cancelled' });
         },
         [updateItem],
     );
@@ -592,17 +788,26 @@ export function UploadManagerProvider({
     const mergeBroadcastTask = useCallback(
         (task: CloudUploadTask) => {
             setItems((currentItems) =>
-                currentItems.map((item) =>
-                    item.task?.id === task.id
-                        ? {
-                              ...item,
-                              task,
-                              progress: task.progress,
-                              status: task.status,
-                              error: task.error_message || undefined,
-                          }
-                        : item,
-                ),
+                currentItems.map((item) => {
+                    if (item.task?.id === task.id) {
+                        const updatedItem = {
+                            ...item,
+                            task,
+                            progress: task.progress,
+                            status: task.status,
+                            error: task.error_message || undefined,
+                        };
+
+                        if (task.status === 'completed' || task.status === 'failed' || task.status === 'cancelled') {
+                            delete updatedItem.file;
+                            delete updatedItem.remote;
+                        }
+
+                        return updatedItem;
+                    }
+
+                    return item;
+                }),
             );
 
             if (task.status === 'completed') {
@@ -612,27 +817,36 @@ export function UploadManagerProvider({
         [refreshFilesIfActive],
     );
 
-    useEffect(() => {
-        const activeItems = items.filter(
-            (item) =>
-                item.task &&
-                (item.status === 'queued' || item.status === 'processing'),
-        );
+    const activeTaskIdsAndConnectionIds = items
+        .filter((i) => i.task && (i.status === 'queued' || i.status === 'processing'))
+        .map((i) => `${i.task!.id}:${i.connectionId}`)
+        .sort()
+        .join(',');
 
-        if (activeItems.length === 0) {
-            return;
-        }
+    useEffect(() => {
+        if (!activeTaskIdsAndConnectionIds) {
+return;
+}
+
+        const taskRefs = activeTaskIdsAndConnectionIds.split(',').map((ref) => {
+            const [taskId, connectionId] = ref.split(':');
+
+            return { taskId: Number(taskId), connectionId: Number(connectionId) };
+        });
+
+        const inFlightPolls = new Set<number>();
 
         const intervalId = globalThis.setInterval(() => {
-            activeItems.forEach((item) => {
-                if (!item.task) {
-                    return;
-                }
+            taskRefs.forEach(({ taskId, connectionId }) => {
+                if (inFlightPolls.has(taskId)) {
+return;
+}
 
+                inFlightPolls.add(taskId);
                 requestJson<CloudUploadTask>(
                     connections.uploadTasks.show({
-                        connection: item.connectionId,
-                        task: item.task.id,
+                        connection: connectionId,
+                        task: taskId,
                     }).url,
                 )
                     .then((task) => {
@@ -640,6 +854,9 @@ export function UploadManagerProvider({
                     })
                     .catch(() => {
                         // Polling is best-effort when Echo is unavailable.
+                    })
+                    .finally(() => {
+                        inFlightPolls.delete(taskId);
                     });
             });
         }, 3000);
@@ -647,7 +864,7 @@ export function UploadManagerProvider({
         return () => {
             globalThis.clearInterval(intervalId);
         };
-    }, [items, mergeBroadcastTask]);
+    }, [activeTaskIdsAndConnectionIds, mergeBroadcastTask]);
 
     const value = useMemo(
         () => ({
@@ -680,6 +897,20 @@ export function UploadManagerProvider({
 
     return (
         <UploadManagerContext.Provider value={value}>
+            <UploadManagerStateContext.Provider value={{ items, isPanelVisible }}>
+                <UploadManagerActionsContext.Provider
+                    value={{
+                        enqueue: value.enqueue,
+                        enqueueRemote: value.enqueueRemote,
+                        pause: value.pause,
+                        resume: value.resume,
+                        cancel: value.cancel,
+                        retry: value.retry,
+                        remove: value.remove,
+                        closePanel: value.closePanel,
+                        registerFileBrowserLocation: value.registerFileBrowserLocation,
+                    }}
+                >
             {user?.id ? (
                 <CloudTaskBroadcastListener
                     userId={user.id}
@@ -687,6 +918,8 @@ export function UploadManagerProvider({
                 />
             ) : null}
             {children}
+                        </UploadManagerActionsContext.Provider>
+            </UploadManagerStateContext.Provider>
         </UploadManagerContext.Provider>
     );
 }
@@ -705,6 +938,26 @@ function CloudTaskBroadcastListener({
     );
 
     return null;
+}
+
+export function useUploadManagerState() {
+    const context = useContext(UploadManagerStateContext);
+
+    if (!context) {
+throw new Error('useUploadManagerState must be used within an UploadManagerProvider.');
+}
+
+    return context;
+}
+
+export function useUploadManagerActions() {
+    const context = useContext(UploadManagerActionsContext);
+
+    if (!context) {
+throw new Error('useUploadManagerActions must be used within an UploadManagerProvider.');
+}
+
+    return context;
 }
 
 export function useUploadManager() {
