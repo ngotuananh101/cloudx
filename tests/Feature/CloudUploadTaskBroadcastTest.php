@@ -283,7 +283,7 @@ it('marks an upload task as failed when provider upload fails', function () {
     Storage::disk('local')->deleteDirectory('testing-cloud-task-uploads');
 });
 
-it('does not cancel an upload task after processing starts', function () {
+it('cancels an upload task when processing', function () {
     $user = User::factory()->create();
     $connection = CloudConnection::factory()->for($user)->create();
     $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
@@ -296,10 +296,12 @@ it('does not cancel an upload task after processing starts', function () {
     $this->actingAs($user)
         ->deleteJson(route('connections.upload-tasks.destroy', [$connection, $task]))
         ->assertOk()
-        ->assertJsonPath('status', 'processing');
+        ->assertJsonPath('status', 'cancelled');
 
-    expect($task->refresh()->status === CloudTaskStatus::Processing)->toBeTrue()
-        ->and($task->cancelled_at)->toBeNull();
+    expect($task->refresh()->status === CloudTaskStatus::Cancelled)->toBeTrue()
+        ->and($task->cancelled_at)->not->toBeNull();
 
-    Event::assertNotDispatched(CloudUploadTaskUpdated::class);
+    Event::assertDispatched(CloudUploadTaskUpdated::class, function (CloudUploadTaskUpdated $event) use ($task) {
+        return $event->task->id === $task->id && $event->task->status === CloudTaskStatus::Cancelled;
+    });
 });

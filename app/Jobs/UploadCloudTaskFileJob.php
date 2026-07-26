@@ -10,6 +10,7 @@ use App\Exceptions\CloudUploadException;
 use App\Models\CloudTask;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
+use App\Support\ChunkStreamWrapper;
 use App\Support\CloudUploadTaskBroadcaster;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -49,7 +50,17 @@ class UploadCloudTaskFileJob implements ShouldQueue
         try {
             $this->processUpload($task, $cache, $broadcaster, $activityLogger);
         } catch (Throwable $exception) {
-            $task->connection->handleApiException($exception);
+            $task->refresh();
+            if ($task->status === CloudTaskStatus::Cancelled) {
+                $totalChunks = (int) ($task->payload['total_chunks'] ?? 0);
+                if ($totalChunks > 0) {
+                    $this->deleteTempFiles($task, $totalChunks, $this->mergedTempPath($task));
+                }
+
+                return;
+            }
+
+            $task->connection?->handleApiException($exception);
             $this->requeueOrFail($task, $exception->getMessage(), $broadcaster);
 
             throw $exception;
@@ -104,10 +115,72 @@ class UploadCloudTaskFileJob implements ShouldQueue
             throw new CloudUploadException('Upload task is missing chunks.');
         }
 
+        $this->assertNotCancelled($task);
         $tempPath = $this->mergedTempPath($task);
-        $this->mergeAndUploadChunks($task, $targetPath, $totalChunks, $tempPath);
+
+        if ($this->shouldStreamChunks($task)) {
+            $this->streamUploadChunks($task, $targetPath, $totalChunks);
+        } else {
+            $this->mergeAndUploadChunks($task, $targetPath, $totalChunks, $tempPath);
+        }
+
         $this->completeUpload($task, $targetPath, $filename, $cache, $broadcaster, $activityLogger);
         $this->deleteTempFiles($task, $totalChunks, $tempPath);
+    }
+
+    private function assertNotCancelled(CloudTask $task): void
+    {
+        $task->refresh();
+
+        if ($task->status === CloudTaskStatus::Cancelled) {
+            throw new CloudUploadException('Upload was cancelled.');
+        }
+    }
+
+    private function shouldStreamChunks(CloudTask $task): bool
+    {
+        return in_array($task->connection?->provider, [
+            CloudProvider::AWS_S3,
+            CloudProvider::FTP,
+            CloudProvider::SFTP,
+        ], true);
+    }
+
+    private function streamUploadChunks(CloudTask $task, string $targetPath, int $totalChunks): void
+    {
+        $tempDisk = Storage::disk($this->tempDiskName());
+        $paths = [];
+
+        for ($index = 0; $index < $totalChunks; $index++) {
+            $chunkPath = $this->chunkPath($task, $index);
+
+            if (! $tempDisk->exists($chunkPath)) {
+                throw new CloudUploadException("Upload chunk {$index} is missing.");
+            }
+
+            $paths[] = $tempDisk->path($chunkPath);
+        }
+
+        ChunkStreamWrapper::register();
+        $streamId = uniqid('task_'.$task->id.'_', true);
+        ChunkStreamWrapper::registerPaths($streamId, $paths);
+
+        $uploadStream = fopen("chunkstream://{$streamId}", 'rb');
+
+        if ($uploadStream === false) {
+            ChunkStreamWrapper::unregisterPaths($streamId);
+            throw new CloudUploadException('Could not create upload stream from chunks.');
+        }
+
+        try {
+            $this->assertNotCancelled($task);
+            $task->connection->getDisk()->writeStream($targetPath, $uploadStream);
+        } finally {
+            if (is_resource($uploadStream)) {
+                fclose($uploadStream);
+            }
+            ChunkStreamWrapper::unregisterPaths($streamId);
+        }
     }
 
     private function mergeAndUploadChunks(CloudTask $task, string $targetPath, int $totalChunks, string $tempPath): void
@@ -128,6 +201,10 @@ class UploadCloudTaskFileJob implements ShouldQueue
 
         try {
             for ($index = 0; $index < $totalChunks; $index++) {
+                if ($index > 0 && $index % 5 === 0) {
+                    $this->assertNotCancelled($task);
+                }
+
                 $chunkPath = $this->chunkPath($task, $index);
 
                 if (! $tempDisk->exists($chunkPath)) {

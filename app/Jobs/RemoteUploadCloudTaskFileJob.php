@@ -60,8 +60,14 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         try {
             $this->processRemoteUpload($task, $cache, $broadcaster, $urlGuard, $activityLogger);
         } catch (Throwable $exception) {
-            $task->connection->handleApiException($exception);
+            $task->refresh();
             Storage::disk($this->tempDiskName())->delete($this->tempPath($task));
+
+            if ($task->status === CloudTaskStatus::Cancelled) {
+                return;
+            }
+
+            $task->connection?->handleApiException($exception);
             $this->requeueOrFail($task, $exception->getMessage(), $broadcaster);
 
             throw $exception;
@@ -132,7 +138,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $absoluteTempPath = $this->absoluteTempPath($tempPath);
 
         $this->ensureRemoteFileIsAllowed($url, $headers, $urlGuard);
-        $this->downloadRemoteFile($url, $headers, $absoluteTempPath, $urlGuard);
+        $this->downloadRemoteFile($task, $url, $headers, $absoluteTempPath, $urlGuard);
 
         $downloadedSize = filesize($absoluteTempPath);
 
@@ -144,6 +150,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
             throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
         }
 
+        $this->assertNotCancelled($task);
         $this->writeDownloadedFile($task, $targetPath, $absoluteTempPath);
 
         $payload['size'] = $downloadedSize;
@@ -235,22 +242,30 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
      * @param  array<string, string>  $headers
      */
     private function downloadRemoteFile(
+        CloudTask $task,
         string $url,
         array $headers,
         string $absoluteTempPath,
         RemoteUploadUrlGuard $urlGuard,
     ): void {
         $maxFileSize = $this->maxFileSize();
+        $lastChecked = time();
 
         $response = $this->request($headers, $urlGuard)
             ->withOptions([
-                'progress' => function (int $downloadTotal, int $downloadedBytes) use ($absoluteTempPath, $maxFileSize): void {
+                'progress' => function (int $downloadTotal, int $downloadedBytes) use ($absoluteTempPath, $maxFileSize, $task, &$lastChecked): void {
                     if ($downloadedBytes > $maxFileSize) {
                         if (is_file($absoluteTempPath)) {
                             unlink($absoluteTempPath);
                         }
 
                         throw new CloudUploadException(self::REMOTE_FILE_TOO_LARGE);
+                    }
+
+                    $now = time();
+                    if ($now - $lastChecked >= 3) { // throttle to 3 seconds
+                        $lastChecked = $now;
+                        $this->assertNotCancelled($task);
                     }
                 },
             ])
@@ -287,6 +302,15 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
                     },
                 ],
             ]);
+    }
+
+    private function assertNotCancelled(CloudTask $task): void
+    {
+        $task->refresh();
+
+        if ($task->status === CloudTaskStatus::Cancelled) {
+            throw new CloudUploadException('Upload was cancelled.');
+        }
     }
 
     private function tempPath(CloudTask $task): string
