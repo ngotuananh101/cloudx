@@ -266,17 +266,13 @@ it('listDirectories avoids provider call when full list is cached', function () 
     ]);
 
     $manager = Mockery::mock(CloudStorageManager::class);
-    // connector and disk should NOT be called because we mock full list cache hit
     $manager->shouldNotReceive('connector');
     $manager->shouldNotReceive('disk');
 
     $cache = Mockery::mock(CloudStorageCache::class);
-    // when rememberDirectoryListing is called, it executes the callback
     $cache->shouldReceive('rememberDirectoryListing')->once()->andReturnUsing(function (CloudConnection $connection, string $path, Closure $callback) {
         return $callback();
     });
-    // listDirectories reuses list(), which goes through the single-flight cache;
-    // a cache hit returns the full listing without touching the provider
     $cache->shouldReceive('rememberFolderListing')->once()->andReturn([
         ['id' => 'docs', 'path' => 'docs', 'name' => 'docs', 'type' => 'folder', 'size' => 0, 'updatedAt' => '--', 'isDirectory' => true],
         ['id' => 'file', 'path' => 'file.txt', 'name' => 'file.txt', 'type' => 'document', 'size' => 10, 'updatedAt' => '--', 'isDirectory' => false],
