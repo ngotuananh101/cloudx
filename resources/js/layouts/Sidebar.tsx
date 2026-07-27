@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { destroy } from '@/actions/App/Http/Controllers/Auth/LoginController';
+import { editConfig } from '@/actions/App/Http/Controllers/CloudConnectionController';
 import ConnectionNavItem from '@/components/cloud/ConnectionNavItem';
 import DeleteConnectionDialog from '@/components/cloud/DeleteConnectionDialog';
 import EditConnectionNameDialog from '@/components/cloud/EditConnectionNameDialog';
@@ -21,6 +22,7 @@ import EditSftpConnectionDialog from '@/components/cloud/EditSftpConnectionDialo
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { requestJson } from '@/lib/request-json';
 import { formatBytes } from '@/lib/format-bytes';
 import { index as storageIndex } from '@/routes/storage';
 import type { PageProps } from '@/types';
@@ -151,6 +153,30 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
     const [connectionBeingDeleted, setConnectionBeingDeleted] =
         useState<CloudConnection | null>(null);
 
+    const handleEditConnection = async (connection: CloudConnection) => {
+        if (
+            connection.provider_value !== 4 &&
+            connection.provider_value !== 5 &&
+            connection.provider_value !== 6
+        ) {
+            setConnectionBeingEdited(connection);
+            return;
+        }
+
+        try {
+            const config = await requestJson<Partial<CloudConnection>>(
+                editConfig.url(connection),
+            );
+            setConnectionBeingEdited({
+                ...connection,
+                ...config,
+            });
+        } catch (error) {
+            console.error('Failed to fetch connection config', error);
+            setConnectionBeingEdited(connection);
+        }
+    };
+
     return (
         <aside className="flex h-full w-65 shrink-0 flex-col border-r border-border bg-card">
             {/* Logo and Brand */}
@@ -215,7 +241,7 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
                                                     setConnectionBeingRenamed
                                                 }
                                                 onEditConnection={
-                                                    setConnectionBeingEdited
+                                                    handleEditConnection
                                                 }
                                                 onDelete={
                                                     setConnectionBeingDeleted

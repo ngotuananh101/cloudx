@@ -117,7 +117,7 @@ it('creates S3 connection after testing credentials', function () {
         ->and($connection->credentials)->toMatchArray(s3Credentials());
 });
 
-it('shares safe S3 config for dashboard connections without secret fields', function () {
+it('does not share S3 config in global inertia requests', function () {
     $this->withoutVite();
 
     $user = User::factory()->create();
@@ -135,9 +135,48 @@ it('shares safe S3 config for dashboard connections without secret fields', func
     $response->assertOk();
     $page = $response->viewData('page');
 
-    expect(data_get($page, 'props.auth.user.connections.0.s3_config.bucket'))->toBe('cloudx-bucket')
-        ->and(data_get($page, 'props.auth.user.connections.0.s3_config.secret_access_key'))->toBeNull()
-        ->and(data_get($page, 'props.auth.user.connections.0.s3_config.session_token'))->toBeNull();
+    expect(data_get($page, 'props.auth.user.connections.0.s3_config'))->toBeNull()
+        ->and(data_get($page, 'props.auth.user.connections.0.secret_access_key'))->toBeNull();
+});
+
+it('returns safe S3 config via API endpoint for owner', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::AWS_S3,
+        'credentials' => s3Credentials([
+            'secret_access_key' => 'super-secret',
+            'session_token' => 'super-token',
+        ]),
+    ]);
+
+    $response = $this->actingAs($user)->getJson(route('connections.edit-config', $connection));
+
+    $response->assertOk()
+        ->assertJson([
+            's3_config' => [
+                'bucket' => 'cloudx-bucket',
+                'region' => 'us-east-1',
+            ],
+        ]);
+
+    expect($response->json('s3_config.secret_access_key'))->toBeNull()
+        ->and($response->json('s3_config.session_token'))->toBeNull()
+        ->and($response->json('credentials'))->toBeNull();
+});
+
+it('forbids non-owner from accessing S3 config', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $otherUser->id,
+        'provider' => CloudProvider::AWS_S3,
+        'credentials' => s3Credentials(),
+    ]);
+
+    $response = $this->actingAs($user)->getJson(route('connections.edit-config', $connection));
+
+    $response->assertForbidden();
 });
 
 it('preserves secret access key on update when secret is blank', function () {

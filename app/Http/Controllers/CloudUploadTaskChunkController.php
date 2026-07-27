@@ -117,17 +117,26 @@ class CloudUploadTaskChunkController extends Controller
             ]);
         }
 
-        $lockedTask->chunks()->updateOrCreate([
+        $chunk = $lockedTask->chunks()->updateOrCreate([
             'index' => $index,
         ], [
             'size' => $size,
             'checksum' => $checksum,
         ]);
 
-        $uploadedChunksCount = $lockedTask->chunks()->count();
         $payload = $lockedTask->payload;
-        $payload['uploaded_chunks_count'] = $uploadedChunksCount;
         $totalChunks = (int) ($payload['total_chunks'] ?? 0);
+        $uploadedChunksCount = (int) ($payload['uploaded_chunks_count'] ?? 0);
+
+        if ($chunk->wasRecentlyCreated) {
+            $uploadedChunksCount++;
+        }
+
+        if ($totalChunks > 0 && $uploadedChunksCount >= $totalChunks) {
+            $uploadedChunksCount = $lockedTask->chunks()->count();
+        }
+
+        $payload['uploaded_chunks_count'] = $uploadedChunksCount;
 
         if ($uploadedChunksCount >= $totalChunks && $totalChunks > 0) {
             $this->queueTaskIfReady($lockedTask, $payload);

@@ -10,6 +10,7 @@ use App\Models\CloudConnection;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\CloudStorageCache;
 use App\Services\CloudStorage\CloudStorageManager;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -181,5 +182,32 @@ class CloudConnectionController extends Controller
         $connection->delete();
 
         return redirect()->route('dashboard')->with('success', 'Successfully disconnected '.$connection->name);
+    }
+
+    public function editConfig(Request $request, CloudConnection $connection): JsonResponse
+    {
+        if ($connection->user_id !== $request->user()->id) {
+            abort(403, self::UNAUTHORIZED_ACTION);
+        }
+
+        $payload = [];
+
+        if ($connection->provider === CloudProvider::FTP) {
+            $payload['ftp_config'] = collect($connection->credentials)
+                ->except('password')
+                ->all();
+        } elseif ($connection->provider === CloudProvider::AWS_S3) {
+            $payload['s3_config'] = collect($connection->credentials)
+                ->except(['secret_access_key', 'session_token'])
+                ->all();
+        } elseif ($connection->provider === CloudProvider::SFTP) {
+            $payload['sftp_config'] = collect($connection->credentials)
+                ->except(['password', 'privateKey', 'passphrase'])
+                ->all();
+        } else {
+            abort(400, 'This connection type does not support edit configuration.');
+        }
+
+        return response()->json($payload);
     }
 }

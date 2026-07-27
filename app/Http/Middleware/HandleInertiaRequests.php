@@ -39,7 +39,7 @@ class HandleInertiaRequests extends Middleware
                         ->latest()
                         ->get()
                         ->map(function (CloudConnection $connection): array {
-                            $payload = [
+                            return [
                                 'id' => $connection->id,
                                 'name' => $connection->name,
                                 'provider' => $connection->provider->getDescription(),
@@ -49,20 +49,6 @@ class HandleInertiaRequests extends Middleware
                                 'status_value' => $connection->status->value,
                                 'actions' => $connection->actions(),
                             ];
-
-                            if ($connection->provider === CloudProvider::FTP) {
-                                $payload['ftp_config'] = collect($connection->credentials)
-                                    ->except('password')
-                                    ->all();
-                            }
-
-                            if ($connection->provider === CloudProvider::AWS_S3) {
-                                $payload['s3_config'] = collect($connection->credentials)
-                                    ->except(['secret_access_key', 'session_token'])
-                                    ->all();
-                            }
-
-                            return $payload;
                         }),
                 ] : null,
             ],

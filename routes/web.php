@@ -71,6 +71,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/connections/{connection}/reconnect', 'reconnect')->name('cloud-connections.reconnect');
         Route::delete('/connections/{connection}', 'disconnect')->name('cloud-connections.destroy');
         Route::patch('/connections/{connection}/name', 'updateName')->name('cloud-connections.name.update');
+        Route::get('/connections/{connection}/edit-config', 'editConfig')->name('connections.edit-config');
     });
     Route::post('/connections/ftp', [FtpConnectionController::class, 'store'])->name('connections.ftp.store');
     Route::patch('/connections/{connection}/ftp', [FtpConnectionController::class, 'update'])->name('connections.ftp.update');

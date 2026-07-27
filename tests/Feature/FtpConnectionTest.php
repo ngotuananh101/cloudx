@@ -95,7 +95,7 @@ it('creates FTP connection after testing credentials', function () {
         ->and($connection->credentials)->toMatchArray(ftpCredentials());
 });
 
-it('shares safe FTP config for dashboard connections without password', function () {
+it('does not share FTP config in global inertia requests', function () {
     $this->withoutVite();
 
     $user = User::factory()->create();
@@ -104,22 +104,50 @@ it('shares safe FTP config for dashboard connections without password', function
         'provider' => CloudProvider::FTP,
         'credentials' => ftpCredentials(['password' => 'super-secret']),
     ]);
-    CloudConnection::factory()->create([
-        'user_id' => $user->id,
-        'provider' => CloudProvider::GOOGLE_DRIVE,
-        'credentials' => ['access_token' => 'google-token'],
-    ]);
 
     $response = $this->actingAs($user)->get(route('dashboard'));
 
     $response->assertOk();
     $page = $response->viewData('page');
 
-    expect(data_get($page, 'props.auth.user.connections.0.ftp_config.host'))->toBe('ftp.example.test')
-        ->and(data_get($page, 'props.auth.user.connections.0.ftp_config.port'))->toBe(2121)
-        ->and(data_get($page, 'props.auth.user.connections.0.ftp_config.ignore_passive_address'))->toBeFalse()
-        ->and(data_get($page, 'props.auth.user.connections.0.ftp_config.password'))->toBeNull()
-        ->and(data_get($page, 'props.auth.user.connections.1.ftp_config'))->toBeNull();
+    expect(data_get($page, 'props.auth.user.connections.0.ftp_config'))->toBeNull()
+        ->and(data_get($page, 'props.auth.user.connections.0.password'))->toBeNull();
+});
+
+it('returns safe FTP config via API endpoint for owner', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::FTP,
+        'credentials' => ftpCredentials(['password' => 'super-secret']),
+    ]);
+
+    $response = $this->actingAs($user)->getJson(route('connections.edit-config', $connection));
+
+    $response->assertOk()
+        ->assertJson([
+            'ftp_config' => [
+                'host' => 'ftp.example.test',
+                'port' => 2121,
+            ],
+        ]);
+
+    expect($response->json('ftp_config.password'))->toBeNull()
+        ->and($response->json('credentials'))->toBeNull();
+});
+
+it('forbids non-owner from accessing FTP config', function () {
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $otherUser->id,
+        'provider' => CloudProvider::FTP,
+        'credentials' => ftpCredentials(),
+    ]);
+
+    $response = $this->actingAs($user)->getJson(route('connections.edit-config', $connection));
+
+    $response->assertForbidden();
 });
 
 it('preserves password on update when password is blank', function () {
