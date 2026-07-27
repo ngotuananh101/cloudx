@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults, validateParameters } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
 export const index = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ index.definition = {
 
 /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
 index.url = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions) => {
@@ -48,7 +48,7 @@ index.url = (args: { connection: string | number | { id: string | number }, path
 
 /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
 index.get = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -57,7 +57,7 @@ index.get = (args: { connection: string | number | { id: string | number }, path
 })
 /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
 index.head = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -67,7 +67,7 @@ index.head = (args: { connection: string | number | { id: string | number }, pat
 
     /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
     const indexForm = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -77,7 +77,7 @@ index.head = (args: { connection: string | number | { id: string | number }, pat
 
             /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
         indexForm.get = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -86,7 +86,7 @@ index.head = (args: { connection: string | number | { id: string | number }, pat
         })
             /**
 * @see \App\Http\Controllers\StorageBrowserController::index
- * @see app/Http/Controllers/StorageBrowserController.php:23
+ * @see app/Http/Controllers/StorageBrowserController.php:24
  * @route '/storage/{connection}/{path?}'
  */
         indexForm.head = (args: { connection: string | number | { id: string | number }, path?: string | number } | [connection: string | number | { id: string | number }, path: string | number ], options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
