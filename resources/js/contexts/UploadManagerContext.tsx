@@ -207,7 +207,9 @@ export function UploadManagerProvider({
                 const controller = new AbortController();
                 abortControllers.current.set(key, controller);
 
-                const partSize = Math.min(file.size, (index + 1) * chunkSize) - index * chunkSize;
+                const partSize =
+                    Math.min(file.size, (index + 1) * chunkSize) -
+                    index * chunkSize;
                 let part, response;
 
                 try {

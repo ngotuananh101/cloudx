@@ -171,8 +171,8 @@ export default function ShareItemModal({
                 preserveScroll: true,
                 onSuccess: () => {
                     setShares((currentShares) =>
-            currentShares.filter((s) => s.id !== shareToDelete.id),
-        );
+                        currentShares.filter((s) => s.id !== shareToDelete.id),
+                    );
                     setShareToDelete(null);
                 },
                 onFinish: () => setIsDeleting(false),

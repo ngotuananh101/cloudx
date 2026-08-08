@@ -82,9 +82,7 @@ export default function FileBrowser({
                 (files || []).map((file) => file.path),
             );
             const nextPaths = new Set(
-                [...selectedPaths].filter((path) =>
-                    availablePaths.has(path),
-                ),
+                [...selectedPaths].filter((path) => availablePaths.has(path)),
             );
 
             if (nextPaths.size !== selectedPaths.size) {

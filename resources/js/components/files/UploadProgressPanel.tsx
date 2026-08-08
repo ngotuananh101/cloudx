@@ -12,7 +12,10 @@ import {
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { useUploadManagerActions, useUploadManagerState } from '@/contexts/UploadManagerContext';
+import {
+    useUploadManagerActions,
+    useUploadManagerState,
+} from '@/contexts/UploadManagerContext';
 import { formatBytes } from '@/lib/format-bytes';
 import type { UploadQueueItem, CloudConnection } from '@/types/cloud';
 
@@ -64,14 +67,8 @@ function getStatusLabel(item: UploadQueueItem): string {
 }
 
 export default function UploadProgressPanel() {
-    const {
-        pause,
-        resume,
-        cancel,
-        retry,
-        closePanel,
-        remove,
-    } = useUploadManagerActions();
+    const { pause, resume, cancel, retry, closePanel, remove } =
+        useUploadManagerActions();
     const { items, isPanelVisible } = useUploadManagerState();
     const [isMinimized, setIsMinimized] = useState(false);
     const { props } = usePage() as any;

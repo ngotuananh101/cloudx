@@ -22,8 +22,8 @@ import EditSftpConnectionDialog from '@/components/cloud/EditSftpConnectionDialo
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { requestJson } from '@/lib/request-json';
 import { formatBytes } from '@/lib/format-bytes';
+import { requestJson } from '@/lib/request-json';
 import { index as storageIndex } from '@/routes/storage';
 import type { PageProps } from '@/types';
 import type { CloudConnection } from '@/types/cloud';
@@ -160,6 +160,7 @@ export function Sidebar({ cloudActions }: Readonly<SidebarProps>) {
             connection.provider_value !== 6
         ) {
             setConnectionBeingEdited(connection);
+
             return;
         }
 
