@@ -4,21 +4,11 @@ on:
   push:
     branches:
       - main
-      - master
-      - develop
-      - workos
-  pull_request:
-    branches:
-      - main
-      - master
-      - develop
-      - workos
   workflow_dispatch:
 
 concurrency:
   group: deploy-production
   cancel-in-progress: true
-
 
 jobs:
   # ─── 1. Run Tests ────────────────────────────────────────────────────────
@@ -101,7 +91,7 @@ jobs:
       - name: Commit Changes
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403 # v5
         with:
-          commit_message: "chore: fix code style"
+          commit_message: 'chore: fix code style'
           commit_options: '--no-verify'
 
   # ─── 3. Build and Deploy ────────────────────────────────────────────────
