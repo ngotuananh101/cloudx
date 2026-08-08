@@ -99,12 +99,13 @@ it('stores etag for completed direct upload part', function () {
     $response = $this->actingAs($user)
         ->postJson(route('connections.upload-tasks.direct.parts.done', [$connection, $task, 'partNumber' => 1]), [
             'etag' => 'etag-1',
+            'size' => 1024,
         ]);
 
     $response->assertOk();
 
     expect($task->refresh()->payload['s3_multipart']['parts'])->toBe([
-        ['ETag' => 'etag-1', 'PartNumber' => 1],
+        ['ETag' => 'etag-1', 'PartNumber' => 1, 'Size' => 1024],
     ]);
 });
 
@@ -171,7 +172,110 @@ it('rejects part updates after the task is cancelled', function () {
     $this->actingAs($user)
         ->postJson(route('connections.upload-tasks.direct.parts.done', [$connection, $task, 'partNumber' => 1]), [
             'etag' => 'etag-1',
+            'size' => 1024,
         ])
         ->assertUnprocessable()
         ->assertJsonValidationErrors('task');
+});
+
+it('requires size when marking a direct upload part done', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::AWS_S3,
+    ]);
+    $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
+        'payload' => [
+            'filename' => 'proposal.pdf',
+            'mime_type' => MIME_PDF,
+            'size' => 2048,
+            'chunk_size' => 1024,
+            'total_chunks' => 2,
+            'uploaded_chunks_count' => 0,
+            'upload_mode' => 'direct',
+            's3_multipart' => [
+                'upload_id' => 'upload-id-1',
+                'key' => 'proposal.pdf',
+                'parts' => [],
+            ],
+        ],
+    ]);
+
+    $this->actingAs($user)
+        ->postJson(route('connections.upload-tasks.direct.parts.done', [$connection, $task, 'partNumber' => 1]), [
+            'etag' => 'etag-1',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('size');
+});
+
+it('rejects direct upload complete when a part exceeds chunk size', function () {
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::AWS_S3,
+    ]);
+    $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
+        'payload' => [
+            'filename' => 'big.pdf',
+            'mime_type' => MIME_PDF,
+            'size' => 1024,
+            'chunk_size' => 1024,
+            'total_chunks' => 1,
+            'uploaded_chunks_count' => 0,
+            'upload_mode' => 'direct',
+            's3_multipart' => [
+                'upload_id' => 'upload-id-1',
+                'key' => 'documents/big.pdf',
+                'parts' => [],
+            ],
+        ],
+        'status' => CloudTaskStatus::Uploading,
+    ]);
+
+    $this->actingAs($user)->postJson(
+        route('connections.upload-tasks.direct.parts.done', [$connection, $task, 'partNumber' => 1]),
+        ['etag' => 'etag-1', 'size' => 5368709120],
+    );
+
+    $this->actingAs($user)
+        ->postJson(route('connections.upload-tasks.direct.complete', [$connection, $task]))
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('task');
+});
+
+it('accepts direct upload complete when parts match chunk size', function () {
+    Queue::fake();
+
+    $user = User::factory()->create();
+    $connection = CloudConnection::factory()->create([
+        'user_id' => $user->id,
+        'provider' => CloudProvider::AWS_S3,
+    ]);
+    $task = CloudTask::factory()->for($user)->for($connection, 'connection')->upload()->create([
+        'payload' => [
+            'filename' => 'ok.pdf',
+            'mime_type' => MIME_PDF,
+            'size' => 1024,
+            'chunk_size' => 1024,
+            'total_chunks' => 1,
+            'uploaded_chunks_count' => 0,
+            'upload_mode' => 'direct',
+            's3_multipart' => [
+                'upload_id' => 'upload-id-1',
+                'key' => 'ok.pdf',
+                'parts' => [],
+            ],
+        ],
+        'status' => CloudTaskStatus::Uploading,
+    ]);
+
+    $this->actingAs($user)->postJson(
+        route('connections.upload-tasks.direct.parts.done', [$connection, $task, 'partNumber' => 1]),
+        ['etag' => 'etag-1', 'size' => 1024],
+    );
+
+    $this->actingAs($user)
+        ->postJson(route('connections.upload-tasks.direct.complete', [$connection, $task]))
+        ->assertOk();
 });

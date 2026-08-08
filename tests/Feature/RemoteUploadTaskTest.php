@@ -152,6 +152,12 @@ it('downloads a remote file and writes it to the cloud disk', function () {
         ->once()
         ->with(ARCHIVE_URL)
         ->andReturnNull();
+    $urlGuard->shouldReceive('resolveIpForUrl')
+        ->once()
+        ->with(ARCHIVE_URL)
+        ->andReturn('1.2.3.4');
+    $urlGuard->shouldReceive('substituteHostWithIp')
+        ->andReturnUsing(fn (string $url, string $ip): string => $url);
 
     $disk = Mockery::mock(Filesystem::class);
     $disk->shouldReceive('writeStream')
@@ -220,6 +226,12 @@ it('requeues a remote upload task when a retryable failure occurs', function () 
         ->once()
         ->with(ARCHIVE_URL)
         ->andReturnNull();
+    $urlGuard->shouldReceive('resolveIpForUrl')
+        ->once()
+        ->with(ARCHIVE_URL)
+        ->andReturn('1.2.3.4');
+    $urlGuard->shouldReceive('substituteHostWithIp')
+        ->andReturnUsing(fn (string $url, string $ip): string => $url);
 
     $manager = Mockery::mock(CloudStorageManager::class);
     $manager->shouldReceive('disk')->never();

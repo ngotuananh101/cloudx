@@ -130,6 +130,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         }
 
         $urlGuard->validate($url);
+        $pinnedIp = $urlGuard->resolveIpForUrl($url);
 
         $targetPath = $task->connection?->provider === CloudProvider::TELEGRAM
             ? $filename
@@ -137,8 +138,8 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         $tempPath = $this->tempPath($task);
         $absoluteTempPath = $this->absoluteTempPath($tempPath);
 
-        $this->ensureRemoteFileIsAllowed($url, $headers, $urlGuard);
-        $this->downloadRemoteFile($task, $url, $headers, $absoluteTempPath, $urlGuard);
+        $this->ensureRemoteFileIsAllowed($url, $headers, $urlGuard, $pinnedIp);
+        $this->downloadRemoteFile($task, $url, $headers, $absoluteTempPath, $urlGuard, $pinnedIp);
 
         $downloadedSize = filesize($absoluteTempPath);
 
@@ -222,10 +223,10 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
     /**
      * @param  array<string, string>  $headers
      */
-    private function ensureRemoteFileIsAllowed(string $url, array $headers, RemoteUploadUrlGuard $urlGuard): void
+    private function ensureRemoteFileIsAllowed(string $url, array $headers, RemoteUploadUrlGuard $urlGuard, ?string $pinnedIp = null): void
     {
-        $response = $this->request($headers, $urlGuard)
-            ->head($url);
+        $response = $this->request($headers, $urlGuard, $url, $pinnedIp)
+            ->head($urlGuard->substituteHostWithIp($url, $pinnedIp ?? ''));
 
         if ($response->failed() && ! in_array($response->status(), [405, 501], true)) {
             $response->throw();
@@ -247,11 +248,13 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
         array $headers,
         string $absoluteTempPath,
         RemoteUploadUrlGuard $urlGuard,
+        ?string $pinnedIp = null,
     ): void {
+        $pinnedUrl = $pinnedIp !== null ? $urlGuard->substituteHostWithIp($url, $pinnedIp) : $url;
         $maxFileSize = $this->maxFileSize();
         $lastChecked = time();
 
-        $response = $this->request($headers, $urlGuard)
+        $response = $this->request($headers, $urlGuard, $url, $pinnedIp)
             ->withOptions([
                 'progress' => function (int $downloadTotal, int $downloadedBytes) use ($absoluteTempPath, $maxFileSize, $task, &$lastChecked): void {
                     if ($downloadedBytes > $maxFileSize) {
@@ -270,7 +273,7 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
                 },
             ])
             ->sink($absoluteTempPath)
-            ->get($url)
+            ->get($pinnedUrl)
             ->throw();
 
         $contentLength = (int) $response->header('Content-Length');
@@ -287,9 +290,24 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
     /**
      * @param  array<string, string>  $headers
      */
-    private function request(array $headers, RemoteUploadUrlGuard $urlGuard): PendingRequest
+    private function request(array $headers, RemoteUploadUrlGuard $urlGuard, string $url, ?string $pinnedIp = null): PendingRequest
     {
-        return Http::withHeaders($headers)
+        $requestHeaders = $headers;
+
+        if ($pinnedIp !== null) {
+            $originalHost = (string) (parse_url($url, PHP_URL_HOST) ?? '');
+            $pinnedUrl = $urlGuard->substituteHostWithIp($url, $pinnedIp);
+
+            if ($originalHost !== '') {
+                $requestHeaders['Host'] = $originalHost;
+            }
+        } else {
+            $pinnedUrl = $url;
+        }
+
+        $pinnedIpForRedirect = $pinnedIp;
+
+        return Http::withHeaders($requestHeaders)
             ->connectTimeout((int) config('cloud-storage.remote_upload.connect_timeout', 10))
             ->timeout((int) config('cloud-storage.remote_upload.timeout', 1200))
             ->retry([1000, 5000, 10000], 0, fn (Throwable $exception): bool => $exception instanceof ConnectionException
@@ -297,8 +315,10 @@ class RemoteUploadCloudTaskFileJob implements ShouldQueue
             ->withOptions([
                 'allow_redirects' => [
                     'max' => (int) config('cloud-storage.remote_upload.max_redirects', 3),
-                    'on_redirect' => function ($request, $response, $uri) use ($urlGuard): void {
-                        $urlGuard->validate((string) $uri);
+                    'on_redirect' => function ($request, $response, $uri) use ($urlGuard, &$pinnedIpForRedirect): void {
+                        $redirectUrl = (string) $uri;
+                        $urlGuard->resolveIpForUrl($redirectUrl);
+                        $pinnedIpForRedirect = $urlGuard->resolveIpForUrl($redirectUrl);
                     },
                 ],
             ]);

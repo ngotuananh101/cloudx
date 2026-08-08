@@ -50,7 +50,7 @@ class SftpConnector implements CloudProviderConnector
     {
         return array_filter([
             'driver' => 'sftp',
-            'host' => $credentials['host'] ?? null,
+            'host' => $credentials['resolved_ip'] ?? $credentials['host'] ?? null,
             'username' => $credentials['username'] ?? null,
             'password' => $credentials['password'] ?? null,
             'privateKey' => $credentials['privateKey'] ?? null,

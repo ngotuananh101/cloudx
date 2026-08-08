@@ -27,7 +27,8 @@ class FtpConnectionController extends Controller
     {
         $validated = $request->validated();
         $this->hostAddressGuard->assertConnectionHostAllowed((string) $validated['host']);
-        $credentials = $this->credentialsFromValidated($validated);
+        $resolvedIp = $this->hostAddressGuard->resolveAllowedIp((string) $validated['host']);
+        $credentials = $this->credentialsFromValidated($validated, [], $resolvedIp);
 
         $this->testConnection($credentials);
 
@@ -65,7 +66,8 @@ class FtpConnectionController extends Controller
 
         $validated = $request->validated();
         $this->hostAddressGuard->assertConnectionHostAllowed((string) $validated['host']);
-        $credentials = $this->credentialsFromValidated($validated, $connection->credentials);
+        $resolvedIp = $this->hostAddressGuard->resolveAllowedIp((string) $validated['host']);
+        $credentials = $this->credentialsFromValidated($validated, $connection->credentials, $resolvedIp);
 
         $this->testConnection($credentials);
 
@@ -89,10 +91,11 @@ class FtpConnectionController extends Controller
      * @param  array<string, mixed>  $existingCredentials
      * @return array<string, mixed>
      */
-    private function credentialsFromValidated(array $validated, array $existingCredentials = []): array
+    private function credentialsFromValidated(array $validated, array $existingCredentials = [], ?string $resolvedIp = null): array
     {
         $credentials = [
             'host' => $validated['host'],
+            'resolved_ip' => $resolvedIp,
             'port' => (int) $validated['port'],
             'username' => $validated['username'],
             'password' => filled($validated['password'] ?? null) ? $validated['password'] : ($existingCredentials['password'] ?? null),

@@ -4,6 +4,28 @@
 **Phạm vi:** `app/` (CloudX Laravel) + `telegram-client` (Python service)
 **Phương pháp:** 6 Finder song song → Verifier bác bỏ từng finding → lọc confidence ≥8/10
 **Spec:** `docs/superpowers/specs/2026-08-09-security-perf-audit-design.md`
+**Plan:** `docs/superpowers/plans/2026-08-09-security-fix.md`
+
+---
+
+## Trạng thái fix (cập nhật 2026-08-09)
+
+| Finding | Fix | Commit | Trạng thái |
+|---------|-----|--------|-----------|
+| F2-001 SSRF DNS rebinding remote upload | Pin IP trong `HostAddressGuard.resolveAllowedIp` + remote upload job dùng IP đó | `07519d8` (CloudX) | ✅ Đã fix |
+| F3-001 SSRF DNS rebinding connection host | Pin IP lưu `resolved_ip` vào credentials, FTP/SFTP/S3 connector ưu tiên IP đó | `07519d8` (CloudX) | ✅ Đã fix |
+| F4-001 SSRF redirect video-downloader | Guard SSRF Python-side chặn private IP (guard Laravel-side vẫn validate URL ban đầu) | `8c477ec` (telegram-client) | ✅ Đã fix (redirect-to-internal còn residual risk, note follow-up) |
+| F5-001 SSRF /yt-dlp/metadata | `url_guard.assert_url_allowed` áp vào `get_metadata` | `8c477ec` (telegram-client) | ✅ Đã fix |
+| F5-002 SSRF /yt-dlp/download | `url_guard.assert_url_allowed` áp vào `download` | `8c477ec` (telegram-client) | ✅ Đã fix |
+| F2-002 size_limit_bypass direct S3 multipart | `partDone` nhận `size`, `complete()` verify tổng ≤ max_file_size + mỗi part ≤ chunk_size | `c8f9900` (CloudX) | ✅ Đã fix |
+
+**Residual risk (ghi nhận):**
+- Pin IP cho redirect target trong remote upload job chỉ re-validate (chặn private redirect), pin IP đầy đủ cho redirect cần hook Guzzle sâu hơn — đã note trong commit.
+- yt-dlp follow HTTP 3xx mặc định → redirect-to-internal là vector còn lại ở Python service. Fix triệt để cần custom yt-dlp handler — phức tạp, rủi ro vỡ yt-dlp. Đợt này guard URL ban đầu giảm surface; follow-up riêng nếu cần.
+
+**Hiệu năng (5 findings):** chưa xử lý đợt này, để đợt sau theo spec.
+
+**Test:** 310/310 Pest pass. Logic check `url_guard` pass (chặn 169.254.169.254/127/10/192.168/100.64 CGNAT/198.18/::1, cho qua 8.8.8.8/1.1.1.1).
 
 ---
 

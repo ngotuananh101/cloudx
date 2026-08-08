@@ -8,12 +8,17 @@ class HostAddressGuard
 {
     public function hostIsAllowed(string $host): bool
     {
+        return $this->resolveAllowedIp($host) !== null;
+    }
+
+    public function resolveAllowedIp(string $host): ?string
+    {
         if ($host === '') {
-            return false;
+            return null;
         }
 
         if (filter_var($host, FILTER_VALIDATE_IP)) {
-            return $this->isPublicIp($host);
+            return $this->isPublicIp($host) ? $host : null;
         }
 
         $records = dns_get_record($host, DNS_A + DNS_AAAA);
@@ -21,10 +26,18 @@ class HostAddressGuard
         if ($records === false || $records === []) {
             $address = gethostbyname($host);
 
-            return $address !== $host && $this->isPublicIp($address);
+            return $address !== $host && $this->isPublicIp($address) ? $address : null;
         }
 
-        return $this->dnsRecordsArePublic($records);
+        foreach ($records as $record) {
+            $address = $record['ip'] ?? $record['ipv6'] ?? null;
+
+            if (is_string($address) && $this->isPublicIp($address)) {
+                return $address;
+            }
+        }
+
+        return null;
     }
 
     public function hostIsAllowedForConnections(string $host): bool
@@ -56,30 +69,6 @@ class HostAddressGuard
         throw ValidationException::withMessages([
             $field => 'Connection host must resolve to a public address or be explicitly allowlisted.',
         ]);
-    }
-
-    /**
-     * @param  array<int, array<string, mixed>>  $records
-     */
-    private function dnsRecordsArePublic(array $records): bool
-    {
-        $found = false;
-
-        foreach ($records as $record) {
-            $address = $record['ip'] ?? $record['ipv6'] ?? null;
-
-            if (! is_string($address)) {
-                continue;
-            }
-
-            $found = true;
-
-            if (! $this->isPublicIp($address)) {
-                return false;
-            }
-        }
-
-        return $found;
     }
 
     private function isPublicIp(string $address): bool

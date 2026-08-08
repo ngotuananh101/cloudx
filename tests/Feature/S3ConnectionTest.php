@@ -7,6 +7,7 @@ use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\Connectors\S3Connector;
+use App\Services\CloudStorage\HostAddressGuard;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
@@ -222,6 +223,72 @@ it('rejects updating a non-s3 connection through the s3 endpoint', function () {
         ->assertNotFound();
 
     expect($connection->fresh()->provider)->toBe(CloudProvider::FTP);
+});
+
+it('stores resolved ip in credentials when creating s3 connection with endpoint', function () {
+    $hostGuard = Mockery::mock(HostAddressGuard::class);
+    $hostGuard->shouldReceive('assertConnectionHostAllowed')->andReturnNull();
+    $hostGuard->shouldReceive('resolveAllowedIp')->with('minio.example.test')->andReturn('203.0.113.30');
+    $this->app->instance(HostAddressGuard::class, $hostGuard);
+
+    $disk = Mockery::mock(Filesystem::class);
+    $disk->shouldReceive('listContents')->once()->with('', false)->andReturn(collect());
+    Storage::shouldReceive('build')->once()->andReturn($disk);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('connections.s3.store'), s3Payload([
+            'provider_preset' => 'minio',
+            'endpoint' => 'https://minio.example.test',
+            'use_path_style_endpoint' => true,
+        ]))
+        ->assertRedirect(route('dashboard'));
+
+    $connection = CloudConnection::query()->sole();
+
+    expect($connection->credentials['resolved_ip'])->toBe('203.0.113.30');
+});
+
+it('rebuilds s3 endpoint as pinned ip when resolved ip is present', function () {
+    $config = app(S3Connector::class)->diskConfig(s3Credentials([
+        'provider_preset' => 'minio',
+        'endpoint' => 'https://minio.example.test',
+        'resolved_ip' => '203.0.113.30',
+        'use_path_style_endpoint' => true,
+    ]));
+
+    expect($config['endpoint'])->toBe('https://203.0.113.30')
+        ->and($config['use_path_style_endpoint'])->toBeTrue();
+});
+
+it('keeps original s3 endpoint when resolved ip is absent', function () {
+    $config = app(S3Connector::class)->diskConfig(s3Credentials([
+        'provider_preset' => 'minio',
+        'endpoint' => 'https://minio.example.test',
+        'use_path_style_endpoint' => true,
+    ]));
+
+    expect($config['endpoint'])->toBe('https://minio.example.test');
+});
+
+it('forces path style endpoint when s3 endpoint is pinned to an ip', function () {
+    $config = app(S3Connector::class)->diskConfig(s3Credentials([
+        'provider_preset' => 'aws',
+        'endpoint' => 'https://minio.example.test',
+        'resolved_ip' => '203.0.113.30',
+        'use_path_style_endpoint' => false,
+    ]));
+
+    expect($config['endpoint'])->toBe('https://203.0.113.30')
+        ->and($config['use_path_style_endpoint'])->toBeTrue();
+});
+
+it('respects explicit path style setting when resolved ip is absent', function () {
+    $config = app(S3Connector::class)->diskConfig(s3Credentials([
+        'provider_preset' => 'aws',
+        'use_path_style_endpoint' => false,
+    ]));
+
+    expect($config['use_path_style_endpoint'])->toBeFalse();
 });
 
 /**

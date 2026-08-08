@@ -7,6 +7,7 @@ use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\Connectors\FtpConnector;
+use App\Services\CloudStorage\HostAddressGuard;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
 
@@ -194,6 +195,31 @@ it('replaces password on update when new password is supplied', function () {
     $response->assertRedirect(route('dashboard'));
 
     expect($connection->refresh()->credentials['password'])->toBe('new-secret');
+});
+
+it('stores resolved ip in credentials when creating ftp connection', function () {
+    $hostGuard = Mockery::mock(HostAddressGuard::class);
+    $hostGuard->shouldReceive('assertConnectionHostAllowed')->andReturnNull();
+    $hostGuard->shouldReceive('resolveAllowedIp')->with('ftp.example.test')->andReturn('203.0.113.10');
+    $this->app->instance(HostAddressGuard::class, $hostGuard);
+
+    $disk = Mockery::mock(Filesystem::class);
+    $disk->shouldReceive('listContents')->once()->with('', false)->andReturn(collect());
+    Storage::shouldReceive('build')->once()->andReturn($disk);
+
+    $this->actingAs(User::factory()->create())
+        ->post(route('connections.ftp.store'), ftpPayload())
+        ->assertRedirect(route('dashboard'));
+
+    $connection = CloudConnection::query()->sole();
+
+    expect($connection->credentials['resolved_ip'])->toBe('203.0.113.10');
+});
+
+it('prefers resolved ip over host when building ftp disk config', function () {
+    $config = app(FtpConnector::class)->diskConfig(ftpCredentials(['resolved_ip' => '203.0.113.10']));
+
+    expect($config['host'])->toBe('203.0.113.10');
 });
 
 /**
