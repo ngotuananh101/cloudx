@@ -270,6 +270,27 @@ it('keeps original s3 endpoint when resolved ip is absent', function () {
     expect($config['endpoint'])->toBe('https://minio.example.test');
 });
 
+it('forces path style endpoint when s3 endpoint is pinned to an ip', function () {
+    $config = app(S3Connector::class)->diskConfig(s3Credentials([
+        'provider_preset' => 'aws',
+        'endpoint' => 'https://minio.example.test',
+        'resolved_ip' => '203.0.113.30',
+        'use_path_style_endpoint' => false,
+    ]));
+
+    expect($config['endpoint'])->toBe('https://203.0.113.30')
+        ->and($config['use_path_style_endpoint'])->toBeTrue();
+});
+
+it('respects explicit path style setting when resolved ip is absent', function () {
+    $config = app(S3Connector::class)->diskConfig(s3Credentials([
+        'provider_preset' => 'aws',
+        'use_path_style_endpoint' => false,
+    ]));
+
+    expect($config['use_path_style_endpoint'])->toBeFalse();
+});
+
 /**
  * @param  array<string, mixed>  $overrides
  * @return array<string, mixed>

@@ -13,9 +13,7 @@ class S3ConnectionConfig
         $providerPreset = (string) ($credentials['provider_preset'] ?? 'aws');
         $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
         $pinnedEndpoint = $this->pinnedEndpoint($credentials, $endpoint);
-        $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
-            ? (bool) $credentials['use_path_style_endpoint']
-            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
+        $usePathStyleEndpoint = $this->usePathStyleEndpoint($credentials, $providerPreset, $pinnedEndpoint !== null);
 
         return array_filter([
             'driver' => 's3',
@@ -42,9 +40,7 @@ class S3ConnectionConfig
         $providerPreset = (string) ($credentials['provider_preset'] ?? 'aws');
         $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
         $pinnedEndpoint = $this->pinnedEndpoint($credentials, $endpoint);
-        $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
-            ? (bool) $credentials['use_path_style_endpoint']
-            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
+        $usePathStyleEndpoint = $this->usePathStyleEndpoint($credentials, $providerPreset, $pinnedEndpoint !== null);
 
         return array_filter([
             'version' => 'latest',
@@ -57,6 +53,23 @@ class S3ConnectionConfig
             'endpoint' => $pinnedEndpoint ?? $endpoint,
             'use_path_style_endpoint' => $usePathStyleEndpoint,
         ], static fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * Khi endpoint bị pin thành IP (pinnedEndpoint), bắt buộc path-style routing
+     * vì virtual-host addressing (https://{bucket}.{ip}/...) không hoạt động với IP.
+     *
+     * @param  array<string, mixed>  $credentials
+     */
+    private function usePathStyleEndpoint(array $credentials, string $providerPreset, bool $hasPinnedEndpoint): bool
+    {
+        if ($hasPinnedEndpoint) {
+            return true;
+        }
+
+        return array_key_exists('use_path_style_endpoint', $credentials)
+            ? (bool) $credentials['use_path_style_endpoint']
+            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
     }
 
     /**
