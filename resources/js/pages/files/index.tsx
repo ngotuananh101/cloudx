@@ -44,6 +44,7 @@ export default function FileBrowser({
     const [selectedPaths, setSelectedPaths] = useState<Set<string>>(
         () => new Set(),
     );
+    const [prevFiles, setPrevFiles] = useState(files);
     const [pendingUploadFiles, setPendingUploadFiles] = useState<File[]>([]);
     const [isUploadModeDialogOpen, setIsUploadModeDialogOpen] = useState(false);
     const [isRemoteUploadDialogOpen, setIsRemoteUploadDialogOpen] =
@@ -70,20 +71,27 @@ export default function FileBrowser({
         );
     }, [files, searchQuery]);
 
-    useEffect(() => {
-        setSelectedPaths((currentPaths) => {
-            if (currentPaths.size === 0) {
-                return currentPaths;
-            }
+    // Prune selected paths that no longer exist when `files` changes.
+    // Adjusting state derived from a prop during render (rather than in an
+    // effect) avoids cascading renders and the `set-state-in-effect` lint.
+    if (files !== prevFiles) {
+        setPrevFiles(files);
 
-            const availablePaths = new Set((files || []).map((file) => file.path));
+        if (selectedPaths.size > 0) {
+            const availablePaths = new Set(
+                (files || []).map((file) => file.path),
+            );
             const nextPaths = new Set(
-                [...currentPaths].filter((path) => availablePaths.has(path)),
+                [...selectedPaths].filter((path) =>
+                    availablePaths.has(path),
+                ),
             );
 
-            return nextPaths.size === currentPaths.size ? currentPaths : nextPaths;
-        });
-    }, [files]);
+            if (nextPaths.size !== selectedPaths.size) {
+                setSelectedPaths(nextPaths);
+            }
+        }
+    }
 
     const selectedItems = useMemo(
         () => filteredFiles.filter((file) => selectedPaths.has(file.path)),
