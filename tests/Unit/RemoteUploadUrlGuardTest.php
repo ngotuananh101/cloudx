@@ -31,3 +31,21 @@ it('substitutes host with pinned ip keeping path and query', function () {
 
     expect($pinned)->toBe('https://1.2.3.4/path?q=1');
 });
+
+it('substitutes host with pinned ip preserving port', function () {
+    $hostGuard = Mockery::mock(HostAddressGuard::class);
+    $guard = new RemoteUploadUrlGuard($hostGuard);
+
+    $pinned = $guard->substituteHostWithIp('https://example.com:8443/path?q=1#frag', '1.2.3.4');
+
+    expect($pinned)->toBe('https://1.2.3.4:8443/path?q=1#frag');
+});
+
+it('substitutes host with pinned ipv6 address', function () {
+    $hostGuard = Mockery::mock(HostAddressGuard::class);
+    $guard = new RemoteUploadUrlGuard($hostGuard);
+
+    $pinned = $guard->substituteHostWithIp('https://example.com/path', '2606:4700:4700::1111');
+
+    expect($pinned)->toBe('https://2606:4700:4700::1111/path');
+});
