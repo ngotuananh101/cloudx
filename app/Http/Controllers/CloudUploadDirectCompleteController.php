@@ -29,6 +29,7 @@ class CloudUploadDirectCompleteController extends Controller
 
         $validated = $request->validate([
             'etag' => ['required', 'string', 'max:1024'],
+            'size' => ['required', 'integer', 'min:1'],
         ]);
 
         $task = DB::transaction(function () use ($task, $partNumber, $validated): CloudTask {
@@ -62,6 +63,7 @@ class CloudUploadDirectCompleteController extends Controller
             $partsByNumber[$partNumber] = [
                 'ETag' => $validated['etag'],
                 'PartNumber' => $partNumber,
+                'Size' => (int) $validated['size'],
             ];
 
             ksort($partsByNumber);
@@ -127,6 +129,30 @@ class CloudUploadDirectCompleteController extends Controller
                 throw ValidationException::withMessages([
                     'task' => 'Upload parts are incomplete or out of order.',
                 ]);
+            }
+
+            $chunkSize = (int) ($payload['chunk_size'] ?? 0);
+            $maxFileSize = (int) config('cloud-storage.uploads.max_file_size');
+
+            $totalUploaded = array_sum(array_map(
+                fn (array $part): int => (int) ($part['Size'] ?? 0),
+                $parts,
+            ));
+
+            if ($maxFileSize > 0 && $totalUploaded > $maxFileSize) {
+                throw ValidationException::withMessages([
+                    'task' => 'Uploaded parts exceed the maximum allowed file size.',
+                ]);
+            }
+
+            if ($chunkSize > 0) {
+                foreach ($parts as $part) {
+                    if ((int) ($part['Size'] ?? 0) > $chunkSize) {
+                        throw ValidationException::withMessages([
+                            'task' => 'Upload part exceeds the allowed chunk size.',
+                        ]);
+                    }
+                }
             }
 
             $lockedTask->forceFill([

@@ -207,6 +207,7 @@ export function UploadManagerProvider({
                 const controller = new AbortController();
                 abortControllers.current.set(key, controller);
 
+                const partSize = Math.min(file.size, (index + 1) * chunkSize) - index * chunkSize;
                 let part, response;
 
                 try {
@@ -263,7 +264,7 @@ export function UploadManagerProvider({
                         {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ etag }),
+                            body: JSON.stringify({ etag, size: partSize }),
                             signal: doneController.signal,
                         },
                     );

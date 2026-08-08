@@ -27,7 +27,8 @@ class SftpConnectionController extends Controller
     {
         $validated = $request->validated();
         $this->hostAddressGuard->assertConnectionHostAllowed((string) $validated['host']);
-        $credentials = $this->credentialsFromValidated($validated);
+        $resolvedIp = $this->hostAddressGuard->resolveAllowedIp((string) $validated['host']);
+        $credentials = $this->credentialsFromValidated($validated, [], $resolvedIp);
 
         $this->testConnection($credentials);
 
@@ -65,7 +66,8 @@ class SftpConnectionController extends Controller
 
         $validated = $request->validated();
         $this->hostAddressGuard->assertConnectionHostAllowed((string) $validated['host']);
-        $credentials = $this->credentialsFromValidated($validated, $connection->credentials);
+        $resolvedIp = $this->hostAddressGuard->resolveAllowedIp((string) $validated['host']);
+        $credentials = $this->credentialsFromValidated($validated, $connection->credentials, $resolvedIp);
 
         $this->testConnection($credentials);
 
@@ -89,7 +91,7 @@ class SftpConnectionController extends Controller
      * @param  array<string, mixed>  $existingCredentials
      * @return array<string, mixed>
      */
-    private function credentialsFromValidated(array $validated, array $existingCredentials = []): array
+    private function credentialsFromValidated(array $validated, array $existingCredentials = [], ?string $resolvedIp = null): array
     {
         $password = filled($validated['password'] ?? null) ? $validated['password'] : ($existingCredentials['password'] ?? null);
         $privateKey = filled($validated['privateKey'] ?? null) ? $validated['privateKey'] : ($existingCredentials['privateKey'] ?? null);
@@ -97,6 +99,7 @@ class SftpConnectionController extends Controller
 
         return array_filter([
             'host' => $validated['host'],
+            'resolved_ip' => $resolvedIp,
             'port' => (int) $validated['port'],
             'username' => $validated['username'],
             'password' => $password,

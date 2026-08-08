@@ -12,9 +12,8 @@ class S3ConnectionConfig
     {
         $providerPreset = (string) ($credentials['provider_preset'] ?? 'aws');
         $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
-        $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
-            ? (bool) $credentials['use_path_style_endpoint']
-            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
+        $pinnedEndpoint = $this->pinnedEndpoint($credentials, $endpoint);
+        $usePathStyleEndpoint = $this->usePathStyleEndpoint($credentials, $providerPreset, $pinnedEndpoint !== null);
 
         return array_filter([
             'driver' => 's3',
@@ -23,7 +22,7 @@ class S3ConnectionConfig
             'token' => $credentials['session_token'] ?? null,
             'region' => $credentials['region'] ?? 'us-east-1',
             'bucket' => $credentials['bucket'] ?? null,
-            'endpoint' => $endpoint,
+            'endpoint' => $pinnedEndpoint ?? $endpoint,
             'url' => $credentials['cdn_url'] ?? null,
             'root' => $credentials['root'] ?? null,
             'use_path_style_endpoint' => $usePathStyleEndpoint,
@@ -40,9 +39,8 @@ class S3ConnectionConfig
     {
         $providerPreset = (string) ($credentials['provider_preset'] ?? 'aws');
         $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
-        $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
-            ? (bool) $credentials['use_path_style_endpoint']
-            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
+        $pinnedEndpoint = $this->pinnedEndpoint($credentials, $endpoint);
+        $usePathStyleEndpoint = $this->usePathStyleEndpoint($credentials, $providerPreset, $pinnedEndpoint !== null);
 
         return array_filter([
             'version' => 'latest',
@@ -52,9 +50,51 @@ class S3ConnectionConfig
                 'secret' => $credentials['secret_access_key'] ?? null,
                 'token' => $credentials['session_token'] ?? null,
             ],
-            'endpoint' => $endpoint,
+            'endpoint' => $pinnedEndpoint ?? $endpoint,
             'use_path_style_endpoint' => $usePathStyleEndpoint,
         ], static fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * Khi endpoint bị pin thành IP (pinnedEndpoint), bắt buộc path-style routing
+     * vì virtual-host addressing (https://{bucket}.{ip}/...) không hoạt động với IP.
+     *
+     * @param  array<string, mixed>  $credentials
+     */
+    private function usePathStyleEndpoint(array $credentials, string $providerPreset, bool $hasPinnedEndpoint): bool
+    {
+        if ($hasPinnedEndpoint) {
+            return true;
+        }
+
+        return array_key_exists('use_path_style_endpoint', $credentials)
+            ? (bool) $credentials['use_path_style_endpoint']
+            : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
+    }
+
+    /**
+     * Pin IP cho S3 endpoint: rebuild endpoint = scheme://resolved_ip để tránh DNS rebinding
+     * khi AWS SDK resolve lại host. Cần use_path_style_endpoint=true (đã có preset
+     * minio/r2/rustfs) để routing đúng khi host là IP thay vì virtual-host.
+     *
+     * @param  array<string, mixed>  $credentials
+     */
+    private function pinnedEndpoint(array $credentials, ?string $fallbackEndpoint): ?string
+    {
+        $resolvedIp = $credentials['resolved_ip'] ?? null;
+
+        if (! is_string($resolvedIp) || $resolvedIp === '') {
+            return null;
+        }
+
+        $endpoint = $fallbackEndpoint ?? $this->defaultEndpointForPreset((string) ($credentials['provider_preset'] ?? 'aws'));
+        $scheme = is_string($endpoint) && str_starts_with($endpoint, 'http://') ? 'http' : 'https';
+
+        if (filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return $scheme.'://['.$resolvedIp.']';
+        }
+
+        return $scheme.'://'.$resolvedIp;
     }
 
     /**

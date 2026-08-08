@@ -35,3 +35,22 @@ it('allows private connection hosts when configured', function () {
 
     expect($guard->hostIsAllowedForConnections('10.0.0.5'))->toBeTrue();
 });
+
+it('resolves allowed ip for public hosts and returns null for private', function () {
+    $guard = app(HostAddressGuard::class);
+
+    expect($guard->resolveAllowedIp('8.8.8.8'))->toBe('8.8.8.8')
+        ->and($guard->resolveAllowedIp('1.1.1.1'))->toBe('1.1.1.1')
+        ->and($guard->resolveAllowedIp('127.0.0.1'))->toBeNull()
+        ->and($guard->resolveAllowedIp('10.0.0.5'))->toBeNull()
+        ->and($guard->resolveAllowedIp('169.254.169.254'))->toBeNull()
+        ->and($guard->resolveAllowedIp('100.64.1.1'))->toBeNull()
+        ->and($guard->resolveAllowedIp(''))->toBeNull();
+});
+
+it('keeps hostIsAllowed as wrapper of resolveAllowedIp', function () {
+    $guard = app(HostAddressGuard::class);
+
+    expect($guard->hostIsAllowed('8.8.8.8'))->toBeTrue()
+        ->and($guard->hostIsAllowed('127.0.0.1'))->toBeFalse();
+});

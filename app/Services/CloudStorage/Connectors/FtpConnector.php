@@ -50,7 +50,7 @@ class FtpConnector implements CloudProviderConnector
     {
         return array_filter([
             'driver' => 'ftp',
-            'host' => $credentials['host'] ?? null,
+            'host' => $credentials['resolved_ip'] ?? $credentials['host'] ?? null,
             'username' => $credentials['username'] ?? null,
             'password' => $credentials['password'] ?? null,
             'port' => $credentials['port'] ?? 21,

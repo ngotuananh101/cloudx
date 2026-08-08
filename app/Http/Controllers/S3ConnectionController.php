@@ -26,8 +26,8 @@ class S3ConnectionController extends Controller
     public function store(StoreS3ConnectionRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $this->assertEndpointHostAllowed($validated['endpoint'] ?? null);
-        $credentials = $this->credentialsFromValidated($validated);
+        $resolvedIp = $this->assertEndpointHostAllowed($validated['endpoint'] ?? null);
+        $credentials = $this->credentialsFromValidated($validated, [], $resolvedIp);
 
         $this->testConnection($credentials);
 
@@ -64,8 +64,8 @@ class S3ConnectionController extends Controller
         }
 
         $validated = $request->validated();
-        $this->assertEndpointHostAllowed($validated['endpoint'] ?? null);
-        $credentials = $this->credentialsFromValidated($validated, $connection->credentials);
+        $resolvedIp = $this->assertEndpointHostAllowed($validated['endpoint'] ?? null);
+        $credentials = $this->credentialsFromValidated($validated, $connection->credentials, $resolvedIp);
 
         $this->testConnection($credentials);
 
@@ -84,10 +84,10 @@ class S3ConnectionController extends Controller
         return redirect()->route('dashboard')->with('success', 'AWS S3 connection updated.');
     }
 
-    private function assertEndpointHostAllowed(mixed $endpoint): void
+    private function assertEndpointHostAllowed(mixed $endpoint): ?string
     {
         if (! is_string($endpoint) || trim($endpoint) === '') {
-            return;
+            return null;
         }
 
         $host = parse_url($endpoint, PHP_URL_HOST);
@@ -99,6 +99,8 @@ class S3ConnectionController extends Controller
         }
 
         $this->hostAddressGuard->assertConnectionHostAllowed($host, 'endpoint');
+
+        return $this->hostAddressGuard->resolveAllowedIp($host);
     }
 
     /**
@@ -106,7 +108,7 @@ class S3ConnectionController extends Controller
      * @param  array<string, mixed>  $existingCredentials
      * @return array<string, mixed>
      */
-    private function credentialsFromValidated(array $validated, array $existingCredentials = []): array
+    private function credentialsFromValidated(array $validated, array $existingCredentials = [], ?string $resolvedIp = null): array
     {
         return array_filter([
             'provider_preset' => $validated['provider_preset'],
@@ -117,6 +119,7 @@ class S3ConnectionController extends Controller
             'region' => $validated['region'],
             'bucket' => $validated['bucket'],
             'endpoint' => $validated['endpoint'] ?? null,
+            'resolved_ip' => $resolvedIp,
             'use_path_style_endpoint' => (bool) ($validated['use_path_style_endpoint'] ?? false),
             'root' => $validated['root'] ?? '',
             'session_token' => $validated['session_token'] ?? null,
