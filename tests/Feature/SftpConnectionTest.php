@@ -6,7 +6,9 @@ use App\Models\CloudConnection;
 use App\Models\User;
 use App\Services\CloudStorage\CloudProviderRegistry;
 use App\Services\CloudStorage\Connectors\SftpConnector;
+use App\Services\CloudStorage\HostAddressGuard;
 use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Storage;
 
 it('registers the sftp provider connector', function () {
     $connector = app(CloudProviderRegistry::class)->for(CloudProvider::SFTP);
@@ -156,4 +158,46 @@ it('forbids non-owner from accessing SFTP config', function () {
     $response = $this->actingAs($user)->getJson(route('connections.edit-config', $connection));
 
     $response->assertForbidden();
+});
+
+it('stores resolved ip in credentials when creating sftp connection', function () {
+    $hostGuard = Mockery::mock(HostAddressGuard::class);
+    $hostGuard->shouldReceive('assertConnectionHostAllowed')->andReturnNull();
+    $hostGuard->shouldReceive('resolveAllowedIp')->with('sftp.example.com')->andReturn('203.0.113.20');
+    $this->app->instance(HostAddressGuard::class, $hostGuard);
+
+    $disk = Mockery::mock(Filesystem::class);
+    $disk->shouldReceive('listContents')->once()->with('', false)->andReturn(collect());
+    Storage::shouldReceive('build')->once()->andReturn($disk);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)->post(route('connections.sftp.store'), [
+        'name' => 'SFTP Server',
+        'host' => 'sftp.example.com',
+        'port' => 22,
+        'username' => 'alice',
+        'password' => 'secret',
+        'root' => '/',
+        'timeout' => 30,
+        'useAgent' => false,
+    ])->assertRedirect(route('dashboard'));
+
+    $connection = CloudConnection::query()->sole();
+
+    expect($connection->credentials['resolved_ip'])->toBe('203.0.113.20');
+});
+
+it('prefers resolved ip over host when building sftp disk config', function () {
+    $config = app(SftpConnector::class)->diskConfig([
+        'host' => 'sftp.example.com',
+        'resolved_ip' => '203.0.113.20',
+        'port' => 22,
+        'username' => 'alice',
+        'password' => 'secret',
+        'root' => '/',
+        'timeout' => 30,
+    ]);
+
+    expect($config['host'])->toBe('203.0.113.20');
 });

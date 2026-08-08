@@ -12,6 +12,7 @@ class S3ConnectionConfig
     {
         $providerPreset = (string) ($credentials['provider_preset'] ?? 'aws');
         $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
+        $pinnedEndpoint = $this->pinnedEndpoint($credentials, $endpoint);
         $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
             ? (bool) $credentials['use_path_style_endpoint']
             : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
@@ -23,7 +24,7 @@ class S3ConnectionConfig
             'token' => $credentials['session_token'] ?? null,
             'region' => $credentials['region'] ?? 'us-east-1',
             'bucket' => $credentials['bucket'] ?? null,
-            'endpoint' => $endpoint,
+            'endpoint' => $pinnedEndpoint ?? $endpoint,
             'url' => $credentials['cdn_url'] ?? null,
             'root' => $credentials['root'] ?? null,
             'use_path_style_endpoint' => $usePathStyleEndpoint,
@@ -40,6 +41,7 @@ class S3ConnectionConfig
     {
         $providerPreset = (string) ($credentials['provider_preset'] ?? 'aws');
         $endpoint = $credentials['endpoint'] ?? $this->defaultEndpointForPreset($providerPreset);
+        $pinnedEndpoint = $this->pinnedEndpoint($credentials, $endpoint);
         $usePathStyleEndpoint = array_key_exists('use_path_style_endpoint', $credentials)
             ? (bool) $credentials['use_path_style_endpoint']
             : $this->defaultUsePathStyleEndpointForPreset($providerPreset);
@@ -52,9 +54,34 @@ class S3ConnectionConfig
                 'secret' => $credentials['secret_access_key'] ?? null,
                 'token' => $credentials['session_token'] ?? null,
             ],
-            'endpoint' => $endpoint,
+            'endpoint' => $pinnedEndpoint ?? $endpoint,
             'use_path_style_endpoint' => $usePathStyleEndpoint,
         ], static fn (mixed $value): bool => $value !== null);
+    }
+
+    /**
+     * Pin IP cho S3 endpoint: rebuild endpoint = scheme://resolved_ip để tránh DNS rebinding
+     * khi AWS SDK resolve lại host. Cần use_path_style_endpoint=true (đã có preset
+     * minio/r2/rustfs) để routing đúng khi host là IP thay vì virtual-host.
+     *
+     * @param  array<string, mixed>  $credentials
+     */
+    private function pinnedEndpoint(array $credentials, ?string $fallbackEndpoint): ?string
+    {
+        $resolvedIp = $credentials['resolved_ip'] ?? null;
+
+        if (! is_string($resolvedIp) || $resolvedIp === '') {
+            return null;
+        }
+
+        $endpoint = $fallbackEndpoint ?? $this->defaultEndpointForPreset((string) ($credentials['provider_preset'] ?? 'aws'));
+        $scheme = is_string($endpoint) && str_starts_with($endpoint, 'http://') ? 'http' : 'https';
+
+        if (filter_var($resolvedIp, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            return $scheme.'://['.$resolvedIp.']';
+        }
+
+        return $scheme.'://'.$resolvedIp;
     }
 
     /**
