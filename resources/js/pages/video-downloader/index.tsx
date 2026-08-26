@@ -1,7 +1,6 @@
 import { Cookie, Download, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { xsrfToken } from '@/lib/csrf';
 import { formatBytes } from '@/lib/format-bytes';
@@ -11,6 +10,7 @@ import type {
     VideoFormat,
     VideoMetadata,
 } from '@/types/video-downloader';
+import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 
 function formatDuration(seconds: number): string {
     if (!Number.isFinite(seconds) || seconds < 0) {
@@ -77,6 +77,7 @@ export default function VideoDownloaderIndex({
             const response = await fetch(SavedCookieController.index.url(), {
                 headers: jsonHeaders,
             });
+
             if (response.ok) {
                 setSavedCookies((await response.json()) as SavedCookie[]);
             }
@@ -103,6 +104,7 @@ export default function VideoDownloaderIndex({
             const response = await fetch(SavedCookieController.show.url(id), {
                 headers: jsonHeaders,
             });
+
             if (response.ok) {
                 const data = (await response.json()) as SavedCookieDetail;
                 setCookies(data.cookies);
@@ -118,7 +120,9 @@ export default function VideoDownloaderIndex({
         if (!saveLabel.trim() || !cookies.trim()) {
             return;
         }
+
         setSavingCookie(true);
+
         try {
             const response = await fetch(SavedCookieController.store.url(), {
                 method: 'POST',
@@ -128,6 +132,7 @@ export default function VideoDownloaderIndex({
                     cookies,
                 }),
             });
+
             if (response.ok) {
                 const created = (await response.json()) as SavedCookie;
                 setSaveLabel('');
