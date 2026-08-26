@@ -1,4 +1,4 @@
-import { Download, Loader2, Save, Trash2 } from 'lucide-react';
+import { Cookie, Download, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
@@ -49,7 +49,9 @@ export default function VideoDownloaderIndex({
 }) {
     const [url, setUrl] = useState('');
     const [cookies, setCookies] = useState('');
-    const [showCookies, setShowCookies] = useState(false);
+    const [showTextarea, setShowTextarea] = useState(false);
+    const [selectedCookieId, setSelectedCookieId] = useState<string>('');
+    const [selectedCookieLabel, setSelectedCookieLabel] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [metadata, setMetadata] = useState<VideoMetadata | null>(null);
     const [error, setError] = useState<string | null>(null);
@@ -59,8 +61,9 @@ export default function VideoDownloaderIndex({
     const [savedCookies, setSavedCookies] =
         useState<SavedCookie[]>(initialSavedCookies);
     const [saveLabel, setSaveLabel] = useState('');
-    const [showSaveInput, setShowSaveInput] = useState(false);
+    const [showSaveModal, setShowSaveModal] = useState(false);
     const [savingCookie, setSavingCookie] = useState(false);
+    const [loadingCookie, setLoadingCookie] = useState(false);
 
     const jsonHeaders = {
         'Content-Type': 'application/json',
@@ -75,16 +78,27 @@ export default function VideoDownloaderIndex({
                 headers: jsonHeaders,
             });
             if (response.ok) {
-                setSavedCookies(
-                    (await response.json()) as SavedCookie[],
-                );
+                setSavedCookies((await response.json()) as SavedCookie[]);
             }
         } catch {
-            // silently ignore — saved cookies are a convenience
+            // silently ignore
         }
     };
 
-    const loadSavedCookie = async (id: number) => {
+    const handleSelectCookie = async (idStr: string) => {
+        if (!idStr) {
+            setSelectedCookieId('');
+            setSelectedCookieLabel('');
+            setCookies('');
+            return;
+        }
+
+        const id = Number(idStr);
+        const matched = savedCookies.find((c) => c.id === id);
+        setSelectedCookieId(idStr);
+        setSelectedCookieLabel(matched?.label ?? '');
+        setLoadingCookie(true);
+
         try {
             const response = await fetch(SavedCookieController.show.url(id), {
                 headers: jsonHeaders,
@@ -92,14 +106,15 @@ export default function VideoDownloaderIndex({
             if (response.ok) {
                 const data = (await response.json()) as SavedCookieDetail;
                 setCookies(data.cookies);
-                setShowCookies(true);
             }
         } catch {
             // silently ignore
+        } finally {
+            setLoadingCookie(false);
         }
     };
 
-    const saveCookie = async () => {
+    const handleSaveCookie = async () => {
         if (!saveLabel.trim() || !cookies.trim()) {
             return;
         }
@@ -114,9 +129,12 @@ export default function VideoDownloaderIndex({
                 }),
             });
             if (response.ok) {
+                const created = (await response.json()) as SavedCookie;
                 setSaveLabel('');
-                setShowSaveInput(false);
+                setShowSaveModal(false);
                 await refreshSavedCookies();
+                setSelectedCookieId(String(created.id));
+                setSelectedCookieLabel(created.label);
             }
         } catch {
             // silently ignore
@@ -125,16 +143,29 @@ export default function VideoDownloaderIndex({
         }
     };
 
-    const deleteSavedCookie = async (id: number) => {
+    const handleDeleteSelectedCookie = async () => {
+        if (!selectedCookieId) {
+            return;
+        }
+        const id = Number(selectedCookieId);
         try {
             await fetch(SavedCookieController.destroy.url(id), {
                 method: 'DELETE',
                 headers: jsonHeaders,
             });
             setSavedCookies((prev) => prev.filter((c) => c.id !== id));
+            setSelectedCookieId('');
+            setSelectedCookieLabel('');
+            setCookies('');
         } catch {
             // silently ignore
         }
+    };
+
+    const clearCookies = () => {
+        setCookies('');
+        setSelectedCookieId('');
+        setSelectedCookieLabel('');
     };
 
     const fetchInfo = async (event: FormEvent) => {
@@ -147,12 +178,7 @@ export default function VideoDownloaderIndex({
         try {
             const response = await fetch('/video-downloader/metadata', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-XSRF-TOKEN': xsrfToken(),
-                    Accept: 'application/json',
-                },
+                headers: jsonHeaders,
                 body: JSON.stringify({
                     url,
                     cookies: cookies || null,
@@ -215,8 +241,9 @@ export default function VideoDownloaderIndex({
 
                 <form
                     onSubmit={fetchInfo}
-                    className="space-y-3 rounded-2xl border border-border bg-card p-6 shadow-sm"
+                    className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm"
                 >
+                    {/* URL Input */}
                     <div>
                         <label
                             htmlFor="vd-url"
@@ -235,129 +262,155 @@ export default function VideoDownloaderIndex({
                         />
                     </div>
 
-                    <button
-                        type="button"
-                        onClick={() => setShowCookies((current) => !current)}
-                        className="text-xs font-semibold text-muted-foreground hover:text-foreground"
-                    >
-                        {showCookies
-                            ? 'Hide cookies'
-                            : 'Use cookies (advanced)'}
-                    </button>
+                    {/* Cookies Bar — Always Visible */}
+                    <div className="space-y-2 rounded-xl border border-border/70 bg-muted/30 p-3">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                                <Cookie className="h-4 w-4 text-muted-foreground" />
+                                <span className="text-xs font-bold text-foreground">
+                                    Cookies
+                                </span>
+                                {selectedCookieLabel && (
+                                    <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+                                        Using: {selectedCookieLabel}
+                                        <button
+                                            type="button"
+                                            onClick={clearCookies}
+                                            className="hover:text-destructive"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </button>
+                                    </span>
+                                )}
+                                {loadingCookie && (
+                                    <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
+                                )}
+                            </div>
 
-                    {showCookies && (
-                        <div className="space-y-3">
-                            {savedCookies.length > 0 && (
-                                <div>
-                                    <label className="text-xs font-bold text-foreground">
-                                        Load saved cookies
-                                    </label>
-                                    <ul className="mt-1 divide-y divide-border rounded-xl border border-border">
-                                        {savedCookies.map((saved) => (
-                                            <li
-                                                key={saved.id}
-                                                className="flex items-center justify-between gap-2 px-3 py-2"
-                                            >
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        loadSavedCookie(
-                                                            saved.id,
-                                                        )
-                                                    }
-                                                    className="min-w-0 flex-1 truncate text-left text-sm font-medium text-foreground hover:text-primary"
-                                                >
-                                                    {saved.label}
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        deleteSavedCookie(
-                                                            saved.id,
-                                                        )
-                                                    }
-                                                    className="shrink-0 text-muted-foreground hover:text-destructive"
-                                                >
-                                                    <Trash2 className="h-3.5 w-3.5" />
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
+                            <div className="flex items-center gap-2">
+                                {cookies.trim() && !selectedCookieId && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowSaveModal(true)}
+                                        className="inline-flex h-7 items-center gap-1 rounded-lg bg-primary/10 px-2.5 text-xs font-semibold text-primary transition hover:bg-primary/20"
+                                    >
+                                        <Save className="h-3 w-3" />
+                                        Save current
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        setShowTextarea((curr) => !curr)
+                                    }
+                                    className="text-xs font-semibold text-muted-foreground hover:text-foreground"
+                                >
+                                    {showTextarea
+                                        ? 'Hide raw cookies'
+                                        : 'Paste / edit raw'}
+                                </button>
+                            </div>
+                        </div>
 
-                            <div>
+                        {/* Dropdown to pick saved cookies */}
+                        {savedCookies.length > 0 && (
+                            <div className="flex items-center gap-2">
+                                <select
+                                    value={selectedCookieId}
+                                    onChange={(e) =>
+                                        handleSelectCookie(e.target.value)
+                                    }
+                                    className="h-9 flex-1 rounded-lg border border-border bg-background px-2.5 text-xs font-medium text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
+                                >
+                                    <option value="">
+                                        -- Select saved cookies --
+                                    </option>
+                                    {savedCookies.map((saved) => (
+                                        <option
+                                            key={saved.id}
+                                            value={String(saved.id)}
+                                        >
+                                            {saved.label}
+                                        </option>
+                                    ))}
+                                </select>
+
+                                {selectedCookieId && (
+                                    <button
+                                        type="button"
+                                        onClick={handleDeleteSelectedCookie}
+                                        title="Delete this saved cookie"
+                                        className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+                                    >
+                                        <Trash2 className="h-3.5 w-3.5" />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Save inline input if no saved cookies yet or wanting to add new */}
+                        {showSaveModal && (
+                            <div className="flex items-center gap-2 pt-1">
+                                <input
+                                    type="text"
+                                    value={saveLabel}
+                                    onChange={(e) => setSaveLabel(e.target.value)}
+                                    placeholder="Label, e.g. YouTube main acc"
+                                    className="h-8 flex-1 rounded-lg border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            handleSaveCookie();
+                                        }
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={handleSaveCookie}
+                                    disabled={savingCookie || !saveLabel.trim()}
+                                    className="inline-flex h-8 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                                >
+                                    {savingCookie ? (
+                                        <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                        <Plus className="h-3 w-3" />
+                                    )}
+                                    Save
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowSaveModal(false)}
+                                    className="inline-flex h-8 items-center rounded-lg border border-border px-2 text-xs text-muted-foreground hover:text-foreground"
+                                >
+                                    Cancel
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Raw textarea */}
+                        {showTextarea && (
+                            <div className="pt-2">
                                 <label
                                     htmlFor="vd-cookies"
-                                    className="text-xs font-bold text-foreground"
+                                    className="text-xs font-medium text-muted-foreground"
                                 >
-                                    Cookies (Netscape format)
+                                    Netscape format or key=value; pairs
                                 </label>
                                 <textarea
                                     id="vd-cookies"
                                     value={cookies}
-                                    onChange={(event) =>
-                                        setCookies(event.target.value)
-                                    }
+                                    onChange={(e) => {
+                                        setCookies(e.target.value);
+                                        setSelectedCookieId('');
+                                        setSelectedCookieLabel('');
+                                    }}
                                     rows={4}
+                                    placeholder="# Netscape HTTP Cookie File&#10;.youtube.com	TRUE	/	FALSE	0	SID	abc..."
                                     className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs text-foreground transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
                                 />
                             </div>
-
-                            {cookies.trim() && (
-                                <div className="flex items-center gap-2">
-                                    {showSaveInput ? (
-                                        <>
-                                            <input
-                                                type="text"
-                                                value={saveLabel}
-                                                onChange={(event) =>
-                                                    setSaveLabel(
-                                                        event.target.value,
-                                                    )
-                                                }
-                                                placeholder="Label, e.g. YouTube main"
-                                                className="h-8 flex-1 rounded-lg border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
-                                                onKeyDown={(event) => {
-                                                    if (event.key === 'Enter') {
-                                                        event.preventDefault();
-                                                        saveCookie();
-                                                    }
-                                                }}
-                                            />
-                                            <button
-                                                type="button"
-                                                onClick={saveCookie}
-                                                disabled={
-                                                    savingCookie ||
-                                                    !saveLabel.trim()
-                                                }
-                                                className="inline-flex h-8 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
-                                            >
-                                                {savingCookie ? (
-                                                    <Loader2 className="h-3 w-3 animate-spin" />
-                                                ) : (
-                                                    <Save className="h-3 w-3" />
-                                                )}
-                                                Save
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <button
-                                            type="button"
-                                            onClick={() =>
-                                                setShowSaveInput(true)
-                                            }
-                                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
-                                        >
-                                            <Save className="h-3 w-3" />
-                                            Save cookies
-                                        </button>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    )}
+                        )}
+                    </div>
 
                     {error && (
                         <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
@@ -381,6 +434,7 @@ export default function VideoDownloaderIndex({
                     </button>
                 </form>
 
+                {/* Metadata Card */}
                 {metadata && (
                     <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
                         <div className="flex flex-col gap-4 sm:flex-row">
