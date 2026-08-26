@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../wayfinder'
 import name from './name'
 import cache from './cache'
 /**
@@ -68,41 +68,6 @@ reconnect.head = (args: { connection: string | number | { id: string | number } 
     method: 'head',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:39
- * @route '/connections/{connection}/reconnect'
- */
-    const reconnectForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: reconnect.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:39
- * @route '/connections/{connection}/reconnect'
- */
-        reconnectForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: reconnect.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::reconnect
- * @see app/Http/Controllers/CloudConnectionController.php:39
- * @route '/connections/{connection}/reconnect'
- */
-        reconnectForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: reconnect.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    reconnect.form = reconnectForm
 /**
 * @see \App\Http\Controllers\CloudConnectionController::destroy
  * @see app/Http/Controllers/CloudConnectionController.php:163
@@ -160,38 +125,6 @@ destroy.delete = (args: { connection: string | number | { id: string | number } 
     url: destroy.url(args, options),
     method: 'delete',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::destroy
- * @see app/Http/Controllers/CloudConnectionController.php:163
- * @route '/connections/{connection}'
- */
-    const destroyForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: destroy.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'DELETE',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::destroy
- * @see app/Http/Controllers/CloudConnectionController.php:163
- * @route '/connections/{connection}'
- */
-        destroyForm.delete = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: destroy.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'DELETE',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    destroy.form = destroyForm
 const cloudConnections = {
     reconnect: Object.assign(reconnect, reconnect),
 destroy: Object.assign(destroy, destroy),

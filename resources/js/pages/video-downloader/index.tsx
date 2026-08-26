@@ -1,10 +1,16 @@
-import { Download, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { Download, Loader2, Save, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { xsrfToken } from '@/lib/csrf';
 import { formatBytes } from '@/lib/format-bytes';
-import type { VideoFormat, VideoMetadata } from '@/types/video-downloader';
+import type {
+    SavedCookie,
+    SavedCookieDetail,
+    VideoFormat,
+    VideoMetadata,
+} from '@/types/video-downloader';
 
 function formatDuration(seconds: number): string {
     if (!Number.isFinite(seconds) || seconds < 0) {
@@ -46,6 +52,89 @@ export default function VideoDownloaderIndex() {
     const [selectedFormatId, setSelectedFormatId] = useState<string | null>(
         null,
     );
+    const [savedCookies, setSavedCookies] = useState<SavedCookie[]>([]);
+    const [saveLabel, setSaveLabel] = useState('');
+    const [showSaveInput, setShowSaveInput] = useState(false);
+    const [savingCookie, setSavingCookie] = useState(false);
+
+    const jsonHeaders = {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+        'X-XSRF-TOKEN': xsrfToken(),
+        Accept: 'application/json',
+    };
+
+    const fetchSavedCookies = async () => {
+        try {
+            const response = await fetch(SavedCookieController.index.url(), {
+                headers: jsonHeaders,
+            });
+            if (response.ok) {
+                setSavedCookies(
+                    (await response.json()) as SavedCookie[],
+                );
+            }
+        } catch {
+            // silently ignore — saved cookies are a convenience
+        }
+    };
+
+    useEffect(() => {
+        fetchSavedCookies();
+    }, []);
+
+    const loadSavedCookie = async (id: number) => {
+        try {
+            const response = await fetch(SavedCookieController.show.url(id), {
+                headers: jsonHeaders,
+            });
+            if (response.ok) {
+                const data = (await response.json()) as SavedCookieDetail;
+                setCookies(data.cookies);
+                setShowCookies(true);
+            }
+        } catch {
+            // silently ignore
+        }
+    };
+
+    const saveCookie = async () => {
+        if (!saveLabel.trim() || !cookies.trim()) {
+            return;
+        }
+        setSavingCookie(true);
+        try {
+            const response = await fetch(SavedCookieController.store.url(), {
+                method: 'POST',
+                headers: jsonHeaders,
+                body: JSON.stringify({
+                    label: saveLabel.trim(),
+                    cookies,
+                }),
+            });
+            if (response.ok) {
+                setSaveLabel('');
+                setShowSaveInput(false);
+                await fetchSavedCookies();
+            }
+        } catch {
+            // silently ignore
+        } finally {
+            setSavingCookie(false);
+        }
+    };
+
+    const deleteSavedCookie = async (id: number) => {
+        try {
+            await fetch(SavedCookieController.destroy.url(id), {
+                method: 'DELETE',
+                headers: jsonHeaders,
+            });
+            setSavedCookies((prev) => prev.filter((c) => c.id !== id));
+        } catch {
+            // silently ignore
+        }
+    };
 
     const fetchInfo = async (event: FormEvent) => {
         event.preventDefault();
@@ -156,22 +245,116 @@ export default function VideoDownloaderIndex() {
                     </button>
 
                     {showCookies && (
-                        <div>
-                            <label
-                                htmlFor="vd-cookies"
-                                className="text-xs font-bold text-foreground"
-                            >
-                                Cookies (Netscape format)
-                            </label>
-                            <textarea
-                                id="vd-cookies"
-                                value={cookies}
-                                onChange={(event) =>
-                                    setCookies(event.target.value)
-                                }
-                                rows={4}
-                                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs text-foreground transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
-                            />
+                        <div className="space-y-3">
+                            {savedCookies.length > 0 && (
+                                <div>
+                                    <label className="text-xs font-bold text-foreground">
+                                        Load saved cookies
+                                    </label>
+                                    <ul className="mt-1 divide-y divide-border rounded-xl border border-border">
+                                        {savedCookies.map((saved) => (
+                                            <li
+                                                key={saved.id}
+                                                className="flex items-center justify-between gap-2 px-3 py-2"
+                                            >
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        loadSavedCookie(
+                                                            saved.id,
+                                                        )
+                                                    }
+                                                    className="min-w-0 flex-1 truncate text-left text-sm font-medium text-foreground hover:text-primary"
+                                                >
+                                                    {saved.label}
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                        deleteSavedCookie(
+                                                            saved.id,
+                                                        )
+                                                    }
+                                                    className="shrink-0 text-muted-foreground hover:text-destructive"
+                                                >
+                                                    <Trash2 className="h-3.5 w-3.5" />
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+
+                            <div>
+                                <label
+                                    htmlFor="vd-cookies"
+                                    className="text-xs font-bold text-foreground"
+                                >
+                                    Cookies (Netscape format)
+                                </label>
+                                <textarea
+                                    id="vd-cookies"
+                                    value={cookies}
+                                    onChange={(event) =>
+                                        setCookies(event.target.value)
+                                    }
+                                    rows={4}
+                                    className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 font-mono text-xs text-foreground transition outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
+                                />
+                            </div>
+
+                            {cookies.trim() && (
+                                <div className="flex items-center gap-2">
+                                    {showSaveInput ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={saveLabel}
+                                                onChange={(event) =>
+                                                    setSaveLabel(
+                                                        event.target.value,
+                                                    )
+                                                }
+                                                placeholder="Label, e.g. YouTube main"
+                                                className="h-8 flex-1 rounded-lg border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
+                                                onKeyDown={(event) => {
+                                                    if (event.key === 'Enter') {
+                                                        event.preventDefault();
+                                                        saveCookie();
+                                                    }
+                                                }}
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={saveCookie}
+                                                disabled={
+                                                    savingCookie ||
+                                                    !saveLabel.trim()
+                                                }
+                                                className="inline-flex h-8 items-center gap-1 rounded-lg bg-primary px-3 text-xs font-semibold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60"
+                                            >
+                                                {savingCookie ? (
+                                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                                ) : (
+                                                    <Save className="h-3 w-3" />
+                                                )}
+                                                Save
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setShowSaveInput(true)
+                                            }
+                                            className="inline-flex h-8 items-center gap-1 rounded-lg border border-border px-3 text-xs font-semibold text-muted-foreground transition hover:text-foreground"
+                                        >
+                                            <Save className="h-3 w-3" />
+                                            Save cookies
+                                        </button>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
 

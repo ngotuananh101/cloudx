@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudConnectionController::update
  * @see app/Http/Controllers/CloudConnectionController.php:139
@@ -56,38 +56,6 @@ update.patch = (args: { connection: string | number | { id: string | number } } 
     url: update.url(args, options),
     method: 'patch',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:139
- * @route '/connections/{connection}/name'
- */
-    const updateForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: update.url(args, {
-                    [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                        _method: 'PATCH',
-                        ...(options?.query ?? options?.mergeQuery ?? {}),
-                    }
-                }),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::update
- * @see app/Http/Controllers/CloudConnectionController.php:139
- * @route '/connections/{connection}/name'
- */
-        updateForm.patch = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: update.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'PATCH',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'post',
-        })
-    
-    update.form = updateForm
 const name = {
     update: Object.assign(update, update),
 }

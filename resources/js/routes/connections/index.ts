@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../wayfinder'
 import ftp from './ftp'
 import s3 from './s3'
 import sftp from './sftp'
@@ -73,42 +73,6 @@ editConfig.head = (args: { connection: string | number | { id: string | number }
     url: editConfig.url(args, options),
     method: 'head',
 })
-
-    /**
-* @see \App\Http\Controllers\CloudConnectionController::editConfig
- * @see app/Http/Controllers/CloudConnectionController.php:187
- * @route '/connections/{connection}/edit-config'
- */
-    const editConfigForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: editConfig.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::editConfig
- * @see app/Http/Controllers/CloudConnectionController.php:187
- * @route '/connections/{connection}/edit-config'
- */
-        editConfigForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: editConfig.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\CloudConnectionController::editConfig
- * @see app/Http/Controllers/CloudConnectionController.php:187
- * @route '/connections/{connection}/edit-config'
- */
-        editConfigForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: editConfig.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    editConfig.form = editConfigForm
 const connections = {
     editConfig: Object.assign(editConfig, editConfig),
 ftp: Object.assign(ftp, ftp),

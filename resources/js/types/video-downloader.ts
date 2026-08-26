@@ -19,3 +19,13 @@ export interface VideoMetadata {
     webpage_url: string;
     formats: VideoFormat[];
 }
+
+export interface SavedCookie {
+    id: number;
+    label: string;
+    created_at: string;
+}
+
+export interface SavedCookieDetail extends SavedCookie {
+    cookies: string;
+}

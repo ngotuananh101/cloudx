@@ -20,6 +20,7 @@ import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
 import CloudUploadPresignController from './CloudUploadPresignController'
 import CloudUploadDirectCompleteController from './CloudUploadDirectCompleteController'
 import VideoDownloaderController from './VideoDownloaderController'
+import SavedCookieController from './SavedCookieController'
 const Controllers = {
     Auth: Object.assign(Auth, Auth),
 ShareViewController: Object.assign(ShareViewController, ShareViewController),
@@ -43,6 +44,7 @@ CloudUploadTaskChunkController: Object.assign(CloudUploadTaskChunkController, Cl
 CloudUploadPresignController: Object.assign(CloudUploadPresignController, CloudUploadPresignController),
 CloudUploadDirectCompleteController: Object.assign(CloudUploadDirectCompleteController, CloudUploadDirectCompleteController),
 VideoDownloaderController: Object.assign(VideoDownloaderController, VideoDownloaderController),
+SavedCookieController: Object.assign(SavedCookieController, SavedCookieController),
 }
 
 export default Controllers

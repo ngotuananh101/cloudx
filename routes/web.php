@@ -16,6 +16,7 @@ use App\Http\Controllers\CloudUploadTaskController;
 use App\Http\Controllers\FtpConnectionController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\S3ConnectionController;
+use App\Http\Controllers\SavedCookieController;
 use App\Http\Controllers\SftpConnectionController;
 use App\Http\Controllers\ShareViewController;
 use App\Http\Controllers\StorageBrowserController;
@@ -114,5 +115,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/video-downloader', 'index')->name('video-downloader.index');
         Route::post('/video-downloader/metadata', 'metadata')->name('video-downloader.metadata');
         Route::get('/video-downloader/download', 'download')->name('video-downloader.download');
+    });
+
+    Route::controller(SavedCookieController::class)->group(function () {
+        Route::get('/saved-cookies', 'index')->name('saved-cookies.index');
+        Route::post('/saved-cookies', 'store')->name('saved-cookies.store');
+        Route::get('/saved-cookies/{savedCookie}', 'show')->name('saved-cookies.show');
+        Route::delete('/saved-cookies/{savedCookie}', 'destroy')->name('saved-cookies.destroy');
     });
 });

@@ -1,4 +1,4 @@
-import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../wayfinder'
+import { queryParams, type RouteQueryOptions, type RouteDefinition, applyUrlDefaults } from './../../../wayfinder'
 /**
 * @see \App\Http\Controllers\CloudFolderController::store
  * @see app/Http/Controllers/CloudFolderController.php:21
@@ -57,27 +57,6 @@ store.post = (args: { connection: string | number | { id: string | number } } | 
     method: 'post',
 })
 
-    /**
-* @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:21
- * @route '/connections/{connection}/folders'
- */
-    const storeForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-        action: store.url(args, options),
-        method: 'post',
-    })
-
-            /**
-* @see \App\Http\Controllers\CloudFolderController::store
- * @see app/Http/Controllers/CloudFolderController.php:21
- * @route '/connections/{connection}/folders'
- */
-        storeForm.post = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
-            action: store.url(args, options),
-            method: 'post',
-        })
-    
-    store.form = storeForm
 /**
 * @see \App\Http\Controllers\Api\CloudFolderListController::index
  * @see app/Http/Controllers/Api/CloudFolderListController.php:15
@@ -144,42 +123,6 @@ index.head = (args: { connection: string | number | { id: string | number } } | 
     url: index.url(args, options),
     method: 'head',
 })
-
-    /**
-* @see \App\Http\Controllers\Api\CloudFolderListController::index
- * @see app/Http/Controllers/Api/CloudFolderListController.php:15
- * @route '/connections/{connection}/folders'
- */
-    const indexForm = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-        action: index.url(args, options),
-        method: 'get',
-    })
-
-            /**
-* @see \App\Http\Controllers\Api\CloudFolderListController::index
- * @see app/Http/Controllers/Api/CloudFolderListController.php:15
- * @route '/connections/{connection}/folders'
- */
-        indexForm.get = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: index.url(args, options),
-            method: 'get',
-        })
-            /**
-* @see \App\Http\Controllers\Api\CloudFolderListController::index
- * @see app/Http/Controllers/Api/CloudFolderListController.php:15
- * @route '/connections/{connection}/folders'
- */
-        indexForm.head = (args: { connection: string | number | { id: string | number } } | [connection: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
-            action: index.url(args, {
-                        [options?.mergeQuery ? 'mergeQuery' : 'query']: {
-                            _method: 'HEAD',
-                            ...(options?.query ?? options?.mergeQuery ?? {}),
-                        }
-                    }),
-            method: 'get',
-        })
-    
-    index.form = indexForm
 const folders = {
     store: Object.assign(store, store),
 index: Object.assign(index, index),
