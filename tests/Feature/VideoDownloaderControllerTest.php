@@ -22,6 +22,7 @@ it('renders the video downloader page for authenticated users', function () {
         ->assertOk()
         ->assertInertia(fn (AssertableInertia $page) => $page
             ->component('video-downloader/index')
+            ->has('savedCookies')
         );
 });
 

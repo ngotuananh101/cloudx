@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\ActivityAction;
 use App\Exceptions\PythonServiceException;
+use App\Models\SavedCookie;
 use App\Services\ActivityLogger;
 use App\Services\CloudStorage\RemoteUploadUrlGuard;
 use App\Services\Python\YtDlpClient;
@@ -25,9 +26,16 @@ class VideoDownloaderController extends Controller
         private RemoteUploadUrlGuard $urlGuard,
     ) {}
 
-    public function index(): Response
+    public function index(Request $request): Response
     {
-        return Inertia::render('video-downloader/index');
+        $savedCookies = SavedCookie::query()
+            ->where('user_id', $request->user()->id)
+            ->orderByDesc('created_at')
+            ->get(['id', 'label', 'created_at']);
+
+        return Inertia::render('video-downloader/index', [
+            'savedCookies' => $savedCookies,
+        ]);
     }
 
     public function metadata(Request $request): JsonResponse

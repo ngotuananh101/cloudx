@@ -1,5 +1,5 @@
 import { Download, Loader2, Save, Trash2 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import type { FormEvent } from 'react';
 import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
@@ -42,7 +42,11 @@ function formatCount(value: number): string {
     return String(value);
 }
 
-export default function VideoDownloaderIndex() {
+export default function VideoDownloaderIndex({
+    savedCookies: initialSavedCookies,
+}: {
+    savedCookies: SavedCookie[];
+}) {
     const [url, setUrl] = useState('');
     const [cookies, setCookies] = useState('');
     const [showCookies, setShowCookies] = useState(false);
@@ -52,7 +56,8 @@ export default function VideoDownloaderIndex() {
     const [selectedFormatId, setSelectedFormatId] = useState<string | null>(
         null,
     );
-    const [savedCookies, setSavedCookies] = useState<SavedCookie[]>([]);
+    const [savedCookies, setSavedCookies] =
+        useState<SavedCookie[]>(initialSavedCookies);
     const [saveLabel, setSaveLabel] = useState('');
     const [showSaveInput, setShowSaveInput] = useState(false);
     const [savingCookie, setSavingCookie] = useState(false);
@@ -64,7 +69,7 @@ export default function VideoDownloaderIndex() {
         Accept: 'application/json',
     };
 
-    const fetchSavedCookies = async () => {
+    const refreshSavedCookies = async () => {
         try {
             const response = await fetch(SavedCookieController.index.url(), {
                 headers: jsonHeaders,
@@ -78,10 +83,6 @@ export default function VideoDownloaderIndex() {
             // silently ignore — saved cookies are a convenience
         }
     };
-
-    useEffect(() => {
-        fetchSavedCookies();
-    }, []);
 
     const loadSavedCookie = async (id: number) => {
         try {
@@ -115,7 +116,7 @@ export default function VideoDownloaderIndex() {
             if (response.ok) {
                 setSaveLabel('');
                 setShowSaveInput(false);
-                await fetchSavedCookies();
+                await refreshSavedCookies();
             }
         } catch {
             // silently ignore
