@@ -1,4 +1,5 @@
 import Auth from './Auth'
+import VideoDownloaderController from './VideoDownloaderController'
 import ShareViewController from './ShareViewController'
 import HomeController from './HomeController'
 import System from './System'
@@ -19,10 +20,10 @@ import CloudUploadTaskController from './CloudUploadTaskController'
 import CloudUploadTaskChunkController from './CloudUploadTaskChunkController'
 import CloudUploadPresignController from './CloudUploadPresignController'
 import CloudUploadDirectCompleteController from './CloudUploadDirectCompleteController'
-import VideoDownloaderController from './VideoDownloaderController'
 import SavedCookieController from './SavedCookieController'
 const Controllers = {
     Auth: Object.assign(Auth, Auth),
+VideoDownloaderController: Object.assign(VideoDownloaderController, VideoDownloaderController),
 ShareViewController: Object.assign(ShareViewController, ShareViewController),
 HomeController: Object.assign(HomeController, HomeController),
 System: Object.assign(System, System),
@@ -43,7 +44,6 @@ CloudUploadTaskController: Object.assign(CloudUploadTaskController, CloudUploadT
 CloudUploadTaskChunkController: Object.assign(CloudUploadTaskChunkController, CloudUploadTaskChunkController),
 CloudUploadPresignController: Object.assign(CloudUploadPresignController, CloudUploadPresignController),
 CloudUploadDirectCompleteController: Object.assign(CloudUploadDirectCompleteController, CloudUploadDirectCompleteController),
-VideoDownloaderController: Object.assign(VideoDownloaderController, VideoDownloaderController),
 SavedCookieController: Object.assign(SavedCookieController, SavedCookieController),
 }
 
