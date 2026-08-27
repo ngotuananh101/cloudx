@@ -18,6 +18,7 @@ export interface VideoMetadata {
     description: string;
     webpage_url: string;
     formats: VideoFormat[];
+    cookies_warning?: string | null;
 }
 
 export interface SavedCookie {

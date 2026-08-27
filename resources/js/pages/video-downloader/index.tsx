@@ -1,4 +1,13 @@
-import { Cookie, Download, Loader2, Plus, Save, Trash2, X } from 'lucide-react';
+import {
+    AlertTriangle,
+    Cookie,
+    Download,
+    Loader2,
+    Plus,
+    Save,
+    Trash2,
+    X,
+} from 'lucide-react';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
@@ -442,6 +451,13 @@ export default function VideoDownloaderIndex({
                 {/* Metadata Card */}
                 {metadata && (
                     <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+                        {metadata.cookies_warning && (
+                            <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-600 dark:text-amber-400">
+                                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                                <span>{metadata.cookies_warning}</span>
+                            </div>
+                        )}
+
                         <div className="flex flex-col gap-4 sm:flex-row">
                             {metadata.thumbnail && (
                                 <img
