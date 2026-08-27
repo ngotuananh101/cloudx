@@ -74,11 +74,11 @@ editConfig.head = (args: { connection: string | number | { id: string | number }
     method: 'head',
 })
 const connections = {
-    editConfig: Object.assign(editConfig, editConfig),
-ftp: Object.assign(ftp, ftp),
+    ftp: Object.assign(ftp, ftp),
 s3: Object.assign(s3, s3),
 sftp: Object.assign(sftp, sftp),
 telegram: Object.assign(telegram, telegram),
+editConfig: Object.assign(editConfig, editConfig),
 items: Object.assign(items, items),
 folders: Object.assign(folders, folders),
 shares: Object.assign(shares, shares),
