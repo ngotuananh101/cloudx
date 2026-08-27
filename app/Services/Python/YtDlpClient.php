@@ -41,13 +41,21 @@ class YtDlpClient extends PythonServiceClient
      *
      * @return array{job_id: string, status: string}
      */
-    public function startDownloadJob(string $url, string $formatId, bool $audioOnly, ?string $cookies = null): array
-    {
+    public function startDownloadJob(
+        string $url,
+        string $formatId,
+        bool $audioOnly,
+        ?string $cookies = null,
+        ?string $callbackUrl = null,
+        ?string $callbackToken = null,
+    ): array {
         $response = $this->post('/yt-dlp/jobs', array_filter([
             'url' => $url,
             'format_id' => $formatId,
             'audio_only' => $audioOnly,
             'cookies' => $cookies,
+            'callback_url' => $callbackUrl,
+            'callback_token' => $callbackToken,
         ], fn ($v) => $v !== null));
 
         $body = $response->json();

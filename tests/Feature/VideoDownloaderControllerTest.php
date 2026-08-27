@@ -1,7 +1,9 @@
 <?php
 
+use App\Events\VideoDownloadJobUpdated;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Inertia\Testing\AssertableInertia;
 
@@ -214,3 +216,38 @@ it('returns 409 when job file is requested before ready', function () {
         ->get(route('video-downloader.jobs.download', 'abc123hex'))
         ->assertStatus(409);
 });
+
+it('broadcasts VideoDownloadJobUpdated event when progress webhook is called', function () {
+    Event::fake();
+
+    $user = User::factory()->create();
+
+    $this->postJson(route('internal.video-downloader.progress', ['user_id' => $user->id]), [
+        'job_id' => 'abc123hex',
+        'status' => 'downloading',
+        'progress' => 45.5,
+        'speed_str' => '2.5MiB/s',
+        'eta_str' => '00:10',
+        'filename' => 'sample.mp4',
+        'error' => '',
+    ], ['X-Token' => 'test-token'])
+        ->assertOk()
+        ->assertJson(['success' => true]);
+
+    Event::assertDispatched(VideoDownloadJobUpdated::class, function (VideoDownloadJobUpdated $event) use ($user) {
+        return $event->userId === $user->id
+            && $event->jobData['job_id'] === 'abc123hex'
+            && $event->jobData['status'] === 'downloading'
+            && $event->jobData['progress'] === 45.5;
+    });
+});
+
+it('rejects progress webhook with invalid token', function () {
+    $user = User::factory()->create();
+
+    $this->postJson(route('internal.video-downloader.progress', ['user_id' => $user->id]), [
+        'job_id' => 'abc123hex',
+    ], ['X-Token' => 'wrong-token'])
+        ->assertStatus(403);
+});
+

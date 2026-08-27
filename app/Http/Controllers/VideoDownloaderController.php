@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Enums\ActivityAction;
+use App\Events\VideoDownloadJobUpdated;
 use App\Exceptions\DownloadFileNotReadyException;
 use App\Exceptions\DownloadJobNotFoundException;
 use App\Exceptions\PythonServiceException;
@@ -85,12 +86,20 @@ class VideoDownloaderController extends Controller
 
         $request->session()->put('video_downloader.url', $validated['url']);
 
+        $user = $request->user();
+        $callbackToken = config('services.python-service.token');
+        $callbackUrl = route('internal.video-downloader.progress', [
+            'user_id' => $user->id,
+        ]);
+
         try {
             $job = $this->client->startDownloadJob(
                 $validated['url'],
                 $validated['format_id'],
                 (bool) ($validated['audio_only'] ?? false),
                 $cookies,
+                $callbackUrl,
+                $callbackToken,
             );
         } catch (PythonServiceException $exception) {
             Log::warning('yt-dlp job start failed.', [
@@ -104,6 +113,35 @@ class VideoDownloaderController extends Controller
         }
 
         return response()->json($job);
+    }
+
+    public function progressWebhook(Request $request): JsonResponse
+    {
+        $token = $request->header('X-Token') ?? $request->bearerToken();
+        $expectedToken = config('services.python-service.token');
+
+        if (! empty($expectedToken) && ! hash_equals((string) $expectedToken, (string) $token)) {
+            return response()->json(['message' => 'Unauthorized.'], 403);
+        }
+
+        $userId = (int) $request->query('user_id', $request->input('user_id'));
+        if ($userId <= 0) {
+            return response()->json(['message' => 'Invalid user ID.'], 422);
+        }
+
+        $jobData = [
+            'job_id' => (string) $request->input('job_id', ''),
+            'status' => (string) $request->input('status', 'pending'),
+            'progress' => (float) $request->input('progress', 0.0),
+            'speed_str' => (string) $request->input('speed_str', ''),
+            'eta_str' => (string) $request->input('eta_str', ''),
+            'filename' => (string) $request->input('filename', ''),
+            'error' => (string) $request->input('error', ''),
+        ];
+
+        broadcast(new VideoDownloadJobUpdated($userId, $jobData));
+
+        return response()->json(['success' => true]);
     }
 
     public function jobStatus(Request $request, string $jobId): JsonResponse

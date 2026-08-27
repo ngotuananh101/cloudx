@@ -1,3 +1,5 @@
+import { usePage } from '@inertiajs/react';
+import { useConnectionStatus, useEcho } from '@laravel/echo-react';
 import {
     AlertCircle,
     AlertTriangle,
@@ -17,6 +19,7 @@ import { Progress } from '@/components/ui/progress';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { xsrfToken } from '@/lib/csrf';
 import { formatBytes } from '@/lib/format-bytes';
+import type { User } from '@/types';
 import type {
     DownloadJob,
     SavedCookie,
@@ -292,14 +295,36 @@ export default function VideoDownloaderIndex({
         }
     };
 
-    // Polling effect for active download job
+    const { props } = usePage<{ auth?: { user?: User | null } }>();
+    const user = props.auth?.user;
+    const connectionStatus = useConnectionStatus();
+
+    // Handle incoming real-time socket updates for video downloads
+    const handleJobUpdate = (updated: DownloadJob) => {
+        if (!job || job.job_id !== updated.job_id) {
+            return;
+        }
+
+        setJob(updated);
+
+        if (updated.status === 'failed' && updated.error) {
+            setJobError(updated.error);
+        }
+
+        if (updated.status === 'completed' && !downloadTriggeredRef.current) {
+            downloadTriggeredRef.current = true;
+            globalThis.location.href = `/video-downloader/jobs/${updated.job_id}/download`;
+        }
+    };
+
+    // Polling fallback only when WebSocket is disconnected or reconnecting
     const activeJobId =
         job && job.status !== 'completed' && job.status !== 'failed'
             ? job.job_id
             : null;
 
     useEffect(() => {
-        if (!activeJobId) {
+        if (!activeJobId || connectionStatus === 'connected') {
             return;
         }
 
@@ -350,19 +375,7 @@ export default function VideoDownloaderIndex({
                 const updated = (await response.json()) as DownloadJob;
 
                 if (!isCancelled) {
-                    setJob(updated);
-
-                    if (updated.status === 'failed' && updated.error) {
-                        setJobError(updated.error);
-                    }
-
-                    if (
-                        updated.status === 'completed' &&
-                        !downloadTriggeredRef.current
-                    ) {
-                        downloadTriggeredRef.current = true;
-                        globalThis.location.href = `/video-downloader/jobs/${updated.job_id}/download`;
-                    }
+                    handleJobUpdate(updated);
                 }
             } catch {
                 // Silently ignore transient network blips while polling
@@ -378,7 +391,7 @@ export default function VideoDownloaderIndex({
             isCancelled = true;
             globalThis.clearInterval(intervalId);
         };
-    }, [activeJobId]);
+    }, [activeJobId, connectionStatus]);
 
     return (
         <AuthenticatedLayout title="Video Downloader">
@@ -801,6 +814,29 @@ export default function VideoDownloaderIndex({
                     </div>
                 )}
             </div>
+
+            {user?.id ? (
+                <VideoDownloadJobBroadcastListener
+                    userId={user.id}
+                    onUpdate={handleJobUpdate}
+                />
+            ) : null}
         </AuthenticatedLayout>
     );
+}
+
+function VideoDownloadJobBroadcastListener({
+    userId,
+    onUpdate,
+}: {
+    userId: number;
+    onUpdate: (job: DownloadJob) => void;
+}) {
+    useEcho<DownloadJob>(
+        `users.${userId}.video-jobs`,
+        '.VideoDownloadJobUpdated',
+        onUpdate,
+    );
+
+    return null;
 }
