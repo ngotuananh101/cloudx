@@ -13,9 +13,8 @@ import {
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { Progress } from '@/components/ui/progress';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
 import { xsrfToken } from '@/lib/csrf';
 import { formatBytes } from '@/lib/format-bytes';
 import type {
@@ -25,6 +24,7 @@ import type {
     VideoFormat,
     VideoMetadata,
 } from '@/types/video-downloader';
+import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 
 function formatDuration(seconds: number): string {
     if (!Number.isFinite(seconds) || seconds < 0) {
@@ -111,6 +111,7 @@ export default function VideoDownloaderIndex({
             setSelectedCookieId('');
             setSelectedCookieLabel('');
             setCookies('');
+
             return;
         }
 
@@ -281,14 +282,21 @@ export default function VideoDownloaderIndex({
                 error: '',
             });
         } catch (err) {
-            setJobError(err instanceof Error ? err.message : 'Could not start download.');
+            setJobError(
+                err instanceof Error
+                    ? err.message
+                    : 'Could not start download.',
+            );
         } finally {
             setStartingJob(false);
         }
     };
 
     // Polling effect for active download job
-    const activeJobId = job && job.status !== 'completed' && job.status !== 'failed' ? job.job_id : null;
+    const activeJobId =
+        job && job.status !== 'completed' && job.status !== 'failed'
+            ? job.job_id
+            : null;
 
     useEffect(() => {
         if (!activeJobId) {
@@ -299,24 +307,39 @@ export default function VideoDownloaderIndex({
         let inFlight = false;
 
         const pollTick = async () => {
-            if (inFlight) return;
+            if (inFlight) {
+return;
+}
+
             inFlight = true;
 
             try {
-                const response = await fetch(`/video-downloader/jobs/${activeJobId}`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'X-XSRF-TOKEN': xsrfToken(),
-                        Accept: 'application/json',
+                const response = await fetch(
+                    `/video-downloader/jobs/${activeJobId}`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-XSRF-TOKEN': xsrfToken(),
+                            Accept: 'application/json',
+                        },
                     },
-                });
+                );
 
                 if (response.status === 404) {
                     if (!isCancelled) {
                         setJobError('Download job not found or expired.');
-                        setJob((prev) => (prev ? { ...prev, status: 'failed', error: 'Job expired' } : null));
+                        setJob((prev) =>
+                            prev
+                                ? {
+                                      ...prev,
+                                      status: 'failed',
+                                      error: 'Job expired',
+                                  }
+                                : null,
+                        );
                     }
+
                     return;
                 }
 
@@ -325,12 +348,18 @@ export default function VideoDownloaderIndex({
                 }
 
                 const updated = (await response.json()) as DownloadJob;
+
                 if (!isCancelled) {
                     setJob(updated);
+
                     if (updated.status === 'failed' && updated.error) {
                         setJobError(updated.error);
                     }
-                    if (updated.status === 'completed' && !downloadTriggeredRef.current) {
+
+                    if (
+                        updated.status === 'completed' &&
+                        !downloadTriggeredRef.current
+                    ) {
                         downloadTriggeredRef.current = true;
                         globalThis.location.href = `/video-downloader/jobs/${updated.job_id}/download`;
                     }
@@ -359,7 +388,8 @@ export default function VideoDownloaderIndex({
                         Video Downloader
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Paste a video URL to fetch available formats and download the file.
+                        Paste a video URL to fetch available formats and
+                        download the file.
                     </p>
                 </div>
 
@@ -668,18 +698,28 @@ export default function VideoDownloaderIndex({
                                             <AlertCircle className="h-4 w-4 text-destructive" />
                                         )}
                                         <span className="text-xs font-bold text-foreground">
-                                            {job.status === 'pending' && 'Preparing download...'}
-                                            {job.status === 'downloading' && 'Downloading from YouTube...'}
-                                            {job.status === 'converting' && 'Converting & merging streams...'}
-                                            {job.status === 'completed' && 'Download ready! Starting file transfer...'}
-                                            {job.status === 'failed' && 'Download failed.'}
+                                            {job.status === 'pending' &&
+                                                'Preparing download...'}
+                                            {job.status === 'downloading' &&
+                                                'Downloading from YouTube...'}
+                                            {job.status === 'converting' &&
+                                                'Converting & merging streams...'}
+                                            {job.status === 'completed' &&
+                                                'Download ready! Starting file transfer...'}
+                                            {job.status === 'failed' &&
+                                                'Download failed.'}
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                                        {job.speed_str && <span>{job.speed_str}</span>}
-                                        {job.eta_str && <span>ETA: {job.eta_str}</span>}
+                                        {job.speed_str && (
+                                            <span>{job.speed_str}</span>
+                                        )}
+                                        {job.eta_str && (
+                                            <span>ETA: {job.eta_str}</span>
+                                        )}
                                         <span className="font-bold text-foreground">
-                                            {job.status === 'completed' || job.status === 'converting'
+                                            {job.status === 'completed' ||
+                                            job.status === 'converting'
                                                 ? '100%'
                                                 : `${job.progress.toFixed(1)}%`}
                                         </span>
@@ -695,7 +735,8 @@ export default function VideoDownloaderIndex({
 
                                 <Progress
                                     value={
-                                        job.status === 'completed' || job.status === 'converting'
+                                        job.status === 'completed' ||
+                                        job.status === 'converting'
                                             ? 100
                                             : job.progress
                                     }
@@ -704,7 +745,10 @@ export default function VideoDownloaderIndex({
 
                                 {job.filename && (
                                     <p className="truncate text-xs text-muted-foreground">
-                                        File: <span className="font-medium text-foreground">{job.filename}</span>
+                                        File:{' '}
+                                        <span className="font-medium text-foreground">
+                                            {job.filename}
+                                        </span>
                                     </p>
                                 )}
                             </div>
@@ -730,7 +774,13 @@ export default function VideoDownloaderIndex({
                         <button
                             type="button"
                             onClick={startDownloadJob}
-                            disabled={!selectedFormat || startingJob || (job !== null && job.status !== 'failed' && job.status !== 'completed')}
+                            disabled={
+                                !selectedFormat ||
+                                startingJob ||
+                                (job !== null &&
+                                    job.status !== 'failed' &&
+                                    job.status !== 'completed')
+                            }
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
                         >
                             {startingJob ? (

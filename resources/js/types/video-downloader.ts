@@ -33,11 +33,7 @@ export interface SavedCookieDetail extends SavedCookie {
 }
 
 export type DownloadJobStatus =
-    | 'pending'
-    | 'downloading'
-    | 'converting'
-    | 'completed'
-    | 'failed';
+    'pending' | 'downloading' | 'converting' | 'completed' | 'failed';
 
 export interface DownloadJob {
     job_id: string;
