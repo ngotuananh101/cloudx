@@ -308,8 +308,8 @@ export default function VideoDownloaderIndex({
 
         const pollTick = async () => {
             if (inFlight) {
-return;
-}
+                return;
+            }
 
             inFlight = true;
 

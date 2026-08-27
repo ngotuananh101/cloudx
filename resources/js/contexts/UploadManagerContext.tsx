@@ -865,7 +865,10 @@ export function UploadManagerProvider({
     useEffect(() => {
         // When WebSocket is connected, rely entirely on Echo broadcast events.
         // Fallback polling is only active when WebSocket is disconnected or reconnecting.
-        if (connectionStatus === 'connected' || !activeTaskIdsAndConnectionIds) {
+        if (
+            connectionStatus === 'connected' ||
+            !activeTaskIdsAndConnectionIds
+        ) {
             return;
         }
 
