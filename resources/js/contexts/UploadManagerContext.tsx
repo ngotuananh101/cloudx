@@ -1,5 +1,5 @@
 import { router, usePage } from '@inertiajs/react';
-import { useEcho } from '@laravel/echo-react';
+import { useConnectionStatus, useEcho } from '@laravel/echo-react';
 import {
     createContext,
     useCallback,
@@ -860,8 +860,12 @@ export function UploadManagerProvider({
         .sort()
         .join(',');
 
+    const connectionStatus = useConnectionStatus();
+
     useEffect(() => {
-        if (!activeTaskIdsAndConnectionIds) {
+        // When WebSocket is connected, rely entirely on Echo broadcast events.
+        // Fallback polling is only active when WebSocket is disconnected or reconnecting.
+        if (connectionStatus === 'connected' || !activeTaskIdsAndConnectionIds) {
             return;
         }
 
@@ -904,7 +908,7 @@ export function UploadManagerProvider({
         return () => {
             globalThis.clearInterval(intervalId);
         };
-    }, [activeTaskIdsAndConnectionIds, mergeBroadcastTask]);
+    }, [activeTaskIdsAndConnectionIds, connectionStatus, mergeBroadcastTask]);
 
     const value = useMemo(
         () => ({
