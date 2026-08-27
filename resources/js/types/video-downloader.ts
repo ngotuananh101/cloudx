@@ -7,6 +7,7 @@ export interface VideoFormat {
     acodec: string | null;
     tbr: number | null;
     format_note: string | null;
+    audio_only?: boolean;
 }
 
 export interface VideoMetadata {

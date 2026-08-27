@@ -81,7 +81,7 @@ export function FileTableRow({
         capabilities?.delete,
     );
 
-    const handleFolderKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const handleFolderKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
         if (!item.isDirectory || (event.key !== 'Enter' && event.key !== ' ')) {
             return;
         }

@@ -59,7 +59,7 @@ export function Navbar({ cloudSearch, cloudActions }: Readonly<NavbarProps>) {
                             <Eraser className="h-5 w-5 text-muted-foreground" />
                         </button>
 
-                        {activeConnection.provider == '7' && (
+                        {activeConnection.provider === 7 && (
                             <button
                                 type="button"
                                 title="Sync"

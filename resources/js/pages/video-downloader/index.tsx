@@ -11,7 +11,7 @@ import {
     Trash2,
     X,
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
@@ -83,7 +83,7 @@ export default function VideoDownloaderIndex({
     const [job, setJob] = useState<DownloadJob | null>(null);
     const [startingJob, setStartingJob] = useState(false);
     const [jobError, setJobError] = useState<string | null>(null);
-    const [downloadTriggered, setDownloadTriggered] = useState(false);
+    const downloadTriggeredRef = useRef(false);
 
     const jsonHeaders = {
         'Content-Type': 'application/json',
@@ -203,7 +203,7 @@ export default function VideoDownloaderIndex({
         setSelectedFormatId(null);
         setJob(null);
         setJobError(null);
-        setDownloadTriggered(false);
+        downloadTriggeredRef.current = false;
 
         try {
             const response = await fetch('/video-downloader/metadata', {
@@ -247,7 +247,7 @@ export default function VideoDownloaderIndex({
 
         setStartingJob(true);
         setJobError(null);
-        setDownloadTriggered(false);
+        downloadTriggeredRef.current = false;
 
         try {
             const response = await fetch('/video-downloader/jobs', {
@@ -288,8 +288,10 @@ export default function VideoDownloaderIndex({
     };
 
     // Polling effect for active download job
+    const activeJobId = job && job.status !== 'completed' && job.status !== 'failed' ? job.job_id : null;
+
     useEffect(() => {
-        if (!job || job.status === 'completed' || job.status === 'failed') {
+        if (!activeJobId) {
             return;
         }
 
@@ -301,8 +303,13 @@ export default function VideoDownloaderIndex({
             inFlight = true;
 
             try {
-                const response = await fetch(`/video-downloader/jobs/${job.job_id}`, {
-                    headers: jsonHeaders,
+                const response = await fetch(`/video-downloader/jobs/${activeJobId}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'X-XSRF-TOKEN': xsrfToken(),
+                        Accept: 'application/json',
+                    },
                 });
 
                 if (response.status === 404) {
@@ -323,6 +330,10 @@ export default function VideoDownloaderIndex({
                     if (updated.status === 'failed' && updated.error) {
                         setJobError(updated.error);
                     }
+                    if (updated.status === 'completed' && !downloadTriggeredRef.current) {
+                        downloadTriggeredRef.current = true;
+                        globalThis.location.href = `/video-downloader/jobs/${updated.job_id}/download`;
+                    }
                 }
             } catch {
                 // Silently ignore transient network blips while polling
@@ -338,15 +349,7 @@ export default function VideoDownloaderIndex({
             isCancelled = true;
             globalThis.clearInterval(intervalId);
         };
-    }, [job?.job_id, job?.status]);
-
-    // Auto-trigger browser download on completion
-    useEffect(() => {
-        if (job?.status === 'completed' && !downloadTriggered) {
-            setDownloadTriggered(true);
-            globalThis.location.href = `/video-downloader/jobs/${job.job_id}/download`;
-        }
-    }, [job?.status, job?.job_id, downloadTriggered]);
+    }, [activeJobId]);
 
     return (
         <AuthenticatedLayout title="Video Downloader">
