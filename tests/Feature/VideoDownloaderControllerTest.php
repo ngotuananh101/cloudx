@@ -250,4 +250,3 @@ it('rejects progress webhook with invalid token', function () {
     ], ['X-Token' => 'wrong-token'])
         ->assertStatus(403);
 });
-
