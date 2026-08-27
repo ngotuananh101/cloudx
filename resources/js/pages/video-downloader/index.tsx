@@ -100,6 +100,7 @@ export default function VideoDownloaderIndex({
             setSelectedCookieId('');
             setSelectedCookieLabel('');
             setCookies('');
+
             return;
         }
 
@@ -161,7 +162,9 @@ export default function VideoDownloaderIndex({
         if (!selectedCookieId) {
             return;
         }
+
         const id = Number(selectedCookieId);
+
         try {
             await fetch(SavedCookieController.destroy.url(id), {
                 method: 'DELETE',
@@ -368,7 +371,9 @@ export default function VideoDownloaderIndex({
                                 <input
                                     type="text"
                                     value={saveLabel}
-                                    onChange={(e) => setSaveLabel(e.target.value)}
+                                    onChange={(e) =>
+                                        setSaveLabel(e.target.value)
+                                    }
                                     placeholder="Label, e.g. YouTube main acc"
                                     className="h-8 flex-1 rounded-lg border border-border bg-background px-2 text-xs text-foreground outline-none focus:border-ring focus:ring-2 focus:ring-ring/50"
                                     onKeyDown={(e) => {
