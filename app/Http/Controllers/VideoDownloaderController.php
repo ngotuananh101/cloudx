@@ -77,12 +77,17 @@ class VideoDownloaderController extends Controller
             'url' => ['required', 'string', 'url', 'max:2048'],
             'format_id' => ['required', 'string', 'max:64'],
             'audio_only' => ['nullable', 'boolean'],
+            'cookies' => ['nullable', 'string'],
         ]);
 
         $this->urlGuard->validate($validated['url']);
 
-        $cookies = $request->session()->get('video_downloader.cookies');
+        $cookies = $validated['cookies'] ?? $request->session()->get('video_downloader.cookies');
         $cookies = is_string($cookies) ? $cookies : null;
+
+        if ($cookies) {
+            $request->session()->put('video_downloader.cookies', $cookies);
+        }
 
         $request->session()->put('video_downloader.url', $validated['url']);
 

@@ -1,5 +1,5 @@
 import { usePage } from '@inertiajs/react';
-import { useConnectionStatus, useEcho } from '@laravel/echo-react';
+import { useEcho } from '@laravel/echo-react';
 import {
     AlertCircle,
     AlertTriangle,
@@ -261,6 +261,7 @@ export default function VideoDownloaderIndex({
                     url,
                     format_id: selectedFormatId,
                     audio_only: selectedFormat?.audio_only ?? false,
+                    cookies: cookies || null,
                 }),
             });
 
@@ -297,7 +298,6 @@ export default function VideoDownloaderIndex({
 
     const { props } = usePage<{ auth?: { user?: User | null } }>();
     const user = props.auth?.user;
-    const connectionStatus = useConnectionStatus();
 
     // Handle incoming real-time socket updates for video downloads
     const handleJobUpdate = (updated: DownloadJob) => {
@@ -317,14 +317,14 @@ export default function VideoDownloaderIndex({
         }
     };
 
-    // Polling fallback only when WebSocket is disconnected or reconnecting
+    // Active polling (1.5s interval) as dual safety-net with WebSocket
     const activeJobId =
         job && job.status !== 'completed' && job.status !== 'failed'
             ? job.job_id
             : null;
 
     useEffect(() => {
-        if (!activeJobId || connectionStatus === 'connected') {
+        if (!activeJobId) {
             return;
         }
 
@@ -384,14 +384,14 @@ export default function VideoDownloaderIndex({
             }
         };
 
-        const intervalId = globalThis.setInterval(pollTick, 1000);
-        pollTick(); // Immediate first poll
+        const intervalId = globalThis.setInterval(pollTick, 1500);
+        pollTick(); // Immediate first check
 
         return () => {
             isCancelled = true;
             globalThis.clearInterval(intervalId);
         };
-    }, [activeJobId, connectionStatus]);
+    }, [activeJobId]);
 
     return (
         <AuthenticatedLayout title="Video Downloader">
