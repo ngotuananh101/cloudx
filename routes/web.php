@@ -114,7 +114,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::controller(VideoDownloaderController::class)->group(function () {
         Route::get('/video-downloader', 'index')->name('video-downloader.index');
         Route::post('/video-downloader/metadata', 'metadata')->name('video-downloader.metadata');
-        Route::get('/video-downloader/download', 'download')->name('video-downloader.download');
+        Route::post('/video-downloader/jobs', 'startJob')->name('video-downloader.jobs.store');
+        Route::get('/video-downloader/jobs/{jobId}', 'jobStatus')->name('video-downloader.jobs.show');
+        Route::get('/video-downloader/jobs/{jobId}/download', 'jobDownload')->name('video-downloader.jobs.download');
     });
 
     Route::controller(SavedCookieController::class)->group(function () {

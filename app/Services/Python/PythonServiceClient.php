@@ -74,9 +74,15 @@ class PythonServiceClient
         return $response;
     }
 
-    protected function get(string $path, array $query = [], int $timeout = 30): Response
+    protected function get(string $path, array $query = [], int $timeout = 30, array $passthroughStatuses = []): Response
     {
         $response = $this->request($timeout)->get($this->baseUrl.$path, $query);
+
+        $this->assertAuthenticated($response);
+
+        if (in_array($response->status(), $passthroughStatuses, true)) {
+            return $response;
+        }
 
         $this->assertSuccess($response);
 

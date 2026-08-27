@@ -1,25 +1,30 @@
 import {
+    AlertCircle,
     AlertTriangle,
+    CheckCircle2,
     Cookie,
     Download,
     Loader2,
     Plus,
+    RotateCw,
     Save,
     Trash2,
     X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FormEvent } from 'react';
+import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout';
+import { Progress } from '@/components/ui/progress';
 import { xsrfToken } from '@/lib/csrf';
 import { formatBytes } from '@/lib/format-bytes';
 import type {
+    DownloadJob,
     SavedCookie,
     SavedCookieDetail,
     VideoFormat,
     VideoMetadata,
 } from '@/types/video-downloader';
-import SavedCookieController from '@/actions/App/Http/Controllers/SavedCookieController';
 
 function formatDuration(seconds: number): string {
     if (!Number.isFinite(seconds) || seconds < 0) {
@@ -74,6 +79,12 @@ export default function VideoDownloaderIndex({
     const [savingCookie, setSavingCookie] = useState(false);
     const [loadingCookie, setLoadingCookie] = useState(false);
 
+    // Async download job states
+    const [job, setJob] = useState<DownloadJob | null>(null);
+    const [startingJob, setStartingJob] = useState(false);
+    const [jobError, setJobError] = useState<string | null>(null);
+    const [downloadTriggered, setDownloadTriggered] = useState(false);
+
     const jsonHeaders = {
         'Content-Type': 'application/json',
         'X-Requested-With': 'XMLHttpRequest',
@@ -100,7 +111,6 @@ export default function VideoDownloaderIndex({
             setSelectedCookieId('');
             setSelectedCookieLabel('');
             setCookies('');
-
             return;
         }
 
@@ -191,6 +201,9 @@ export default function VideoDownloaderIndex({
         setError(null);
         setMetadata(null);
         setSelectedFormatId(null);
+        setJob(null);
+        setJobError(null);
+        setDownloadTriggered(false);
 
         try {
             const response = await fetch('/video-downloader/metadata', {
@@ -226,22 +239,114 @@ export default function VideoDownloaderIndex({
             (format) => format.format_id === selectedFormatId,
         ) ?? null;
 
-    const triggerDownload = () => {
+    // Start async download job
+    const startDownloadJob = async () => {
         if (!metadata || !selectedFormatId) {
             return;
         }
 
-        const params = new URLSearchParams({
-            url,
-            format_id: selectedFormatId,
-        });
+        setStartingJob(true);
+        setJobError(null);
+        setDownloadTriggered(false);
 
-        if (selectedFormat?.audio_only) {
-            params.set('audio_only', '1');
+        try {
+            const response = await fetch('/video-downloader/jobs', {
+                method: 'POST',
+                headers: jsonHeaders,
+                body: JSON.stringify({
+                    url,
+                    format_id: selectedFormatId,
+                    audio_only: selectedFormat?.audio_only ?? false,
+                }),
+            });
+
+            const data = (await response.json().catch(() => ({}))) as Record<
+                string,
+                unknown
+            >;
+
+            if (!response.ok) {
+                throw new Error(
+                    (data.message as string) ?? 'Failed to start download job.',
+                );
+            }
+
+            setJob({
+                job_id: data.job_id as string,
+                status: (data.status as DownloadJob['status']) || 'pending',
+                progress: 0,
+                speed_str: '',
+                eta_str: '',
+                filename: '',
+                error: '',
+            });
+        } catch (err) {
+            setJobError(err instanceof Error ? err.message : 'Could not start download.');
+        } finally {
+            setStartingJob(false);
+        }
+    };
+
+    // Polling effect for active download job
+    useEffect(() => {
+        if (!job || job.status === 'completed' || job.status === 'failed') {
+            return;
         }
 
-        globalThis.location.href = `/video-downloader/download?${params.toString()}`;
-    };
+        let isCancelled = false;
+        let inFlight = false;
+
+        const pollTick = async () => {
+            if (inFlight) return;
+            inFlight = true;
+
+            try {
+                const response = await fetch(`/video-downloader/jobs/${job.job_id}`, {
+                    headers: jsonHeaders,
+                });
+
+                if (response.status === 404) {
+                    if (!isCancelled) {
+                        setJobError('Download job not found or expired.');
+                        setJob((prev) => (prev ? { ...prev, status: 'failed', error: 'Job expired' } : null));
+                    }
+                    return;
+                }
+
+                if (!response.ok) {
+                    return;
+                }
+
+                const updated = (await response.json()) as DownloadJob;
+                if (!isCancelled) {
+                    setJob(updated);
+                    if (updated.status === 'failed' && updated.error) {
+                        setJobError(updated.error);
+                    }
+                }
+            } catch {
+                // Silently ignore transient network blips while polling
+            } finally {
+                inFlight = false;
+            }
+        };
+
+        const intervalId = globalThis.setInterval(pollTick, 1000);
+        pollTick(); // Immediate first poll
+
+        return () => {
+            isCancelled = true;
+            globalThis.clearInterval(intervalId);
+        };
+    }, [job?.job_id, job?.status]);
+
+    // Auto-trigger browser download on completion
+    useEffect(() => {
+        if (job?.status === 'completed' && !downloadTriggered) {
+            setDownloadTriggered(true);
+            globalThis.location.href = `/video-downloader/jobs/${job.job_id}/download`;
+        }
+    }, [job?.status, job?.job_id, downloadTriggered]);
 
     return (
         <AuthenticatedLayout title="Video Downloader">
@@ -251,8 +356,7 @@ export default function VideoDownloaderIndex({
                         Video Downloader
                     </h1>
                     <p className="mt-1 text-sm text-muted-foreground">
-                        Paste a video URL to fetch available formats and
-                        download the file.
+                        Paste a video URL to fetch available formats and download the file.
                     </p>
                 </div>
 
@@ -365,7 +469,7 @@ export default function VideoDownloaderIndex({
                             </div>
                         )}
 
-                        {/* Save inline input if no saved cookies yet or wanting to add new */}
+                        {/* Save inline input */}
                         {showSaveModal && (
                             <div className="flex items-center gap-2 pt-1">
                                 <input
@@ -455,7 +559,7 @@ export default function VideoDownloaderIndex({
 
                 {/* Metadata Card */}
                 {metadata && (
-                    <div className="space-y-4 rounded-2xl border border-border bg-card p-6 shadow-sm">
+                    <div className="space-y-5 rounded-2xl border border-border bg-card p-6 shadow-sm">
                         {metadata.cookies_warning && (
                             <div className="flex items-start gap-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3.5 text-xs text-amber-600 dark:text-amber-400">
                                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
@@ -490,9 +594,10 @@ export default function VideoDownloaderIndex({
                             </div>
                         </div>
 
+                        {/* Format Selection List */}
                         <div>
                             <h3 className="mb-2 text-xs font-bold tracking-wider text-muted-foreground">
-                                FORMATS
+                                SELECT QUALITY / FORMAT
                             </h3>
                             <ul className="divide-y divide-border rounded-xl border border-border">
                                 {metadata.formats.map((format) => {
@@ -539,17 +644,106 @@ export default function VideoDownloaderIndex({
                             </ul>
                         </div>
 
+                        {/* Progress Taskbar Banner when Download Job is Active */}
+                        {job && (
+                            <div className="space-y-3 rounded-xl border border-primary/30 bg-primary/5 p-4 shadow-sm">
+                                <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                        {job.status === 'downloading' && (
+                                            <Loader2 className="h-4 w-4 animate-spin text-primary" />
+                                        )}
+                                        {job.status === 'converting' && (
+                                            <RotateCw className="h-4 w-4 animate-spin text-primary" />
+                                        )}
+                                        {job.status === 'pending' && (
+                                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+                                        )}
+                                        {job.status === 'completed' && (
+                                            <CheckCircle2 className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                                        )}
+                                        {job.status === 'failed' && (
+                                            <AlertCircle className="h-4 w-4 text-destructive" />
+                                        )}
+                                        <span className="text-xs font-bold text-foreground">
+                                            {job.status === 'pending' && 'Preparing download...'}
+                                            {job.status === 'downloading' && 'Downloading from YouTube...'}
+                                            {job.status === 'converting' && 'Converting & merging streams...'}
+                                            {job.status === 'completed' && 'Download ready! Starting file transfer...'}
+                                            {job.status === 'failed' && 'Download failed.'}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+                                        {job.speed_str && <span>{job.speed_str}</span>}
+                                        {job.eta_str && <span>ETA: {job.eta_str}</span>}
+                                        <span className="font-bold text-foreground">
+                                            {job.status === 'completed' || job.status === 'converting'
+                                                ? '100%'
+                                                : `${job.progress.toFixed(1)}%`}
+                                        </span>
+                                        <button
+                                            type="button"
+                                            onClick={() => setJob(null)}
+                                            className="ml-1 text-muted-foreground hover:text-foreground"
+                                        >
+                                            <X className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <Progress
+                                    value={
+                                        job.status === 'completed' || job.status === 'converting'
+                                            ? 100
+                                            : job.progress
+                                    }
+                                    className="h-2"
+                                />
+
+                                {job.filename && (
+                                    <p className="truncate text-xs text-muted-foreground">
+                                        File: <span className="font-medium text-foreground">{job.filename}</span>
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        {jobError && (
+                            <div className="flex items-center justify-between gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-3.5 text-xs text-destructive">
+                                <div className="flex items-center gap-2">
+                                    <AlertCircle className="h-4 w-4 shrink-0" />
+                                    <span>{jobError}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={startDownloadJob}
+                                    className="shrink-0 font-semibold underline hover:no-underline"
+                                >
+                                    Retry
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Download Trigger Button */}
                         <button
                             type="button"
-                            onClick={triggerDownload}
-                            disabled={!selectedFormat}
+                            onClick={startDownloadJob}
+                            disabled={!selectedFormat || startingJob || (job !== null && job.status !== 'failed' && job.status !== 'completed')}
                             className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-bold text-primary-foreground shadow-sm transition hover:bg-primary/90 disabled:opacity-60"
                         >
-                            <Download className="h-4 w-4" />
-                            Download{' '}
-                            {selectedFormat
-                                ? `${selectedFormat.format_note ?? selectedFormat.format_id}.${selectedFormat.ext}`
-                                : ''}
+                            {startingJob ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Starting...
+                                </>
+                            ) : (
+                                <>
+                                    <Download className="h-4 w-4" />
+                                    Download{' '}
+                                    {selectedFormat
+                                        ? `${selectedFormat.format_note ?? selectedFormat.format_id}.${selectedFormat.ext}`
+                                        : ''}
+                                </>
+                            )}
                         </button>
                     </div>
                 )}

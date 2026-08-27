@@ -30,3 +30,20 @@ export interface SavedCookie {
 export interface SavedCookieDetail extends SavedCookie {
     cookies: string;
 }
+
+export type DownloadJobStatus =
+    | 'pending'
+    | 'downloading'
+    | 'converting'
+    | 'completed'
+    | 'failed';
+
+export interface DownloadJob {
+    job_id: string;
+    status: DownloadJobStatus;
+    progress: number;
+    speed_str: string;
+    eta_str: string;
+    filename: string;
+    error: string;
+}

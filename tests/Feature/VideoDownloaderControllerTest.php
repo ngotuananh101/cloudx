@@ -79,7 +79,7 @@ it('rejects private network urls for metadata requests', function () {
         ->assertJsonValidationErrors(['url']);
 });
 
-it('returns 502 when the microservice fails', function () {
+it('returns 502 when the microservice metadata fails', function () {
     Http::fake([
         'http://localhost:8000/yt-dlp/metadata' => Http::response(['boom' => true], 500),
     ]);
@@ -94,45 +94,123 @@ it('returns 502 when the microservice fails', function () {
         ->assertJson(['message' => 'Could not fetch video metadata.']);
 });
 
-it('streams the downloaded file with the original Content-Disposition filename', function () {
+it('starts a background download job successfully', function () {
     Http::fake([
-        'http://localhost:8000/yt-dlp/download' => Http::response('binary-body', 200, [
+        'http://localhost:8000/yt-dlp/jobs' => Http::response([
+            'job_id' => 'abc123hex',
+            'status' => 'pending',
+        ], 200),
+    ]);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('video-downloader.jobs.store'), [
+            'url' => VD_TEST_URL,
+            'format_id' => '18',
+        ])
+        ->assertOk()
+        ->assertJson([
+            'job_id' => 'abc123hex',
+            'status' => 'pending',
+        ]);
+});
+
+it('returns 422 when start job payload is invalid', function () {
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('video-downloader.jobs.store'), [
+            'format_id' => '18',
+        ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['url']);
+});
+
+it('returns 502 when starting download job fails on microservice', function () {
+    Http::fake([
+        'http://localhost:8000/yt-dlp/jobs' => Http::response(['boom' => true], 500),
+    ]);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->postJson(route('video-downloader.jobs.store'), [
+            'url' => VD_TEST_URL,
+            'format_id' => '18',
+        ])
+        ->assertStatus(502)
+        ->assertJson(['message' => 'Could not start the video download.']);
+});
+
+it('returns job status correctly', function () {
+    Http::fake([
+        'http://localhost:8000/yt-dlp/jobs/abc123hex' => Http::response([
+            'job_id' => 'abc123hex',
+            'status' => 'downloading',
+            'progress' => 55.4,
+            'speed_str' => '3.2MiB/s',
+            'eta_str' => '00:05',
+            'filename' => 'video.mp4',
+            'error' => '',
+        ], 200),
+    ]);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->getJson(route('video-downloader.jobs.show', 'abc123hex'))
+        ->assertOk()
+        ->assertJson([
+            'job_id' => 'abc123hex',
+            'status' => 'downloading',
+            'progress' => 55.4,
+        ]);
+});
+
+it('returns 404 when job status is not found or expired', function () {
+    Http::fake([
+        'http://localhost:8000/yt-dlp/jobs/expired_id' => Http::response([
+            'detail' => 'Job not found',
+        ], 404),
+    ]);
+
+    $user = User::factory()->create();
+
+    $this->actingAs($user)
+        ->getJson(route('video-downloader.jobs.show', 'expired_id'))
+        ->assertStatus(404)
+        ->assertJson(['message' => 'Download job not found or expired.']);
+});
+
+it('streams the completed job file with Content-Disposition header', function () {
+    Http::fake([
+        'http://localhost:8000/yt-dlp/jobs/abc123hex/file' => Http::response('binary-video-stream', 200, [
             'Content-Type' => 'video/mp4',
-            'Content-Disposition' => 'attachment; filename="ytdlp_dl_abc.mp4"',
+            'Content-Disposition' => 'attachment; filename="my_cool_video.mp4"',
+            'Content-Length' => '19',
         ]),
     ]);
 
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->get(route('video-downloader.download', [
-            'url' => VD_TEST_URL,
-            'format_id' => '18',
-        ]))
+        ->get(route('video-downloader.jobs.download', 'abc123hex'))
         ->assertOk()
         ->assertHeader('Content-Type', 'video/mp4')
-        ->assertHeader('Content-Disposition', 'attachment; filename="ytdlp_dl_abc.mp4"; filename*=UTF-8\'\'ytdlp_dl_abc.mp4');
+        ->assertHeader('Content-Disposition', 'attachment; filename="my_cool_video.mp4"; filename*=UTF-8\'\'my_cool_video.mp4');
 });
 
-it('returns 422 when the download url is missing', function () {
-    $user = User::factory()->create();
-
-    $this->actingAs($user)
-        ->getJson(route('video-downloader.download', ['format_id' => '18']))
-        ->assertUnprocessable();
-});
-
-it('returns 502 when the download request fails', function () {
+it('returns 409 when job file is requested before ready', function () {
     Http::fake([
-        'http://localhost:8000/yt-dlp/download' => Http::response(['boom' => true], 500),
+        'http://localhost:8000/yt-dlp/jobs/abc123hex/file' => Http::response([
+            'detail' => 'File not ready',
+        ], 409),
     ]);
 
     $user = User::factory()->create();
 
     $this->actingAs($user)
-        ->getJson(route('video-downloader.download', [
-            'url' => VD_TEST_URL,
-            'format_id' => '18',
-        ]))
-        ->assertStatus(502);
+        ->get(route('video-downloader.jobs.download', 'abc123hex'))
+        ->assertStatus(409);
 });

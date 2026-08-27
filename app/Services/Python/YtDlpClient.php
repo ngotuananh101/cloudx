@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services\Python;
 
+use App\Exceptions\DownloadFileNotReadyException;
+use App\Exceptions\DownloadJobNotFoundException;
 use App\Exceptions\PythonServiceException;
 
 class YtDlpClient extends PythonServiceClient
@@ -32,6 +34,86 @@ class YtDlpClient extends PythonServiceClient
         }
 
         return $data;
+    }
+
+    /**
+     * Start a background video download job in the Python microservice.
+     *
+     * @return array{job_id: string, status: string}
+     */
+    public function startDownloadJob(string $url, string $formatId, bool $audioOnly, ?string $cookies = null): array
+    {
+        $response = $this->post('/yt-dlp/jobs', array_filter([
+            'url' => $url,
+            'format_id' => $formatId,
+            'audio_only' => $audioOnly,
+            'cookies' => $cookies,
+        ], fn ($v) => $v !== null));
+
+        $body = $response->json();
+
+        if (! is_array($body) || ! isset($body['job_id'])) {
+            throw new PythonServiceException('Microservice did not return a job id.');
+        }
+
+        return [
+            'job_id' => (string) $body['job_id'],
+            'status' => (string) ($body['status'] ?? 'pending'),
+        ];
+    }
+
+    /**
+     * Get live progress status of a download job.
+     *
+     * @return array{job_id: string, status: string, progress: float, speed_str: string, eta_str: string, filename: string, error: string}
+     */
+    public function getDownloadJobStatus(string $jobId): array
+    {
+        $response = $this->get('/yt-dlp/jobs/'.$jobId, timeout: 10, passthroughStatuses: [404]);
+
+        if ($response->status() === 404) {
+            throw new DownloadJobNotFoundException($jobId);
+        }
+
+        $this->assertSuccess($response);
+
+        /** @var array{job_id: string, status: string, progress: float, speed_str: string, eta_str: string, filename: string, error: string} */
+        return $response->json();
+    }
+
+    /**
+     * Stream the completed download file from the microservice.
+     *
+     * @return array{stream: resource, content_type: string, filename: string, content_length: int|null}
+     */
+    public function getDownloadJobFileStream(string $jobId): array
+    {
+        $response = $this->getStream('/yt-dlp/jobs/'.$jobId.'/file', timeout: 30, passthroughStatuses: [404, 409]);
+
+        if ($response->status() === 404) {
+            throw new DownloadJobNotFoundException($jobId);
+        }
+
+        if ($response->status() === 409) {
+            throw new DownloadFileNotReadyException;
+        }
+
+        $this->assertSuccess($response);
+
+        $contentType = $response->header('Content-Type') ?? 'application/octet-stream';
+        $filename = $this->parseFilename($response->header('Content-Disposition'));
+        $contentLength = $response->header('Content-Length') !== null
+            ? (int) $response->header('Content-Length')
+            : null;
+
+        $stream = $response->toPsrResponse()->getBody()->detach();
+
+        return [
+            'stream' => $stream,
+            'content_type' => $contentType,
+            'filename' => $filename,
+            'content_length' => $contentLength,
+        ];
     }
 
     /**
