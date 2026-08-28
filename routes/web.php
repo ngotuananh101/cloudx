@@ -29,9 +29,6 @@ use Illuminate\Support\Facades\Route;
 
 require __DIR__.'/auth.php';
 
-// Internal Webhook from Python microservice (protected by Python service token)
-Route::post('internal/video-downloader/progress', [VideoDownloaderController::class, 'progressWebhook'])->name('internal.video-downloader.progress');
-
 // Public share routes (no auth required)
 Route::controller(ShareViewController::class)->prefix('s/{uuid}')->name('share.')->group(function () {
     Route::get('/', 'index')->name('view');

@@ -93,7 +93,7 @@ class VideoDownloaderController extends Controller
 
         $user = $request->user();
         $callbackToken = config('services.python-service.token');
-        $callbackUrl = route('internal.video-downloader.progress', [
+        $callbackUrl = route('api.video-downloader.progress', [
             'user_id' => $user->id,
         ]);
 
@@ -122,13 +122,6 @@ class VideoDownloaderController extends Controller
 
     public function progressWebhook(Request $request): JsonResponse
     {
-        $token = $request->header('X-Token') ?? $request->bearerToken();
-        $expectedToken = config('services.python-service.token');
-
-        if (! empty($expectedToken) && ! hash_equals((string) $expectedToken, (string) $token)) {
-            return response()->json(['message' => 'Unauthorized.'], 403);
-        }
-
         $userId = (int) $request->query('user_id', $request->input('user_id'));
         if ($userId <= 0) {
             return response()->json(['message' => 'Invalid user ID.'], 422);

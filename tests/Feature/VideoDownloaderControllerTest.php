@@ -222,7 +222,7 @@ it('broadcasts VideoDownloadJobUpdated event when progress webhook is called', f
 
     $user = User::factory()->create();
 
-    $this->postJson(route('internal.video-downloader.progress', ['user_id' => $user->id]), [
+    $this->postJson(route('api.video-downloader.progress', ['user_id' => $user->id]), [
         'job_id' => 'abc123hex',
         'status' => 'downloading',
         'progress' => 45.5,
@@ -245,7 +245,7 @@ it('broadcasts VideoDownloadJobUpdated event when progress webhook is called', f
 it('rejects progress webhook with invalid token', function () {
     $user = User::factory()->create();
 
-    $this->postJson(route('internal.video-downloader.progress', ['user_id' => $user->id]), [
+    $this->postJson(route('api.video-downloader.progress', ['user_id' => $user->id]), [
         'job_id' => 'abc123hex',
     ], ['X-Token' => 'wrong-token'])
         ->assertStatus(403);
